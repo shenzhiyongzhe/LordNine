@@ -51,7 +51,7 @@ startScript.addEventListener("click", () =>
 
 updateScript.addEventListener("click", () =>
 {
-    $autox.callHandler("updateScript", "update script", (callBackData) =>
+    $autox.callHandler("UpdateScript", "update script", (callBackData) =>
     {
         console.log(callBackData);
     });

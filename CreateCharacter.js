@@ -1,7 +1,8 @@
 const {
     ReadImg, FindImg, RandomPress, Sleep, FindMultiColors, SwipeSlowly,
     ClickSkip,
-    FindBlueBtn, FindCheckMark, FindBlackScreen,
+    FindBlueBtn, FindCheckMark, FindBlackScreen, PressBlank,
+    HasSkip,
 
 } = require("./utils.js");
 
@@ -26,27 +27,31 @@ function GenerateRandomName()
     return name.join("");
 }
 
-// 是否需要选区
-
+const LordNineWordColorList = [
+    ["#cda465", [[75, -4, "#d8b773"], [139, -8, "#d8b77e"], [189, -5, "#c79959"], [205, 13, "#a67c41"]]],
+    ["#dbbb87", [[25, 3, "#be985b"], [49, 8, "#c8a263"], [99, 4, "#e2b980"], [124, 1, "#dab66d"]]]
+];
+const WhiteAvatarColorList = [
+    ["#a4a4a3", [[2, 0, "#b1b1b1"], [7, 1, "#b4b4b3"], [2, 4, "#bababa"], [5, 13, "#b6b6b6"]]],
+    ["#a4a4a3", [[1, 0, "#a6a6a5"], [2, 0, "#b1b1b1"], [5, 3, "#b4b4b3"], [3, 10, "#b8b8b8"]]]
+];
 const ServerListPopupColorList = [
-    ["#c7bf9b", [[10, 0, "#c3bc99"], [17, 0, "#c7bf9b"], [44, 0, "#c2bb98"], [61, 1, "#bab392"]]]
+    ["#b2b2b2", [[5, 1, "#bababa"], [2, 4, "#babab9"], [3, 10, "#bcbcbc"], [6, 13, "#b8b8b8"]]]
 ];
-const GameMainUIColorList = [
-    ["#a1a1a0", [[2, 12, "#b4b4b3"], [34, 5, "#e4e4e3"], [41, 6, "#fdfdfd"], [49, 6, "#ffffff"]]]
-];
+
 const CanNotCreateCharacterColorList = [
     ["#862f30", [[5, 0, "#802d2f"], [14, 0, "#8a3031"], [20, 1, "#893031"], [37, -1, "#882f30"]]],
     ["#8b3031", [[7, 0, "#8a3031"], [14, 0, "#8b3031"], [21, 0, "#7e2d2e"], [33, 2, "#8b3031"]]],
-    ["#832f2f", [[5, 1, "#893031"], [14, 1, "#8b3031"], [20, 1, "#8b3031"], [34, 1, "#842f2f"]]]
+    ["#832f2f", [[5, 1, "#893031"], [14, 1, "#8b3031"], [20, 1, "#8b3031"], [34, 1, "#842f2f"]]],
+    ["#832e2f", [[18, -3, "#8a3031"], [33, -1, "#832e2f"], [44, 0, "#762b2c"], [32, -6, "#862f30"]]],
+    ["#8a3031", [[15, 2, "#882f30"], [29, 2, "#872f30"], [41, -2, "#8b3031"], [44, -2, "#8b3031"]]],
 ];
-const TouchToStartColorList = [
-    ["#b3ada6", [[13, -2, "#b7b1ab"], [33, 1, "#b6b1ab"], [52, 1, "#b7b2ae"], [81, 3, "#b6b2ae"]]],
-    ["#b4afa8", [[12, 3, "#b6afa9"], [33, 4, "#b6b1ab"], [52, 4, "#b7b2ab"], [71, 3, "#b6b3ae"]]]
-];
+
 
 const RedBtnColorList = [
     ["#381a1a", [[41, -2, "#3d1c1c"], [137, 1, "#3d1d1d"], [120, 27, "#421f1f"], [16, 27, "#432020"]]],
 ];
+const HasMainUI = () => FindMultiColors(LordNineWordColorList, [313, 333, 728, 354]);
 
 const RandPressBlank = () => RandomPress([361, 264, 525, 263]);
 
@@ -56,89 +61,70 @@ const FindRedBtn = (region) => FindMultiColors(RedBtnColorList, region);
 
 const MainUICheck = () => FindMultiColors(GameMainUIColorList, [43, 604, 110, 37]);
 
-const ServerSelectCheck = () => FindMultiColors(ServerListPopupColorList, [590, 68, 98, 39]);
-const LaunchGameCheck = () =>
-{
-    for (let i = 0; i < 30; i++)
-    {
-        if (TouchToStartCheck())
-        {
-            RandPressBlank();
-            Sleep(15);
-            for (let j = 0; j < 30; j++)
-            {
-                if (MainUICheck())
-                {
-                    return true;
-                }
-                Sleep();
-            }
-        }
-        if (ClickSkip())
-        {
-            Sleep(8);
-        }
-        Sleep();
-    }
-    return false;
-};
+const ServerSelectCheck = () => FindMultiColors(ServerListPopupColorList, [902, 113, 29, 33]);
 
 
 const CreateCharacterFlow = (serverName) =>
 {
     console.log("import select server flow");
     const hasServerSelectList = ServerSelectCheck();
-    const hasMainUI = MainUICheck();
-    const hasStartGame = TouchToStartCheck();
-    if (!hasServerSelectList && !hasMainUI && !hasStartGame)
+
+    let hasEnterMainUI = false;
+    if (hasServerSelectList)
     {
-        if (!LaunchGameCheck())
-        {
-            alert("创建角色失败:1,", "未找到游戏界面");
-            return false;
-        }
-        if (!MainUICheck())
-        {
-            alert("创建角色失败:2,", "未找到游戏界面");
-            return false;
-        }
-        else
-        {
-            RandomPress([600, 594, 84, 19]); // select server
-            Sleep(3);
-        }
-        if (!ServerSelectCheck())
-        {
-            alert("创建角色失败:3,", "未找到服务器列表");
-            return false;
-        }
+        console.log("start select server...");
+
     }
-    if (hasMainUI)
+    else
     {
-        console.log("click and select server");
-        RandomPress([600, 594, 84, 19]); // select server
-        Sleep(3);
-    }
-    else if (hasStartGame)
-    {
-        console.log("touch to start game");
-        RandPressBlank();
-        Sleep(15);
-        for (let j = 0; j < 30; j++)
+        for (let i = 0; i < 30; i++)
         {
-            if (MainUICheck())
+            console.log("waite until have main ui...");
+            ClickSkip();
+            if (HasMainUI())
             {
-                RandomPress([600, 594, 84, 19]); // select server
-                Sleep(3);
-                break;
+                console.log("has found main ui...");
+                let hasWhiteAvatar = FindMultiColors(WhiteAvatarColorList, [35, 601, 44, 41]);
+                if (!hasWhiteAvatar)
+                {
+                    Sleep(3);
+                    PressBlank();
+                    console.log("wait unitl have avatar...");
+                    Sleep(5);
+                    for (let i = 0; i < 30; i++)
+                    {
+                        hasWhiteAvatar = FindMultiColors(WhiteAvatarColorList, [35, 601, 44, 41]);
+                        if (hasWhiteAvatar)
+                        {
+                            hasEnterMainUI = true;
+                            console.log("found avatar!!");
+                            break;
+                        }
+                        if (FindBlueBtn([555, 429, 176, 56]))
+                        {
+                            console.log("server is full !");
+                            RandomPress([576, 445, 130, 25]);
+                            Sleep(5);
+                        }
+                        Sleep();
+                    }
+                }
+                else 
+                {
+                    hasEnterMainUI = true;
+                    break;
+                }
             }
             Sleep();
         }
+        if (hasEnterMainUI)
+        {
+            console.log("click and select server");
+            RandomPress([600, 594, 84, 19]); // select server
+            Sleep(3);
+        }
     }
-    else if (hasServerSelectList)
-    {
-        console.log("start select server...");
-    }
+
     const bigServer = parseInt(serverName.slice(0, 1));
     const littleServer = parseInt(serverName.slice(1, 2));
     console.log("server name : " + (bigServer + 1) + "区 " + (littleServer + 1));
@@ -157,7 +143,7 @@ const CreateCharacterFlow = (serverName) =>
 
     for (let i = 0; i < bigServer; i++)
     {
-        SwipeSlowly([750, 600, 400, 10], [750, 370, 400, 10], 3.4);
+        SwipeSlowly([600, 550, 10, 10], [600, 320, 10, 10], 3.3);
     }
     let hasServerName = FindImg(serverNameImgList[bigServer], [73, 162, 228, 434]);
     if (!hasServerName)
@@ -190,13 +176,18 @@ const CreateCharacterFlow = (serverName) =>
     RandomPress([hasServerName.x + shiftX * 230, hasServerName.y + shiftY * 110, 10, 10]);
     Sleep(5);
     RandPressBlank();
-    Sleep(25);
+    Sleep(15);
     for (let i = 0; i < 500; i++)
     {
         if (FindRedBtn([535, 494, 212, 69]))
         {
             console.log("排队等待中......");
             Sleep(180);
+        }
+        else if (HasSkip())
+        {
+            ClickSkip();
+            break;
         }
         else
         {
@@ -211,25 +202,33 @@ const CreateCharacterFlow = (serverName) =>
         }
     }
 
-    ClickSkip();
     Sleep(5);
     console.log("begin create character...");
-    if (!FindBlueBtn([1011, 647, 212, 64]))
+    let hasCreateCharacterBtn = false;
+    for (let i = 0; i < 10; i++)
     {
-        alert("创建失败", "未发现创建按钮");
-        return false;
+        if (FindBlueBtn([1011, 647, 212, 64]))
+        {
+            console.log("found create btn! start get a name!");
+            hasCreateCharacterBtn = true;
+            break;
+        }
+        Sleep();
     }
-
-    console.log("点击创建角色");
-    RandomPress([1045, 665, 152, 25]); //create btn
-    RandomPress([449, 347, 383, 30]); //input box
-    setText(GenerateRandomName());
-    Sleep();
-    RandomPress([1175, 647, 51, 22]); // keyboard confirm btn
-    Sleep();
-    RandomPress([686, 452, 77, 17]); //confirm
-    Sleep();
-    RandomPress([685, 452, 84, 19]); //confirm
+    if (hasCreateCharacterBtn)
+    {
+        console.log("点击创建角色");
+        RandomPress([1045, 665, 152, 25]); //create btn
+        Sleep();
+        RandomPress([449, 347, 383, 30]); //input box
+        setText(GenerateRandomName());
+        Sleep();
+        RandomPress([1175, 647, 51, 22]); // keyboard confirm btn
+        Sleep();
+        RandomPress([686, 452, 77, 17]); //confirm
+        Sleep();
+        RandomPress([685, 452, 84, 19]); //confirm 
+    }
 
     for (let i = 0; i < 5; i++)
     {
@@ -252,30 +251,34 @@ const CreateCharacterFlow = (serverName) =>
     }
 
     Sleep(5);
-    let hasStartBtn = false;
+
     for (let i = 0; i < 10; i++)
     {
         if (FindBlueBtn([930, 640, 264, 69]))
         {
-            hasStartBtn = true;
-            break;
+            RandomPress([963, 659, 200, 32]);
+            Sleep(10);
+            for (let i = 0; i < 30; i++)
+            {
+                if (HasSkip())
+                {
+                    ClickSkip();
+                    Sleep(3);
+                    RandomPress([905, 135, 260, 25]);
+                    console.log("create character flow finished!!! oh yeah!!!");
+                    return true;
+                }
+                Sleep();
+            }
+
+
         }
         Sleep();
     }
-    if (!hasStartBtn)
-    {
-        alert("创建角色成功", "未发现开始按钮");
-        return false;
-    }
-    RandomPress([963, 659, 200, 32]);
-    Sleep(30);
-    ClickSkip();
-    Sleep(3);
-    RandomPress([905, 135, 260, 25]);
-    return true;
 };
 
 module.exports = {
     CreateCharacterFlow,
 };
 // CreateCharacterFlow("28");
+// console.log(HasMainUI());

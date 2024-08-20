@@ -1,4 +1,7 @@
 
+const { WearEquipment, StrengthenEquipment, DecomposeEquipment } = require("./Backpack.js");
+const { LoginProps, AddAttributePoint, HasCrucifixIcon, PickUpAbilityPoint } = require("./CommonFlow.js");
+
 const {
     ReadImg, FindImg, RandomPress, Sleep, FindMultiColors, OpenMenu, CloseMenu,
     HollowPress,
@@ -7,40 +10,44 @@ const {
     WaitUntilMenu, WaitUntilPageBack,
     ClickSkip,
     ReadConfig,
-    FindBlackScreen,
-    HasSkip
+    HasSkip,
 
 } = require("./utils.js");
 
+const { HasTip } = require("./MainStory.js");
 
-const CrucifixColorList = [
-    ["#bcaa51", [[19, 0, "#bba950"], [10, -10, "#eed967"], [9, 18, "#bca952"], [9, 0, "#1a1d1a"]]]
-];
 const NoPotionColorList = [
     ["#070101", [[18, 0, "#363635"], [39, 2, "#040000"], [16, 14, "#fefefd"], [21, 14, "#fbfbfa"]]],
     ["#555555", [[3, 0, "#474747"], [1, 6, "#494949"], [0, 19, "#ffffff"], [5, 20, "#fcfcfc"]]],
     ["#70706f", [[3, 8, "#4d4d4d"], [3, 9, "#474747"], [2, 21, "#ffffff"], [7, 23, "#fefefd"]]],
     ["#555555", [[0, 8, "#414140"], [-2, 18, "#fbfbfa"], [4, 18, "#fefefd"], [1, 14, "#f8f8f8"]]]
 ];
-const TouchToStartColorList = [
-    ["#ae8852", [[0, 13, "#a47e4f"], [14, -2, "#b8925c"], [15, 8, "#a27c4c"], [15, 17, "#8d673f"]]],
+const LordNineWordColorList = [
+    ["#cca967", [[75, 4, "#deb371"], [138, -6, "#d8b77e"], [195, 3, "#c8a266"], [205, 16, "#a77a40"]]],
+    ["#cda465", [[75, -4, "#d8b773"], [139, -8, "#d8b77e"], [189, -5, "#c79959"], [205, 13, "#a67c41"]]],
+    ["#dbbb87", [[25, 3, "#be985b"], [49, 8, "#c8a263"], [99, 4, "#e2b980"], [124, 1, "#dab66d"]]]
 ];
-const GameMainUIColorList = [
-    ["#a1a1a0", [[2, 12, "#b4b4b3"], [34, 5, "#e4e4e3"], [41, 6, "#fdfdfd"], [49, 6, "#ffffff"]]],
-    ["#b1b1b1", [[7, 0, "#b7b7b6"], [5, 2, "#b6b6b6"], [3, 8, "#afafaf"], [-3, 13, "#999998"]]]
+const WhiteAvatarColorList = [
+    ["#a4a4a3", [[2, 0, "#b1b1b1"], [7, 1, "#b4b4b3"], [2, 4, "#bababa"], [5, 13, "#b6b6b6"]]],
+    ["#a4a4a3", [[1, 0, "#a6a6a5"], [2, 0, "#b1b1b1"], [5, 3, "#b4b4b3"], [3, 10, "#b8b8b8"]]]
 ];
-const blueBtnPosList = [
-    [[506, 592, 269, 69], [547, 610, 196, 33]], // 制造，确认
-    [[655, 444, 200, 64], [689, 462, 139, 30]], //传送，确认
-    [[538, 419, 207, 68], [567, 435, 149, 34]], //death 
-    [[917, 639, 273, 68], [963, 658, 197, 35]], //start game
-    [[1061, 644, 209, 62], [1092, 658, 149, 29]], //horse confirm
+// exception btn
+const LongTimeNoInputColorList = [
+    ["#ffe9be", [[-1, 6, "#fbe5bc"], [5, 5, "#f1dcb5"], [13, 4, "#224148"], [18, 10, "#edd8b2"]]]
 ];
 
+const BackpackFullColorList = [
+    ["#fda763", [[3, 0, "#fda763"], [6, 0, "#fda763"], [9, 0, "#fda763"], [13, 0, "#fda763"]]]
+];
+const AddAttributeIconColorList = [
+    ["#a8965e", [[7, 0, "#918150"], [13, 0, "#dfc67e"], [8, -8, "#efd587"], [8, 6, "#b5a165"]]]
+];
+// check ----
 
-const NoPotionCheck = () =>
+const HasAttributeIcon = (shot) => FindMultiColors(AddAttributeIconColorList, [618, 468, 46, 39], shot);
+const IsNoPotion = (shot) =>
 {
-    const hasNoPotion = FindMultiColors(NoPotionColorList, [325, 636, 55, 60]);
+    const hasNoPotion = FindMultiColors(NoPotionColorList, [325, 636, 55, 60], shot);
     if (hasNoPotion)
     {
         console.log("character is use out of  potion. ");
@@ -48,6 +55,9 @@ const NoPotionCheck = () =>
     }
     return false;
 };
+const IsBackpackFull = (shot) => FindMultiColors(BackpackFullColorList, [1145, 48, 36, 13], shot);
+
+// flow -----
 const NoPotionFlow = () =>
 {
     console.log("回家买药水...");
@@ -75,110 +85,67 @@ const NoPotionFlow = () =>
             RandomPress([667, 578, 133, 29]);
             console.log("购买药水成功！");
         }
+        else
+        {
+            RandomPress([953, 77, 242, 503]);
+        }
+        Sleep();
         PageBack();
     }
 };
 
-
-const ClickAllBlueBtn = (shot) =>
+const BlueBtnCheck = (shot) =>
 {
     shot = shot || captureScreen();
-    for (let i = 0; i < blueBtnPosList.length; i++)
+    if (FindMultiColors(LongTimeNoInputColorList, [621, 444, 43, 25], shot))
     {
-        let hasBlueBtn = FindBlueBtn(blueBtnPosList[i][0], shot);
-        if (hasBlueBtn)
-        {
-            RandomPress(blueBtnPosList[i][1]);
-            break;
-        }
+        console.log("long time no input! click and restart game");
+        RandomPress([577, 443, 127, 28]);
+        Sleep(5);
+        app.launch("");
+    }
+    else if (FindBlueBtn([655, 380, 207, 68], shot))
+    {
+        console.log("monster collection quickly transform btn");
+        RandomPress([681, 399, 149, 33]);
     }
 };
-const CloseAllWindows = () =>
-{
-    const hasMenu = HasMenu();
-    if (hasMenu)
-    {
-        return;
-    }
-    CloseMenu();
-    PageBack();
-    CloseBackpack();
-};
 
-const LaunchGameCheck = () => FindBlackScreen([584, 630, 88, 51]);
-const TouchToStartCheck = () => FindMultiColors(TouchToStartColorList, [623, 492, 48, 59]);
+// ------------------------------ make sure in game ---------------------
 
-const MainUICheck = () => FindMultiColors(GameMainUIColorList, [43, 604, 110, 37]);
-
-const RandPressBlank = () => RandomPress([361, 264, 525, 263]);
+const HasMainUI = () => FindMultiColors(LordNineWordColorList, [313, 333, 728, 354]);
+const PressBlank = () => RandomPress([361, 264, 525, 263]);
 
 const HasStartBlueBtn = () => FindBlueBtn([931, 639, 261, 71]);
 const PressStartBtn = () => RandomPress([955, 655, 208, 37]);
 
-const LaunchGameFlow = () =>
-{
-    Sleep(10);
-    for (let i = 0; i < 10; i++)
-    {
-        if (HasSkip())
-        {
-            ClickSkip();
-            Sleep(3);
-            TouchToStartFlow();
-            break;
-        }
-        Sleep();
-    }
 
-};
-const TouchToStartFlow = () =>
-{
-    console.log("touch to start game flow...");
-    RandPressBlank();
-    Sleep(22);
-    for (let i = 0; i < 30; i++)
-    {
-        if (MainUICheck())
-        {
-            Sleep(3);
-            RandPressBlank();
-            Sleep(5);
-            break;
-        }
-        Sleep();
-    }
-
-    for (let i = 0; i < 30; i++)
-    {
-        if (HasStartBlueBtn())
-        {
-            PressStartBtn();
-            break;
-        }
-        Sleep();
-    }
-
-    for (let i = 0; i < 30; i++)
-    {
-        if (HasMenu())
-        {
-            console.log("已经进入游戏！");
-            return true;
-        }
-        Sleep();
-    }
-    console.log("进入游戏失败！");
-    return false;
-};
 const MainUIFlow = () =>
 {
-    console.log("main ui flow...");
-    RandPressBlank();
-    Sleep(5);
+    const hasWhiteAvatar = FindMultiColors(WhiteAvatarColorList, [35, 601, 44, 41]);
+    if (!hasWhiteAvatar)
+    {
+        PressBlank();
+        console.log("touch to start game flow...");
+        Sleep(5);
+        for (let i = 0; i < 30; i++)
+        {
+            if (FindMultiColors(WhiteAvatarColorList, [35, 601, 44, 41]))
+            {
+                break;
+            }
+            Sleep();
+        }
+    }
+    PressBlank();
+    console.log("press to enter game...");
+    Sleep(10);
+
     for (let i = 0; i < 30; i++)
     {
         if (HasStartBlueBtn())
         {
+            console.log("press start btn");
             PressStartBtn();
             break;
         }
@@ -197,47 +164,40 @@ const MainUIFlow = () =>
     console.log("进入游戏失败！");
     return false;
 };
-const IsMoving = () =>
-{
-    const clip = images.clip(captureScreen(), 180, 187, 42, 35);
-    Sleep(3);
-    return FindImg(clip, [166, 178, 72, 57]) ? false : true;
-};
-const GameModeFlow = (mode) =>
-{
-    if (mode == "mainStory")
-    {
-        const isInCity = IsInCity();
 
-        if (isInCity)
+const ExceptionFlow = () =>
+{
+    const shot = captureScreen();
+    const hasMenu = HasMenu();
+    if (hasMenu)
+    {
+        const isBackpackFull = IsBackpackFull(shot);
+        if (isBackpackFull)
         {
-            const isMoving = IsMoving();
-            if (!isMoving)
-            {
-                console.log("gameMode: " + mode + " not moving! keep on");
-                RandomPress([904, 135, 220, 31]);
-            }
+            console.log("backpack is full");
+            WearEquipment();
+            StrengthenEquipment();
+            LoginProps();
+            DecomposeEquipment();
+        }
+        const isNoption = IsNoPotion(shot);
+        if (isNoption)
+        {
+            console.log("no potion");
+            NoPotionFlow();
+        }
+        HasAttributeIcon(shot) && AddAttributePoint();
+        HasCrucifixIcon() && PickUpAbilityPoint();
+    }
+    else
+    {
+        if (HasMainUI())
+        {
+            MakeSureInGame();
         }
     }
-};
+    BlueBtnCheck(shot);
 
-const ExceptionFlow = (gameMode) =>
-{
-    ClickAllBlueBtn();
-    CloseAllWindows();
-    if (gameMode == "instance")
-    {
-
-        NoPotionCheck() && NoPotionFlow();
-    }
-    GameModeFlow(gameMode);
-    const hasMenu = HasMenu();
-    if (!hasMenu)
-    {
-        LaunchGameCheck() && LaunchGameFlow();
-        TouchToStartCheck() && TouchToStartFlow();
-        MainUICheck() && MainUIFlow();
-    }
 };
 // *******************************************************************  确保在游戏中 *********************************************************************
 
@@ -246,6 +206,36 @@ const MakeSureInGame = () =>
 {
     app.launch("com.smilegate.lordnine.stove.google");
     Sleep(3);
+    console.log("make sure in game flow");
+
+    if (HasMenu())
+    {
+        console.log("find menu in game! return ");
+        return true;
+    }
+    if (HasTip())
+    {
+        console.log("exception: found tip! return ");
+        return true;
+    }
+    if (HasPageback())
+    {
+        console.log("found packback! return true;");
+        return true;
+    }
+    for (let i = 0; i < 15; i++)
+    {
+        if (HasSkip())
+        {
+            ClickSkip();
+            break;
+        }
+        else if (HasMainUI())
+        {
+            break;
+        }
+        Sleep();
+    }
     const config = ReadConfig();
     if (config.ui.createCharacter)
     {
@@ -253,35 +243,47 @@ const MakeSureInGame = () =>
         CreateCharacterFlow(config.ui.serverName);
     }
 
-    if (HasMenu())
+    for (let i = 0; i < 60; i++)
     {
-        console.log("already in game...");
-        return true;
-    }
-    if (HasStartBlueBtn())
-    {
-        PressStartBtn();
-        Sleep(10);
-        for (let i = 0; i < 30; i++)
+        if (HasMenu())
         {
-            if (HasMenu())
-            {
-                break;
-            }
-            Sleep();
+            console.log("already in game...");
+            return true;
         }
+        else if (HasStartBlueBtn())
+        {
+            PressStartBtn();
+            Sleep(10);
+            for (let i = 0; i < 30; i++)
+            {
+                if (HasMenu())
+                {
+                    return;
+                }
+                Sleep();
+            }
+        }
+
+        else if (HasMainUI())
+        {
+            MainUIFlow();
+            return true;
+        }
+        Sleep(1);
     }
-    LaunchGameCheck() && LaunchGameFlow();
-    TouchToStartCheck() && TouchToStartFlow();
-    MainUICheck() && MainUIFlow();
-    console.log("make sure in game finished...");
+    console.log("make sure in game failed...");
 };
 // *******************************************************************  确保在游戏中 *********************************************************************
 
 module.exports = {
     ExceptionFlow, MakeSureInGame
 };
-// GameModeFlow("mainStory");
 
-// MakeSureInGame()
+// console.log(HasTouchToStart());
+// MakeSureInGame();
+// DeathFlow();
+// GameModeFlow("mainStory");
+// ExceptionFlow();
+// MakeSureInGame();
+// console.log(MainUICheck());
 

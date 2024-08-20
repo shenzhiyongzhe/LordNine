@@ -2,7 +2,7 @@ const { Sleep, RandomPress, ReadImg, FindImg, FindMultiColors,
     HasPageback, HasMenu, FindTipPoint,
     FindBlueBtn,
 
-    SwipeSlowly,
+    SwipeSlowly, PullDownSkill, PressBlank, PageBack,
 } = require("./utils.js");
 
 
@@ -47,13 +47,21 @@ const { Sleep, RandomPress, ReadImg, FindImg, FindMultiColors,
 
 // }), true);
 // console.log(FindBlueBtn([917, 639, 273, 68]));
-var start = 44032;  // 韩文字母的Unicode起始值
-var end = 55203;    // 韩文字母的Unicode结束值
-var random2 = new java.util.Random();
-var 长度 = 4;
-let result;
-for (var i = 0; i <= 长度; i++)
+// var start = 44032;  // 韩文字母的Unicode起始值
+// var end = 55203;    // 韩文字母的Unicode结束值
+// var random2 = new java.util.Random();
+// var 长度 = 4;
+// let result;
+// for (var i = 0; i <= 长度; i++)
+// {
+//     result += String.fromCharCode(random2.nextInt(end - start + 1) + start);
+// }
+// console.log(result);
+// console.log(FindBlueBtn([654, 439, 205, 71]));
+
+// console.log(ReadImg('icon/font/abilitySkillPage_select'));
+
+for (let i = 0; i < 5; i++)
 {
-    result += String.fromCharCode(random2.nextInt(end - start + 1) + start);
+    SwipeSlowly([600, 550, 10, 10], [600, 320, 10, 10], 3.3);
 }
-console.log(result);

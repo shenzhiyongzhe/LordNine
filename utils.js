@@ -1,14 +1,15 @@
-const { PagebackColorList, MenuColorList, MenuCloseColorList, BlueBtnColorList, BackpackCloseColorList, BackpackColorList,
-    SkipColorList, CheckMarkColorList, BlackScreenColorList, TipPointColorList,
+const { PagebackColorList, MenuColorList, MenuCloseColorList, BlueBtnColorList, BackpackColorList,
+    SkipColorList, CheckMarkColorList, BlackScreenColorList, TipPointColorList, GoldBtnColorList, RedBtnColorList, PopupCloseColorList,
 } = require("./Color/Color.js");
 
 const defaultConfig = {
     ui: {
+        createCharacter: "false",
         serverName: "33",
-
+        gameMode: "mainStory"
     },
     game: {
-
+        deathTime: 0
     }
 };
 const configFile = "/sdcard/LordNine/config.json";
@@ -21,28 +22,60 @@ const HaltModeColorList = [
     ["#b9a97e", [[7, 1, "#bcac7f"], [16, -1, "#dccb96"], [23, 0, "#d6c492"], [17, -18, "#dccb96"]]]
 ];
 
-const Sleep = (time) => { time = time || 1.5; sleep(time * 1000); };
-
-const RandomPress = ([startX, startY, w, h]) =>
-{
-    const time = random(16, 256);
-    const x = Math.round(Math.random() * w + startX);
-    const y = Math.round(Math.random() * h + startY);
-    press(x, y, time);
-    Sleep();
-};
+const HomeColorList = [
+    ["#d3c28f", [[1, 2, "#cfbe8d"], [1, 5, "#d9c794"], [4, 2, "#dccb96"], [10, 2, "#d9c794"]]]
+];
+const BackpackPageColorList = [
+    ["#fbfbfa", [[0, 4, "#fbfbfa"], [3, 6, "#ffffff"], [0, 7, "#fbfbfa"], [0, 10, "#fcfcfc"]]]
+];
 const ClickRandomly = ([startX, startY, w, h]) =>
 {
     const x = Math.round(Math.random() * w + startX);
     const y = Math.round(Math.random() * h + startY);
     click(x, y);
 };
-const ReadImg = (name) => images.read(`./img/${name}.png`);
-const FindImg = (img, region, shot) =>
+const CloseMenu = () =>
 {
-    shot = shot || captureScreen();
-    return images.findImage(shot, img, { region });
+
+    const hasMenuClose = HasMenuClose();
+    if (hasMenuClose)
+    {
+        RandomPress([1213, 25, 23, 24]);
+    }
 };
+const CloseBackpack = () =>
+{
+    const hasBackpackClose = HasBackpackClose();
+    if (hasBackpackClose)
+    {
+        RandomPress([1216, 110, 18, 19]);
+    }
+    const hasBackpackMenuClose = HasBackpackMenuClose();
+    if (hasBackpackMenuClose)
+    {
+        RandomPress([1105, 44, 16, 18]);
+    }
+};
+const ClickSkip = () =>
+{
+    const hasSkip = HasSkip();
+    if (hasSkip == "up")
+    {
+        RandomPress([1149, 18, 86, 23]);
+        console.log("click skip on right up ");
+        return true;
+    }
+
+    if (hasSkip == "bottom")
+    {
+        RandomPress([1160, 630, 40, 15]);
+        console.log("click skip on bottom ");
+        return true;
+    }
+    return false;
+};
+
+
 
 /**
  * @param {Array} colorArr
@@ -62,15 +95,88 @@ const FindMultiColors = (colorArr, region, shot) =>
     }
     return hasColor;
 };
+const FindImg = (img, region, shot) =>
+{
+    shot = shot || captureScreen();
+    return images.findImage(shot, img, { region });
+};
+const FindBlueBtn = (region, shot) => { shot = shot || captureScreen(); return FindMultiColors(BlueBtnColorList, region, shot); };
+
+const FindRedBtn = (region, shot) => { shot = shot || captureScreen(); return FindMultiColors(RedBtnColorList, region, shot); };
+const FindTipPoint = (region, shot) => { shot = shot || captureScreen(); return FindMultiColors(TipPointColorList, region, shot); };
+const FindGoldBtn = (region) => FindMultiColors(GoldBtnColorList, region);
+const FindCheckMark = (region) => FindMultiColors(CheckMarkColorList, region);
+const FindBlackScreen = (region) => FindMultiColors(BlackScreenColorList, region);
+
 
 const HasPageback = () => FindMultiColors(PagebackColorList, [1216, 9, 41, 43]);
 
 const HasMenu = () => FindMultiColors(MenuColorList, [1198, 13, 55, 47]);
 
 const HasBackpack = () => FindMultiColors(BackpackColorList, [1143, 12, 40, 50]);
-const HasBackpackClose = () => FindMultiColors(BackpackCloseColorList, [1210, 101, 33, 35]);
+const HasBackpackClose = () => FindMultiColors(PopupCloseColorList, [1210, 101, 33, 35]);
 
-const PageBack = () =>
+
+const HasMenuClose = () => FindMultiColors(MenuCloseColorList, [1204, 17, 46, 45]);
+const HasPopupClose = (region) => FindMultiColors(PopupCloseColorList, region);
+const HasHome = () => FindMultiColors(HomeColorList, [38, 243, 35, 27]);
+const HasOpenTheBackPage = (region) => FindMultiColors(BackpackPageColorList, region);
+const HasBackpackMenuClose = () => FindMultiColors(PopupCloseColorList, [1094, 31, 39, 45]);
+const HasSkip = () =>
+{
+    const shot = captureScreen();
+    const rightUp = FindMultiColors(SkipColorList, [1207, 14, 40, 36], shot);
+    const rightBottom = FindMultiColors(SkipColorList, [1215, 626, 30, 26], shot);
+    if (rightUp)
+    {
+        return "up";
+    }
+    else if (rightBottom)
+    {
+        return "bottom";
+    }
+    return false;
+};
+
+const HollowPress = (hollowRegion) =>
+{
+    const [x, y, w, h] = hollowRegion;
+    let x1 = random() * 1000 + 140;
+    let y1 = random() * 620 + 70;
+    for (let i = 0; i < 100; i++)
+    {
+        x1 = random() * 1000 + 140;
+        y1 = random() * 620 + 70;
+        if ((x1 < x || x1 > x + w) && (y1 < y || y1 > y + h))
+        {
+            break;
+        }
+    }
+    log(`RandomHollow ${x1}, ${y1}`);
+    press(x1, y1, random(16, 256));
+    Sleep();
+};
+
+
+const OpenMenu = () =>
+{
+    const hasMenu = HasMenu();
+    if (hasMenu)
+    {
+        RandomPress([1211, 21, 32, 30]);
+        if (WaitUntilMenuOpen())
+        {
+            return true;
+        }
+        return false;
+    }
+    else if (HasMenuClose())
+    {
+        return true;
+    }
+    return false;
+};
+const PageBack = () => 
 {
     const hasPageBack = HasPageback();
     if (hasPageBack)
@@ -79,41 +185,13 @@ const PageBack = () =>
     }
 };
 
-const OpenMenu = () =>
-{
-    const hasMenu = HasMenu();
-    if (hasMenu)
-    {
-        RandomPress([1211, 21, 32, 30]);
-        return true;
-    }
-    return false;
-};
-const CloseMenu = () =>
-{
 
-    const hasMenuClose = FindMultiColors(MenuCloseColorList, [1204, 17, 46, 45]);
-    if (hasMenuClose)
-    {
-        RandomPress([1213, 25, 23, 24]);
-    }
-};
-const WaitUntilBackOpen = () =>
-{
-    for (let i = 0; i < 20; i++)
-    {
-        if (HasBackpackClose())
-        {
-            return true;
-        }
-        Sleep(0.5);
-    }
-    return false;
-};
-const BackpackPageColorList = [
-    ["#fbfbfa", [[0, 4, "#fbfbfa"], [3, 6, "#ffffff"], [0, 7, "#fbfbfa"], [0, 10, "#fcfcfc"]]]
-];
-const HasOpenTheBackPage = (region) => FindMultiColors(BackpackPageColorList, region);
+/**
+ *
+ *
+ * @param {*} type "default all" "equipment" "props" "gold" "auto"
+ * @return {*} 
+ */
 const OpenBackpack = (type) =>
 {
     const hasBackpack = HasBackpack();
@@ -184,74 +262,119 @@ const OpenBackpack = (type) =>
     console.log("open backpack failed !");
     return false;
 };
-const HasBackpackMenuClose = () => FindMultiColors(BackpackCloseColorList, [1094, 31, 39, 45]);
-const CloseBackpack = () =>
+const OpenBackpackMenu = (type) =>
 {
-    const hasBackpackClose = HasBackpackClose();
-    if (hasBackpackClose)
+    console.log("Open backpack menu");
+    if (HasBackpackMenuClose())
     {
-        RandomPress([1216, 110, 18, 19]);
+        console.log("already opened backpack menu");
     }
-    const hasBackpackMenuClose = HasBackpackMenuClose();
-    if (hasBackpackMenuClose)
+    else
     {
-        RandomPress([1105, 44, 16, 18]);
-    }
-};
-const FindBlueBtn = (region, shot) => { shot = shot || captureScreen(); return FindMultiColors(BlueBtnColorList, region, shot); };
-
-const FindTipPoint = (region, shot) => { shot = shot || captureScreen(); return FindMultiColors(TipPointColorList, region, shot); };
-
-const HollowPress = (hollowRegion) =>
-{
-    const [x, y, w, h] = hollowRegion;
-    let x1 = random() * 1000 + 140;
-    let y1 = random() * 620 + 70;
-    for (let i = 0; i < 100; i++)
-    {
-        x1 = random() * 1000 + 140;
-        y1 = random() * 620 + 70;
-        if ((x1 < x || x1 > x + w) && (y1 < y || y1 > y + h))
+        const hasMenuClose = HasMenuClose();
+        const hasMenu = HasMenu();
+        if (hasMenuClose)
         {
-            break;
+            RandomPress([914, 210, 26, 23]);
+            Sleep(2);
+        }
+        else if (hasMenu)
+        {
+            OpenMenu();
+            const hadOpenMenu = WaitUntilMenuOpen();
+            if (!hadOpenMenu)
+            {
+                console.log("open menu faild");
+                return false;
+            }
+            RandomPress([914, 210, 26, 23]);
+            Sleep(2);
         }
     }
-    log(`RandomHollow ${x1}, ${y1}`);
-    press(x1, y1, random(16, 256));
-    Sleep();
-};
 
-const WaitUntilMenu = () =>
-{
-    for (let i = 0; i < 16; i++)
+    if (HasBackpackMenuClose())
     {
-        let hasMenu = HasMenu();
-        if (hasMenu)
+        switch (type)
         {
-            Sleep(1);
-            return true;
+            case "identify":
+                RandomPress([273, 46, 38, 17]);
+                break;
+            case "strengthen":
+                RandomPress([409, 43, 36, 21]);
+                break;
+            case "recast":
+                RandomPress([540, 45, 38, 20]);
+                break;
+            default:
+                break;
         }
-        Sleep(1);
+        return true;
     }
     return false;
 };
+const Sleep = (time) => { time = time || 1.5; sleep(time * 1000); };
 
-const WaitUntilPageBack = () =>
+const RandomPress = ([startX, startY, w, h]) =>
 {
-    for (let i = 0; i < 10; i++)
+    const time = random(16, 256);
+    const x = Math.round(Math.random() * w + startX);
+    const y = Math.round(Math.random() * h + startY);
+    press(x, y, time);
+    Sleep();
+};
+
+const ReadImg = (name) => images.read(`./img/${name}.png`);
+
+
+
+const WaitUntil = (func) =>
+{
+    for (let i = 0; i < 30; i++)
     {
-        let hasPageBack = HasPageback();
-        if (hasPageBack)
+        if (func())
         {
-            Sleep(1);
             return true;
         }
         Sleep();
     }
     return false;
 };
+const WaitUntilMenu = () => WaitUntil(HasMenu);
 
+const WaitUntilPageBack = () => WaitUntil(HasPageback);
+
+const WaitUntilBackOpen = () => WaitUntil(HasBackpackClose);
+
+const WaitUntilMenuOpen = () => WaitUntil(HasMenuClose)
+    ;
 const IsInCity = () => FindMultiColors(GroceryColorList, [983, 422, 207, 64]);
+const ReturnHome = () =>
+{
+    if (IsInCity())
+    {
+        console.log("ReturnHome success: already in city");
+        return true;
+    }
+    else if (HasHome())
+    {
+        RandomPress([45, 252, 22, 23]);
+        Sleep(10);
+        for (let i = 0; i < 10; i++)
+        {
+            if (IsInCity())
+            {
+                console.log("ReturnHome success: return home success");
+                return true;
+            }
+            Sleep();
+        }
+    }
+    else
+    {
+        console.log("ReturnHome failed");
+        alert("回家失败", "返回首页失败");
+    }
+};
 const SwipeSlowly = (startRegion, endRegion, sec) =>
 {
     const [x1, y1, w1, h1] = startRegion;
@@ -280,47 +403,15 @@ const RewriteConfig = (attr, value) =>
     {
         config[attr] = value;
         files.write(configFile, JSON.stringify(config));
+        console.log("rewrite config: " + JSON.stringify(config));
     }
-    else
+    else if (config[attr] == null)
     {
         alert("配置文件参数错误", "请检查配置文件参数");
     }
 };
-const HasSkip = () =>
-{
-    const shot = captureScreen();
-    const rightUp = FindMultiColors(SkipColorList, [1207, 14, 40, 36], shot);
-    const rightBottom = FindMultiColors(SkipColorList, [1215, 626, 30, 26], shot);
-    if (rightUp)
-    {
-        return "up";
-    }
-    else if (rightBottom)
-    {
-        return "bottom";
-    }
-    return false;
-};
-const ClickSkip = () =>
-{
-    const hasSkip = HasSkip();
-    if (hasSkip == "up")
-    {
-        RandomPress([1149, 18, 86, 23]);
-        console.log("click skip on right up ");
-        return true;
-    }
 
-    if (hasSkip == "bottom")
-    {
-        RandomPress([1160, 630, 40, 15]);
-        console.log("click skip on bottom ");
-        return true;
-    }
-    return false;
-};
-const FindCheckMark = (region) => FindMultiColors(CheckMarkColorList, region);
-const FindBlackScreen = (region) => FindMultiColors(BlackScreenColorList, region);
+
 
 const IsHaltMode = () => FindMultiColors(HaltModeColorList, [622, 652, 43, 48]);
 
@@ -331,24 +422,89 @@ const ExitHaltMode = () =>
     PageBack();
     Sleep();
 };
+
+const ChangeHaltModeTime = () =>
+{
+    console.log("start change halt mode time");
+    const hasOpenMenu = OpenMenu();
+    if (!hasOpenMenu)
+    {
+        console.log("open menu failed");
+        return false;
+    }
+    RandomPress([1153, 550, 21, 27]);
+    WaitUntilPageBack();
+    RandomPress([342, 76, 61, 28]);
+};
 /**
  * 下拉技能，自动释放
  *
  * @param {*} pos [x, y]
  */
-const PullDownSkill = (pos) => gesture(1000, pos, [pos[0], pos[1] + 30]);
+const PullDownSkill = (pos) => gesture(500, pos, [pos[0], pos[1] + 30]);
+
+/*
+* @param {*} type "grocery" "skill" "equipment" "friend" "exchange" "mount" "stockroom"
+*/
+const GoToTheNPC = (type) =>
+{
+    if (!IsInCity())
+    {
+        ReturnHome();
+    }
+    switch (type)
+    {
+        case "grocery":
+            RandomPress([993, 433, 44, 44]);
+            break;
+        case "skill":
+            RandomPress([1066, 433, 45, 43]);
+            break;
+        case "equipment":
+            RandomPress([1139, 432, 48, 44]);
+            break;
+        case "friend":
+            RandomPress([1214, 433, 43, 42]);
+            break;
+        case "exchange":
+            RandomPress([996, 508, 41, 39]);
+            break;
+        case "mount":
+            RandomPress([1068, 507, 43, 43]);
+            break;
+        case "stockroom":
+            RandomPress([1141, 508, 44, 42]);
+            break;
+        default:
+            alert("错误", "没有这个NPC");
+            break;
+    }
+    Sleep(5);
+    const hasEnter = WaitUntilPageBack();
+    if (!hasEnter)
+    {
+        console.log("enter npc failed!");
+        return false;
+    }
+    console.log("enter npc success!" + type);
+    return true;
+};
+const PressBlank = () => RandomPress([451, 485, 357, 144]);
+
 
 module.exports = {
-    FindBlueBtn, FindTipPoint, FindImg, FindMultiColors, FindCheckMark, FindBlackScreen,
-    HasPageback, HasMenu, HollowPress, HasSkip, ClickSkip,
-    OpenMenu, OpenBackpack, CloseBackpack, CloseMenu, HasBackpackClose, HasBackpackMenuClose,
-    PageBack,
-    RandomPress, ReadImg, ClickRandomly,
+    CloseBackpack, CloseMenu, ClickSkip, ClickRandomly,
+    FindBlueBtn, FindTipPoint, FindImg, FindMultiColors, FindCheckMark, FindBlackScreen, FindRedBtn, FindGoldBtn,
+    HasPageback, HasMenu, HollowPress, HasSkip, HasBackpackClose, HasBackpackMenuClose, HasPopupClose,
+    OpenMenu, OpenBackpack, OpenBackpackMenu,
+    PageBack, PressBlank,
+    RandomPress, ReadImg,
     Sleep,
-    WaitUntilMenu, WaitUntilPageBack,
+    WaitUntil, WaitUntilMenu, WaitUntilPageBack,
     IsInCity, SwipeSlowly,
-    ReadConfig, RewriteConfig, IsHaltMode, ExitHaltMode, PullDownSkill,
+    ReadConfig, RewriteConfig, IsHaltMode, ExitHaltMode, PullDownSkill, ReturnHome, GoToTheNPC,
 };
+
 
 
 

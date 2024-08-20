@@ -25,7 +25,9 @@ const TipColorList = [
     ["#e9e191", [[7, 0, "#fff59e"], [12, 0, "#e9e191"], [13, 0, "#f6ee99"], [17, 0, "#fef59e"]]],
     ["#ffc75b", [[21, 4, "#e6de8f"], [28, 5, "#fff59e"], [33, 5, "#ece492"], [33, 8, "#ece492"]]],
     ["#e7de8f", [[8, -1, "#ebe292"], [8, 4, "#ebe292"], [15, 0, "#f9f09b"], [21, 0, "#fcf39e"]]],
-    ["#e8df91", [[7, 0, "#f8ef9b"], [14, 0, "#e9e091"], [19, -4, "#efe694"], [19, -2, "#f1e996"]]]
+    ["#e8df91", [[7, 0, "#f8ef9b"], [14, 0, "#e9e091"], [19, -4, "#efe694"], [19, -2, "#f1e996"]]],
+    ["#f1e996", [[0, 4, "#f1e996"], [9, -1, "#ebe392"], [8, 5, "#f3eb98"], [21, -1, "#fff59e"]]],
+    ["#fff59e", [[8, 0, "#fef59e"], [14, -4, "#fef59e"], [14, 3, "#fef59e"], [21, -3, "#fff59e"]]]
 
 ];
 
@@ -74,7 +76,13 @@ const ArrowColorList = {
         ["#f8f8f8", [[1, 0, "#f8f8f8"], [1, -1, "#f6f6f4"], [2, -1, "#d8d8d6"], [2, 0, "#fafafa"]]],
         ["#fffefa", [[1, 0, "#fffefa"], [1, -1, "#fffdf8"], [2, 0, "#fffffc"], [3, 1, "#fcfbf6"]]],
         ["#f7f7f6", [[1, -1, "#f8f8f8"], [2, -1, "#f8f8f8"], [2, -2, "#f5f5f4"], [3, -1, "#fafafa"]]],
-        ["#fcfbf8", [[1, 0, "#f3f2f0"], [1, -1, "#fffefa"], [2, 0, "#fbfaf8"], [3, 1, "#f5f4f0"]]]
+        ["#fcfbf8", [[1, 0, "#f3f2f0"], [1, -1, "#fffefa"], [2, 0, "#fbfaf8"], [3, 1, "#f5f4f0"]]],
+        ["#e0dfda", [[1, -1, "#e8e6e1"], [2, -1, "#f1f0ed"], [2, -2, "#f0f0ed"], [5, 0, "#f0f0ed"]]],
+        ["#e3e1dc", [[2, -1, "#f3f1ef"], [3, -2, "#ffffff"], [4, -1, "#faf9f6"], [5, 0, "#f3f1ef"]]],
+        ["#e9e8e3", [[1, 0, "#f2f1ef"], [1, -1, "#f1f0ef"], [2, -1, "#ffffff"], [4, 1, "#f2f0ef"]]],
+        ["#fefcfa", [[1, -1, "#ffffff"], [2, -1, "#fffffd"], [3, 0, "#f7f6f2"], [5, 2, "#ecebe5"]]],
+        ["#f9f8f6", [[1, -2, "#d1d0cb"], [3, -2, "#fffffc"], [4, 0, "#f0efeb"], [5, 0, "#f3f1ef"]]],
+        ["#faf9f6", [[1, -1, "#fdfcfa"], [2, -2, "#ffffff"], [3, -1, "#fcfbf8"], [5, 0, "#f4f2ef"]]]
     ],
     down: [
         ["#bbb8b5", [[3, 2, "#f2f1ef"], [5, 3, "#fdfcfc"], [7, 2, "#e7e5e3"], [8, 1, "#e4e3e1"]]],
@@ -104,26 +112,23 @@ const ArrowColorList = {
         ["#f8f7f4", [[2, 1, "#efefeb"], [3, 2, "#fbfaf6"], [4, 1, "#f2f2ef"], [5, 0, "#efedeb"]]],
         ["#ebebeb", [[2, 1, "#fcfcfc"], [3, 2, "#efefef"], [4, 1, "#ebebeb"], [5, 0, "#e8e8e7"]]],
         ["#ebebeb", [[2, 1, "#fdfcfc"], [3, 2, "#f0f0ef"], [4, 0, "#e6e6e5"], [5, 0, "#e8e8e7"]]],
-        ["#fffcf6", [[1, 1, "#ffffff"], [2, 2, "#fbf9f2"], [3, 0, "#f1f0e9"], [4, 0, "#f3f1eb"]]]
+        ["#fffcf6", [[1, 1, "#ffffff"], [2, 2, "#fbf9f2"], [3, 0, "#f1f0e9"], [4, 0, "#f3f1eb"]]],
+        ["#e4e3df", [[1, 2, "#f3f1ef"], [2, 2, "#fffffd"], [2, 3, "#d6d4cd"], [4, 0, "#f0efeb"]]],
+        ["#eae7e1", [[1, 1, "#f5f4ef"], [2, 2, "#fffffd"], [3, 1, "#faf9f4"], [4, 0, "#f5f2ed"]]],
+        ["#e2e0df", [[1, 1, "#efeeed"], [2, 2, "#fdfcfc"], [3, 1, "#f3f2f2"], [4, 0, "#eeeceb"]]],
+        ["#e1e0df", [[1, 1, "#efefed"], [1, 2, "#f0eeed"], [2, 2, "#fefdfc"], [3, 1, "#f3f3f2"]]],
+        ["#e2e1df", [[1, 2, "#efeeed"], [2, 2, "#fdfdfc"], [3, 1, "#f3f3f2"], [4, 0, "#eeedeb"]]],
+        ["#c1bfba", [[3, 2, "#fffffd"], [4, 2, "#f6f4f2"], [3, 3, "#bab9b5"], [6, 0, "#e7e5e1"]]],
+        ["#f0f0eb", [[1, 1, "#f5f5f0"], [2, 2, "#fffffd"], [3, 2, "#f6f4f2"], [5, 0, "#e7e6e1"]]],
+        ["#f0efeb", [[2, 1, "#e6e4e1"], [2, 2, "#fffffd"], [3, 2, "#f5f4f2"], [4, 1, "#edebe7"]]],
+        ["#f1f0ed", [[2, 2, "#fffffd"], [3, 2, "#f7f6f2"], [4, 2, "#c3c2bc"], [5, 0, "#e9e7e3"]]],
+        ["#f6f5f2", [[1, 1, "#fdfcfc"], [2, 2, "#fdfdfc"], [2, 3, "#bebdba"], [3, 1, "#fefdfc"]]],
+        ["#fcfaf4", [[1, 1, "#fffffd"], [2, 1, "#fdfcf8"], [2, 2, "#fffffd"], [4, 0, "#fffffc"]]],
+        ["#f8f8f2", [[1, 1, "#fffffd"], [2, 2, "#fffffd"], [2, 3, "#c2bfbc"], [4, 0, "#fdfcfa"]]],
+        ["#fcfbf4", [[1, 1, "#fffffd"], [2, 2, "#fffffd"], [3, 1, "#fffffd"], [4, 0, "#fffffc"]]]
 
     ],
-    left: [
-        ["#e0e0df", [[-2, 2, "#f3f3f2"], [-4, 5, "#f2f2f0"], [-1, 7, "#cdcccb"], [0, 8, "#c1bebe"]]],
-        ["#d1d0cf", [[-2, 2, "#e9e9e7"], [-5, 5, "#f9f9fa"], [-3, 8, "#e4e3e3"], [-1, 10, "#d1d0cf"]]],
-        ["#f0f0ef", [[-2, 2, "#f9f9f8"], [-2, 3, "#ebebeb"], [-1, 3, "#eeeeed"], [-1, 4, "#e4e4e3"]]],
-        ["#f4f4f4", [[-1, 1, "#f9f9f8"], [0, 1, "#ededeb"], [-1, 2, "#ebebeb"], [0, 2, "#eeeeed"]]],
-        ["#efefef", [[-1, 1, "#fafafa"], [-1, 2, "#efeeed"], [0, 3, "#e8e7e7"], [0, 3, "#e8e7e7"]]],
-        ["#efefef", [[-1, 1, "#fafafa"], [-1, 2, "#efeeed"], [0, 2, "#dfdedc"], [0, 3, "#e8e7e7"]]],
-        ["#f5f4f4", [[-1, 1, "#fafafa"], [-1, 1, "#fafafa"], [0, 4, "#e0dfdf"], [1, 4, "#e1e0df"]]],
-        ["#f5f4f4", [[-1, 1, "#fafafa"], [-1, 2, "#f9f9f8"], [-1, 3, "#e5e4e3"], [0, 3, "#efeeed"]]],
-        ["#f6f6f4", [[-1, 1, "#fcfcfc"], [-1, 2, "#f9f9f8"], [-1, 3, "#fdfdfc"], [0, 3, "#cdcccb"]]],
-        ["#efefed", [[-1, 1, "#eeeeed"], [-1, 2, "#fafafa"], [-2, 3, "#d8d8d8"], [0, 4, "#efefef"]]],
-        ["#eeeeed", [[-1, 2, "#d8d8d8"], [0, 2, "#f6f6f6"], [0, 1, "#fafafa"], [0, 3, "#d3d1d1"]]],
-        ["#f0f0f0", [[-1, 1, "#f3f3f2"], [-2, 2, "#edeceb"], [-1, 2, "#f9f9f8"], [-1, 3, "#f3f3f2"]]],
-        ["#e3e2e1", [[-1, 1, "#e3e2e1"], [-2, 2, "#dededc"], [-1, 2, "#fafafa"], [-1, 3, "#f1f1f0"]]],
-        ["#eaeae9", [[0, 1, "#fcfcfc"], [-1, 1, "#e8e8e7"], [-1, 2, "#e6e5e5"], [1, 3, "#edeceb"]]],
-        ["#e2e2e1", [[-2, 2, "#ebebeb"], [-2, 3, "#fafafa"], [-2, 4, "#f1f1f0"], [-1, 5, "#eae9e9"]]]
-    ],
+
     right: [
         ["#dad8d6", [[2, 2, "#eceae9"], [4, 4, "#fdfcfa"], [2, 6, "#e6e4e3"], [0, 9, "#cbc9c6"]]],
         ["#e6e5e1", [[2, 2, "#f3f3f0"], [3, 4, "#e7e7e3"], [1, 6, "#e0e0dc"], [-1, 8, "#cdcbc6"]]],
@@ -179,12 +184,63 @@ const ArrowColorList = {
         ["#e2e0da", [[1, 2, "#f0eeeb"], [2, 3, "#fffffc"], [1, 5, "#f5f2ef"], [0, 6, "#edece7"]]],
         ["#e2e1e1", [[1, 1, "#eaeae9"], [2, 2, "#fbfbfa"], [1, 3, "#ececeb"], [0, 4, "#e1e1df"]]],
         ["#e7e5e3", [[2, 1, "#e8e7e3"], [2, 2, "#fefdfa"], [1, 3, "#f0f0eb"], [0, 4, "#e6e5e1"]]],
-        ["#e2e1e1", [[2, 1, "#e5e4e3"], [2, 2, "#fcfbfa"], [1, 3, "#ececeb"], [0, 4, "#e1e1df"]]]
+        ["#e2e1e1", [[2, 1, "#e5e4e3"], [2, 2, "#fcfbfa"], [1, 3, "#ececeb"], [0, 4, "#e1e1df"]]],
+        ["#f0efe9", [[2, 1, "#eae7e3"], [2, 2, "#eeece7"], [1, 3, "#ecece7"], [-1, 4, "#e8e5e1"]]],
+        ["#eeede9", [[1, 1, "#fafaf6"], [1, 2, "#fffffc"], [1, 3, "#ebebe7"], [0, 3, "#eeede9"]]],
+        ["#b3ada0", [[2, 1, "#fdfcf8"], [2, 2, "#fffffd"], [2, 2, "#fffffd"], [1, 3, "#f2f0eb"]]],
+        ["#f3f1eb", [[2, 1, "#ece9e5"], [0, 2, "#c3beb6"], [1, 3, "#efeee9"], [0, 3, "#f3f1eb"]]],
+        ["#f9f8f4", [[1, 1, "#fcfbf8"], [2, 2, "#fffffd"], [2, 3, "#f5f4f2"], [1, 3, "#f7f6f4"]]],
+        ["#f8f7f4", [[1, 2, "#ecebe9"], [2, 2, "#fffffd"], [1, 3, "#f6f6f4"], [0, 4, "#eceae7"]]],
+        ["#faf8f4", [[2, 2, "#fffffd"], [2, 3, "#f5f4f2"], [1, 3, "#f7f7f4"], [1, 4, "#ebebe7"]]],
+        ["#f9f8f4", [[2, 2, "#fffffd"], [2, 3, "#f4f4f2"], [1, 4, "#ebeae7"], [0, 4, "#ecebe7"]]],
+        ["#f5f5f2", [[1, 1, "#fdfdfc"], [1, 2, "#fbfbf8"], [0, 2, "#e8e8e5"], [0, 3, "#f0f0ef"]]],
+        ["#f0f0ed", [[1, 1, "#f5f5f2"], [2, 2, "#fdfdfc"], [2, 3, "#fbfbf8"], [1, 4, "#f0f0ef"]]],
+        ["#f5f4f2", [[1, 1, "#fcfcfc"], [1, 2, "#fafaf8"], [0, 2, "#e8e7e5"], [0, 3, "#f0f0ef"]]],
+        ["#f5f5f2", [[1, 1, "#fdfcfc"], [1, 3, "#a9a6a3"], [0, 2, "#e8e8e5"], [-1, 3, "#d7d6d4"]]],
+        ["#f5f4f2", [[1, 1, "#fdfcfc"], [1, 2, "#fbfaf8"], [0, 2, "#e8e8e5"], [0, 3, "#f0f0ef"]]],
+        ["#807669", [[0, 2, "#f7f6f2"], [1, 3, "#e9e7e5"], [1, 3, "#e9e7e5"], [-1, 5, "#eae9e7"]]],
+        ["#efede9", [[2, 2, "#fbfaf4"], [2, 3, "#fffffd"], [2, 4, "#f1f0ed"], [1, 5, "#f0ede9"]]],
+        ["#f0efeb", [[1, 2, "#fffffc"], [2, 2, "#e9e8e5"], [1, 3, "#efefeb"], [0, 4, "#edebe9"]]],
+        ["#f2f0e9", [[1, 0, "#f4f2ed"], [1, 1, "#ffffff"], [0, 2, "#f9f7f2"], [-2, 4, "#e3e1dc"]]],
+        ["#f0eee9", [[1, 0, "#f2f0ed"], [0, 1, "#ebe9e3"], [0, 2, "#f7f5f2"], [-2, 4, "#e4e2dc"]]],
+        ["#ded9d1", [[2, 3, "#eceae3"], [3, 3, "#ffffff"], [2, 4, "#f8f6f2"], [0, 6, "#e5e3dc"]]],
+        ["#dcd7d1", [[2, 2, "#f0ede9"], [2, 4, "#f6f4f2"], [3, 3, "#ffffff"], [-1, 7, "#d6d4cd"]]],
+        ["#e7e4dc", [[2, 2, "#f3f1ed"], [2, 3, "#ffffff"], [1, 4, "#f8f5f2"], [0, 5, "#f0eee9"]]],
+        ["#f1efe9", [[1, 0, "#f3f1ed"], [1, 1, "#ffffff"], [0, 2, "#f8f6f2"], [-1, 3, "#f0eee9"]]],
+        ["#e2e0da", [[2, 1, "#f1efeb"], [2, 2, "#fffffd"], [1, 3, "#f4f2f0"], [0, 4, "#ecebe7"]]],
+        ["#e4e2e1", [[1, 0, "#efeeed"], [1, 2, "#e5e3e1"], [0, 2, "#ebeae9"], [-1, 3, "#e1dfdc"]]]
     ],
-    rightUp: [
-        ["#eeeeed", [[2, 0, "#f0f0ef"], [3, 0, "#e1e1df"], [3, 1, "#f0f0f0"], [3, 2, "#f7f7f6"]]],
-        ["#d5d0cd", [[3, 0, "#e7e5e3"], [6, 0, "#f9f9f8"], [7, 3, "#f7f6f6"], [7, 8, "#c7c2be"]]]
-    ]
+    left: [
+        ["#e0e0df", [[-2, 2, "#f3f3f2"], [-4, 5, "#f2f2f0"], [-1, 7, "#cdcccb"], [0, 8, "#c1bebe"]]],
+        ["#d1d0cf", [[-2, 2, "#e9e9e7"], [-5, 5, "#f9f9fa"], [-3, 8, "#e4e3e3"], [-1, 10, "#d1d0cf"]]],
+        ["#f0f0ef", [[-2, 2, "#f9f9f8"], [-2, 3, "#ebebeb"], [-1, 3, "#eeeeed"], [-1, 4, "#e4e4e3"]]],
+        ["#f4f4f4", [[-1, 1, "#f9f9f8"], [0, 1, "#ededeb"], [-1, 2, "#ebebeb"], [0, 2, "#eeeeed"]]],
+        ["#efefef", [[-1, 1, "#fafafa"], [-1, 2, "#efeeed"], [0, 3, "#e8e7e7"], [0, 3, "#e8e7e7"]]],
+        ["#efefef", [[-1, 1, "#fafafa"], [-1, 2, "#efeeed"], [0, 2, "#dfdedc"], [0, 3, "#e8e7e7"]]],
+        ["#f5f4f4", [[-1, 1, "#fafafa"], [-1, 1, "#fafafa"], [0, 4, "#e0dfdf"], [1, 4, "#e1e0df"]]],
+        ["#f5f4f4", [[-1, 1, "#fafafa"], [-1, 2, "#f9f9f8"], [-1, 3, "#e5e4e3"], [0, 3, "#efeeed"]]],
+        ["#f6f6f4", [[-1, 1, "#fcfcfc"], [-1, 2, "#f9f9f8"], [-1, 3, "#fdfdfc"], [0, 3, "#cdcccb"]]],
+        ["#efefed", [[-1, 1, "#eeeeed"], [-1, 2, "#fafafa"], [-2, 3, "#d8d8d8"], [0, 4, "#efefef"]]],
+        ["#eeeeed", [[-1, 2, "#d8d8d8"], [0, 2, "#f6f6f6"], [0, 1, "#fafafa"], [0, 3, "#d3d1d1"]]],
+        ["#f0f0f0", [[-1, 1, "#f3f3f2"], [-2, 2, "#edeceb"], [-1, 2, "#f9f9f8"], [-1, 3, "#f3f3f2"]]],
+        ["#e3e2e1", [[-1, 1, "#e3e2e1"], [-2, 2, "#dededc"], [-1, 2, "#fafafa"], [-1, 3, "#f1f1f0"]]],
+        ["#eaeae9", [[0, 1, "#fcfcfc"], [-1, 1, "#e8e8e7"], [-1, 2, "#e6e5e5"], [1, 3, "#edeceb"]]],
+        ["#e2e2e1", [[-2, 2, "#ebebeb"], [-2, 3, "#fafafa"], [-2, 4, "#f1f1f0"], [-1, 5, "#eae9e9"]]],
+        ["#e8e7e7", [[-1, 1, "#f4f4f2"], [-2, 3, "#f9f9f8"], [-3, 3, "#fcfcfc"], [-1, 5, "#f8f8f6"]]],
+        ["#f4f4f2", [[-2, 1, "#e1e1df"], [-2, 2, "#fcfcfc"], [-1, 3, "#fdfdfc"], [0, 4, "#f8f8f6"]]],
+        ["#d3d3d1", [[-1, 2, "#ebeae9"], [-2, 4, "#f1f1f0"], [-1, 5, "#e7e6e5"], [1, 7, "#d6d5d4"]]],
+        ["#f0f0ef", [[-2, 3, "#c4c4c3"], [-1, 2, "#fafafa"], [0, 4, "#eeeeed"], [1, 4, "#c6c4c3"]]],
+        ["#e1e0dc", [[-1, 2, "#eeede9"], [-2, 2, "#f1f0eb"], [-2, 3, "#fffffd"], [0, 5, "#e7e6e1"]]],
+        ["#e1e0dc", [[-1, 1, "#e8e6e3"], [-2, 2, "#f1f0eb"], [-2, 3, "#fffffd"], [0, 5, "#e7e6e1"]]],
+        ["#e9e6df", [[-1, 1, "#f4f1eb"], [-2, 1, "#f5f2ed"], [-2, 2, "#ffffff"], [0, 4, "#f0ede5"]]],
+        ["#e6e4e1", [[-1, 1, "#f0eeeb"], [-1, 2, "#fffffd"], [0, 3, "#eeede9"], [1, 4, "#e5e4e1"]]],
+        ["#edeae5", [[-1, 1, "#f4f1ed"], [-1, 3, "#f1f0e9"], [0, 3, "#f4f3ed"], [1, 4, "#eeece5"]]],
+        ["#efeeed", [[-1, 1, "#f4f4f4"], [-2, 2, "#fdfdfd"], [-1, 4, "#e2e2e1"], [0, 4, "#e0e0df"]]],
+        ["#efeeed", [[-1, 1, "#f5f5f4"], [-2, 3, "#eeeeed"], [-1, 4, "#e3e3e1"], [0, 5, "#dcdbda"]]],
+        ["#f0f0ed", [[-1, 1, "#f6f6f4"], [-2, 3, "#f0efed"], [-1, 4, "#e4e4e1"], [0, 5, "#dfdcda"]]],
+        ["#efeeed", [[-1, 1, "#f4f4f4"], [-2, 2, "#fdfdfd"], [-1, 4, "#e2e2e1"], [0, 5, "#dcdbda"]]],
+        ["#efeeed", [[-2, 2, "#fdfdfd"], [-1, 3, "#eeeeed"], [-1, 4, "#e2e2e1"], [0, 5, "#dcdbda"]]]
+    ],
 };
 
 
@@ -192,7 +248,10 @@ const ArrowColorList = {
 const BlankColorList = [
     ["#f6f8c1", [[8, 0, "#e1e3b1"], [17, -1, "#fcffc6"], [35, -1, "#dcdfae"], [50, -1, "#f9fcc3"]]],
     ["#eedc99", [[13, 0, "#fdeba3"], [25, 0, "#ebd998"], [42, 0, "#ffeca5"], [59, 1, "#ffeca5"]]],
-    ["#feffc8", [[3, 0, "#fcffc6"], [3, 4, "#e6e9b6"], [1, 7, "#fcfec6"], [7, 10, "#e2e4b2"]]]
+    ["#feffc8", [[3, 0, "#fcffc6"], [3, 4, "#e6e9b6"], [1, 7, "#fcfec6"], [7, 10, "#e2e4b2"]]],
+    ["#ffeca5", [[17, 6, "#f5e49e"], [33, 8, "#ffeca5"], [50, 8, "#ffeca5"], [67, 5, "#ffeca5"]]],
+    ["#f7fac3", [[11, 0, "#feffc8"], [19, 0, "#fdffc8"], [27, 1, "#eaecb9"], [42, 1, "#c4c69b"]]],
+    ["#f5f7c1", [[17, -3, "#fcffc6"], [35, -3, "#f9fcc3"], [53, 0, "#fbfdc6"], [70, -2, "#f1f3be"]]]
 ];
 
 const QuestionMarkColorList = [
@@ -213,19 +272,21 @@ const Auto_activeColorList = [
     ["#f5eadf", [[8, 0, "#f5e1cb"], [18, 2, "#feecda"], [24, 4, "#fef2e7"], [31, 2, "#f4ece1"]]]
 ];
 const QuestColorList = [
-    ["#f7f1eb", [[2, -8, "#fbf0e5"], [0, -13, "#faf2eb"], [-5, -13, "#faf5f0"], [-7, -10, "#fcf9f4"]]]
+    ["#fcfaf6", [[11, 0, "#fff2e7"], [20, 0, "#fbe4cb"], [30, 0, "#fdf0e1"], [40, 0, "#fffcfa"]]],
+    ["#fef7ef", [[3, -1, "#f4e3cf"], [11, -1, "#fdebd6"], [25, 1, "#f8eadc"], [32, 1, "#fffcfa"]]],
+    ["#fcf2e9", [[3, 0, "#fff2e7"], [12, 0, "#fce7cf"], [25, 1, "#f1e2cf"], [33, 1, "#c3a374"]]]
 ];
 const RidingColorList = [
     ["#553e55", [[9, 0, "#ffffff"], [9, 8, "#ffffff"], [18, 4, "#ffffff"], [24, 8, "#5a4158"]]]
 ];
-const TalkColorList = [
 
-];
 const LeaveColorList = [
     ["#dccb96", [[-2, 5, "#ccba8b"], [-1, 17, "#bdad80"], [7, 8, "#dccb96"], [13, 9, "#cdbc8b"]]]
 ];
 const TalkBubbleColorList = [
-    ["#c6c6c6", [[7, -5, "#fdfdfd"], [14, -5, "#fafafa"], [8, 0, "#dfdfdf"], [17, 4, "#f1f1f0"]]]
+    ["#f5faf4", [[2, 0, "#fdfdfd"], [6, 0, "#f7f7f6"], [3, 5, "#fdfdfd"], [8, 5, "#e3e3e3"]]],
+    ["#f5faf4", [[3, 0, "#fcfcfc"], [7, 0, "#f7f7f6"], [3, 5, "#fdfdfd"], [8, 7, "#ebebeb"]]],
+    ["#f6f9f6", [[1, 1, "#fcfcfc"], [3, 1, "#f5f5f4"], [7, 0, "#f8f8f8"], [2, 5, "#ffffff"]]]
 ];
 
 const SpeedUpOffColorList = [
@@ -234,5 +295,5 @@ const SpeedUpOffColorList = [
 
 module.exports = {
     TipColorList, ArrowColorList, BlankColorList, QuestionMarkColorList, NextColorList, Auto_inactiveColorList, Auto_activeColorList, QuestColorList, RidingColorList,
-    TalkColorList, LeaveColorList, TalkBubbleColorList, SpeedUpOffColorList
+    LeaveColorList, TalkBubbleColorList, SpeedUpOffColorList
 };
