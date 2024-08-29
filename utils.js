@@ -14,6 +14,33 @@ const defaultConfig = {
 };
 const configFile = "/sdcard/LordNine/config.json";
 
+const MenuItemRegionList = {
+    "weaponFeatures": [913, 114, 28, 29],
+    "ability": [973, 118, 24, 31],
+    "suit": [1030, 118, 31, 28],
+    "horse": [1089, 119, 25, 24],
+    "animal": [1147, 120, 31, 27],
+    "propsLogin": [1205, 116, 30, 26],
+
+    "trade": [852, 204, 33, 30],
+    "equipment": [913, 207, 27, 28],
+    "manufacture": [972, 206, 27, 27],
+    "mission": [1088, 205, 30, 30],
+    "achievement": [1150, 206, 28, 26],
+    "log": [1205, 202, 30, 37],
+
+    "instance": [855, 294, 30, 31],
+    "trialOfTower": [912, 295, 29, 28],
+    "holyRelics": [972, 290, 30, 27],
+    "mark": [1029, 296, 35, 27],
+    "monsterKnowledge": [1092, 291, 24, 30],
+    "friendship": [1146, 289, 31, 36],
+    "boss": [1204, 289, 31, 35],
+
+    "guild": [854, 376, 31, 37],
+    "email": [1035, 552, 22, 22],
+    "setting": [1149, 545, 28, 29]
+};
 const GroceryColorList = [
     ["#111112", [[12, 2, "#a9a892"], [20, 2, "#aba892"], [84, 6, "#a4a694"], [159, 3, "#a9a892"]]],
     ["#a9a892", [[11, 0, "#aca992"], [72, -4, "#a6a592"], [86, 6, "#a5a28b"], [144, 0, "#aca992"]]]
@@ -185,7 +212,6 @@ const PageBack = () =>
     }
 };
 
-
 /**
  *
  *
@@ -345,8 +371,21 @@ const WaitUntilPageBack = () => WaitUntil(HasPageback);
 
 const WaitUntilBackOpen = () => WaitUntil(HasBackpackClose);
 
-const WaitUntilMenuOpen = () => WaitUntil(HasMenuClose)
-    ;
+const WaitUntilMenuOpen = () => WaitUntil(HasMenuClose);
+
+const WaitUntilFindColor = (colorList, region, time) =>
+{
+    time = time || 60;
+    for (let i = 0; i < time; i++)
+    {
+        if (FindMultiColors(colorList, region))
+        {
+            return true;
+        }
+        Sleep();
+    }
+    return false;
+};
 const IsInCity = () => FindMultiColors(GroceryColorList, [983, 422, 207, 64]);
 const ReturnHome = () =>
 {
@@ -491,18 +530,78 @@ const GoToTheNPC = (type) =>
 };
 const PressBlank = () => RandomPress([451, 485, 357, 144]);
 
+function RestartGame(packageName, time)
+{
+    log("强制停止:" + packageName);
 
+    app.openAppSetting(packageName);
+    text(app.getAppName(packageName)).waitFor();
+    let is_sure = textMatches(/(.*강.*|.*종.*|.*료.*|.*FORCE.*|.*STOP.*|.*强.*|.*止.*|.*结.*|.*行.*)/).findOne();
+    if (is_sure.enabled())
+    {
+        textMatches(/(.*강.*|.*종.*|.*료.*|.*FORCE.*|.*STOP.*|.*强.*|.*止.*|.*结.*|.*行.*)/).findOne().click();
+        textMatches(/(.*확.*|.*인.*|.*OK.*|.*确.*|.*定.*)/).findOne().click();
+        log(app.getAppName(packageName) + "应用已被关闭");
+        sleep(1000);
+        back();
+    }
+    home();
+    time = time || random(60, 300);
+    console.log("延迟时间：" + time);
+    Sleep(time);
+    app.launch(packageName);
+}
+
+const EnterMenuItemPage = (item) =>
+{
+    const hasOpenMenu = OpenMenu();
+    if (!hasOpenMenu)
+    {
+        console.log("open menu failed.");
+        return false;
+    }
+    RandomPress(MenuItemRegionList[item]);
+    const hasEnterItemPage = WaitUntilPageBack();
+    if (!hasEnterItemPage)
+    {
+        console.log("enter page failed");
+        return false;
+    }
+    return true;
+};
+
+const LoadImgList = (url) =>
+{
+    const list = [];
+    let img = null;
+    for (let i = 0; i < 10; i++)
+    {
+        img = ReadImg(`${url}/${i}`);
+        if (img == null)
+        {
+            break;
+        }
+        list.push(img);
+    }
+    if (list.length == 0)
+    {
+        alert("加载文件有误", "无照片文件");
+    }
+    return list;
+};
 module.exports = {
     CloseBackpack, CloseMenu, ClickSkip, ClickRandomly,
+    EnterMenuItemPage,
     FindBlueBtn, FindTipPoint, FindImg, FindMultiColors, FindCheckMark, FindBlackScreen, FindRedBtn, FindGoldBtn,
     HasPageback, HasMenu, HollowPress, HasSkip, HasBackpackClose, HasBackpackMenuClose, HasPopupClose,
+    LoadImgList,
     OpenMenu, OpenBackpack, OpenBackpackMenu,
     PageBack, PressBlank,
     RandomPress, ReadImg,
     Sleep,
-    WaitUntil, WaitUntilMenu, WaitUntilPageBack,
+    WaitUntil, WaitUntilMenu, WaitUntilPageBack, WaitUntilFindColor,
     IsInCity, SwipeSlowly,
-    ReadConfig, RewriteConfig, IsHaltMode, ExitHaltMode, PullDownSkill, ReturnHome, GoToTheNPC,
+    ReadConfig, RewriteConfig, IsHaltMode, ExitHaltMode, PullDownSkill, ReturnHome, GoToTheNPC, RestartGame
 };
 
 

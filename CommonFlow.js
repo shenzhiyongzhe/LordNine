@@ -1,14 +1,17 @@
 
-const { WearEquipment, StrengthenEquipment, OpenAllBox, UseHolyGrail } = require("./Backpack.js");
+const { WearEquipment, StrengthenEquipment, OpenAllBox, UseHolyGrail, DecomposeEquipment } = require("./Backpack.js");
 const {
-    ReadImg, FindImg, RandomPress, Sleep, FindMultiColors, OpenMenu, CloseMenu,
+    ReadImg, FindImg, RandomPress, Sleep, FindMultiColors, OpenMenu, CloseMenu, EnterMenuItemPage,
     PageBack,
     WaitUntilPageBack,
     SwipeSlowly,
     FindBlueBtn, FindTipPoint, FindCheckMark, FindRedBtn, FindGoldBtn,
     HasPopupClose,
     PressBlank, WaitUntil,
+    HasMenu,
+    HasPageback,
 } = require("./utils.js");
+
 
 const GetEmail = () =>
 {
@@ -130,9 +133,9 @@ const GetMonsterKnowledgeAward = () =>
     }
     RandomPress([1091, 292, 25, 28]);
     WaitUntilPageBack();
-    if (FindBlueBtn([10, 657, 235, 58]))
+    if (FindBlueBtn([131, 651, 115, 63]))
     {
-        RandomPress([33, 672, 183, 26]);
+        RandomPress([161, 670, 61, 27]);
         Sleep();
         PressBlank();
         Sleep();
@@ -206,7 +209,7 @@ const LoginProps = () =>
 const ShopBuy = () =>
 {
     //buy strengthening stone 
-    const hasOpenMenu = OpenMenu();
+    const hasOpenMenu = HasMenu();
     if (!hasOpenMenu)
     {
         console.log("no menu button");
@@ -229,9 +232,9 @@ const ShopBuy = () =>
     const IsNotCheck = (region) => FindMultiColors(NotCheckedColorList, region);
 
     let isSuccess = false;
-    if (FindBlueBtn([10, 642, 221, 65]))
+    if (FindBlueBtn([146, 632, 89, 79]))
     {
-        RandomPress([37, 658, 172, 32]);
+        RandomPress([166, 657, 45, 34]);
         const shot = captureScreen();
         for (let i = 0; i < 5; i++)
         {
@@ -269,7 +272,7 @@ const PickUpAbilityPoint = () =>
 {
     console.log("pick up ability point");
     RandomPress([337, 73, 21, 23]);
-    if (WaitUntil(() => HasPopupClose([38, 102, 36, 38])))
+    if (WaitUntil(() => HasPopupClose([34, 94, 46, 53])))
     {
         if (FindBlueBtn([142, 602, 214, 70]))
         {
@@ -361,8 +364,17 @@ const AddAttributePoint = () =>
     const ZeroPointColorList = [
         ["#5d5b54", [[-3, 2, "#a19d91"], [-3, 4, "#c7c2b5"], [-3, 6, "#c6c1b3"], [-3, 9, "#c7c2b5"], [0, 12, "#646158"], [3, 11, "#bfbbae"], [4, 9, "#c7c2b5"], [3, 8, "#aca89b"], [3, 6, "#aba69b"], [4, 4, "#c7c2b5"]]]
     ];
+    const PlusAbilityIcon = [
+        ["#8f7f4f", [[14, 0, "#ab995f"], [6, -7, "#b19d62"], [7, 0, "#af9c62"], [7, 6, "#b7a366"]]]
+    ];
+    if (!FindMultiColors(PlusAbilityIcon, [615, 461, 57, 58]))
+    {
+        console.log("未找到加属性图标");
+        return false;
+    }
     RandomPress([62, 27, 234, 24]);
-    WaitUntil(() => HasPopupClose([37, 107, 33, 33]));
+    console.log("wait until popup close");
+    WaitUntil(() => HasPopupClose([32, 96, 47, 54]));
 
     RandomPress([283, 360, 16, 19]); // plus btn
     RandomPress([522, 171, 98, 22]); // dex 
@@ -441,10 +453,6 @@ const StrengthenHorseEquipment = () =>
     PageBack();
 };
 
-// ComprehensiveImprovement();
-// AddAttributePoint();
-// IncreaseWeaponAbility();
-// console.log(FindRedBtn([992, 641, 212, 58]));
 const GetPassAward = () =>
 {
     console.log("start to get pass award");
@@ -547,15 +555,221 @@ const GetActivitiesAward = () =>
         }
     }
     //````````````````````````
-    const hasPopupClose = HasPopupClose([746, 98, 46, 47]);
-    if (hasPopupClose)
+    for (let i = 0; i < 5; i++)
     {
-        RandomPress([hasPopupClose.x, hasPopupClose.y, 15, 15]);
+        if (HasPopupClose([745, 97, 46, 47]))
+        {
+            RandomPress([760, 108, 19, 20]);
+        }
+        else if (HasPopupClose([1143, 55, 42, 51]))
+        {
+            RandomPress([1157, 74, 14, 18]);
+            break;
+        }
+        Sleep();
     }
-    if (HasPopupClose([1139, 62, 45, 42]))
+
+};
+const GetTravelLogAward = () =>
+{
+    console.log("start get travel log award...");
+    const hasOpenMenu = OpenMenu();
+    if (!hasOpenMenu)
     {
-        RandomPress([1153, 74, 17, 17]);
+        console.log("open menu failed!");
+        return false;
     }
+    const hasLogTip = FindTipPoint([1232, 187, 21, 20]);
+    if (!hasLogTip)
+    {
+        console.log("no log award can pick up");
+        return false;
+    }
+
+    RandomPress([1207, 201, 31, 36]);
+    const hasEnterLogPage = WaitUntilPageBack();
+    if (!hasEnterLogPage)
+    {
+        console.log("enter page failed");
+        PageBack();
+        return false;
+    }
+    // WaitUntil(() => FindBlueBtn([552, 451, 204, 72]));
+    if (!FindTipPoint([602, 608, 28, 38]))
+    {
+        console.log("no awrd can pick up");
+        PageBack();
+        return false;
+    }
+    if (!FindBlueBtn([551, 448, 209, 74]))
+    {
+        console.log("not find blue btn! ");
+        PageBack();
+        return false;
+    }
+    RandomPress([581, 466, 151, 33]); // open travel log
+    Sleep(3);
+    for (let i = 0; i < 5; i++)
+    {
+        let hasTipPoint = FindTipPoint([249, 101, 27, 340]);
+        if (hasTipPoint)
+        {
+            RandomPress([hasTipPoint.x - 200, hasTipPoint.y, 200, 40]);
+            let hasItemTipPoint = FindTipPoint([468, 166, 199, 47]);
+            if (hasItemTipPoint)
+            {
+                RandomPress([hasItemTipPoint.x - 40, hasItemTipPoint.y, 40, 40]);
+                Sleep(3);
+                PressBlank();
+                console.log("get award successful");
+            }
+        }
+        else
+        {
+            console.log("no award can get return ");
+            break;
+        }
+    }
+    WaitUntil(() => HasPageback());
+    PageBack();
+    return true;
+};
+const UpgradeAbilityLevel = () =>
+{
+    console.log("start upgrade ability level");
+    const hasOpenMenu = OpenMenu();
+    if (!hasOpenMenu)
+    {
+        console.log("open menu failed");
+        return false;
+    }
+    RandomPress([974, 119, 26, 28]);
+    const hasEnterAbilityPage = WaitUntilPageBack();
+    if (!hasEnterAbilityPage)
+    {
+        console.log("enter ability page failed");
+        return false;
+    }
+    const CanUpgrade = () => FindBlueBtn([1020, 598, 199, 69]);
+    const PressUpgradeDetailBtn = () => RandomPress([1011, 661, 175, 28]);
+    const PressUpgradeBtn = () => RandomPress([1049, 620, 156, 27]);
+
+    const PressPositionList = [
+        [130, 166, 38, 33],
+        [225, 168, 25, 28],
+        [402, 166, 30, 28],
+        [492, 168, 25, 28],
+        [670, 167, 32, 31],
+        [757, 168, 30, 26]
+    ];
+    for (let i = 0; i < 6; i++)
+    {
+        RandomPress(PressPositionList[i]);
+        PressUpgradeDetailBtn();
+        if (CanUpgrade())
+        {
+            PressUpgradeBtn();
+            for (let i = 0; i < 10; i++)
+            {
+                if (FindBlueBtn([537, 586, 208, 77]))
+                {
+                    RandomPress([567, 609, 151, 31]);
+                    break;
+                }
+                Sleep();
+            }
+        }
+        else
+        {
+            if (HasPopupClose([1184, 55, 42, 39]))
+            {
+
+                RandomPress([1198, 65, 15, 19]);
+            }
+        }
+    }
+    if (HasPopupClose([1184, 55, 42, 39]))
+    {
+
+        RandomPress([1198, 65, 15, 19]);
+    }
+    PageBack();
+};
+
+const UpgradeHolyRelics = () =>
+{
+    console.log("start upgrade holy relics");
+    const hasEnter = EnterMenuItemPage("holyRelics");
+    if (!hasEnter)
+    {
+        console.log("enter failed ");
+        return false;
+    }
+    const blackColorList = [
+        ["#070707", [[3, 0, "#070707"], [1, 6, "#070707"], [1, 15, "#070707"], [2, 31, "#070707"]]]
+    ];
+    const IsUnlocked = () => FindMultiColors(blackColorList, [1093, 644, 25, 56]);
+    for (let i = 0; i < 10; i++)
+    {
+        //is up to lv20
+        if (FindBlueBtn([1105, 641, 163, 64]))
+        {
+            RandomPress([1126, 657, 119, 32]);
+            if (FindBlueBtn([657, 442, 195, 70]))
+            {
+                RandomPress([679, 458, 154, 36]);
+                Sleep(5);
+            }
+        }
+        else
+        {
+            break;
+        }
+    }
+    RandomPress([38, 187, 257, 80]);
+    let secondUnlocked = false;
+    if (!IsUnlocked())
+    {
+        if (FindBlueBtn([946, 641, 317, 66]))
+        {
+            RandomPress([972, 657, 268, 32]);
+            if (FindBlueBtn([655, 443, 201, 70]))
+            {
+                RandomPress([674, 460, 162, 32]);
+                Sleep(3);
+                if (IsUnlocked())
+                {
+                    secondUnlocked = true;
+                }
+            }
+        }
+    }
+    else
+    {
+        secondUnlocked = true;
+    }
+    if (secondUnlocked)
+    {
+        Sleep();
+        for (let i = 0; i < 10; i++)
+        {
+            //is up to lv20
+            if (FindBlueBtn([1105, 641, 163, 64]))
+            {
+                RandomPress([1126, 657, 119, 32]);
+                if (FindBlueBtn([657, 442, 195, 70]))
+                {
+                    RandomPress([679, 458, 154, 36]);
+                    Sleep(5);
+                }
+            }
+            else
+            {
+                break;
+            }
+        }
+    }
+    PageBack();
 };
 
 const ComprehensiveImprovement = () =>
@@ -567,24 +781,38 @@ const ComprehensiveImprovement = () =>
     GetMonsterKnowledgeAward();
     GetEmail();
     GetAchievement();
+    GetTravelLogAward();
     // first open all box
     OpenAllBox();
+
     UseHolyGrail();
+    AddAttributePoint();
+
     // next wear equipment
     WearEquipment();
     // strengthen equipment
     StrengthenEquipment();
+    LoginProps();
+    DecomposeEquipment();
     IncreaseWeaponAbility();
-
     ShopBuy();
 };
 
 
+// module.exports = { GetEmail, GetAchievement, GetMonsterKnowledgeAward, LoginProps, HasCrucifixIcon, ShopBuy, PickUpAbilityPoint, AddAttributePoint, ComprehensiveImprovement, StrengthenHorseEquipment };
 
-module.exports = { GetEmail, GetAchievement, GetMonsterKnowledgeAward, LoginProps, HasCrucifixIcon, ShopBuy, PickUpAbilityPoint, AddAttributePoint, ComprehensiveImprovement, StrengthenHorseEquipment };
+// GetTravelLogAward();
+// ShopBuy();
+// GetTravelLogAward();
 // ComprehensiveImprovement();
-// console.log(HasPopupClose([690, 80, 162, 111]));
 // GetMonsterKnowledgeAward();
-// console.log(FindTipPoint([1150, 405, 27, 32]));
+// GetEmail();
+// AddAttributePoint();
+// GetActivitiesAward();
+// UpgradeHolyRelics();
+// console.log(HasPopupClose([1180, 54, 45, 43]));
+// console.log(FindBlueBtn([140, 636, 96, 72]));
+// console.log(HasPopupClose([34, 94, 46, 53]));
+// console.log(FindTipPoint([569, 55, 37, 36]));
 // console.log(HasPopupClose([748, 101, 39, 35]));
 // console.log(FindCheckMark([839, 359, 52, 53]));

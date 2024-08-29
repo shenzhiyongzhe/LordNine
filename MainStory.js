@@ -12,7 +12,11 @@ const {
     SwipeSlowly,
     OpenBackpack,
     OpenBackpackMenu,
-    FindGoldBtn
+    FindGoldBtn,
+    HasPopupClose,
+    EnterMenuItemPage,
+    WaitUntil,
+    LoadImgList
 } = require("./utils.js");
 
 const { TipColorList, ArrowColorList, BlankColorList, QuestionMarkColorList, NextColorList, Auto_inactiveColorList,
@@ -27,23 +31,18 @@ const { ComprehensiveImprovement, StrengthenHorseEquipment } = require("./Common
 const PageImg = {
     "abilityPage": ReadImg('icon/beginner/growthMission/abilityPage')
 };
+
+let DeathImgList = [];
+DeathImgList = LoadImgList("special/death");
+
 let storyMode = "mainMission";
+
+
 // 点击提示
 const HasTip = () => FindMultiColors(TipColorList, [19, 17, 1238, 688]);
 const FindArrow = (region) =>
 {
-    region = region || [0, 0, 1280, 720];
-    let [x, y, w, h] = region;
-    if (x + w >= 1280)
-    {
-        w = 1280 - x;
-    }
-    if (y + h >= 720)
-    {
-        h = 720 - y;
-    }
-
-    for (let i = 0; i < 20; i++)
+    for (let i = 0; i < 40; i++)
     {
         let shot = captureScreen();
         let hasUpArrow = FindMultiColors(ArrowColorList.up, region, shot);
@@ -67,7 +66,7 @@ const FindArrow = (region) =>
             return ["right", hasRightArrow];
         }
 
-        Sleep(0.05);
+        sleep(0.02);
     }
     return false;
 };
@@ -82,11 +81,12 @@ const TapTip = () =>
         if (!hasArrow)
         {
             console.log("未发现箭头。");
-            const randomStart_x = hasTip.x - 150 > 0 ? hasTip.x - 150 : 0;
-            const randomStart_y = hasTip.y - 100 > 0 ? hasTip.y - 100 : 0;
-            const w = hasTip.x + 150 < 1280 ? 300 : 1280 - hasTip.x;
-            const h = hasTip.y + 100 < 720 ? 200 : 720 - hasTip.y;
-            RandomPress([randomStart_x, randomStart_y, w, h]);
+            // const randomStart_x = hasTip.x - 150 > 0 ? hasTip.x - 150 : 0;
+            // const randomStart_y = hasTip.y - 100 > 0 ? hasTip.y - 100 : 0;
+            // const w = hasTip.x + 150 < 1280 ? 300 : 1280 - hasTip.x;
+            // const h = hasTip.y + 100 < 720 ? 200 : 720 - hasTip.y;
+            // RandomPress([randomStart_x, randomStart_y, w, h]);
+            RandomPress([753, 86, 333, 401]);
         }
         else
         {
@@ -145,7 +145,7 @@ const TapDialog = () =>
     {
         RandomPress([538, 399, 206, 17]);
     }
-    if (isSpeedUpOff)
+    else if (isSpeedUpOff)
     {
         RandomPress([1109, 39, 139, 14]);
         RandomPress([1174, 88, 71, 18]);
@@ -199,10 +199,7 @@ const weaponSelectColorList = [
 const PurpleMainStoryColorList = [
     ["#d5b0ff", [[3, 1, "#d5b0ff"], [10, 6, "#b898dc"], [355, 9, "#dbc996"], [342, 8, "#dccb96"]]]
 ];
-const SkillPopupCloseColorList = [
-    ["#878786", [[7, 7, "#636363"], [15, 15, "#6d6d6d"], [13, 0, "#90908f"], [0, 14, "#686867"]]],
-    ["#8c8c8b", [[7, 8, "#686867"], [14, 14, "#6a6a6a"], [15, 1, "#797979"], [2, 14, "#6c6c6c"]]]
-];
+
 const AbilityPopupCloseColorList = [
     ["#a59674", [[8, 9, "#625945"], [16, 16, "#746a51"], [16, 0, "#7c7157"], [1, 15, "#655b46"]]],
     ["#97896a", [[6, 7, "#635945"], [14, 15, "#635945"], [13, 1, "#7b6f55"], [-1, 14, "#6a604a"]]]
@@ -212,21 +209,33 @@ const BossTitleColorList = [
     ["#ee2b05", [[16, 3, "#fd2d00"], [30, -2, "#ff2d00"], [47, -4, "#fe2d00"], [52, 2, "#f62c02"]]],
     ["#fc2c01", [[6, 3, "#fc2d01"], [20, 3, "#ff2d00"], [35, 1, "#ff2d00"], [52, -1, "#fd2d00"]]],
     ["#ff2d00", [[5, 4, "#fd2d01"], [14, 4, "#ff2d00"], [35, 6, "#ee2c0e"], [54, 4, "#fe2d01"]]],
-    ["#f92d0a", [[13, -2, "#ff2d00"], [33, -1, "#fc2d04"], [53, -3, "#fe2d01"], [63, -3, "#fb2d03"]]]
-];
-
-const DeathPopupColorList = [
-    ["#224149", [[2, 0, "#fce7bc"], [17, -4, "#224249"], [21, 0, "#fae5bc"], [20, -8, "#fbe6bc"]]],
-    ["#fce7bc", [[0, 3, "#fce7bc"], [8, 2, "#f6e1b9"], [29, -4, "#ffe9be"], [29, 1, "#ffe9be"]]]
+    ["#f92d0a", [[13, -2, "#ff2d00"], [33, -1, "#fc2d04"], [53, -3, "#fe2d01"], [63, -3, "#fb2d03"]]],
+    ["#e92a07", [[0, 9, "#f22f17"], [27, 1, "#b32618"], [30, 3, "#fd2d00"], [50, 4, "#fe2d02"]]],
+    ["#fd2d01", [[18, 1, "#fa2e0b"], [35, 3, "#fc2d03"], [52, 0, "#fe2d02"], [35, 2, "#f92c02"]]],
+    ["#fe2d00", [[4, 1, "#fd2d01"], [10, 1, "#fe2d00"], [17, 0, "#fd2d04"], [24, 2, "#fe2d02"]]],
+    ["#f92d04", [[9, -1, "#fa2d06"], [19, -1, "#f72c03"], [26, 3, "#fc2e07"], [33, 0, "#f1321e"]]],
+    ["#fe2d02", [[4, -1, "#fe2d02"], [10, 2, "#f72f14"], [28, -1, "#f83118"], [28, 4, "#fa2d08"]]],
+    ["#ff2d00", [[23, 2, "#f92e0c"], [36, 2, "#fb2d04"], [52, 3, "#ff2d00"], [105, 8, "#fe2d01"]]],
+    ["#fb2d05", [[1, 0, "#fd2d02"], [6, 0, "#fe2d00"], [10, 0, "#fb2d07"], [16, 0, "#ff2d00"]]],
+    ["#fd2d03", [[1, 0, "#ff2d00"], [4, 0, "#fb2e07"], [6, 0, "#fd2d01"], [37, -1, "#fb2d03"]]]
 ];
 
 
 const DeathCheck = () =>
 {
-    if (FindMultiColors(DeathPopupColorList, [617, 439, 46, 26]))
+    const shot = captureScreen();
+    for (let i = 0; i < DeathImgList.length; i++)
     {
-        console.log("Death Check: character is dead!");
-        return true;
+        if (FindImg(DeathImgList[i], [596, 423, 84, 59], shot))
+        {
+            console.log("character is dead");
+            return true;
+        }
+        else if (FindImg(DeathImgList[i], [600, 591, 76, 65], shot))
+        {
+            console.log("character is dead! lost ability point");
+            return true;
+        }
     }
     return false;
 };
@@ -234,7 +243,14 @@ const DeathCheck = () =>
 const DeathFlow = () =>
 {
     console.log("Main Story Death Flow: Start  Death Flow!");
-    RandomPress([570, 437, 147, 31]);
+    if (FindBlueBtn([532, 590, 217, 67]))
+    {
+        RandomPress([563, 610, 157, 29]);
+    }
+    else if (FindBlueBtn([536, 415, 204, 77]))
+    {
+        RandomPress([568, 437, 151, 30]);
+    }
 
     storyMode = "growthMission";
     const hasMenu = WaitUntilMenu();
@@ -246,14 +262,11 @@ const DeathFlow = () =>
 };
 const ChangeGameSetting = () =>
 {
-    if (!OpenMenu())
+
+    const hasEnterSettingPage = EnterMenuItemPage("setting");
+    if (!hasEnterSettingPage)
     {
-        alert("修改游戏设置失败", "未发现菜单按钮");
-    }
-    RandomPress([1151, 549, 26, 29]);
-    if (!WaitUntilPageBack())
-    {
-        alert("修改游戏设置失败", "打开设置失败");
+        console.log("change setting error!");
     }
     RandomPress([357, 77, 33, 20]);
     Sleep();
@@ -267,71 +280,54 @@ const ChangeGameSetting = () =>
     RandomPress([731, 391, 167, 24]); // select btn
     RandomPress([931, 415, 156, 30]); // choose chinese
     PageBack();
+
     if (FindBlueBtn([655, 443, 200, 67]))
     {
         console.log("修改配置成功!");
         RandomPress([678, 456, 155, 36]); //confirm
-        Sleep(16);
-
+        Sleep(10);
+        WaitUntil(() => HasSkip());
         ClickSkip();
-        Sleep(5);
-        RandomPress([396, 192, 379, 193]);
-        Sleep(3);
-        if (FindBlueBtn([652, 429, 171, 59]))
+
+        if (FindBlueBtn([651, 426, 171, 61]))
         {
-            RandomPress([679, 444, 124, 28]); // start download chinese package
-            Sleep(30);
-            const downloadingColorList = [
-                ["#c1b183", [[8, 0, "#dac894"], [8, -2, "#d3c28f"], [13, 3, "#cebd8b"], [19, 2, "#c8b989"]]]
+            console.log("start to download chinese package...");
+            RandomPress([670, 444, 133, 26]);
+            let hadDownloadFinished = false;
+            const voiceIconColorList = [
+                ["#ccbc8b", [[7, -2, "#d7c692"], [9, -3, "#d4c391"], [10, 1, "#dac894"], [9, 2, "#dac894"]]]
             ];
-            const HasStartBlueBtn = () => FindBlueBtn([931, 639, 261, 71]);
-            const PressStartBtn = () => RandomPress([955, 655, 208, 37]);
-            for (let i = 0; i < 100; i++)
+            for (let i = 0; i < 500; i++)
             {
-                let isDownloading = FindMultiColors(downloadingColorList, [1210, 30, 47, 38]);
-                if (isDownloading)
+                if (FindMultiColors(voiceIconColorList, [1207, 27, 48, 47]))
                 {
-                    console.log("正在下载中文包...");
                     Sleep(60);
                 }
                 else
                 {
-                    console.log("下载中文包完成!");
-                    RandomPress([383, 73, 578, 184]);//
-                    Sleep(5);
-                    for (let i = 0; i < 30; i++)
+                    if (HasMainUI())
                     {
-                        if (HasStartBlueBtn())
-                        {
-                            PressStartBtn();
-                            break;
-                        }
-                        Sleep();
+                        console.log("download finished!");
+                        break;
                     }
-
-                    for (let i = 0; i < 30; i++)
-                    {
-                        if (HasMenu())
-                        {
-                            console.log("已经进入游戏！");
-                            return true;
-                        }
-                        Sleep();
-                    }
-                    console.log("进入游戏失败！");
-                    return false;
                 }
             }
+            if (hadDownloadFinished == false)
+            {
+                alert("download failed!! ", "下载中文包失败");
+            }
         }
+        return true;
     }
     else
     {
         return false;
     }
 };
-const IsAttackBoss = () => FindMultiColors(BossTitleColorList, [920, 152, 100, 24]);
+const IsAttackBoss = () => FindMultiColors(BossTitleColorList, [893, 153, 228, 23]);
 
 let lostTitleCount = 0;
+
 const AttackingBossFlow = (number) =>
 {
     const LowHPColorList = [
@@ -348,7 +344,7 @@ const AttackingBossFlow = (number) =>
             console.log("Lost Boss Title!");
             lostTitleCount++;
             console.log("lost title count: " + lostTitleCount);
-            if (lostTitleCount > 20)
+            if (lostTitleCount > 10)
             {
 
                 return true;
@@ -356,14 +352,17 @@ const AttackingBossFlow = (number) =>
         }
         return false;
     };
-    SwipeLeft(3);
+    SwipeRight(3);
     let isDead = false;
     let isBossDead = false;
     let time = 0;
+
     let moveTimeArr = [
         [3, 3, 3, 3],
-        [3.5, 3.5, 3.5, 3.5,]
+        [2.8, 2.8, 2.8, 2.8],
+        [3.5, 3.5, 3.5, 3.5],
     ];
+
     while (isDead == false && isBossDead == false)
     {
         const moveTime = moveTimeArr[number];
@@ -381,24 +380,27 @@ const AttackingBossFlow = (number) =>
 
         isDead = DeathCheck();
         isBossDead = IsBossDead();
-        time++;
-        console.log("time: " + time);
 
-        SwipeLeft(moveTime[0]);
-        Sleep(1);
-        SwipeDown(moveTime[1]);
-        Sleep(1);
+
         SwipeRight(moveTime[2]);
         Sleep(1);
         SwipeUp(moveTime[3]);
         Sleep(1);
-
-        // if (time > 12 && time < 24)
-        // {
-        //     RandomPress([1081, 435, 29, 22]);
-        //     console.log("switch enemy...");
-        //     Sleep(0.1);
-        // }
+        SwipeLeft(moveTime[0]);
+        Sleep(1);
+        SwipeDown(moveTime[1]);
+        Sleep(1);
+        if (number != 0)
+        {
+            time++;
+            console.log("time: " + time);
+            if (time > 12 && time < 24)
+            {
+                click(1095, 443);
+                console.log("switch enemy...");
+                Sleep(0.1);
+            }
+        }
     }
 };
 
@@ -426,23 +428,24 @@ const MainStoryBranch = () =>
         {
             return true;
         }
-        RandomPress([902, 131, 273, 36]);
+        if (!IsMoving())
+        {
+            RandomPress([902, 131, 273, 36]);
+        }
         console.log("start to trace on main story...");
         return true;
     }
-    const hasSkillPopup = FindMultiColors(SkillPopupCloseColorList, [1209, 105, 39, 34], shot);
-    if (hasSkillPopup)
-    {
-        PullDownSkill([420, 640]);
-        console.log("start to change setting...");
-        const changeSuccess = ChangeGameSetting();
-        if (!changeSuccess)
-        {
-            console.log("change setting failed!");
-        }
-
-
-    }
+    // const hasSkillPopup = HasPopupClose([1216, 111, 25, 25]);
+    // if (hasSkillPopup)
+    // {
+    //     PullDownSkill([420, 640]);
+    //     console.log("start to change setting...");
+    //     const changeSuccess = ChangeGameSetting();
+    //     if (!changeSuccess)
+    //     {
+    //         console.log("change setting failed!");
+    //     }
+    // }
     const hasAbilityPopup = FindMultiColors(AbilityPopupCloseColorList, [35, 103, 37, 38], shot);
     if (hasAbilityPopup)
     {
@@ -452,6 +455,14 @@ const MainStoryBranch = () =>
         RandomPress([685, 348, 21, 24]);
         RandomPress([586, 659, 163, 26]);
         RandomPress([45, 113, 21, 22]); //close popup 
+
+        PullDownSkill([420, 640]);
+        console.log("start to change setting...");
+        const changeSuccess = ChangeGameSetting();
+        if (!changeSuccess)
+        {
+            console.log("change setting failed!");
+        }
         // start to change weapon
         console.log("start to change weapon...");
         OpenAllBox();
@@ -514,7 +525,9 @@ const MainStoryBranch = () =>
 };
 // -----------------------------     exception    ----------------------------------
 const MainStoryQuestIconColorList = [
-    ["#dbc996", [[7, -8, "#d9c894"], [12, 0, "#dbc996"], [3, 8, "#c2b384"], [12, 8, "#d1bf8f"]]]
+    ["#dbc996", [[7, -8, "#d9c894"], [12, 0, "#dbc996"], [3, 8, "#c2b384"], [12, 8, "#d1bf8f"]]],
+    ["#dccb96", [[1, 8, "#cebd8d"], [12, 0, "#dccb96"], [12, 3, "#dcc996"], [7, 10, "#bfb082"]]],
+    ["#dccb96", [[7, -8, "#d8c692"], [13, -2, "#dccb96"], [13, 1, "#dbc996"], [9, 6, "#d8c794"]]]
 ];
 const MissionAwardSelectColorList = [
     ["#564926", [[2, 0, "#564926"], [5, 0, "#564926"], [6, 0, "#564926"], [25, 0, "#554926"]]]
@@ -536,15 +549,128 @@ const MainStoryException = () =>
     const hasMenu = HasMenu();
     if (!hasMenu)
     {
-        if (FindBlueBtn([654, 444, 202, 66], shot))
+        if (DeathCheck())
+        {
+            DeathFlow();
+        }
+        else if (FindBlueBtn([654, 444, 202, 66], shot))
         {
             console.log("main story transform...");
             RandomPress([683, 460, 151, 30]);
         }
-        else if (FindBlueBtn([1055, 637, 219, 71]))
+        else if (FindBlueBtn([1055, 637, 219, 71], shot))
         {
             console.log("horse page confirm");
             RandomPress([1077, 656, 173, 35]);
+        }
+        else if (FindBlueBtn([481, 620, 316, 76], shot))
+        {
+            console.log("animal confirm");
+            RandomPress([525, 639, 244, 34]);
+        }
+        else if (FindBlueBtn([655, 380, 207, 68], shot))
+        {
+            console.log("monster collection quickly transform btn");
+            RandomPress([681, 399, 149, 33]);
+        }
+    }
+    else
+    {
+        if (IsAttackBoss())
+        {
+            console.log("start attacking boss");
+            if (FindMultiColors(Auto_inactiveColorList, [1127, 431, 51, 33]))
+            {
+                console.log("auto attack boss");
+                click(1150, 450);
+            }
+            SwipeLeft(3);
+            Sleep(1);
+            SwipeDown(3);
+            Sleep(1);
+            SwipeRight(3);
+            Sleep(1);
+            SwipeUp(3);
+
+            const GetBossIndex = () =>
+            {
+                const bossImgList = {
+                    0: [],
+                    1: [],
+                    2: [],
+                    // 3: []
+                };
+                for (let i = 0; i < 4; i++)
+                {
+                    for (let j = 0; j < 10; j++)
+                    {
+                        let img = ReadImg(`icon/boss/${i}/${j}`);
+                        if (img == null) break;
+                        bossImgList[i].push(img);
+                    }
+                }
+                const shot = captureScreen();
+                let index = false;
+                for (let i = 0; i < 3; i++)
+                {
+                    for (let j = 0; j < 10; j++)
+                    {
+                        if (!bossImgList[i][j])
+                        {
+                            break;
+                        }
+                        if (FindImg(bossImgList[i][j], [478, 3, 353, 44], shot))
+                        {
+                            console.log("find boss index: " + i);
+                            index = i;
+                            break;
+                        }
+                    }
+                }
+                for (let key in bossImgList)
+                {
+                    bossImgList[key].forEach(element =>
+                    {
+                        element.recycle();
+                    });
+                }
+                if (index == false)
+                {
+                    console.log("not find boss index: return 0");
+                    return 0;
+                }
+                else
+                {
+                    console.log("find boss index: " + index);
+                    return index;
+                }
+
+            };
+
+            AttackingBossFlow(GetBossIndex());
+            console.log("finish boss flow");
+        }
+        else if (!IsMoving())
+        {
+            const isQuest = MainStoryQuestCheck();
+            if (isQuest)
+            {
+                return true;
+            }
+            const hasMainStoryQuestIcon = HasMainStoryQuestIcon();
+            if (hasMainStoryQuestIcon && storyMode == "mainMission")
+            {
+                ClickMainStory();
+                if (!IsMoving())
+                {
+                    console.log("hasMainStory: " + hasMainStoryQuestIcon);
+                    console.log("character is stop moving!!!");
+                    if (HasMainStoryQuestIcon())
+                    {
+                        gesture(3000, [240, 496], [440, 496]);
+                    }
+                }
+            }
         }
 
     }
@@ -554,14 +680,10 @@ const MainStoryException = () =>
         console.log("need press blank...");
         RandomPress([461, 520, 309, 114]);
     }
+
     else if (FindMultiColors(BlankColorList, [588, 650, 109, 39], shot))
     {
         RandomPress([492, 498, 332, 142]);
-    }
-
-    else if (DeathCheck())
-    {
-        DeathFlow();
     }
 
     else if (FindMultiColors(MissionAwardSelectColorList, [587, 257, 118, 36], shot))
@@ -569,116 +691,18 @@ const MainStoryException = () =>
         RandomPress([779, 438, 50, 50]);
         Sleep(3);
     }
-    if (IsAttackBoss())
-    {
-        console.log("start attacking boss");
-        if (FindMultiColors(Auto_inactiveColorList, [1127, 431, 51, 33]))
-        {
-            console.log("auto attack boss");
-            click(1150, 450);
-        }
-        SwipeLeft(3);
-        Sleep(1);
-        SwipeDown(3);
-        Sleep(1);
-        SwipeRight(3);
-        Sleep(1);
-        SwipeUp(3);
 
-        const GetBossIndex = () =>
-        {
-            const bossImgList = {
-                0: [],
-                1: [],
-                // 2: [],
-                // 3: []
-            };
-            for (let i = 0; i < 4; i++)
-            {
-                for (let j = 0; j < 10; j++)
-                {
-                    let img = ReadImg(`icon/boss/${i}/${j}`);
-                    if (img == null) break;
-                    bossImgList[i].push(img);
-                }
-            }
-            const shot = captureScreen();
-            let index = false;
-            for (let i = 0; i < 2; i++)
-            {
-                for (let j = 0; j < 10; j++)
-                {
-                    if (!bossImgList[i][j])
-                    {
-                        break;
-                    }
-                    if (FindImg(bossImgList[i][j], [478, 3, 353, 44], shot))
-                    {
-                        console.log("find boss index: " + i);
-                        index = i;
-                        break;
-                    }
-                }
-            }
-            for (let key in bossImgList)
-            {
-                bossImgList[key].forEach(element =>
-                {
-                    element.recycle();
-                });
-            }
-            if (index == false)
-            {
-                console.log("not find boss index: return 0");
-                return 0;
-            }
-            else
-            {
-                console.log("find boss index: " + index);
-                return index;
-            }
-
-        };
-
-        AttackingBossFlow(GetBossIndex());
-        console.log("finish boss flow");
-    }
-    else if (!IsMoving())
-    {
-        const isQuest = MainStoryQuestCheck();
-        if (isQuest)
-        {
-            return true;
-        }
-        const hasMainStoryQuestIcon = HasMainStoryQuestIcon();
-        if (hasMainStoryQuestIcon && storyMode == "mainMission")
-        {
-            ClickMainStory();
-            if (!IsMoving())
-            {
-                console.log("character is stop moving!!!");
-                if (HasMainStoryQuestIcon())
-                {
-                    gesture(3000, [240, 496], [440, 496]);
-                }
-            }
-        }
-
-
-    }
-    PageBack();
-    CloseBackpack();
-    CloseMenu();
 };
-
 
 const GrowthMissionColorList = [
     ["#d4affd", [[5, 0, "#d3affc"], [-5, 7, "#c7a5ef"], [1, 9, "#d5b0ff"], [9, 8, "#b595d8"]]],
     ["#d4affd", [[5, 0, "#d3affc"], [-5, 6, "#b696da"], [2, 7, "#d5b0ff"], [10, 7, "#c6a3ed"]]],
-    ["#d5b0ff", [[5, 0, "#d1aefc"], [-6, 7, "#d0acf8"], [11, 7, "#c6a3ed"], [2, 9, "#d5b0ff"]]]
+    ["#d5b0ff", [[5, 0, "#d1aefc"], [-6, 7, "#d0acf8"], [11, 7, "#c6a3ed"], [2, 9, "#d5b0ff"]]],
+    ["#d3affc", [[1, 1, "#d5b0ff"], [5, 1, "#d5b0ff"], [2, 8, "#d4affd"], [2, 11, "#c6a3ed"]]]
 ];
 const TransformIconColorList = [
-    ["#998b5f", [[2, -6, "#c6b37c"], [6, -5, "#c7b57e"], [12, -3, "#a89869"], [9, 5, "#b3a271"]]]
+    ["#998b5f", [[2, -6, "#c6b37c"], [6, -5, "#c7b57e"], [12, -3, "#a89869"], [9, 5, "#b3a271"]]],
+    ["#c8b67f", [[-3, 4, "#ccb981"], [7, 4, "#cbb880"], [-2, 10, "#b9a874"], [5, 11, "#b9a874"]]]
 ];
 const GrowthImgList = {
     skillBookMerchantPage: ReadImg("icon/beginner/growthMission/skillBookMerchant"),
@@ -714,15 +738,22 @@ const GrowthMissionFlow = () =>
     const hasGrowthIcon = FindMultiColors(GrowthMissionColorList, [862, 187, 32, 32]);
     if (hasGrowthIcon)
     {
-
         if (FindMultiColors(TransformIconColorList, [1132, 184, 50, 39]))
         {
-            RandomPress([1147, 195, 20, 14]);
-            if (FindBlueBtn([653, 443, 205, 65]))
+            if (!IsInCity())
             {
-                RandomPress([678, 461, 157, 31]);
-                Sleep(5);
+                RandomPress([1147, 195, 20, 14]);
+                if (FindBlueBtn([653, 443, 205, 65]))
+                {
+                    RandomPress([678, 461, 157, 31]);
+                    Sleep(5);
+                }
             }
+            else
+            {
+                RandomPress([909, 197, 181, 31]);
+            }
+
         }
         else
         {
@@ -892,6 +923,8 @@ const DailyMissionFlow = () =>
         }
     }
 };
+
+
 // storyMode = "growthMission";
 
 const MainStoryFlow = () =>
@@ -918,19 +951,19 @@ const MainStoryFlow = () =>
     MainStoryException();
 };
 
-// ComprehensiveImprovement();
-// WearEquipment();
+
 
 module.exports = { HasTip, MainStoryFlow };
 
+// DeathCheck();
 
-// console.log(GetBossIndex());
-// console.log(FindMultiColors(FinishedMissionColorList, [1128, 203, 64, 40]));
-
-
+// console.log(FindMultiColors(DeathFontColorList, [560, 239, 145, 64]));
+// AttackingBossFlow(2);
+//
+// console.log(HasTip());
 // while (true)
 // {
-//     MainStoryFlow();
+// MainStoryFlow();
 //     Sleep(1);
 // }
 

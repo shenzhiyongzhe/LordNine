@@ -11,10 +11,14 @@ const {
     ClickSkip,
     ReadConfig,
     HasSkip,
+    IsHaltMode,
+    ExitHaltMode,
 
 } = require("./utils.js");
 
 const { HasTip } = require("./MainStory.js");
+
+let lastTimeOfBuyingPotion = new Date().getMinutes();
 
 const NoPotionColorList = [
     ["#070101", [[18, 0, "#363635"], [39, 2, "#040000"], [16, 14, "#fefefd"], [21, 14, "#fbfbfa"]]],
@@ -104,11 +108,7 @@ const BlueBtnCheck = (shot) =>
         Sleep(5);
         app.launch("");
     }
-    else if (FindBlueBtn([655, 380, 207, 68], shot))
-    {
-        console.log("monster collection quickly transform btn");
-        RandomPress([681, 399, 149, 33]);
-    }
+
 };
 
 // ------------------------------ make sure in game ---------------------
@@ -125,6 +125,7 @@ const MainUIFlow = () =>
     const hasWhiteAvatar = FindMultiColors(WhiteAvatarColorList, [35, 601, 44, 41]);
     if (!hasWhiteAvatar)
     {
+        Sleep(3);
         PressBlank();
         console.log("touch to start game flow...");
         Sleep(5);
@@ -183,8 +184,16 @@ const ExceptionFlow = () =>
         const isNoption = IsNoPotion(shot);
         if (isNoption)
         {
-            console.log("no potion");
-            NoPotionFlow();
+            if (new Date().getMinutes() - lastTimeOfBuyingPotion < 10)
+            {
+                console.log("连续购买药水时间间隔较短，暂不购买");
+            }
+            else
+            {
+                console.log("no potion");
+                NoPotionFlow();
+            }
+
         }
         HasAttributeIcon(shot) && AddAttributePoint();
         HasCrucifixIcon() && PickUpAbilityPoint();
@@ -195,9 +204,15 @@ const ExceptionFlow = () =>
         {
             MakeSureInGame();
         }
+        if (IsHaltMode())
+        {
+            ExitHaltMode();
+        }
     }
     BlueBtnCheck(shot);
-
+    PageBack();
+    CloseMenu();
+    CloseBackpack();
 };
 // *******************************************************************  确保在游戏中 *********************************************************************
 
@@ -242,43 +257,49 @@ const MakeSureInGame = () =>
         const { CreateCharacterFlow } = require("./CreateCharacter.js");
         CreateCharacterFlow(config.ui.serverName);
     }
-
-    for (let i = 0; i < 60; i++)
+    else
     {
-        if (HasMenu())
+        for (let i = 0; i < 60; i++)
         {
-            console.log("already in game...");
-            return true;
-        }
-        else if (HasStartBlueBtn())
-        {
-            PressStartBtn();
-            Sleep(10);
-            for (let i = 0; i < 30; i++)
+            if (HasMenu())
             {
-                if (HasMenu())
-                {
-                    return;
-                }
-                Sleep();
+                console.log("already in game...");
+                return true;
             }
-        }
+            else if (HasStartBlueBtn())
+            {
+                PressStartBtn();
+                Sleep(10);
+                for (let i = 0; i < 30; i++)
+                {
+                    if (HasMenu())
+                    {
+                        return;
+                    }
+                    Sleep();
+                }
+            }
 
-        else if (HasMainUI())
-        {
-            MainUIFlow();
-            return true;
+            else if (HasMainUI())
+            {
+                MainUIFlow();
+                return true;
+            }
+            Sleep(1);
         }
-        Sleep(1);
+        console.log("make sure in game failed...");
     }
-    console.log("make sure in game failed...");
+
 };
 // *******************************************************************  确保在游戏中 *********************************************************************
 
 module.exports = {
-    ExceptionFlow, MakeSureInGame
+    ExceptionFlow, MakeSureInGame, HasMainUI
 };
 
+// console.time("exception");
+// ExceptionFlow();
+// console.timeEnd("exception");
 // console.log(HasTouchToStart());
 // MakeSureInGame();
 // DeathFlow();

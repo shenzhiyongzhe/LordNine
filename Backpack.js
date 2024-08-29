@@ -49,47 +49,19 @@ const BackpackMenuCloseList = [
 ];
 
 
-const BackpackItemColorList = {
-    "white": [
-        ["#2f2f2f", [[0, 10, "#2f2f2f"], [43, 10, "#2e2e2e"], [42, 2, "#2e2e2e"], [18, 28, "#2f2f2f"]]],
-        ["#2f2f2f", [[37, 3, "#2e2e2e"], [30, 16, "#323232"], [17, 26, "#2b2b2b"], [-2, 23, "#2f2f2f"]]],
-        ["#2e2e2e", [[2, 19, "#2f2f2f"], [44, -2, "#262625"], [41, 16, "#292929"], [31, 27, "#2b2b2b"]]],
-        ["#2e2e2e", [[1, 13, "#2f2f2f"], [17, 19, "#2f2f2f"], [31, -6, "#2c2c2c"], [36, 7, "#2e2e2e"]]],
-        ["#2f2f2f", [[1, 16, "#2c2c2c"], [28, -9, "#2a2a29"], [34, 7, "#2f2f2e"], [22, 29, "#262626"]]],
-        ["#2b2b2a", [[-18, 10, "#2f2f2f"], [-12, 25, "#2c2c2c"], [10, 31, "#2e2e2e"], [19, 17, "#2c2c2c"]]],
-        ["#2f2f2f", [[0, 7, "#2e2e2e"], [2, 18, "#2f2f2f"], [15, 27, "#2e2e2e"], [41, 11, "#2d2d2d"]]],
-        ["#2f2f2f", [[-1, 11, "#2f2f2f"], [19, 20, "#2f2f2f"], [37, 18, "#2f2f2f"], [38, 4, "#2f2f2f"]]],
-        ["#2c2c2c", [[2, 10, "#2f2f2f"], [4, 35, "#2c2c2c"], [34, 34, "#303030"], [35, 16, "#2f2f2f"]]],
-        ["#282828", [[2, 14, "#2f2f2f"], [16, 34, "#282828"], [32, 35, "#2f2f2f"], [36, 2, "#2b2b2a"]]],
-        ["#2c2c2c", [[0, 10, "#2f2f2f"], [38, -9, "#222222"], [38, 15, "#323232"], [3, 31, "#2f2f2f"]]],
-    ],
-    "green": [
-        ["#343d22", [[4, 24, "#354024"], [27, -16, "#2a321c"], [46, -3, "#323c20"], [24, 5, "#374124"]]],
-        ["#2e371e", [[3, 22, "#354023"], [23, 28, "#232b16"], [49, 5, "#283019"], [40, -14, "#282f1a"]]],
-        ["#364023", [[-2, 22, "#343f23"], [16, 31, "#374123"], [44, 15, "#353f22"], [37, -11, "#2c341d"]]],
-        ["#364024", [[-1, 20, "#354023"], [18, 30, "#313a20"], [39, 10, "#374124"], [39, -8, "#323a20"]]],
-        ["#353e22", [[-1, 16, "#333d22"], [21, 34, "#364023"], [46, 11, "#353f23"], [45, -5, "#323b21"]]],
-        ["#353f23", [[2, 21, "#354023"], [22, 29, "#374124"], [44, 11, "#30391f"], [36, -12, "#2f381f"]]]
-    ],
-    "blue": [
-        ["#1a3344", [[-2, 14, "#193142"], [12, 30, "#1a3445"], [18, 30, "#182f3f"], [33, -15, "#142633"]]],
-        ["#193242", [[0, 20, "#193243"], [14, 29, "#193345"], [22, 29, "#132633"], [36, -16, "#142735"]]],
-        ["#193243", [[-1, 19, "#193243"], [18, 33, "#183040"], [40, 34, "#183142"], [42, -11, "#162a39"]]],
-        ["#162c3c", [[-1, 21, "#193243"], [17, 34, "#193343"], [24, 34, "#152b37"], [44, -1, "#172f3e"]]],
-        ["#1a3344", [[-3, 29, "#172f3e"], [13, 33, "#193443"], [32, 33, "#172e3e"], [45, 5, "#1e323e"]]]
-    ]
-};
 
 const BackpackItemDetailColorList = {
     "white": [
-        ["#3d3e3e", [[8, -1, "#3e3f3f"], [15, 5, "#404041"], [14, 10, "#404141"], [-2, 8, "#3e3f40"]]],
-        ["#3d3e3e", [[7, 1, "#3e3f40"], [12, 7, "#404041"], [-14, 9, "#3b3c3c"], [-8, 4, "#3c3c3d"]]],
+        ["#28292b", [[22, 6, "#28292b"], [46, -1, "#28292b"], [43, 22, "#28292b"], [3, 18, "#28292b"]]]
     ],
     "green": [
-        ["#325438", [[-7, 0, "#325438"], [-12, 1, "#325338"], [-11, -5, "#315238"], [-2, -9, "#315238"]]]
+        ["#243028", [[30, 3, "#243028"], [70, 1, "#243028"], [51, 25, "#243028"], [1, 19, "#243028"]]],
+        ["#243028", [[35, 1, "#243028"], [68, 2, "#243028"], [41, 22, "#243028"], [9, 19, "#243028"]]]
     ],
     "blue": [
-        ["#25477c", [[7, 0, "#25477e"], [4, 5, "#25487f"], [-6, 7, "#25477c"], [-12, -1, "#1c3660"]]]
+        ["#202c43", [[22, 1, "#202c43"], [44, 1, "#202c43"], [74, 7, "#202c43"], [29, 20, "#202c43"]]],
+        ["#202c43", [[31, -1, "#202c43"], [80, 5, "#202c43"], [2, 16, "#202c43"], [51, 17, "#202c43"]]],
+        ["#202c43", [[26, -6, "#202c43"], [76, 3, "#202c43"], [8, 14, "#202c43"], [51, 15, "#202c43"]]]
     ]
 
 };
@@ -108,9 +80,7 @@ const SkillBookColorList = [
     ["#262626", [[8, 2, "#d7ac81"], [31, 3, "#b79d82"], [2, 27, "#715028"], [23, 33, "#513521"]]]
 ];
 
-const Strengthen100RateColorList = [
-    ["#ffffff", [[6, 0, "#ffffff"], [20, 1, "#ffffff"], [33, -2, "#ffffff"], [49, 5, "#ffffff"]]]
-];
+
 const DetailOnColorList = [
     ["#1d5d55", [[5, 0, "#1d5d55"], [10, 3, "#1d5d55"], [0, 4, "#1d5d55"], [6, 8, "#1d5d55"]]]
 ];
@@ -128,7 +98,6 @@ const IdentifyClickScreenColorList = [
 const IsEquiped = (region, shot) => { shot = shot || captureScreen(); return FindMultiColors(EquipColorList, region, shot); };
 
 const IsEmpty = (region, shot) => FindMultiColors(GridEmptyColorList, region, shot);
-const CanStillStrengthen = () => FindMultiColors(Strengthen100RateColorList, [459, 242, 68, 25]);
 const IsOnDetail = () => FindMultiColors(DetailOnColorList, [1044, 572, 30, 27]);
 
 
@@ -139,20 +108,8 @@ const IsOnDetail = () => FindMultiColors(DetailOnColorList, [1044, 572, 30, 27])
 
 // ***** operation ---------------------
 
-const WaitUntilEnterBackpackMenu = () =>
-{
-    for (let i = 0; i < 10; i++)
-    {
-        if (FindMultiColors(BackpackMenuCloseList, [1096, 36, 34, 35]))
-        {
-            return true;
-        }
+const WaitUntilEnterBackpackMenu = () => WaitUntil(HasPopupClose([1095, 32, 39, 46]));
 
-        Sleep();
-    }
-
-    return false;
-};
 const CloseDetail = () =>
 {
     if (IsOnDetail())
@@ -199,10 +156,12 @@ const OpenNormalBox = () =>
  */
 const OpenEquipmentBox = (type) =>
 {
+    console.log("start open equipment box");
     const equipmentImgList = [];
     let img = null;
     let tapRegion = null;
     let hasOpenedBox = false;
+
     if (type == "weapon")
     {
         tapRegion = [518, 359, 39, 36];
@@ -220,8 +179,10 @@ const OpenEquipmentBox = (type) =>
         }
         equipmentImgList.push(img);
     }
+
     let hasEquipment = null;
     const shot = captureScreen();
+    console.log("equipmentImgList length " + equipmentImgList.length);
     for (let i = 0; i < equipmentImgList.length; i++)
     {
         hasEquipment = FindImg(equipmentImgList[i], [933, 158, 258, 438], shot);
@@ -251,9 +212,48 @@ const OpenEquipmentBox = (type) =>
     {
         equipmentImgList[i].recycle();
     }
+    console.log("finish open equipment box");
     return hasOpenedBox;
 };
-
+const OpenPropsBox = () =>
+{
+    console.log("start open props box");
+    const PropsImgList = [];
+    let hasOpenPropsBox = false;
+    let hasPropsBox = null;
+    let img = null;
+    for (let i = 0; i < 10; i++)
+    {
+        img = ReadImg(`backpack/box/propsBox/${i}`);
+        if (img == null)
+        {
+            break;
+        }
+        PropsImgList.push(img);
+    }
+    for (let i = 0; i < PropsImgList.length; i++)
+    {
+        hasPropsBox = FindImg(PropsImgList[i], [933, 158, 258, 438]);
+        if (hasPropsBox)
+        {
+            RandomPress([hasPropsBox.x, hasPropsBox.y, 30, 30]);
+            RandomPress([hasPropsBox.x, hasPropsBox.y, 30, 30]);
+            if (IsMultipleBox())
+            {
+                RandomPress([666, 520, 138, 30]);
+            }
+            Sleep();
+            PressBlank();
+            hasOpenPropsBox = true;
+        }
+    }
+    for (let i = 0; i < PropsImgList.length; i++)
+    {
+        PropsImgList[i].recycle();
+    }
+    console.log("finish open props box");
+    return hasOpenPropsBox;
+};
 const OpenAllBox = () =>
 {
     const hasOpenBackpack = OpenBackpack("props");
@@ -263,17 +263,16 @@ const OpenAllBox = () =>
         return false;
     }
     OpenNormalBox();
-    for (let i = 0; i < 4; i++)
+
+    let hasOpenedWeaponBox = OpenEquipmentBox("weapon");
+    let hasOpenedArmorBox = OpenEquipmentBox("armor");
+    let hasOpenPropsBox = OpenPropsBox();
+    if (!hasOpenedWeaponBox && !hasOpenedArmorBox && !hasOpenPropsBox)
     {
-        let hasOpenedWeaponBox = OpenEquipmentBox("weapon");
-        let hasOpenedArmorBox = OpenEquipmentBox("armor");
-        if (!hasOpenedWeaponBox && !hasOpenedArmorBox)
-        {
-            console.log("no box to open");
-            break;
-        }
-        Sleep();
+        console.log("no box to open");
     }
+    Sleep();
+
 };
 
 const OpenSuit = () =>
@@ -396,7 +395,7 @@ const IsBetterQuality = () =>
     const shot = captureScreen();
     for (let key in BackpackItemDetailColorList)
     {
-        hasLeftColor = FindMultiColors(BackpackItemDetailColorList[key], [571, 231, 34, 32], shot);
+        hasLeftColor = FindMultiColors(BackpackItemDetailColorList[key], [310, 172, 128, 56], shot);
         if (hasLeftColor)
         {
             left_color = key;
@@ -405,7 +404,7 @@ const IsBetterQuality = () =>
     }
     for (let key in BackpackItemDetailColorList)
     {
-        hasRightColor = FindMultiColors(BackpackItemDetailColorList[key], [880, 231, 32, 28], shot);
+        hasRightColor = FindMultiColors(BackpackItemDetailColorList[key], [620, 175, 122, 53], shot);
         if (hasRightColor)
         {
             right_color = key;
@@ -573,6 +572,7 @@ const WearEquipment = () =>
         }
     }
     console.log("finish wearing equipment");
+
     for (let key in magicWandImgList)
     {
         magicWandImgList[key].recycle();
@@ -705,6 +705,14 @@ const StrengthenEquipment = () =>
     {
         return false;
     }
+
+    const Strengthen100RateColorList = [
+        ["#ffffff", [[6, 0, "#ffffff"], [20, 1, "#ffffff"], [33, -2, "#ffffff"], [49, 5, "#ffffff"]]],
+        ["#ffffff", [[5, 2, "#ffffff"], [12, 2, "#ffffff"], [15, 2, "#ffffff"], [22, 2, "#ffffff"]]]
+    ];
+
+    const CanStillStrengthen = (region) => FindMultiColors(Strengthen100RateColorList, region);
+
     RandomPress([384, 41, 90, 27]);
     CloseDetail();
     SingleStrengthen();
@@ -731,43 +739,52 @@ const StrengthenEquipment = () =>
             }
         }
     }
-    //-----------------------------  strengthen armor ---------------------------------
-    RandomPress([1094, 220, 38, 34]);
-
-    let isEquiped = false;
-    out: for (let i = 0; i < 2; i++)
+    //-----------------------------  strengthen armor and ornement---------------------------------
+    const LoopStrengthen = (region) =>
     {
-        for (let j = 0; j < 4; j++)
+        const pageShot = captureScreen();
+        let isEquiped = false;
+
+        out: for (let i = 0; i < 2; i++)
         {
-            RandomPress([720, 96, 102, 84]);
-            RandomPress([720, 96, 102, 84]);
-            RandomPress([720, 96, 102, 84]);
-            let armor_shot = captureScreen();
-            isEquiped = IsEquiped([836 + j * 58, 69 + i * 58, 38, 42], armor_shot);
-            if (isEquiped)
+            for (let j = 0; j < 4; j++)
             {
-                RandomPress([863 + j * 58, 101 + i * 58, 24, 22]);
-                for (let k = 0; k < 5; k++)
+                RandomPress([720, 96, 102, 84]);
+                RandomPress([720, 96, 102, 84]);
+                RandomPress([720, 96, 102, 84]);
+                isEquiped = IsEquiped([836 + j * 58, 69 + i * 58, 38, 42], pageShot);
+                if (isEquiped)
                 {
-                    let canStillStrengthenArmor = CanStillStrengthen();
-                    if (canStillStrengthenArmor)
+                    RandomPress([863 + j * 58, 101 + i * 58, 24, 22]);
+                    for (let k = 0; k < 5; k++)
                     {
-                        if (FindBlueBtn([387, 566, 213, 70]))
+                        let canStillStrengthenArmor = CanStillStrengthen(region);
+                        if (canStillStrengthenArmor)
                         {
-                            RandomPress([422, 581, 154, 36]);
-                            Sleep(4);
+                            if (FindBlueBtn([387, 566, 213, 70]))
+                            {
+                                RandomPress([422, 581, 154, 36]);
+                                Sleep(4);
+                            }
                         }
                     }
-                }
 
+                }
+                else
+                {
+                    break out;
+                }
             }
-            else
-            {
-                break out;
-            }
-        }
+        };
     };
+
+    RandomPress([1094, 220, 38, 34]);
+    LoopStrengthen([459, 242, 68, 25]);
+    //ornament
+    RandomPress([1093, 276, 38, 41]);
+    LoopStrengthen([468, 217, 53, 25]);
     CloseBackpack();
+
     CloseMenu();
     console.log("stengthen equipment finish");
 };
@@ -821,6 +838,7 @@ const DecomposeEquipment = () =>
 const UseHolyGrail = () =>
 {
     console.log("start to use holy grail");
+    let hasUsedHolyGrail = false;
     OpenBackpack("props");
     SortEquipment();
     const holyGrailImg = ReadImg("backpack/props/holyGrail");
@@ -834,17 +852,24 @@ const UseHolyGrail = () =>
             if (FindBlueBtn([646, 506, 175, 57]))
             {
                 RandomPress([668, 520, 138, 30]);
+                hasUsedHolyGrail = true;
                 Sleep();
                 break;
             }
             Sleep();
         }
     }
+    return hasUsedHolyGrail;
 };
 
 
 module.exports = { OpenAllBox, WearEquipment, UseSkillBook, EquipSkill, StrengthenEquipment, DecomposeEquipment, UseHolyGrail };
+
+
 // OpenAllBox();
+// console.log(FindImg(ReadImg("backpack/box/weaponBox/1"), [925, 149, 275, 215]));
+// console.log(ReadImg("backpack/box/weaponBox/1"));
+// OpenPropsBox();
 // WearEquipment();
 // OpenSuit();
 // console.log(IsEmpty([930, 216, 71, 75]));

@@ -8,7 +8,7 @@ const reset = document.querySelector("#reset");
 
 const UIData = {
     createCharacter: false,
-    serverName: "32",
+    serverName: "00",
     gameMode: "mainStory"
 };
 
@@ -61,3 +61,12 @@ document.addEventListener("AutoxJsBridgeReady", () =>
 {
     console.log("AutoxJsBridegReady");
 });
+
+document.querySelector("#downloadAutoJs").addEventListener("click", () =>
+{
+    $autox.callHandler("DownloadAutoJs", "download autojs", (callBackData) =>
+    {
+        console.log(callBackData);
+    });
+});
+
