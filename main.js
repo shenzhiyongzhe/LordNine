@@ -1,12 +1,13 @@
 "ui";
 
-const { RewriteConfig, Sleep, } = require("./utils");
+const { RewriteConfig, Sleep, specialConfig } = require("./utils");
 const { ExceptionFlow, MakeSureInGame } = require("./Exception");
 const { MainStoryFlow } = require("./MainStory.js");
 const { ListenServerFlow } = require("./ListenServer.js");
+const { InstanceFlow } = require("./Instance.js");
 
 let isRunning = false;
-let gameConfig = { ui: {}, game: {} };
+
 let mainThread;
 let launchData = {};
 function StartScript(data)
@@ -25,11 +26,20 @@ function StartScript(data)
         {
             isRunning = true;
             auto();
-            images.requestScreenCapture(true);
+            threads.start(function () { images.requestScreenCapture(true); });
+            threads.start(function ()
+            {
+                const hasOpen = textMatches(/(.*시작하기.*|.*立即开始.*)/).findOne(2000);
+                if (hasOpen)
+                {
+                    hasOpen.click();
+                }
+            });
             data = JSON.parse(data);
             launchData = data;
-            toast(launchData);
-
+            toast("game start");
+            specialConfig.gameMode = data.gameMode;
+            specialConfig.initGameMode = data.gameMode;
             MainFlow(data);
         }
         );
@@ -39,65 +49,16 @@ const DownLoadApk = (downloadUrl, savePath) =>
 {
     threads.start(function ()
     {
-        if (files.exists("/sdcard/AutoJs.apk"))
-        {
-            app.viewFile("/sdcard/AutoJs.apk");
-            let is_sure = textMatches(/(.*설.*|.*정.*|.*强.*|.*止.*|.*结.*|.*行.*)/).findOne();
-            if (is_sure.enabled())
-            {
-                textMatches(/(.*설.*|.*정.*|.*强.*|.*止.*|.*结.*|.*行.*)/).findOne().click();
-            }
-        }
-        else
-        {
-            const url = `http://10.6.130.129:82/${downloadUrl}`;
-            const fullSavePath = `/sdcard/${savePath}`;
+        const url = `http://10.6.130.129:82/${downloadUrl}`;
+        const fullSavePath = `/sdcard/${savePath}`;
 
-            let r = http.client().newCall(
-                http.buildRequest(url, {
-                    method: "GET",
-                })
-            ).execute();
-
-            let fs = new java.io.FileOutputStream(fullSavePath);
-
-            let is = r.body().byteStream();
-            const buffer = util.java.array("byte", 1024);
-            let byteRead; //每次读取的byte数
-            while ((byteRead = is.read(buffer)) != -1)
-            {
-                fs.write(buffer, 0, byteRead); //读取
-            }
-            if (files.exists(fullSavePath))
-            {
-                app.viewFile(fullSavePath);
-                // sleep(400);
-                // click(580, 765);
-                // sleep(2000);
-                // click(580, 765);
-            }
-            else
-            {
-                alert('下载失败');
-            }
-        }
-
-    });
-};
-const UpdateScript = function ()
-{
-    threads.start(function ()
-    {
-        console.log("start update scripte:");
-        const url = "http://10.6.130.129:82/LordNine.apk";
-        const apkUrl = "/sdcard/LordNine/LordNine.apk";
         let r = http.client().newCall(
             http.buildRequest(url, {
                 method: "GET",
             })
         ).execute();
-        files.createWithDirs("/sdcard/LordNine/");
-        let fs = new java.io.FileOutputStream(apkUrl);
+
+        let fs = new java.io.FileOutputStream(fullSavePath);
 
         let is = r.body().byteStream();
         const buffer = util.java.array("byte", 1024);
@@ -106,19 +67,39 @@ const UpdateScript = function ()
         {
             fs.write(buffer, 0, byteRead); //读取
         }
-        if (files.exists(apkUrl))
+        if (files.exists(fullSavePath))
         {
-            app.viewFile(apkUrl);
-            sleep(400);
-            click(580, 765);
-            // sleep(2000);
-            // click(580, 765);
-        } else
+            app.viewFile(fullSavePath);
+        }
+        else
         {
             alert('下载失败');
         }
-    });
+    }
+    );
 };
+const AutoInstallApk = (url) =>
+{
+    if (files.exists(`/sdcard/${url}`))
+    {
+        app.viewFile(`/sdcard/${url}`);
+
+        let hasUpdate = text("업데이트").findOne(15000);
+        if (hasUpdate)
+        {
+            hasUpdate.click();
+            // sleep(2000);
+        }
+        let hasOpen = text("열기").findOne(15000);
+        if (hasOpen)
+        {
+            console.log("open");
+            hasOpen.click();
+        }
+
+    }
+};
+const UpdateScript = () => DownLoadApk("LordNine.apk", "LordNine/LordNine.apk");
 const DownloadAutoJs = () => DownLoadApk("AutoJs.apk", "AutoJs.apk");
 
 const UI = () =>
@@ -141,6 +122,7 @@ const UI = () =>
     ui.web.jsBridge.registerHandler("UpdateScript", (data, callBack) =>
     {
         UpdateScript();
+        AutoInstallApk("LordNine/LordNine.apk");
         callBack("successful");
     });
     ui.web.jsBridge.registerHandler("DownloadAutoJs", (data, callBack) =>
@@ -154,15 +136,14 @@ console.setGlobalLogConfig({
     "file": "/sdcard/LordNine/log.txt",
     "filePattern": "%d{dd日}%m%n"
 });
-// const { ExceptionFlow } = require("./Exception.js");
-// const { MainStoryFlow } = require("./MainStory.js");
-// const { Sleep } = require("./utils.js");
+
 
 const floaty_window = floaty.window(
-    <frame gravity="center" id="switch" w="42" h="20" bg="#F5EDED" alpha="1">
-        <text id="monthlyIncome" textColor="#7FA1C3">ʕ̡̢̡ʘ̅͟͜͡ʘ̲̅ʔ̢̡̢</text>
+    <frame gravity="center" id="switch" w="12" h="20" bg="#F5EDED" alpha="1">
+        <text id="debug" textColor="#7FA1C3"></text>
     </frame>
 );
+
 
 floaty_window.setPosition(10, 650);
 
@@ -182,8 +163,14 @@ floaty_window.switch.click(function ()
         mainThread = threads.start(function ()
         {
             isRunning = true;
-            auto();
-            images.requestScreenCapture(true);
+            threads.start(function ()
+            {
+                const hasOpen = textMatches(/(.*시작하기.*|.*立即开始.*)/).findOne(2000);
+                if (hasOpen)
+                {
+                    hasOpen.click();
+                }
+            });
             MainFlow(launchData);
         }
         );
@@ -200,8 +187,25 @@ const Update = () =>
 {
     while (true)
     {
-        MainStoryFlow();
-        ExceptionFlow();
+        if (specialConfig.gameMode == "mainStory")
+        {
+            MainStoryFlow();
+        }
+        else if (specialConfig.gameMode == "instance")
+        {
+            InstanceFlow();
+        }
+        if (specialConfig.gameMode != specialConfig.initGameMode)
+        {
+            if (Math.abs(specialConfig.lastModeChangeTime.getTime() - new Date().getTime()) / (3600 * 1000) >= 5)
+            {
+                console.log("--- game mode changed ----");
+                console.log("game mode changed over 5 hours");
+                console.log("back to main story");
+                specialConfig.gameMode = "mainStory";
+            }
+        }
+        ExceptionFlow(specialConfig.gameMode);
         sleep(100);
     }
 };

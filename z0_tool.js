@@ -4,8 +4,18 @@ const GetCaptureScreenPermission = () =>
     requestScreenCapture(true);
     const img = captureScreen();
     toast(img.getWidth() + " x " + img.getHeight());
+
 };
-GetCaptureScreenPermission();
+threads.start(GetCaptureScreenPermission);
+
+threads.start(function ()
+{
+    let hasOpen = textMatches(/(.*시작하기.*|.*立即开始.*)/).findOne(2000);
+    if (hasOpen)
+    {
+        hasOpen.click();
+    }
+});
 
 //com.smilegate.lordnine.stove.google
 //adb -s 10.245.81.17:5555  pull /sdcard/脚本/LordNine/build/lordnine_v1.0.0.apk C:/nginx/Rom/LordNine.apk
@@ -19,6 +29,7 @@ GetCaptureScreenPermission();
 // 007: 10.245.81.17
 // 008: 10.245.81.23
 // 009: 10.245.81.24
+// 011: 10.245.81.31
 // 012: 10.245.81.79
 // 014: 10.245.81.87
 

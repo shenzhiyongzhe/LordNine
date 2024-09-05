@@ -1,5 +1,6 @@
 const { PagebackColorList, MenuColorList, MenuCloseColorList, BlueBtnColorList, BackpackColorList,
-    SkipColorList, CheckMarkColorList, BlackScreenColorList, TipPointColorList, GoldBtnColorList, RedBtnColorList, PopupCloseColorList,
+    SkipColorList, CheckMarkColorList, TipPointColorList, GoldBtnColorList, RedBtnColorList, PopupCloseColorList, BackpackFullColorList,
+    PleaseTapBlankColorList,
 } = require("./Color/Color.js");
 
 const defaultConfig = {
@@ -9,12 +10,22 @@ const defaultConfig = {
         gameMode: "mainStory"
     },
     game: {
-        deathTime: 0
+        deathTime: 0,
+        today: 0,
+        reconnectionTime: 0
     }
 };
+const specialConfig = {
+    gameMode: null,
+    initGameMode: null,
+    lastModeChangeTime: new Date()
+};
+
+
 const configFile = "/sdcard/LordNine/config.json";
 
 const MenuItemRegionList = {
+    "master": [857, 121, 20, 25],
     "weaponFeatures": [913, 114, 28, 29],
     "ability": [973, 118, 24, 31],
     "suit": [1030, 118, 31, 28],
@@ -25,6 +36,7 @@ const MenuItemRegionList = {
     "trade": [852, 204, 33, 30],
     "equipment": [913, 207, 27, 28],
     "manufacture": [972, 206, 27, 27],
+    "episode": [1032, 204, 24, 28],
     "mission": [1088, 205, 30, 30],
     "achievement": [1150, 206, 28, 26],
     "log": [1205, 202, 30, 37],
@@ -46,7 +58,8 @@ const GroceryColorList = [
     ["#a9a892", [[11, 0, "#aca992"], [72, -4, "#a6a592"], [86, 6, "#a5a28b"], [144, 0, "#aca992"]]]
 ];
 const HaltModeColorList = [
-    ["#b9a97e", [[7, 1, "#bcac7f"], [16, -1, "#dccb96"], [23, 0, "#d6c492"], [17, -18, "#dccb96"]]]
+    ["#dccb96", [[1, 0, "#dccb96"], [5, 0, "#dbc996"], [8, 4, "#0e1116"], [5, 13, "#0d1015"]]],
+    ["#dccb96", [[3, -2, "#dccb96"], [7, 2, "#0d1015"], [5, 12, "#0d1014"], [9, 16, "#a2946d"]]]
 ];
 
 const HomeColorList = [
@@ -133,9 +146,53 @@ const FindRedBtn = (region, shot) => { shot = shot || captureScreen(); return Fi
 const FindTipPoint = (region, shot) => { shot = shot || captureScreen(); return FindMultiColors(TipPointColorList, region, shot); };
 const FindGoldBtn = (region) => FindMultiColors(GoldBtnColorList, region);
 const FindCheckMark = (region) => FindMultiColors(CheckMarkColorList, region);
-const FindBlackScreen = (region) => FindMultiColors(BlackScreenColorList, region);
 
 
+const GetFormatedTimeString = function (sign)
+{
+    let s = sign || ":";
+    const time = new Date();
+
+    const year = time.getFullYear();
+    const month = time.getMonth() + 1;
+    const day = time.getDate();
+    const hour = time.getHours();
+    const minute = time.getMinutes();
+    const second = time.getSeconds();
+    return `${year}-${month}-${day} ${hour}${s}${minute}${s}${second}`;
+};
+const GetVerificationCode = () =>
+{
+    const url = "https://upload.chaojiying.net/Upload/Processing.php";
+    const clip = images.clip(images.captureScreen(), 470, 297, 278, 86);
+
+    // files.create("/sdcard/clip/");
+    // const fileName = `${GetFormatedTimeString("_")}.png`;
+    // images.save(clip, `/sdcard/clip/${fileName}`);
+    // const img = files.read(`/sdcard/clip/${fileName}`);
+    // const img = clip;
+    const img = images.toBase64(clip);
+    const data =
+    {
+        user: "btx159632",
+        pass: "Snhc2024",
+        softid: "6909c4f85873ab3fd2011a6c72e4ed5b",
+        codetype: "1902",
+        // userfile: img
+        file_base64: img
+    };
+    const result = http.post(url, data);
+    // const result = http.request(url, {
+    //     headers: {
+    //         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.8; rv:24.0) Gecko/20100101 Firefox/24.0',
+    //         'Content-Type': 'application/x-www-form-urlencoded'
+    //     },
+    //     method: 'POST',
+    //     contentType: "text/ html; charset=utf-8",
+    //     body: data
+    // });
+    return result.body.json().pic_str;
+};
 const HasPageback = () => FindMultiColors(PagebackColorList, [1216, 9, 41, 43]);
 
 const HasMenu = () => FindMultiColors(MenuColorList, [1198, 13, 55, 47]);
@@ -183,7 +240,67 @@ const HollowPress = (hollowRegion) =>
     press(x1, y1, random(16, 256));
     Sleep();
 };
+let moveObj = {
+    clipCount: 0,
+    movingClip: null
+};
 
+const IsMoving = () =>
+{
+    if (moveObj.clipCount == 0)
+    {
+        moveObj.movingClip = images.clip(captureScreen(), 180, 180, 40, 40);
+    }
+    if (moveObj.clipCount >= 20)
+    {
+        moveObj.clipCount = 0;
+        const hasClip = FindImg(moveObj.movingClip, [180, 180, 40, 40]);
+        if (!hasClip)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+
+    }
+    else
+    {
+        moveObj.clipCount++;
+        return true;
+    }
+
+};
+const IsBackpackFull = (shot) => FindMultiColors(BackpackFullColorList, [1145, 48, 36, 13], shot);
+const IsInCity = () => FindMultiColors(GroceryColorList, [983, 422, 207, 64]);
+const IsHaltMode = () => FindMultiColors(HaltModeColorList, [606, 643, 76, 62]);
+
+const LaunchGame = () => app.launch("com.smilegate.lordnine.stove.google");
+const LoadImgList = (url) =>
+{
+    const list = [];
+    let img = null;
+    for (let i = 0; i < 20; i++)
+    {
+        img = ReadImg(`${url}/${i}`);
+        if (img == null)
+        {
+            break;
+        }
+        list.push(img);
+    }
+    if (list.length == 0)
+    {
+        alert("加载文件有误", "无照片文件");
+    }
+    return list;
+};
+const NeedPressBlank = (region, shot) =>
+{
+    shot = shot || captureScreen();
+    return FindMultiColors(PleaseTapBlankColorList, region, shot);
+};
 
 const OpenMenu = () =>
 {
@@ -226,6 +343,7 @@ const OpenBackpack = (type) =>
     if (hasBackpackClose)
     {
         console.log("backpack has already opened");
+
     }
     else if (hasBackpack && hasBackpackClose == null)
     {
@@ -236,6 +354,7 @@ const OpenBackpack = (type) =>
             console.log("backpack did not open!");
             return false;
         }
+
     }
 
     if (type == undefined)
@@ -351,17 +470,25 @@ const RandomPress = ([startX, startY, w, h]) =>
 
 const ReadImg = (name) => images.read(`./img/${name}.png`);
 
-
-
-const WaitUntil = (func) =>
+const RecycleImgList = (list) =>
 {
-    for (let i = 0; i < 30; i++)
+    for (let i = 0; i < list.length; i++)
+    {
+        list[i].recycle();
+    }
+};
+
+const WaitUntil = (func, frequence, loopTime) =>
+{
+    frequence = frequence || 1.5;
+    loopTime = loopTime || 30;
+    for (let i = 0; i < loopTime; i++)
     {
         if (func())
         {
             return true;
         }
-        Sleep();
+        Sleep(frequence);
     }
     return false;
 };
@@ -386,7 +513,6 @@ const WaitUntilFindColor = (colorList, region, time) =>
     }
     return false;
 };
-const IsInCity = () => FindMultiColors(GroceryColorList, [983, 422, 207, 64]);
 const ReturnHome = () =>
 {
     if (IsInCity())
@@ -452,7 +578,6 @@ const RewriteConfig = (attr, value) =>
 
 
 
-const IsHaltMode = () => FindMultiColors(HaltModeColorList, [622, 652, 43, 48]);
 
 const ExitHaltMode = () =>
 {
@@ -480,7 +605,7 @@ const ChangeHaltModeTime = () =>
  *
  * @param {*} pos [x, y]
  */
-const PullDownSkill = (pos) => gesture(500, pos, [pos[0], pos[1] + 30]);
+const PullDownSkill = (pos) => { gesture(500, pos, [pos[0], pos[1] + 30]); sleep(1000); };
 
 /*
 * @param {*} type "grocery" "skill" "equipment" "friend" "exchange" "mount" "stockroom"
@@ -570,38 +695,27 @@ const EnterMenuItemPage = (item) =>
     return true;
 };
 
-const LoadImgList = (url) =>
-{
-    const list = [];
-    let img = null;
-    for (let i = 0; i < 10; i++)
-    {
-        img = ReadImg(`${url}/${i}`);
-        if (img == null)
-        {
-            break;
-        }
-        list.push(img);
-    }
-    if (list.length == 0)
-    {
-        alert("加载文件有误", "无照片文件");
-    }
-    return list;
-};
+
+let DeathImgList = [];
+DeathImgList = LoadImgList("special/death");
+
 module.exports = {
+    specialConfig, DeathImgList,
     CloseBackpack, CloseMenu, ClickSkip, ClickRandomly,
-    EnterMenuItemPage,
-    FindBlueBtn, FindTipPoint, FindImg, FindMultiColors, FindCheckMark, FindBlackScreen, FindRedBtn, FindGoldBtn,
+    EnterMenuItemPage, ExitHaltMode,
+    FindBlueBtn, FindTipPoint, FindImg, FindMultiColors, FindCheckMark, FindRedBtn, FindGoldBtn,
+    GetFormatedTimeString, GoToTheNPC,
     HasPageback, HasMenu, HollowPress, HasSkip, HasBackpackClose, HasBackpackMenuClose, HasPopupClose,
-    LoadImgList,
+    IsMoving, IsBackpackFull, IsInCity, IsHaltMode,
+    LoadImgList, LaunchGame,
+    NeedPressBlank,
     OpenMenu, OpenBackpack, OpenBackpackMenu,
-    PageBack, PressBlank,
-    RandomPress, ReadImg,
+    PageBack, PressBlank, PullDownSkill,
+    RandomPress, ReadImg, ReturnHome, RestartGame, RecycleImgList, ReadConfig, RewriteConfig,
     Sleep,
     WaitUntil, WaitUntilMenu, WaitUntilPageBack, WaitUntilFindColor,
-    IsInCity, SwipeSlowly,
-    ReadConfig, RewriteConfig, IsHaltMode, ExitHaltMode, PullDownSkill, ReturnHome, GoToTheNPC, RestartGame
+    SwipeSlowly,
+
 };
 
 

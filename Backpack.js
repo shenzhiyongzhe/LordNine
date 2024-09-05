@@ -1,4 +1,4 @@
-const { RedBtnColorList } = require("./Color/Color.js");
+
 const {
     FindImg, FindBlueBtn, FindGoldBtn, FindCheckMark,
     CloseBackpack,
@@ -16,6 +16,8 @@ const {
     SwipeSlowly,
     WaitUntilPageBack,
     PageBack,
+    LoadImgList,
+    RecycleImgList,
 } = require("./utils.js");
 
 const EquipColorList = [
@@ -35,28 +37,17 @@ const NormalBoxColorList = [
     ["#222221", [[3, 38, "#343434"], [44, 2, "#282828"], [4, 12, "#674b25"], [17, 12, "#6a5030"], [32, 13, "#6e4e2f"], [9, 22, "#1e1a19"], [27, 24, "#1e1a18"], [39, 23, "#3a5d76"], [23, 31, "#221f1b"], [9, 28, "#362b26"]]],
     ["#2c2c2c", [[4, 3, "#765527"], [18, 3, "#77643d"], [32, 3, "#735b33"], [13, 15, "#231d1c"], [25, 16, "#221e1d"], [11, 21, "#342d28"], [25, 23, "#2a2421"], [32, 26, "#493319"], [38, 22, "#14232d"]]]
 ];
-const GreenEquipmentBoxColorList = [
-    ["#2c341d", [[18, 3, "#b4825e"], [13, 6, "#4f3827"], [4, 29, "#97634a"], [31, 27, "#0c1214"]]],
-    ["#b17e5a", [[-12, 4, "#8c5b39"], [-18, 26, "#916c48"], [9, 16, "#0f1617"], [11, 26, "#151f20"]]]
-];
-const IdentifyColorList = [
-    ["#3e3e3e", [[5, 0, "#f8e7b2"], [8, 0, "#3e3e3e"], [11, 0, "#3f3c3f"], [0, 2, "#f1e2ae"], [5, 2, "#a99e7c"], [11, 2, "#f0e0ac"], [10, 2, "#eddcab"], [1, 3, "#3f3f3f"], [4, 4, "#7f7762"], [8, 4, "#e7d7a6"], [-2, 7, "#424242"], [1, 7, "#d4c699"],
-    [5, 7, "#f8e8b2"], [10, 7, "#91886d"], [-2, 10, "#424342"], [2, 10, "#beb28b"], [5, 10, "#f8e8b3"], [10, 10, "#414040"], [-2, 11, "#424342"], [0, 11, "#f5e5b1"], [4, 11, "#fcecb6"], [5, 11, "#feeeb8"], [-1, 13, "#6f6a5b"], [2, 13, "#444444"],
-    [6, 13, "#92896e"], [9, 13, "#aba07f"]]]
-];
-const BackpackMenuCloseList = [
-    ["#877a5f", [[5, 6, "#736951"], [12, 12, "#665d47"], [12, 0, "#80745a"], [-1, 12, "#7b6f56"]]]
-];
-
 
 
 const BackpackItemDetailColorList = {
     "white": [
-        ["#28292b", [[22, 6, "#28292b"], [46, -1, "#28292b"], [43, 22, "#28292b"], [3, 18, "#28292b"]]]
+        ["#28292b", [[22, 6, "#28292b"], [46, -1, "#28292b"], [43, 22, "#28292b"], [3, 18, "#28292b"]]],
+        ["#28292b", [[27, -2, "#28292b"], [75, -1, "#28292b"], [58, 19, "#28292b"], [7, 20, "#28292b"]]]
     ],
     "green": [
         ["#243028", [[30, 3, "#243028"], [70, 1, "#243028"], [51, 25, "#243028"], [1, 19, "#243028"]]],
-        ["#243028", [[35, 1, "#243028"], [68, 2, "#243028"], [41, 22, "#243028"], [9, 19, "#243028"]]]
+        ["#243028", [[35, 1, "#243028"], [68, 2, "#243028"], [41, 22, "#243028"], [9, 19, "#243028"]]],
+        ["#243028", [[14, -2, "#243028"], [37, 0, "#243028"], [59, 10, "#243028"], [15, 22, "#243028"]]],
     ],
     "blue": [
         ["#202c43", [[22, 1, "#202c43"], [44, 1, "#202c43"], [74, 7, "#202c43"], [29, 20, "#202c43"]]],
@@ -66,18 +57,7 @@ const BackpackItemDetailColorList = {
 
 };
 const GridEmptyColorList = [
-    ["#161818", [[14, 1, "#18181b"], [30, 8, "#151618"], [21, 18, "#161818"], [6, 10, "#18181b"]]]
-];
-
-const SkillBookColorList = [
-    ["#242424", [[12, 2, "#bda97f"], [31, 3, "#8b6c45"], [6, 28, "#5f4023"], [24, 32, "#452e17"]]],
-    ["#262626", [[12, 3, "#cdad71"], [31, 3, "#86683b"], [6, 27, "#714d2a"], [25, 32, "#452f17"]]],
-    ["#262626", [[11, 4, "#a99067"], [31, 5, "#7d5d3e"], [6, 30, "#6c5235"], [24, 34, "#432f13"]]],
-    ["#252525", [[15, 4, "#c3ab6e"], [34, 7, "#3e2d1a"], [6, 29, "#664b25"], [27, 35, "#4e3523"]]],
-    ["#202020", [[13, 5, "#c1a374"], [32, 6, "#8e674d"], [6, 31, "#604426"], [26, 36, "#372215"]]],
-    ["#202020", [[15, 3, "#d6bc78"], [32, 4, "#61472e"], [6, 28, "#614d26"], [26, 33, "#493117"]]],
-    ["#262626", [[11, 5, "#c9a26d"], [28, 5, "#735430"], [3, 28, "#6a4b26"], [23, 33, "#472f17"]]],
-    ["#262626", [[8, 2, "#d7ac81"], [31, 3, "#b79d82"], [2, 27, "#715028"], [23, 33, "#513521"]]]
+    ["#151618", [[13, 0, "#161818"], [27, 1, "#151618"], [0, 14, "#181618"], [15, 14, "#18181b"], [34, 14, "#151618"], [-3, 27, "#151518"], [10, 27, "#161818"], [27, 28, "#151618"]]]
 ];
 
 
@@ -90,7 +70,7 @@ const SingleStrengthenColorList = [
 ];
 
 const IdentifyClickScreenColorList = [
-    ["#625240", [[4, 0, "#a89376"], [9, 3, "#a69272"], [14, -1, "#a68a6a"], [18, 0, "#6c5a47"]]]
+    ["#9e8c52", [[3, -3, "#b09d5b"], [5, -1, "#b29e5d"], [2, 2, "#9b8a50"], [2, -1, "#242014"]]]
 ];
 
 
@@ -108,7 +88,7 @@ const IsOnDetail = () => FindMultiColors(DetailOnColorList, [1044, 572, 30, 27])
 
 // ***** operation ---------------------
 
-const WaitUntilEnterBackpackMenu = () => WaitUntil(HasPopupClose([1095, 32, 39, 46]));
+const WaitUntilEnterBackpackMenu = () => WaitUntil(() => HasPopupClose([1095, 32, 39, 46]));
 
 const CloseDetail = () =>
 {
@@ -135,6 +115,8 @@ const SingleStrengthen = () =>
 const IsMultipleBox = () => FindBlueBtn([646, 506, 177, 59]);
 const OpenNormalBox = () =>
 {
+    console.log("open normal box");
+    let hasOpenedBox = false;
     const hasNormalBox = FindMultiColors(NormalBoxColorList, [928, 157, 262, 437]);
     if (hasNormalBox)
     {
@@ -146,9 +128,11 @@ const OpenNormalBox = () =>
         }
         Sleep();
         PressBlank();
+        hasOpenedBox = true;
     }
+    console.log("hasOpenedBox: " + hasOpenedBox);
+    return hasOpenedBox;
 };
-
 
 /**
  * 
@@ -156,7 +140,7 @@ const OpenNormalBox = () =>
  */
 const OpenEquipmentBox = (type) =>
 {
-    console.log("start open equipment box");
+    console.log("open " + type + " box ");
     const equipmentImgList = [];
     let img = null;
     let tapRegion = null;
@@ -212,12 +196,12 @@ const OpenEquipmentBox = (type) =>
     {
         equipmentImgList[i].recycle();
     }
-    console.log("finish open equipment box");
+    console.log("finish: had opened box:  " + hasOpenedBox);
     return hasOpenedBox;
 };
 const OpenPropsBox = () =>
 {
-    console.log("start open props box");
+    console.log("open props box");
     const PropsImgList = [];
     let hasOpenPropsBox = false;
     let hasPropsBox = null;
@@ -251,33 +235,38 @@ const OpenPropsBox = () =>
     {
         PropsImgList[i].recycle();
     }
-    console.log("finish open props box");
+    console.log("finish: hasOpenedPropsBox: " + hasOpenPropsBox);
     return hasOpenPropsBox;
 };
-const OpenAllBox = () =>
+const OpenSkillBook = () =>
 {
-    const hasOpenBackpack = OpenBackpack("props");
-    if (!hasOpenBackpack)
+    console.log("start open skill book");
+    let hasSkillBook = false;
+    let hasOpened = false;
+    const skillBookImgList = LoadImgList("backpack/skillBook");
+    for (let i = 0; i < skillBookImgList.length; i++)
     {
-        console.log("open backpack failed");
-        return false;
-    }
-    OpenNormalBox();
+        hasSkillBook = FindImg(skillBookImgList[i], [931, 160, 260, 445]);
+        if (hasSkillBook)
+        {
+            RandomPress([hasSkillBook.x, hasSkillBook.y, 30, 30]);
+            RandomPress([hasSkillBook.x, hasSkillBook.y, 30, 30]);
+            Sleep(3);
+            hasOpened = true;
+        }
 
-    let hasOpenedWeaponBox = OpenEquipmentBox("weapon");
-    let hasOpenedArmorBox = OpenEquipmentBox("armor");
-    let hasOpenPropsBox = OpenPropsBox();
-    if (!hasOpenedWeaponBox && !hasOpenedArmorBox && !hasOpenPropsBox)
-    {
-        console.log("no box to open");
     }
+    RecycleImgList(skillBookImgList);
     Sleep();
+    CloseSkillPopup();
+    console.log("finish: hasOpenedSkillBook: " + hasOpened);
 
+    return hasOpened;
 };
 
 const OpenSuit = () =>
 {
-    console.log("start open suit");
+    console.log("open suit");
     const hasOpenBackpack = OpenBackpack("props");
     if (!hasOpenBackpack)
     {
@@ -285,31 +274,29 @@ const OpenSuit = () =>
         return false;
     }
     SortEquipment();
+    let hadOpenSuit = false;
+
     const JumpAnimationColorList = [
         ["#ffffff", [[4, 3, "#ffffff"], [6, 5, "#ffffff"], [10, 1, "#ffffff"], [13, -1, "#ffffff"]]]
     ];
     const IsJumpAnimation = () => FindMultiColors(JumpAnimationColorList, [12, 657, 49, 54]);
-    const suitImgList = [];
+
+    const suitImgList = LoadImgList("backpack/suit");
+
     const SwipeBarColorList = [
         ["#3e3f3e", [[30, 0, "#3e403f"], [69, 1, "#3e403f"], [104, 3, "#3f403f"], [163, 4, "#3f4040"]]],
         ["#3e3f3f", [[30, 0, "#3e3f3f"], [69, 0, "#3e403f"], [137, 0, "#3f4040"], [173, 0, "#404140"]]]
     ];
-    for (let i = 0; i < 10; i++)
-    {
-        let img = ReadImg(`backpack/suit/${i}`);
-        if (img == null)
-        {
-            break;
-        }
-        suitImgList.push(img);
-    }
+
     for (let i = 0; i < suitImgList.length; i++)
     {
         let hasOpenedSuit = FindImg(suitImgList[i], [932, 155, 256, 447]);
+        console.log(hasOpenedSuit);
         if (hasOpenedSuit)
         {
             RandomPress([hasOpenedSuit.x, hasOpenedSuit.y, 30, 30]);
             RandomPress([hasOpenedSuit.x, hasOpenedSuit.y, 30, 30]);
+            Sleep(3);
             if (HasSkip())
             {
                 ClickSkip();
@@ -330,10 +317,52 @@ const OpenSuit = () =>
             if (FindBlueBtn([1055, 639, 214, 72]))
             {
                 RandomPress([1080, 656, 166, 36]);
+                hadOpenSuit = true;
             }
         }
     }
+    console.log("finish");
+    return hadOpenSuit;
 };
+
+const OpenAllBox = () =>
+{
+    const hasOpenBackpack = OpenBackpack("props");
+    if (!hasOpenBackpack)
+    {
+        console.log("open backpack failed");
+        return false;
+    }
+
+    OpenNormalBox();
+
+    let hasOpenedWeaponBox = OpenEquipmentBox("weapon");
+    let hasOpenedArmorBox = OpenEquipmentBox("armor");
+    let hasOpenPropsBox = OpenPropsBox();
+
+    if (!hasOpenedWeaponBox && !hasOpenedArmorBox && !hasOpenPropsBox)
+    {
+        console.log("no box to open");
+    }
+
+    const hasOpenSkill = OpenSkillBook();
+    if (hasOpenSkill)
+    {
+        console.log("had open skill book, start to auto release skill");
+        AutoReleaseSkill();
+        OpenBackpack("props");
+    }
+    const hasOpenSuit = OpenSuit();
+    if (hasOpenSuit)
+    {
+        console.log("had open suit card, start to wear suit");
+        WearBestSuit();
+    }
+    Sleep();
+    console.log("finish: open all box");
+};
+
+
 const WearBestSuit = () =>
 {
     console.log("start to wear best suit");
@@ -366,22 +395,29 @@ const WearBestSuit = () =>
     const region = [882, 158, 319, 497];
     const hasBlueSuit = FindMultiColors(BlueSuitColorList, region);
     const hasGreenSuit = FindMultiColors(GreenSuitColorList, region);
-    if (hasBlueSuit)
+    try
     {
-        RandomPress([hasBlueSuit.x, hasBlueSuit.y, 30, 30]);
-        if (FindBlueBtn([1034, 656, 190, 61]))
+        if (hasBlueSuit)
         {
-            RandomPress([1053, 667, 152, 35]);
+            RandomPress([hasBlueSuit.x, hasBlueSuit.y, 30, 30]);
+            if (FindBlueBtn([1034, 656, 190, 61]))
+            {
+                RandomPress([1053, 667, 152, 35]);
+            }
         }
-    }
-    else if (hasGreenSuit)
+        else if (hasGreenSuit)
+        {
+            RandomPress([hasBlueSuit.x, hasBlueSuit.y, 30, 30]);
+            if (FindBlueBtn([1034, 656, 190, 61]))
+            {
+                RandomPress([1053, 667, 152, 35]);
+            }
+        }
+    } catch (error)
     {
-        RandomPress([hasBlueSuit.x, hasBlueSuit.y, 30, 30]);
-        if (FindBlueBtn([1034, 656, 190, 61]))
-        {
-            RandomPress([1053, 667, 152, 35]);
-        }
+        alert("wear suit failed", error);
     }
+
     PageBack();
 };
 // --------------------------- wear equipment ---------------------------------
@@ -451,7 +487,7 @@ const IsBetterQuality = () =>
     return false;
 };
 
-const SortEquipment = () => RandomPress([1097, 668, 17, 19]);
+const SortEquipment = () => { RandomPress([1097, 668, 17, 19]); Sleep(3); };
 const WearEquipment = () =>
 {
     console.log("start to wear equipment");
@@ -469,6 +505,7 @@ const WearEquipment = () =>
         "green": ReadImg("icon/font/magicWand_green"),
         "blue": ReadImg("icon/font/magicWand_blue")
     };
+    let hasWornEquipment = false;
     const IdentifyEquipment = () =>
     {
         console.log("identify equipment");
@@ -478,7 +515,7 @@ const WearEquipment = () =>
             {
                 RandomPress([411, 582, 169, 35]);
                 Sleep(2);
-                if (WaitUntil(() => FindMultiColors(IdentifyClickScreenColorList, [610, 631, 62, 25])))
+                if (WaitUntil(() => FindMultiColors(IdentifyClickScreenColorList, [670, 604, 35, 33])))
                 {
                     RandomPress([243, 434, 899, 153]);
                 }
@@ -507,6 +544,11 @@ const WearEquipment = () =>
                 console.log("equiped jump...");
                 continue;
             }
+            if (!HasMenu())
+            {
+                console.log("not find menu break out");
+                break out;
+            }
 
             RandomPress([955 + j * 62, 179 + i * 62, 24, 26]);
             Sleep();
@@ -524,12 +566,14 @@ const WearEquipment = () =>
                             IdentifyEquipment();
                             OpenBackpack("equipment");
                             SortEquipment();
-                            Sleep(3);
                             RandomPress([955 + j * 62, 179 + i * 62, 24, 26]);
                             RandomPress([955 + j * 62, 179 + i * 62, 24, 26]);
                             Sleep();
                             shot = captureScreen();
                         }
+                        hasWornEquipment = true;
+                        return hasWornEquipment;
+                        // SortEquipment();
                     }
                     continue;
                 }
@@ -542,12 +586,14 @@ const WearEquipment = () =>
                         IdentifyEquipment();
                         OpenBackpack("equipment");
                         SortEquipment();
-                        Sleep(3);
                         RandomPress([955 + j * 62, 179 + i * 62, 24, 26]);
                         RandomPress([955 + j * 62, 179 + i * 62, 24, 26]);
                         Sleep();
                         shot = captureScreen();
                     }
+                    hasWornEquipment = true;
+                    return hasWornEquipment;
+                    // SortEquipment();
                     continue;
                 }
 
@@ -555,6 +601,7 @@ const WearEquipment = () =>
 
             if (IsBetterQuality())
             {
+                console.log("the equipment is better quality");
                 RandomPress([955 + j * 62, 179 + i * 62, 24, 26]);
                 Sleep(3.5);
                 if (!HasBackpackClose() && HasBackpackMenuClose())
@@ -562,12 +609,14 @@ const WearEquipment = () =>
                     IdentifyEquipment();
                     OpenBackpack("equipment");
                     SortEquipment();
-                    Sleep(3);
                     RandomPress([955 + j * 62, 179 + i * 62, 24, 26]);
                     RandomPress([955 + j * 62, 179 + i * 62, 24, 26]);
                     Sleep();
                     shot = captureScreen();
                 }
+                hasWornEquipment = true;
+                return hasWornEquipment;
+                // SortEquipment();
             }
         }
     }
@@ -577,41 +626,22 @@ const WearEquipment = () =>
     {
         magicWandImgList[key].recycle();
     }
-    return true;
+    return hasWornEquipment;
 };
+const WearEquipments = () =>
+{
+    console.log("start to wear equipmentssss");
+    for (let i = 0; i < 6; i++)
+    {
+        let hasWornNewEquipment = WearEquipment();
+        if (!hasWornNewEquipment)
+            break;
+    }
+};
+
 
 // --------------------------- skill book ---------------------------------
-const FindSkillBook = () => FindMultiColors(SkillBookColorList, [930, 156, 256, 442]);
 
-const UseSkillBook = () =>
-{
-    console.log("start to use skill book");
-    const hasOpenBackpack = OpenBackpack("props");
-    if (!hasOpenBackpack)
-    {
-        console.log("open backpack failed");
-        return false;
-    }
-    let hasSkillBook = null;
-    Sleep();
-    for (let i = 0; i < 8; i++)
-    {
-        hasSkillBook = FindSkillBook();
-        if (!hasSkillBook)
-        {
-            break;
-        }
-        else
-        {
-            RandomPress([hasSkillBook.x, hasSkillBook.y, 24, 24]);
-            RandomPress([hasSkillBook.x, hasSkillBook.y, 24, 24]);
-            Sleep();
-        }
-    }
-    CloseBackpack();
-    console.log("finish using skill book");
-    return true;
-};
 
 const CloseSkillPopup = () =>
 {
@@ -624,79 +654,110 @@ const CloseSkillPopup = () =>
         RandomPress([1094, 22, 20, 30]);
     }
 };
-const EquipSkill = () =>
+// const EquipSkill = () =>
+
+// {
+//     if (!HasMenu())
+//     {
+//         console.log("当前页面没有菜单按钮！装备技能失败");
+//         return false;
+//     }
+//     console.log("start to equip skill");
+//     // RandomPress([1095, 22, 19, 29]);
+//     Sleep(3);
+//     const SkillEquipedColorList = [
+//         ["#ffffff", [[0, 1, "#ffffff"], [0, 3, "#ffffff"], [0, 5, "#ffffff"], [0, 6, "#ffffff"]]],
+//         ["#fbfbfa", [[0, 1, "#fbfbfa"], [0, 3, "#fbfbfa"], [0, 4, "#fbfbfa"], [0, 6, "#fbfbfa"]]],
+//         ["#ffffff", [[0, 1, "#ffffff"], [0, 3, "#ffffff"], [0, 4, "#ffffff"], [0, 6, "#ffffff"]]],
+//         ["#ffffff", [[0, 2, "#ffffff"], [0, 4, "#ffffff"], [0, 5, "#ffffff"], [0, 6, "#ffffff"]]]
+//     ];
+//     const IsLearnedColorList = [
+//         ["#a28a5f", [[0, 7, "#d8b980"], [0, 19, "#d7b87f"], [25, -1, "#a99062"], [55, 18, "#c7aa74"]]],
+//         ["#a48b5f", [[0, 8, "#a48b5f"], [14, -7, "#b59969"], [56, 3, "#574930"], [55, 13, "#b19767"]]],
+//         ["#8c7750", [[0, 6, "#ac9263"], [0, 23, "#9d885b"], [26, -2, "#a99062"], [55, 19, "#9d865b"]]]
+//     ];
+//     const IsSkillAutoColorList = [
+//         ["#f7c931", [[2, 0, "#ffda2f"], [5, 0, "#fff235"], [7, 0, "#fffa35"], [10, 0, "#fffa37"]]],
+//         ["#ffe234", [[1, 0, "#ffea34"], [3, 0, "#fff635"], [6, 0, "#fffb35"], [8, 0, "#fff93a"]]],
+//         ["#eac133", [[2, 0, "#fdcf35"], [4, 0, "#ffe035"], [8, 0, "#fffa37"], [12, 0, "#fff834"]]],
+//         ["#ffdb30", [[2, 0, "#ffec32"], [5, 0, "#fffa34"], [6, 0, "#fffb34"], [11, 0, "#ffeb32"]]],
+//         ["#ffffff", [[0, 2, "#ffffff"], [0, 3, "#ffffff"], [0, 5, "#ffffff"], [3, 2, "#efefef"]]]
+//     ];
+//     const CancelColorList = [
+//         ["#a29971", [[7, 7, "#6b6349"], [14, 13, "#8f8663"], [13, 1, "#9e946e"], [1, 13, "#7d7455"]]],
+//         ["#a39971", [[7, 7, "#817959"], [13, 13, "#7e7556"], [13, -1, "#b7ab80"], [1, 11, "#877f5d"]]],
+//         ["#a59972", [[5, 6, "#7f7657"], [11, 11, "#7b7355"], [11, 1, "#a49972"], [0, 12, "#827a5a"]]]
+//     ];
+
+//     for (let i = 0; i < 2; i++)
+//     {
+//         for (let j = 0; j < 4; j++)
+//         {
+//             if (FindMultiColors(SkillEquipedColorList, [925 + j * 62, 282 + i * 62, 38, 36]))
+//             {
+//                 if (!FindMultiColors(IsSkillAutoColorList, [384 + (i + 1) * j * 62, 627, 77, 24]))
+//                 {
+//                     console.log((i + 1) * j + " skill is equiped but  is not auto");
+//                     PullDownSkill([420 + (i + 1) * j * 62, 650]);
+//                     Sleep();
+//                 }
+//             }
+//             else if (FindMultiColors(IsLearnedColorList, [925 + j * 62, 282 + i * 62, 73, 78])) 
+//             {
+//                 if (!FindMultiColors(SkillEquipedColorList, [925 + j * 62, 282 + i * 62, 38, 36]))
+//                 {
+//                     console.log((i + 1) * j + " learn but not equiped this skill");
+//                     console.log("shift: " + (407 + (i + 1) * j * 62));
+//                     RandomPress([948 + j * 62, 305 + i * 62, 29, 30]);
+//                     RandomPress([407 + (i + 1) * j * 62, 652, 33, 33]);
+//                     PullDownSkill([420 + (i + 1) * j * 62, 650]);
+//                     Sleep();
+//                     if (FindMultiColors(CancelColorList, [399 + (i + 1) * j * 62, 647, 49, 45]))
+//                     {
+//                         RandomPress([406 + (i + 1) * j * 62, 652, 35, 38]);
+//                     }
+//                     Sleep();
+//                 }
+//                 else if (!FindMultiColors(IsSkillAutoColorList, [384, 627, 77, 24]))
+//                 {
+//                     console.log((i + 1) * j + " not equiped this skill");
+
+//                     PullDownSkill([420 + (i + 1) * j * 62, 650]);
+//                     Sleep();
+//                 }
+
+//             }
+//         }
+//     }
+//     console.log(FindMultiColors(IsLearnedColorList, [928, 290, 76, 79]));
+//     // CloseSkillPopup();
+// };
+
+const AutoReleaseSkill = () =>
 {
-    if (!HasMenu())
+    console.log("start to release skill");
+    const hasMenu = HasMenu();
+    if (!hasMenu)
     {
-        console.log("当前页面没有菜单按钮！装备技能失败");
+        console.log("not find menu. return false");
         return false;
     }
-    console.log("start to equip skill");
-    RandomPress([1095, 22, 19, 29]);
-    const SkillEquipedColorList = [
-        ["#ffffff", [[0, 1, "#ffffff"], [0, 3, "#ffffff"], [0, 5, "#ffffff"], [0, 6, "#ffffff"]]],
-        ["#fbfbfa", [[0, 1, "#fbfbfa"], [0, 3, "#fbfbfa"], [0, 4, "#fbfbfa"], [0, 6, "#fbfbfa"]]],
-        ["#ffffff", [[0, 1, "#ffffff"], [0, 3, "#ffffff"], [0, 4, "#ffffff"], [0, 6, "#ffffff"]]],
-        ["#ffffff", [[0, 2, "#ffffff"], [0, 4, "#ffffff"], [0, 5, "#ffffff"], [0, 6, "#ffffff"]]]
-    ];
-    const IsLearnedColorList = [
-        ["#a28a5f", [[0, 7, "#d8b980"], [0, 19, "#d7b87f"], [25, -1, "#a99062"], [55, 18, "#c7aa74"]]],
-        ["#a48b5f", [[0, 8, "#a48b5f"], [14, -7, "#b59969"], [56, 3, "#574930"], [55, 13, "#b19767"]]],
-        ["#8c7750", [[0, 6, "#ac9263"], [0, 23, "#9d885b"], [26, -2, "#a99062"], [55, 19, "#9d865b"]]]
-    ];
-    const IsSkillAutoColorList = [
-        ["#f7c931", [[2, 0, "#ffda2f"], [5, 0, "#fff235"], [7, 0, "#fffa35"], [10, 0, "#fffa37"]]],
-        ["#ffe234", [[1, 0, "#ffea34"], [3, 0, "#fff635"], [6, 0, "#fffb35"], [8, 0, "#fff93a"]]],
-        ["#eac133", [[2, 0, "#fdcf35"], [4, 0, "#ffe035"], [8, 0, "#fffa37"], [12, 0, "#fff834"]]],
-        ["#ffdb30", [[2, 0, "#ffec32"], [5, 0, "#fffa34"], [6, 0, "#fffb34"], [11, 0, "#ffeb32"]]]
-    ];
-    const CancelColorList = [
-        ["#a29971", [[7, 7, "#6b6349"], [14, 13, "#8f8663"], [13, 1, "#9e946e"], [1, 13, "#7d7455"]]],
-        ["#a39971", [[7, 7, "#817959"], [13, 13, "#7e7556"], [13, -1, "#b7ab80"], [1, 11, "#877f5d"]]],
-        ["#a59972", [[5, 6, "#7f7657"], [11, 11, "#7b7355"], [11, 1, "#a49972"], [0, 12, "#827a5a"]]]
-    ];
-    for (let i = 0; i < 2; i++)
-    {
-        for (let j = 0; j < 4; j++)
-        {
-            if (FindMultiColors(SkillEquipedColorList, [925 + j * 62, 282 + i * 62, 38, 36]))
-            {
-                if (!FindMultiColors(IsSkillAutoColorList, [384 + (i + 1) * j * 62, 627, 77, 24]))
-                {
-                    console.log((i + 1) * j + " skill is equiped but  is not auto");
-                    PullDownSkill([420 + (i + 1) * j * 62, 650]);
-                    Sleep();
-                }
-            }
-            else if (FindMultiColors(IsLearnedColorList, [925 + j * 62, 282 + i * 62, 73, 78])) 
-            {
-                if (!FindMultiColors(SkillEquipedColorList, [925 + j * 62, 282 + i * 62, 38, 36]))
-                {
-                    console.log((i + 1) * j + " learn but not equiped this skill");
-                    console.log("shift: " + (407 + (i + 1) * j * 62));
-                    RandomPress([948 + j * 62, 305 + i * 62, 29, 30]);
-                    RandomPress([407 + (i + 1) * j * 62, 652, 33, 33]);
-                    PullDownSkill([420 + (i + 1) * j * 62, 650]);
-                    Sleep();
-                    if (FindMultiColors(CancelColorList, [399 + (i + 1) * j * 62, 647, 49, 45]))
-                    {
-                        RandomPress([406 + (i + 1) * j * 62, 652, 35, 38]);
-                    }
-                    Sleep();
-                }
-                else if (!FindMultiColors(IsSkillAutoColorList, [384, 627, 77, 24]))
-                {
-                    console.log((i + 1) * j + " not equiped this skill");
+    RandomPress([1095, 26, 21, 21]); // icon
+    Sleep();
 
-                    PullDownSkill([420 + (i + 1) * j * 62, 650]);
-                    Sleep();
-                }
+    RandomPress([944, 309, 37, 34]);
+    RandomPress([407, 650, 36, 32]);
+    PullDownSkill([420, 650]);
 
-            }
-        }
-    }
-    CloseSkillPopup();
+    RandomPress([1011, 312, 30, 31]);
+    RandomPress([470, 652, 33, 36]);
+    PullDownSkill([480, 650]);
+
+    RandomPress([1067, 312, 39, 33]);
+    RandomPress([532, 653, 33, 35]);
+    PullDownSkill([540, 550]);
 };
+
 const StrengthenEquipment = () =>
 {
     console.log("start to strengthen equipment");
@@ -863,31 +924,12 @@ const UseHolyGrail = () =>
 };
 
 
-module.exports = { OpenAllBox, WearEquipment, UseSkillBook, EquipSkill, StrengthenEquipment, DecomposeEquipment, UseHolyGrail };
+module.exports = { OpenAllBox, WearEquipments, OpenSkillBook, StrengthenEquipment, DecomposeEquipment, UseHolyGrail };
 
 
-// OpenAllBox();
-// console.log(FindImg(ReadImg("backpack/box/weaponBox/1"), [925, 149, 275, 215]));
-// console.log(ReadImg("backpack/box/weaponBox/1"));
-// OpenPropsBox();
-// WearEquipment();
-// OpenSuit();
-// console.log(IsEmpty([930, 216, 71, 75]));
-// OpenAllBox();
-// OpenGreenArmorBox();
-// DecomposeEquipment();
-// console.log(FindCheckMark([404, 311, 44, 36]));
-// OpenBox("greenEquipmentBox");
-// OpenGreenEquipmentBox();
-// WearEquipment();
-// StrengthenEquipment();
-// console.log(IsEquiped([842, 135, 27, 25], captureScreen()));
-// OpenBackpackMenu("strengthen");
-// OpenBox("normalBox");
-// console.log(FindSkillBook());
-// console.log(IsEquiped([953, 74, 35, 34]));
-// StrengthenEquipment();
-// OpenBackpackMenu("strengthen");
-// EquipSkill();
-// WearEquipment();
-// WearBestSuit();
+// OpenSkillBook()
+// EquipSkill()
+// OpenAllBox()
+// WearEquipments()
+
+

@@ -42,6 +42,11 @@ const { Sleep, RandomPress, ReadImg, FindImg, FindMultiColors,
     HasPopupClose,
     LoadImgList,
     FindCheckMark,
+    FindGoldBtn,
+    NeedPressBlank,
+    IsHaltMode,
+    HasSkip,
+    GetFormatedTimeString,
 } = require("./utils.js");
 
 
@@ -271,6 +276,12 @@ const SetApplicationProxy = () =>
     app.launch("fun.kitsunebi.kitsunebi4android");
     id("add_btn").findOne(15000).click();
 };
+// console.log(FindGoldBtn([836, 459, 146, 68]));
+// console.log(NeedPressBlank([580, 645, 121, 43]));
+// console.log(text("시작하기").findOne(2000));
+// console.log(new Date());
+// console.log(new Date().getDate());
+// console.log(HasPopupClose([1184, 55, 42, 39]));
 // console.log(device.getAndroidId());
 // console.log(text("Refresh").findOne(20));
 // splitScreen();
@@ -285,5 +296,60 @@ const SetApplicationProxy = () =>
 // className("android.widget.Button").text("동의").findOne();
 // console.log(text("동의").findOne(100));
 // console.log(id("fre_bottom_group").findOne(100));
-desc("복구 이메일 확인").findOne(100).click();
+// desc("복구 이메일 확인").findOne(100).click();
+
 // text("Use the web version").findOne(20).click();
+// var date1 = new Date(); //开始时间
+// Sleep();
+// var date2 = new Date();  //结束时间
+// var date3 = date2.getTime() - date1.getTime(); //时间差的毫秒数
+// var hours = Math.floor(date3 / (3600 * 1000));
+// console.log(hours);
+// console.log(text("열기").findOne(200));
+// console.log(FindBlueBtn([532, 590, 217, 67]));
+// console.log(FindBlueBtn([536, 415, 204, 77]));
+// toast("hello");
+// console.log(HasPageback());
+
+// console.log(new Date());
+// console.log(HasPopupClose([823, 211, 35, 38]));
+// const account = textMatches(/(.*@gmail.com.*)/).findOne(100).parent().parent();
+// console.log(account);
+// console.log(IsHaltMode());
+// toast("hello");
+// console.log(textMatches(/(.*시작하기.*|.*立即开始.*)/).findOne(2000));
+const GetVerificationCode = () =>
+{
+    const url = "https://upload.chaojiying.net/Upload/Processing.php";
+    const clip = images.clip(images.captureScreen(), 470, 297, 278, 86);
+
+    // files.create("/sdcard/clip/");
+    // const fileName = `${GetFormatedTimeString("_")}.png`;
+    // images.save(clip, `/sdcard/clip/${fileName}`);
+    // const img = files.read(`/sdcard/clip/${fileName}`);
+    // const img = clip;
+    const img = images.toBase64(clip);
+    const data =
+    {
+        user: "btx159632",
+        pass: "Snhc2024",
+        softid: "6909c4f85873ab3fd2011a6c72e4ed5b",
+        codetype: "1902",
+        // userfile: img
+        file_base64: img
+    };
+    const result = http.post(url, data);
+    // const result = http.request(url, {
+    //     headers: {
+    //         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.8; rv:24.0) Gecko/20100101 Firefox/24.0',
+    //         'Content-Type': 'application/x-www-form-urlencoded'
+    //     },
+    //     method: 'POST',
+    //     contentType: "text/ html; charset=utf-8",
+    //     body: data
+    // });
+    console.log(result.body.json().pic_str);
+};
+setText("111");
+// console.log(GetFormatedTimeString("_"));
+// files.create("/sdcard/clip/");

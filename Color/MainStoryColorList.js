@@ -30,6 +30,9 @@ const TipColorList = [
     ["#fff59e", [[8, 0, "#fef59e"], [14, -4, "#fef59e"], [14, 3, "#fef59e"], [21, -3, "#fff59e"]]],
     ["#f6ed99", [[8, 0, "#f7ee99"], [14, 0, "#f7ee99"], [0, 4, "#f6ed99"], [20, -2, "#e4db8d"]]],
     ["#ece392", [[0, 3, "#ece392"], [8, 3, "#efe694"], [14, 3, "#f0e796"], [21, -1, "#fcf39e"]]],
+    ["#fff59e", [[8, 0, "#fff59e"], [14, -2, "#fff59e"], [14, 4, "#fff59e"], [20, -2, "#fef59e"]]],
+    ["#fff59e", [[0, 2, "#fff59e"], [8, 2, "#fef49e"], [14, 0, "#fdf49e"], [14, 4, "#fdf49e"]]],
+    ["#fff59e", [[0, 1, "#fff59e"], [8, 1, "#fff59e"], [14, 1, "#fff59e"], [21, -1, "#fff59e"]]]
 
 ];
 
@@ -128,7 +131,11 @@ const ArrowColorList = {
         ["#fcfaf4", [[1, 1, "#fffffd"], [2, 1, "#fdfcf8"], [2, 2, "#fffffd"], [4, 0, "#fffffc"]]],
         ["#f8f8f2", [[1, 1, "#fffffd"], [2, 2, "#fffffd"], [2, 3, "#c2bfbc"], [4, 0, "#fdfcfa"]]],
         ["#fcfbf4", [[1, 1, "#fffffd"], [2, 2, "#fffffd"], [3, 1, "#fffffd"], [4, 0, "#fffffc"]]],
-        ["#f3f3f2", [[2, 1, "#f9f9f8"], [2, 2, "#f5f5f4"], [4, 0, "#f3f3f2"], [5, -1, "#f2f2f2"]]]
+        ["#f3f3f2", [[2, 1, "#f9f9f8"], [2, 2, "#f5f5f4"], [4, 0, "#f3f3f2"], [5, -1, "#f2f2f2"]]],
+        ["#a19c96", [[0, 1, "#f0f0eb"], [1, 2, "#fefdfc"], [2, 2, "#fcfbf8"], [3, 1, "#efefeb"]]],
+        ["#f0f0eb", [[1, 1, "#fefdfc"], [2, 1, "#fcfbf8"], [1, 2, "#e0dfda"], [3, 0, "#efefeb"]]],
+        ["#f0f0eb", [[1, 1, "#fefdfc"], [1, 2, "#e0dfda"], [2, 1, "#fcfbf8"], [3, 0, "#efefeb"]]],
+        ["#f1f0ed", [[1, 1, "#fffffc"], [2, 1, "#fdfcf8"], [1, 2, "#e1e0da"], [3, 0, "#f0f0ed"]]]
 
     ],
 
@@ -302,10 +309,12 @@ const RidingColorList = [
 const LeaveColorList = [
     ["#dccb96", [[-2, 5, "#ccba8b"], [-1, 17, "#bdad80"], [7, 8, "#dccb96"], [13, 9, "#cdbc8b"]]]
 ];
+
 const TalkBubbleColorList = [
     ["#f5faf4", [[2, 0, "#fdfdfd"], [6, 0, "#f7f7f6"], [3, 5, "#fdfdfd"], [8, 5, "#e3e3e3"]]],
     ["#f5faf4", [[3, 0, "#fcfcfc"], [7, 0, "#f7f7f6"], [3, 5, "#fdfdfd"], [8, 7, "#ebebeb"]]],
-    ["#f6f9f6", [[1, 1, "#fcfcfc"], [3, 1, "#f5f5f4"], [7, 0, "#f8f8f8"], [2, 5, "#ffffff"]]]
+    ["#f6f9f6", [[1, 1, "#fcfcfc"], [3, 1, "#f5f5f4"], [7, 0, "#f8f8f8"], [2, 5, "#ffffff"]]],
+    ["#fbfafa", [[2, 0, "#f8f8f8"], [4, -1, "#f0f0f0"], [3, 5, "#fdfdfd"], [7, 7, "#eeeeed"]]]
 ];
 
 const SpeedUpOffColorList = [

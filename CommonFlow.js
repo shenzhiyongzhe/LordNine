@@ -1,5 +1,6 @@
 
-const { WearEquipment, StrengthenEquipment, OpenAllBox, UseHolyGrail, DecomposeEquipment } = require("./Backpack.js");
+const { WearEquipments, StrengthenEquipment, OpenAllBox, UseHolyGrail, DecomposeEquipment } = require("./Backpack.js");
+const { ExceptionFlow } = require("./Exception.js");
 const {
     ReadImg, FindImg, RandomPress, Sleep, FindMultiColors, OpenMenu, CloseMenu, EnterMenuItemPage,
     PageBack,
@@ -9,7 +10,10 @@ const {
     HasPopupClose,
     PressBlank, WaitUntil,
     HasMenu,
-    HasPageback,
+    HasPageback, IsBackpackFull,
+    NeedPressBlank,
+    PullDownSkill,
+    CloseBackpack,
 } = require("./utils.js");
 
 
@@ -152,6 +156,7 @@ const LoginProps = () =>
         console.log("do not have menu button");
         return false;
     }
+
     const hasLoginPropsPoint = FindTipPoint([1232, 96, 22, 23]);
     if (!hasLoginPropsPoint)
     {
@@ -161,12 +166,7 @@ const LoginProps = () =>
     const LoginBtnColorList = [
         ["#283735", [[18, -1, "#283735"], [113, 0, "#283735"], [0, 16, "#283735"], [128, 15, "#283735"]]]
     ];
-    const NoMoreLoginItemColorList = [
-        ["#1f1e1e", [[2, 0, "#1f1e1e"], [4, 0, "#1e1e1e"], [6, 0, "#1e1e1e"], [8, 0, "#1e1e1e"], [0, 2, "#1f1f1e"],
-        [2, 2, "#1f1e1e"], [4, 2, "#1f1e1e"], [6, 2, "#1e1e1e"], [8, 2, "#1e1e1e"], [8, 4, "#1e1e1e"], [6, 4, "#1f1e1e"],
-        [4, 4, "#1f1e1e"], [2, 4, "#1f1f1e"], [0, 4, "#201f1e"], [0, 6, "#21201e"], [2, 6, "#201f1e"], [4, 6, "#1f1f1e"], [6, 6, "#1f1e1e"], [8, 6, "#1f1e1e"]]]
-    ];
-    const IsNoMoreLoginItem = () => FindMultiColors(NoMoreLoginItemColorList, [102, 88, 8, 6]);
+
     const CanPressLoginBtn = () => FindMultiColors(LoginBtnColorList, [1088, 506, 170, 50]);
 
     RandomPress([1209, 116, 21, 26]); // login props icon
@@ -181,25 +181,25 @@ const LoginProps = () =>
     let loginCount = 0;
     for (let i = 0; i < 10; i++)
     {
-        if (IsNoMoreLoginItem())
+        RandomPress([176, 76, 74, 24]);
+        for (let j = 0; j < 10; j++)
         {
-            console.log("no more login item");
-            break;
-        }
-        hasTipPoint = FindTipPoint([511, 122, 421, 494]);
-        if (hasTipPoint)
-        {
-            RandomPress([hasTipPoint.x - 40, hasTipPoint.y, 40, 40]);
-            if (CanPressLoginBtn())
+            hasTipPoint = FindTipPoint([511, 122, 421, 494]);
+            if (hasTipPoint)
             {
-                RandomPress([1103, 521, 144, 23]);
-                Sleep(4);
-                loginCount++;
+                RandomPress([hasTipPoint.x - 40, hasTipPoint.y, 40, 40]);
+                if (CanPressLoginBtn())
+                {
+                    RandomPress([1103, 521, 144, 23]);
+                    Sleep(4);
+                    loginCount++;
+                }
             }
         }
-        else
+        RandomPress([43, 75, 80, 23]);
+        if (!FindTipPoint([511, 122, 421, 494]))
         {
-            SwipeSlowly([394, 555, 56, 25], [397, 259, 54, 24], 4);
+            break;
         }
     }
     PageBack();
@@ -281,24 +281,35 @@ const PickUpAbilityPoint = () =>
             {
                 RandomPress([44, 108, 24, 25]);
             }
+            console.log("finish pick up ability point");
+
         }
+        else
+        {
+            console.log("use out of recover time");
+            RandomPress([365, 263, 16, 17]);
+            RandomPress([123, 547, 98, 43]);
+            if (FindBlueBtn([138, 604, 216, 66]))
+            {
+                RandomPress([170, 622, 157, 30]);
+            }
+            console.log("finish pick up ability point");
+        }
+    }
+    if (HasPopupClose([34, 94, 46, 53]))
+    {
+        console.log("finish");
+        RandomPress([47, 109, 20, 21]);
     }
 };
 
 const IncreaseWeaponAbility = () =>
 {
     console.log("increase weapon skill ability");
-    const hasOpenMenu = OpenMenu();
-    if (!hasOpenMenu)
+    const hasEntered = EnterMenuItemPage("weaponFeatures");
+    if (!hasEntered)
     {
-        console.log("open menu faild");
-        return false;
-    }
-    RandomPress([911, 117, 32, 33]);
-    const hasEnter = WaitUntilPageBack();
-    if (!hasEnter)
-    {
-        console.log("enter weapon ability page faild");
+        console.log("enter weapon features page failed!");
         return false;
     }
     const ActivatedColorList = [
@@ -318,7 +329,7 @@ const IncreaseWeaponAbility = () =>
         [[526, 284, 19, 21], [421, 387, 24, 24], [421, 492, 24, 22]],
         [[525, 282, 21, 22], [525, 388, 24, 21], [526, 493, 21, 20]]
     ];
-    for (let i = 0; i < 3; i++)
+    out: for (let i = 0; i < 3; i++)
     {
         RandomPress([197, 300 + i * 82, 146, 46]);
 
@@ -340,6 +351,10 @@ const IncreaseWeaponAbility = () =>
                     {
                         RandomPress([1019, 653, 155, 31]);
                     }
+                    if (!FindBlueBtn([530, 643, 222, 67]))
+                    {
+                        continue out;
+                    }
                 }
                 else
                 {
@@ -351,7 +366,6 @@ const IncreaseWeaponAbility = () =>
                 }
             }
             console.log(i + " " + j);
-
         }
 
     }
@@ -365,7 +379,9 @@ const AddAttributePoint = () =>
         ["#5d5b54", [[-3, 2, "#a19d91"], [-3, 4, "#c7c2b5"], [-3, 6, "#c6c1b3"], [-3, 9, "#c7c2b5"], [0, 12, "#646158"], [3, 11, "#bfbbae"], [4, 9, "#c7c2b5"], [3, 8, "#aca89b"], [3, 6, "#aba69b"], [4, 4, "#c7c2b5"]]]
     ];
     const PlusAbilityIcon = [
-        ["#8f7f4f", [[14, 0, "#ab995f"], [6, -7, "#b19d62"], [7, 0, "#af9c62"], [7, 6, "#b7a366"]]]
+        ["#8f7f4f", [[14, 0, "#ab995f"], [6, -7, "#b19d62"], [7, 0, "#af9c62"], [7, 6, "#b7a366"]]],
+        ["#86774a", [[3, 0, "#90804f"], [15, 0, "#b4a165"], [9, -6, "#e8cf84"], [8, 6, "#928251"]]],
+        ["#86774a", [[7, 0, "#978754"], [14, 0, "#b09d62"], [9, -6, "#e8cf84"], [9, 5, "#b4a165"]]]
     ];
     if (!FindMultiColors(PlusAbilityIcon, [615, 461, 57, 58]))
     {
@@ -403,16 +419,10 @@ const AddAttributePoint = () =>
 const StrengthenHorseEquipment = () =>
 {
     console.log("Start Strengthen horse equipment");
-    const hasOpenMenu = OpenMenu();
-    if (!hasOpenMenu)
+    const hasEnter = EnterMenuItemPage("horse");
+    if (!hasEnter)
     {
-        console.log("open menu failed");
-        return false;
-    }
-    RandomPress([1088, 116, 29, 28]);
-    if (!WaitUntilPageBack())
-    {
-        console.log("enter horse page failed");
+        console.log("enter horse failed!");
         return false;
     }
     if (FindGoldBtn([869, 653, 171, 63]))
@@ -428,6 +438,10 @@ const StrengthenHorseEquipment = () =>
         {
             RandomPress([680, 459, 154, 33]);
         }
+        else
+        {
+            break;
+        }
         Sleep(3);
     }
     RandomPress([1089, 209, 31, 32]);
@@ -438,6 +452,10 @@ const StrengthenHorseEquipment = () =>
         {
             RandomPress([680, 459, 154, 33]);
         }
+        else
+        {
+            break;
+        }
         Sleep(3);
     }
     RandomPress([976, 209, 32, 35]);
@@ -447,6 +465,10 @@ const StrengthenHorseEquipment = () =>
         if (FindBlueBtn([650, 439, 211, 73]))
         {
             RandomPress([680, 459, 154, 33]);
+        }
+        else
+        {
+            break;
         }
         Sleep(3);
     }
@@ -497,7 +519,7 @@ const GetActivitiesAward = () =>
         console.log("enter failed");
         return false;
     }
-    Sleep();
+    Sleep(3);
     const shot = captureScreen();
     let hasTip = false;
     let hasGoldenLight = false;
@@ -526,35 +548,7 @@ const GetActivitiesAward = () =>
             }
         }
     }
-    // special award
-    RandomPress([121, 353, 180, 29]);
-    if (FindCheckMark([1077, 477, 39, 40]))
-    {
-        console.log("special already get");
-    }
-    else
-    {
-        for (let i = 0; i < 2; i++)
-        {
-            for (let j = 0; j < 7; j++)
-            {
-                if (FindCheckMark([367 + j * 116, 354 + i * 117, 57, 57]))
-                {
-                    continue;
-                }
-                else
-                {
-                    RandomPress([382 + j * 116, 371 + i * 117, 29, 21]);
-                    PressBlank();
-                }
-                if (HasPopupClose([748, 100, 41, 36]))
-                {
-                    RandomPress([760, 110, 19, 22]);
-                }
-            }
-        }
-    }
-    //````````````````````````
+
     for (let i = 0; i < 5; i++)
     {
         if (HasPopupClose([745, 97, 46, 47]))
@@ -568,7 +562,7 @@ const GetActivitiesAward = () =>
         }
         Sleep();
     }
-
+    console.log("finish: get activities award");
 };
 const GetTravelLogAward = () =>
 {
@@ -637,17 +631,10 @@ const GetTravelLogAward = () =>
 const UpgradeAbilityLevel = () =>
 {
     console.log("start upgrade ability level");
-    const hasOpenMenu = OpenMenu();
-    if (!hasOpenMenu)
+    const hasEntered = EnterMenuItemPage("ability");
+    if (!hasEntered)
     {
-        console.log("open menu failed");
-        return false;
-    }
-    RandomPress([974, 119, 26, 28]);
-    const hasEnterAbilityPage = WaitUntilPageBack();
-    if (!hasEnterAbilityPage)
-    {
-        console.log("enter ability page failed");
+        console.log("enter failed");
         return false;
     }
     const CanUpgrade = () => FindBlueBtn([1020, 598, 199, 69]);
@@ -695,7 +682,102 @@ const UpgradeAbilityLevel = () =>
     }
     PageBack();
 };
+const ChangeAbility = (changeList) =>
+{
+    console.log("start change ability");
+    const hasEnter = EnterMenuItemPage("ability");
+    if (!hasEnter)
+    {
+        console.log("enter ability failed");
+        return false;
+    }
+    changeList = changeList || [[0, 0, 0], [0, 1, 1], [3, 1, 2], [3, 0, 3], [2, 1, 4], [2, 0, 5]];
 
+    const typePosArr = [
+        [318, 226, 106, 31],
+        [457, 227, 98, 32],
+        [594, 229, 96, 27],
+        [729, 227, 99, 29],
+        [861, 227, 104, 29],
+        [319, 281, 103, 27],
+        [456, 282, 105, 28],
+        [592, 284, 103, 25]
+    ];
+    const equipedPosArr = [
+        [130, 166, 38, 33],
+        [225, 168, 25, 28],
+        [402, 166, 30, 28],
+        [492, 168, 25, 28],
+        [670, 167, 32, 31],
+        [757, 168, 30, 26]
+    ];
+    const optionPosArr = [
+        [84, 350, 85, 95],
+        [222, 343, 81, 115],
+        [356, 349, 85, 116],
+        [353, 348, 90, 112],
+        [491, 338, 84, 123],
+        [631, 343, 84, 122],
+        [762, 343, 83, 119],
+    ];
+    const TapClear = () =>
+    {
+        console.log("clear");
+        if (FindGoldBtn([836, 459, 146, 68]))
+        {
+            RandomPress([854, 478, 109, 27]);
+        }
+    };
+    const TapConfirm = () =>
+    {
+        console.log("tap confirm");
+        if (FindBlueBtn([532, 527, 215, 71]))
+        {
+            RandomPress([567, 546, 156, 31]);
+        }
+    };
+    const TapSelect = () =>
+    {
+        console.log("tap select");
+        if (FindGoldBtn([18, 646, 139, 60]))
+        {
+            RandomPress([39, 662, 96, 27]);
+        }
+    };
+
+    for (let i = 0; i < changeList.length; i++)
+    {
+        let type = changeList[i][0];
+        let optionPos = changeList[i][1];
+        let equipPos = changeList[i][2];
+
+        TapSelect();
+        TapClear();
+        RandomPress(typePosArr[type]);
+        TapConfirm();
+        RandomPress(optionPosArr[optionPos]);
+        RandomPress(optionPosArr[optionPos]);
+        RandomPress(equipedPosArr[equipPos]);
+        Sleep(3);
+        if (NeedPressBlank())
+        {
+            PressBlank();
+        }
+    }
+
+    PageBack();
+    if (!HasMenu())
+    {
+        CloseBackpack();
+        CloseMenu();
+        CloseBackpack();
+        CloseMenu();
+    }
+    PullDownSkill([1060, 650]);
+    PullDownSkill([1130, 650]);
+    PullDownSkill([1090, 650]);
+    console.log("finish change ability");
+};
 const UpgradeHolyRelics = () =>
 {
     console.log("start upgrade holy relics");
@@ -748,7 +830,51 @@ const UpgradeHolyRelics = () =>
     {
         secondUnlocked = true;
     }
+
     if (secondUnlocked)
+    {
+        Sleep();
+        for (let i = 0; i < 10; i++)
+        {
+            //is up to lv20
+            if (FindBlueBtn([1105, 641, 163, 64]))
+            {
+                RandomPress([1126, 657, 119, 32]);
+                if (FindBlueBtn([657, 442, 195, 70]))
+                {
+                    RandomPress([679, 458, 154, 36]);
+                    Sleep(5);
+                }
+            }
+            else
+            {
+                break;
+            }
+        }
+    }
+    RandomPress([66, 306, 216, 60]);
+    let thirdUnlocked = false;
+    if (!IsUnlocked())
+    {
+        if (FindBlueBtn([946, 641, 317, 66]))
+        {
+            RandomPress([972, 657, 268, 32]);
+            if (FindBlueBtn([655, 443, 201, 70]))
+            {
+                RandomPress([674, 460, 162, 32]);
+                Sleep(3);
+                if (IsUnlocked())
+                {
+                    secondUnlocked = true;
+                }
+            }
+        }
+    }
+    else
+    {
+        thirdUnlocked = true;
+    }
+    if (thirdUnlocked)
     {
         Sleep();
         for (let i = 0; i < 10; i++)
@@ -772,10 +898,23 @@ const UpgradeHolyRelics = () =>
     PageBack();
 };
 
+
 const ComprehensiveImprovement = () =>
 {
     console.log("start comprehensive improvement");
+
     HasCrucifixIcon() && PickUpAbilityPoint();
+
+    const isBackpackFull = IsBackpackFull(captureScreen());
+    if (isBackpackFull)
+    {
+        console.log("backpack is full");
+        WearEquipments();
+        StrengthenEquipment();
+        LoginProps();
+        DecomposeEquipment();
+    }
+
     GetPassAward();
     GetActivitiesAward();
     GetMonsterKnowledgeAward();
@@ -786,33 +925,40 @@ const ComprehensiveImprovement = () =>
     OpenAllBox();
 
     UseHolyGrail();
+
+    if (!isBackpackFull)
+    {
+        WearEquipments();
+        StrengthenEquipment();
+        LoginProps();
+        DecomposeEquipment();
+    }
+
     AddAttributePoint();
 
-    // next wear equipment
-    WearEquipment();
-    // strengthen equipment
-    StrengthenEquipment();
-    LoginProps();
-    DecomposeEquipment();
     IncreaseWeaponAbility();
+    UpgradeHolyRelics();
+    StrengthenHorseEquipment();
+    UpgradeAbilityLevel();
     ShopBuy();
+
 };
 
 
-// module.exports = { GetEmail, GetAchievement, GetMonsterKnowledgeAward, LoginProps, HasCrucifixIcon, ShopBuy, PickUpAbilityPoint, AddAttributePoint, ComprehensiveImprovement, StrengthenHorseEquipment };
+module.exports = {
+    ChangeAbility, GetEmail, GetAchievement, GetMonsterKnowledgeAward, LoginProps, HasCrucifixIcon,
+    ShopBuy, PickUpAbilityPoint, AddAttributePoint, ComprehensiveImprovement, StrengthenHorseEquipment
+};
 
-// GetTravelLogAward();
-// ShopBuy();
-// GetTravelLogAward();
+
+// HasCrucifixIcon() && PickUpAbilityPoint();
+// PullDownSkill([1060, 650]);
+// PullDownSkill([1130, 650]);
+// PullDownSkill([1190, 650]);
+// ChangeAbility();
 // ComprehensiveImprovement();
-// GetMonsterKnowledgeAward();
-// GetEmail();
-// AddAttributePoint();
-// GetActivitiesAward();
+// WearEquipments();
+// OpenAllBox();
+// UpgradeAbilityLevel()
 // UpgradeHolyRelics();
-// console.log(HasPopupClose([1180, 54, 45, 43]));
-// console.log(FindBlueBtn([140, 636, 96, 72]));
-// console.log(HasPopupClose([34, 94, 46, 53]));
-// console.log(FindTipPoint([569, 55, 37, 36]));
-// console.log(HasPopupClose([748, 101, 39, 35]));
-// console.log(FindCheckMark([839, 359, 52, 53]));
+// GetActivitiesAward();
