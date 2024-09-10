@@ -147,7 +147,78 @@ const FindTipPoint = (region, shot) => { shot = shot || captureScreen(); return 
 const FindGoldBtn = (region) => FindMultiColors(GoldBtnColorList, region);
 const FindCheckMark = (region) => FindMultiColors(CheckMarkColorList, region);
 
+const FindImgInList = (imgList, region, shot) =>
+{
+    shot = shot = shot || captureScreen();
+    let hasImg = false;
+    for (let i = 0; i < imgList.length; i++)
+    {
+        hasImg = FindImg(imgList[i], region, shot);
+        if (hasImg)
+        {
+            return hasImg;
+        }
+    }
+    return false;
+};
+const FindNumber = function (directory, region, shot)
+{
+    console.log("find number in directory: " + directory + " region: " + region);
+    shot = shot || captureScreen();
+    const numberArr = [];
+    for (let i = 0; i < 10; i++)
+    {
+        let arr = [];
+        for (let j = 0; j < 20; j++)
+        {
+            let img = ReadImg(`number/${directory}/${i}/${j}`);
+            if (img == null) break;
+            arr.push(img);
+        }
+        numberArr.push(arr);
+    }
+    let settleAccount = []; //settle account
+    for (let i = 0; i < 10; i++)
+    {
+        let n = numberArr[i].length;
+        for (let j = 0; j < n; j++)
+        {
+            let num = images.matchTemplate(shot, numberArr[i][j], { region: region });
+            if (num.points.length > 0)
+            {
+                settleAccount.push({ num: i, points: num.points });
+            }
+        }
 
+    }
+    // //recycle
+    numberArr.forEach(arr => arr.forEach(img => img.recycle()));
+    // check if it is not a number
+    if (settleAccount.length === 0) return null;
+    //sort
+    const sequence = [];
+    settleAccount.forEach(item =>
+    {
+        item.points.forEach(point => sequence.push({ number: item.num, x: point.x }));
+    });
+    sequence.sort((a, b) => a.x - b.x);
+
+    const filteredArr = sequence.filter((element, index) =>
+    {
+        if (index > 0 && Math.abs(element.x - sequence[index - 1].x) < 3)
+        {
+            return false; // 删除相邻元素x值小于3的情况
+        }
+        return true;
+    });
+
+    filteredArr.forEach((point, index, arr) => arr[index] = point.number);
+
+    // log(sequence);
+    const finalNumber = filteredArr.join("");
+    console.log("find number: " + finalNumber);
+    return parseInt(finalNumber);
+};
 const GetFormatedTimeString = function (sign)
 {
     let s = sign || ":";
@@ -192,6 +263,20 @@ const GetVerificationCode = () =>
     //     body: data
     // });
     return result.body.json().pic_str;
+};
+const GetCaptureScreenPermission = () =>
+{
+    auto();
+    threads.start(function () { images.requestScreenCapture(true); });
+    threads.start(function ()
+    {
+        const hasOpen = textMatches(/(.*시작하기.*|.*立即开始.*)/).findOne(2000);
+        if (hasOpen)
+        {
+            sleep(1000);
+            hasOpen.click();
+        }
+    });
 };
 const HasPageback = () => FindMultiColors(PagebackColorList, [1216, 9, 41, 43]);
 
@@ -582,7 +667,7 @@ const RewriteConfig = (attr, value) =>
 const ExitHaltMode = () =>
 {
     RandomPress([628, 661, 29, 27]);
-    Sleep(3);
+    Sleep();
     PageBack();
     Sleep();
 };
@@ -703,8 +788,8 @@ module.exports = {
     specialConfig, DeathImgList,
     CloseBackpack, CloseMenu, ClickSkip, ClickRandomly,
     EnterMenuItemPage, ExitHaltMode,
-    FindBlueBtn, FindTipPoint, FindImg, FindMultiColors, FindCheckMark, FindRedBtn, FindGoldBtn,
-    GetFormatedTimeString, GoToTheNPC,
+    FindBlueBtn, FindTipPoint, FindImg, FindMultiColors, FindCheckMark, FindRedBtn, FindGoldBtn, FindImgInList, FindNumber,
+    GetFormatedTimeString, GoToTheNPC, GetVerificationCode, GetCaptureScreenPermission,
     HasPageback, HasMenu, HollowPress, HasSkip, HasBackpackClose, HasBackpackMenuClose, HasPopupClose,
     IsMoving, IsBackpackFull, IsInCity, IsHaltMode,
     LoadImgList, LaunchGame,

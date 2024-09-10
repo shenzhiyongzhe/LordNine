@@ -1,6 +1,6 @@
 const { Auto_activeColorList, Auto_inactiveColorList } = require("./Color/MainStoryColorList");
 const { ComprehensiveImprovement } = require("./CommonFlow");
-const { DeathImgList, FindMultiColors, RandomPress, HasMenu, WaitUntilPageBack, FindBlueBtn, Sleep, IsMoving, PageBack, WaitUntil, IsHaltMode, ExitHaltMode, FindImg, IsInCity, WaitUntilMenu } = require("./utils");
+const { DeathImgList, FindMultiColors, RandomPress, HasMenu, WaitUntilPageBack, FindBlueBtn, Sleep, IsMoving, PageBack, WaitUntil, IsHaltMode, ExitHaltMode, FindImg, IsInCity, WaitUntilMenu, EnterMenuItemPage, FindNumber } = require("./utils");
 
 
 const MapIconColorList = [
@@ -14,7 +14,9 @@ const MapIconGrayColorList = [
 const AutoMovingColorList = [
     ["#fbfbfa", [[3, 0, "#fbfbfa"], [22, 2, "#f1f1f0"], [28, 2, "#f4f4f4"], [48, 0, "#f9f9f8"]]]
 ];
-
+const InInstanceColorList = [
+    ["#ffffff", [[7, -6, "#ffffff"], [7, -4, "#ffffff"], [14, -1, "#fcfcfc"], [13, 12, "#e6e6e5"]]]
+];
 const FirstLevel = [
     [18, 137, 26, 30],
     [19, 205, 27, 28],
@@ -32,6 +34,21 @@ const ThirdLevel = [
     [964, 191, 158, 28],
     [961, 242, 162, 23]
 ];
+
+const PressAuto = () =>
+{
+    const hasAuto_inactive = FindMultiColors(Auto_inactiveColorList, [1123, 421, 55, 52]);
+    if (hasAuto_inactive)
+    {
+        RandomPress([1137, 434, 29, 23]);
+        return true;
+    }
+    const hasAuto_active = FindMultiColors(Auto_activeColorList, [1124, 415, 69, 65]);
+    if (hasAuto_active)
+    {
+        return true;
+    }
+};
 const OpenMap = () =>
 {
     console.log("open map");
@@ -63,6 +80,7 @@ const OpenMap = () =>
     }
     return false;
 };
+
 const IsAutoMoving = () =>
 {
 
@@ -209,7 +227,7 @@ const InstanceExceptionCheck = () =>
     }
 };
 
-let lastEnterMinute = new Date().getMinutes();
+
 let lastEnterHour = new Date().getHours();
 let hasSuccessfully = false;
 
@@ -245,11 +263,96 @@ const InstanceFlow = () =>
     InstanceExceptionCheck();
 };
 
+const InInstanceCheck = () =>
+{
+    if (IsHaltMode())
+    {
+        ExitHaltMode();
+    }
+    const hasInstanceIcon = FindMultiColors(InInstanceColorList, [86, 290, 35, 39]);
+    if (hasInstanceIcon)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+};
+const EnterInstanceFlow = () =>
+{
+    console.log("EnterInstanceFlow");
+    const hasEnterInstancePage = EnterMenuItemPage("instance");
+    if (!hasEnterInstancePage)
+    {
+        console.log("enter instance page failed");
+        return false;
+    }
+    const CanEnterInstance = () => FindBlueBtn([979, 637, 276, 74]);
+    const PressEnterInstanceBtn = () => { RandomPress([1010, 656, 214, 37]); Sleep(10); WaitUntilMenu(); PressAuto(); };
+
+    RandomPress([72, 107, 294, 96]); //first instance
+    const canEnterFirstInstance = CanEnterInstance();
+    if (canEnterFirstInstance)
+    {
+        console.log("enter first instance");
+        PressEnterInstanceBtn();
+        if (InInstanceCheck())
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    RandomPress([78, 280, 304, 103]); //second instance
+    const canEnterSecondendInstance = CanEnterInstance();
+    if (canEnterSecondendInstance)
+    {
+        console.log("enter second instance");
+        PressEnterInstanceBtn();
+
+        if (InInstanceCheck())
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    RandomPress([75, 449, 276, 90]); // third instance
+    const canEnterThirdInstance = CanEnterInstance();
+    if (canEnterThirdInstance)
+    {
+        console.log("enter third instance");
+        PressEnterInstanceBtn();
+
+        if (InInstanceCheck())
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+};
+
+
+
 module.exports = {
     InstanceFlow
 };
 
 
+
+// EnterInstanceFlow();
+// FindNumber("combatPower", [1147, 490, 114, 45]);
+// console.log(FindNumber("combatPower", [1162, 535, 82, 49]));
 // AutoLevelingFlow([0, 2, 0]);
 // InstanceFlow();
 // OpenMap();

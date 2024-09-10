@@ -1,6 +1,7 @@
 
 
 const serverNameList = document.querySelectorAll("input[name=serverName]");
+const monsterMapList = document.querySelectorAll("input[name=monsterMap]");
 
 const startScript = document.querySelector("#startScript");
 const updateScript = document.querySelector("#updateScript");
@@ -9,16 +10,18 @@ const reset = document.querySelector("#reset");
 const UIData = {
     createCharacter: false,
     serverName: "00",
-    gameMode: "mainStory"
+    gameMode: "mainStory",
+    monsterMapList: []
 };
+
+const selects = document.querySelectorAll(".select");
+const option_list = document.querySelectorAll(".option-list");
+selects.forEach((select, index) => select.addEventListener("click", () => option_list[index].classList.toggle("active")));
+
 
 const SelectServer = () =>
 {
     const createCharacter = document.querySelector("input[name=createCharacter]");
-
-    const select = document.querySelector(".select");
-    const option_list = document.querySelector(".option-list");
-    select.addEventListener("click", () => option_list.classList.toggle("active"));
 
     serverNameList.forEach((item) =>
     {
@@ -70,3 +73,23 @@ document.querySelector("#downloadAutoJs").addEventListener("click", () =>
     });
 });
 
+//怪物图鉴地图选择
+const SelectMonsterMap = () =>
+{
+    monsterMapList.forEach((item) =>
+    {
+        item.addEventListener("click", () =>
+        {
+            if (item.checked == true)
+            {
+                UIData.monsterMapList.push(item.value);
+            }
+            else
+            {
+                UIData.monsterMapList = UIData.monsterMapList.filter(map => map != item.value);
+            }
+        });
+    }
+    );
+};
+SelectMonsterMap();

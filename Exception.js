@@ -1,25 +1,36 @@
 
-const { WearEquipments, StrengthenEquipment, DecomposeEquipment } = require("./Backpack.js");
-const { LoginProps, AddAttributePoint, HasCrucifixIcon, PickUpAbilityPoint } = require("./CommonFlow.js");
 
 const {
-    ReadImg, FindImg, RandomPress, Sleep, FindMultiColors, OpenMenu, CloseMenu,
+    ClickSkip, CloseMenu,
+    ExitHaltMode,
+    ReadImg, FindImg, RandomPress, Sleep, FindMultiColors, OpenMenu,
     HollowPress,
     FindBlueBtn, HasPageback, PageBack, HasMenu, CloseBackpack,
+    GetVerificationCode,
     IsInCity, SwipeSlowly,
     WaitUntilMenu, WaitUntilPageBack,
-    ClickSkip,
     ReadConfig,
     HasSkip,
     IsHaltMode,
-    ExitHaltMode, LoadImgList, IsBackpackFull, LaunchGame,
+    LoadImgList, IsBackpackFull, LaunchGame,
     RewriteConfig,
+    FindImgInList,
 
 } = require("./utils.js");
 
+const { WearEquipments, StrengthenEquipment, DecomposeEquipment } = require("./Backpack.js");
+
+const { LoginProps } = require("./CommonFlow.js");
+
 const { HasTip } = require("./MainStory.js");
 
+const { NoPotionColorList, LordNineWordColorList, WhiteAvatarColorList } = require("./Color/ExceptionColorList.js");
+
 let lastTimeOfBuyingPotion = new Date().getMinutes();
+let lastDebugModeTime = 0;
+let lastGetVerificationCodeTime = 0;
+let totalGetVerificationCodeTimes = 0;
+
 let gameConfig = ReadConfig();
 gameConfig = gameConfig.game;
 
@@ -29,39 +40,78 @@ const ExceptionImgList = {
     preventAutoLogin: LoadImgList("special/preventAutoLogin"),
 };
 
-const NoPotionColorList = [
-    ["#070101", [[18, 0, "#363635"], [39, 2, "#040000"], [16, 14, "#fefefd"], [21, 14, "#fbfbfa"]]],
-    ["#555555", [[3, 0, "#474747"], [1, 6, "#494949"], [0, 19, "#ffffff"], [5, 20, "#fcfcfc"]]],
-    ["#70706f", [[3, 8, "#4d4d4d"], [3, 9, "#474747"], [2, 21, "#ffffff"], [7, 23, "#fefefd"]]],
-    ["#555555", [[0, 8, "#414140"], [-2, 18, "#fbfbfa"], [4, 18, "#fefefd"], [1, 14, "#f8f8f8"]]],
-    ["#626262", [[2, 0, "#555555"], [5, 0, "#535353"], [1, 19, "#ffffff"], [6, 19, "#fbfbfa"]]],
-    ["#585858", [[2, 6, "#454545"], [4, 2, "#4c4c4b"], [1, 22, "#fefefd"], [6, 22, "#fbfbfa"]]]
-];
 
-const LordNineWordColorList = [
-    ["#cca967", [[75, 4, "#deb371"], [138, -6, "#d8b77e"], [195, 3, "#c8a266"], [205, 16, "#a77a40"]]],
-    ["#cda465", [[75, -4, "#d8b773"], [139, -8, "#d8b77e"], [189, -5, "#c79959"], [205, 13, "#a67c41"]]],
-    ["#dbbb87", [[25, 3, "#be985b"], [49, 8, "#c8a263"], [99, 4, "#e2b980"], [124, 1, "#dab66d"]]]
-];
-const WhiteAvatarColorList = [
-    ["#a4a4a3", [[2, 0, "#b1b1b1"], [7, 1, "#b4b4b3"], [2, 4, "#bababa"], [5, 13, "#b6b6b6"]]],
-    ["#a4a4a3", [[1, 0, "#a6a6a5"], [2, 0, "#b1b1b1"], [5, 3, "#b4b4b3"], [3, 10, "#b8b8b8"]]]
-];
-
-
-const IsNoPotion = (shot) =>
+// flow -----
+const NoPotionFlow = (shot) =>
 {
     const hasNoPotion = FindMultiColors(NoPotionColorList, [325, 636, 55, 60], shot);
     const hasNoPotion_haltMode = FindMultiColors(NoPotionColorList, [1143, 639, 61, 68], shot);
     if (hasNoPotion || hasNoPotion_haltMode)
     {
         console.log("character is use out of  potion. ");
-        return true;
-    }
-    return false;
-};
+        const buyPotionInterval = Math.abs(lastTimeOfBuyingPotion - new Date().getMinutes());
+        if (buyPotionInterval > 2 && buyPotionInterval < 30) 
+        {
+            console.log("连续购买药水时间间隔较短，不重复购买");
+            console.log("last time of buying potion: " + lastTimeOfBuyingPotion);
+            console.log("current time: " + new Date().getMinutes());
+            console.log("interval: " + buyPotionInterval);
+            return true;
+        }
 
-const HasDisconnection = (shot) =>
+        console.log("回家买药水...");
+        lastTimeOfBuyingPotion = new Date().getMinutes();
+
+        if (IsHaltMode())
+        {
+            ExitHaltMode();
+        }
+        const hasMenu = HasMenu();
+        if (!hasMenu)
+        {
+            return false;
+        }
+        if (!IsInCity())
+        {
+            RandomPress([46, 253, 19, 19]);
+            Sleep(10);
+            WaitUntilMenu();
+            Sleep(2);
+        }
+
+        RandomPress([995, 433, 42, 41]); //grocery store
+        Sleep(5);
+        if (WaitUntilPageBack())
+        {
+            RandomPress([154, 93, 164, 39]); //potion
+            RandomPress([474, 434, 146, 25]); // 80%
+            if (FindBlueBtn([648, 566, 175, 56]))
+            {
+                RandomPress([667, 578, 133, 29]);
+                console.log("购买药水成功！");
+            }
+            else
+            {
+                RandomPress([953, 77, 242, 503]);
+            }
+            Sleep();
+            PageBack();
+        }
+    }
+};
+const BackpackFullFlow = (shot) =>
+{
+    const isBackpackFull = IsBackpackFull(shot);
+    if (isBackpackFull)
+    {
+        console.log("backpack is full");
+        WearEquipments();
+        StrengthenEquipment();
+        LoginProps();
+        DecomposeEquipment();
+    }
+};
+const DisconnectionFlow = (shot) =>
 {
     let hasDisconnection = false;
     for (let i = 0; i < ExceptionImgList.disconnection.length; i++)
@@ -72,77 +122,91 @@ const HasDisconnection = (shot) =>
             break;
         }
     }
-    return hasDisconnection;
-};
-
-// flow -----
-const NoPotionFlow = () =>
-{
-    console.log("回家买药水...");
-    const hasMenu = HasMenu();
-    if (!hasMenu)
+    if (hasDisconnection)
     {
-        alert("当前页面没有菜单按钮", "没有药水，无法回城");
-    }
-    if (!IsInCity())
-    {
-        RandomPress([46, 253, 19, 19]);
-        Sleep(10);
-        WaitUntilMenu();
-        Sleep(2);
-    }
-
-    RandomPress([995, 433, 42, 41]); //grocery store
-    Sleep(5);
-    if (WaitUntilPageBack())
-    {
-        RandomPress([154, 93, 164, 39]); //potion
-        RandomPress([474, 434, 146, 25]); // 80%
-        if (FindBlueBtn([648, 566, 175, 56]))
+        console.log("game disconnection");
+        let hasBlueBtn = FindBlueBtn([446, 323, 396, 173]);
+        if (hasBlueBtn)
         {
-            RandomPress([667, 578, 133, 29]);
-            console.log("购买药水成功！");
+            RandomPress([hasBlueBtn.x, hasBlueBtn.y, 15, 5]);
+            const delayTime = random(300, 600);
+            console.log("launch delay time: " + delayTime + "s");
+            Sleep(delayTime);
+            LaunchGame();
+            if (typeof gameConfig.reconnectionTime == "number")
+            {
+                gameConfig.reconnectionTime++;
+            }
+            else
+            {
+                gameConfig.reconnectionTime = 1;
+            }
+            console.log("重连次数: " + gameConfig.reconnectionTime);
+            RewriteConfig("game", gameConfig);
+            if (gameConfig.reconnectionTime >= 100)
+            {
+                console.log("重连次数超过3次，退出游戏");
+                alert("Disconnection", "重连次数超过100次，退出游戏");
+            }
+        }
+    }
+
+};
+const InputVerificationFlow = (shot) =>
+{
+    const hasPreventAutoLogin = FindImgInList(ExceptionImgList.preventAutoLogin, [535, 205, 206, 55], shot);
+    if (hasPreventAutoLogin)
+    {
+        console.log("发现防自动登录窗口,开始获取验证码并输入");
+        const getVerificationCodeTimeInterval = Math.abs(lastGetVerificationCodeTime - new Date().getMinutes());
+        if (getVerificationCodeTimeInterval < 1)
+        {
+            console.log("获取验证码间隔时间太短,跳过获取验证码");
+            return true;
+        }
+        if (totalGetVerificationCodeTimes >= 10)
+        {
+            alert("获取验证码次数过多", "获取验证码次数过多");
+            return true;
+        }
+        const code = GetVerificationCode();
+        console.log("验证码为: " + code);
+        totalGetVerificationCodeTimes++;
+
+
+        RandomPress([476, 422, 331, 21]);
+        setText(code);
+        const hasConfirm = textMatches(/(.*확인.*|.*确认.*)/).findOne(100);
+        if (hasConfirm)
+        {
+            hasConfirm.click();
+            Sleep();
+        }
+        RandomPress([1172, 667, 85, 37]);
+        const hasBlueConfirm = FindBlueBtn([503, 328, 279, 184]);
+        if (hasBlueConfirm)
+        {
+            click(hasBlueConfirm.x, hasBlueConfirm.y);
+        }
+    }
+};
+const MainUIFlow = (shot) =>
+{
+    if (FindMultiColors(LordNineWordColorList, [313, 333, 728, 354], shot))
+    {
+        if (FindMultiColors(WhiteAvatarColorList, [32, 600, 52, 49], shot))
+        {
+            PressBlank();
+            console.log("find main ui find white avatar");
         }
         else
         {
-            RandomPress([953, 77, 242, 503]);
+            console.log("find main ui");
+            PressBlank();
         }
-        Sleep();
-        PageBack();
-    }
-};
-const DisconnectionFlow = () =>
-{
-    console.log("game disconnection");
-    let hasBlueBtn = FindBlueBtn([446, 323, 396, 173]);
-    if (hasBlueBtn)
-    {
-        RandomPress([hasBlueBtn.x, hasBlueBtn.y, 15, 5]);
-        const delayTime = random(300, 600);
-        console.log("launch delay time: " + delayTime + "s");
-        Sleep(delayTime);
-        LaunchGame();
-        // if (typeof gameConfig.reconnectionTime == "number")
-        // {
-        //     gameConfig.reconnectionTime++;
-        // }
-        // else
-        // {
-        //     gameConfig.reconnectionTime = 1;
-        // }
-        // console.log("重连次数: " + gameConfig.reconnectionTime);
-        // if (gameConfig.reconnectionTime >= 3)
-        // {
-        //     console.log("重连次数超过3次，退出游戏");
-        //     alert("Disconnection", "重连次数超过3次，退出游戏");
-        // }
     }
 };
 
-
-// ------------------------------ make sure in game ---------------------
-
-const HasMainUI = () => FindMultiColors(LordNineWordColorList, [313, 333, 728, 354]);
 
 const PressBlank = () => RandomPress([361, 264, 525, 263]);
 
@@ -160,55 +224,7 @@ const ResetConfig = () =>
         RewriteConfig("game", gameConfig);
     }
 };
-const MainUIFlow = () =>
-{
-    const hasWhiteAvatar = FindMultiColors(WhiteAvatarColorList, [35, 601, 44, 41]);
-    if (!hasWhiteAvatar)
-    {
-        Sleep(3);
-        PressBlank();
-        console.log("touch to start game flow...");
-        Sleep(5);
-        for (let i = 0; i < 30; i++)
-        {
-            if (FindMultiColors(WhiteAvatarColorList, [35, 601, 44, 41]))
-            {
-                break;
-            }
-            else if (HasStartBlueBtn())
-            {
-                break;
-            }
-            Sleep();
-        }
-    }
-    PressBlank();
-    console.log("press to enter game...");
-    Sleep(10);
 
-    for (let i = 0; i < 30; i++)
-    {
-        if (HasStartBlueBtn())
-        {
-            console.log("press start btn");
-            PressStartBtn();
-            break;
-        }
-        Sleep();
-    }
-
-    for (let i = 0; i < 30; i++)
-    {
-        if (HasMenu())
-        {
-            console.log("已经进入游戏！");
-            return true;
-        }
-        Sleep();
-    }
-    console.log("进入游戏失败！");
-    return false;
-};
 const ReLoginFlow = () =>
 {
     const hasGoogleLogin = textMatches(/(.*使用Google登入.*)/).findOne(20);
@@ -227,172 +243,72 @@ const ReLoginFlow = () =>
     }
 };
 // const 
-let lastDebugModeTime = 0;
 const ExceptionFlow = (gameMode) =>
 {
     const shot = captureScreen();
-    const hasMenu = HasMenu();
-    if (hasMenu)
-    {
-        let curMinute = new Date().getMinutes();
-        if (curMinute != lastDebugModeTime)
-        {
-            console.log("debug mode: " + gameMode);
-            lastDebugModeTime = curMinute;
-        }
-        const isBackpackFull = IsBackpackFull(shot);
-        if (isBackpackFull)
-        {
-            console.log("backpack is full");
-            WearEquipments();
-            StrengthenEquipment();
-            LoginProps();
-            DecomposeEquipment();
-        }
-        const isNoption = IsNoPotion(shot);
-        if (isNoption)
-        {
-            if ((curMinute - lastTimeOfBuyingPotion) >= 1 && (curMinute - lastTimeOfBuyingPotion) < 10)
-            {
-                console.log("连续购买药水时间间隔较短，暂不购买");
-            }
-            else
-            {
-                console.log("no potion");
-                lastTimeOfBuyingPotion = new Date().getMinutes();
-                NoPotionFlow();
-            }
 
-        }
-    }
-    else
+    let curMinute = new Date().getMinutes();
+    if (curMinute != lastDebugModeTime)
     {
-        if (gameMode == "mainStory")
+        console.log("debug mode: " + gameMode);
+        lastDebugModeTime = curMinute;
+    }
+
+    if ((curMinute - lastTimeOfBuyingPotion) <= 2 || (curMinute - lastTimeOfBuyingPotion) > 10)
+    {
+        NoPotionFlow(shot);
+
+    }
+
+    if (gameMode == "mainStory")
+    {
+        if (IsHaltMode())
         {
-            if (IsHaltMode())
-            {
-                ExitHaltMode();
-            }
-        }
-        if (HasMainUI())
-        {
-            MakeSureInGame();
-        }
-        else if (HasDisconnection())
-        {
-            DisconnectionFlow();
+            ExitHaltMode();
         }
     }
-    ReLoginFlow();
-    PageBack();
-    CloseMenu();
-    CloseBackpack();
+
+    BackpackFullFlow(shot);
+    DisconnectionFlow(shot);
+
     ResetConfig();
-    // if(new Date().get)
+
+    MakeSureInGame(shot);
 };
 // *******************************************************************  确保在游戏中 *********************************************************************
 
 
-const MakeSureInGame = () =>
+const MakeSureInGame = (shot) =>
 {
-    app.launch("com.smilegate.lordnine.stove.google");
-    Sleep(3);
-    console.log("make sure in game flow");
+    CloseBackpack();
+    PageBack();
 
-    if (HasMenu())
+    if (!HasMenu())
     {
-        console.log("find menu in game! return ");
-        return true;
-    }
-    if (HasTip())
-    {
-        console.log("exception: found tip! return ");
-        return true;
-    }
-    if (HasPageback())
-    {
-        console.log("found packback! return true;");
-        return true;
-    }
-    for (let i = 0; i < 15; i++)
-    {
-        if (HasSkip())
+        if (!HasTip() && !HasPageback())
         {
             ClickSkip();
-            break;
+            CloseMenu();
         }
-        else if (HasMainUI())
-        {
-            break;
-        }
-        else if (HasStartBlueBtn())
-        {
-            PressStartBtn();
-            Sleep(10);
-            for (let i = 0; i < 30; i++)
-            {
-                if (HasMenu())
-                {
-                    return;
-                }
-                Sleep();
-            }
-        }
-        Sleep();
-    }
-    const config = ReadConfig();
-    if (config.ui.createCharacter)
-    {
-        const { CreateCharacterFlow } = require("./CreateCharacter.js");
-        CreateCharacterFlow(config.ui.serverName);
-    }
-    else
-    {
-        for (let i = 0; i < 60; i++)
-        {
-            if (HasMenu())
-            {
-                console.log("already in game...");
-                return true;
-            }
-            else if (HasStartBlueBtn())
-            {
-                PressStartBtn();
-                Sleep(10);
-                for (let i = 0; i < 30; i++)
-                {
-                    if (HasMenu())
-                    {
-                        return;
-                    }
-                    Sleep();
-                }
-            }
 
-            else if (HasMainUI())
-            {
-                MainUIFlow();
-                return true;
-            }
-            Sleep(1);
-        }
-        console.log("make sure in game failed...");
+        ReLoginFlow();
+        MainUIFlow(shot);
+        HasStartBlueBtn() && PressStartBtn();
+        InputVerificationFlow(shot);
     }
-
 };
 
 
-// *******************************************************************  确保在游戏中 *********************************************************************
+
 
 module.exports = {
-    ExceptionFlow, MakeSureInGame, HasMainUI
+    ExceptionFlow
 };
 
+
+// console.log(CloseBackpack());
 // console.time("exception");
-// if (IsHaltMode())
-// {
-//     ExitHaltMode();
-// }
+// ExceptionFlow("mainStory");
 // console.timeEnd("exception");
 // console.log(HasTouchToStart());
 // MakeSureInGame();
@@ -401,4 +317,4 @@ module.exports = {
 // ExceptionFlow();
 // MakeSureInGame();
 // console.log(MainUICheck());
-
+// console.log(FindMultiColors(NoPotionColorList, [331, 633, 46, 70]));

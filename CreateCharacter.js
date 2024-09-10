@@ -10,6 +10,9 @@ const {
     WaitUntil,
     WaitUntilFindColor,
     RestartGame,
+    LoadImgList,
+    FindImgInList,
+    GetVerificationCode,
 
 } = require("./utils.js");
 
@@ -128,15 +131,8 @@ const WaitUntilEnterAccountPage = () =>
 
     let hasEnterAccountPage = false;
 
-    const WhiteAvatarColorList = [
-        ["#a4a4a3", [[2, 0, "#b1b1b1"], [7, 1, "#b4b4b3"], [2, 4, "#bababa"], [5, 13, "#b6b6b6"]]],
-        ["#a4a4a3", [[1, 0, "#a6a6a5"], [2, 0, "#b1b1b1"], [5, 3, "#b4b4b3"], [3, 10, "#b8b8b8"]]]
-    ];
-    const CloseMarkColorList = [
-        ["#ebebeb", [[18, 17, "#ebebeb"], [36, 36, "#ebebeb"], [33, 1, "#ebebeb"], [3, 32, "#ebebeb"]]]
-    ];
 
-    for (let i = 0; i < 30; i++)
+    for (let i = 0; i < 90; i++)
     {
         let shot = captureScreen();
         if (HasMainUI())
@@ -145,70 +141,80 @@ const WaitUntilEnterAccountPage = () =>
             {
                 Sleep(5);
                 PressBlank();
-                const hasGoogleIcon = WaitUntil(() => FindImg(ImgList.googleLogin, [649, 492, 108, 105]));
-                if (hasGoogleIcon)
-                {
-                    RandomPress([759, 523, 298, 30]);
-                    console.log("enter google page successfully");
-                    Sleep(5);
-                    hasEnterAccountPage = true;
-                    break;
-                }
-                else
-                {
-                    alert("登录失败！", "未发现谷歌登录选项");
-                }
             }
         }
-        else if (FindImg(ImgList.googleLogin, [649, 492, 108, 105], shot))
+        let googleIcon = textMatches(/(.*Google.*)/).findOne(20);
+        if (googleIcon)
         {
             Sleep(3);
-            RandomPress([759, 523, 298, 30]);
-            console.log("enter google page successfully");
-            Sleep(5);
+            click(googleIcon.bounds().centerX(), googleIcon.bounds().centerY());
             hasEnterAccountPage = true;
+            console.log("发现谷歌登录选项。find google icon break;");
+            Sleep(3);
+        }
+        let hasForgetEmail_zh = text("忘记了电子邮件地址？").findOne(100);
+        let hasForgetEmail_kr = text("이메일을 잊으셨나요?").findOne(100);
+        if (hasForgetEmail_zh || hasForgetEmail_kr)
+        {
+            console.log("发现忘记电子邮件地址。 break。");
+
             break;
         }
-        else if (HasSkip())
+        let hasSelectAccount = textMatches(/(.*选择账号.*|.*계정 선택.*)/).findOne(20);
+        if (hasSelectAccount)
         {
-            ClickSkip();
+            let hasAccount = textMatches(/(.*@gmail.com.*)/).findOne(20).parent().parent();
+            if (hasAccount)
+            {
+                hasEnterAccountPage = true;
+                console.log("发现已经登录了账号，find select account break;");
+                break;
+            }
         }
-        else if (FindMultiColors(CloseMarkColorList, [1183, 24, 75, 79], shot))
-        {
-            RandomPress([1202, 43, 32, 43]);
-        }
-        else if (FindMultiColors(BlackBtnColorList, [268, 516, 749, 122], shot)) 
+
+        if (FindMultiColors(BlackBtnColorList, [268, 516, 749, 122], shot)) 
         {
             RandomPress([342, 564, 627, 37]);
         }
         Sleep();
     }
+    console.log("finished login account page");
     return hasEnterAccountPage;
 };
-// const WaitUntilSelectAccountPage = () =>
-// {
-//     console.log("wait unitl have select account page");
-//     for (let i = 0; i < 30; i++)
-//     {
-//         if (FindImg(ImgList.selectAccount_zh, [477, 106, 357, 170]))
-//         {
-//             RandomPress([385, 282, 494, 50]);
-//             return true;
-//         }
-//         else if (FindImg(ImgList.selectAccount_kr), [490, 67, 306, 130])
-//         {
-//             RandomPress([402, 284, 328, 51]);
-//             return true;
-//         }
-//         Sleep();
-//     }
-//     return false;
-// };
 
-// WaitUntilEnterAccountPage();
+const HadLoginCheck = () =>
+{
+    let hadLogin = false;
+
+    for (let i = 0; i < 30; i++)
+    {
+        let hasSelectAccount = textMatches(/(.*选择账号.*|.*계정 선택.*)/).findOne(20);
+        if (hasSelectAccount)
+        {
+            let hasAccount = textMatches(/(.*@gmail.com.*)/).findOne(20).parent().parent();
+            if (hasAccount)
+            {
+                console.log("find select account break;");
+                hasAccount.click();
+                hadLogin = true;
+                return hadLogin;
+            }
+        }
+        let hasForgetEmail_zh = text("忘记了电子邮件地址？").findOne(100);
+        let hasForgetEmail_kr = text("이메일을 잊으셨나요?").findOne(100);
+        if (hasForgetEmail_zh || hasForgetEmail_kr)
+        {
+            console.log("发现忘记电子邮件地址。 开始输入邮箱。");
+            console.log("input email account!");
+            hadLogin = false;
+            return hadLogin;
+        }
+        Sleep();
+    }
+};
 const LoginGoogleAccount = () =>
 {
-    console.log("wait until enter login page");
+    console.log("start login google account");
     const accountArray = GetAccountFile();
 
     const ClickNextBtn = () =>
@@ -226,7 +232,8 @@ const LoginGoogleAccount = () =>
             console.log("next btn clicked");
         }
     };
-    for (let i = 0; i < 30; i++)
+
+    for (let i = 0; i < 90; i++)
     {
         let hasForgetEmail_zh = text("忘记了电子邮件地址？").findOne(100);
         let hasForgetEmail_kr = text("이메일을 잊으셨나요?").findOne(100);
@@ -276,6 +283,15 @@ const LoginGoogleAccount = () =>
         {
             break;
         }
+        let hadYeah_0 = text("예").findOne(100);
+        if (hadYeah_0)
+        {
+            console.log("click yes");
+            hadYeah_0.click();
+            console.log("暂时不用输入辅助邮箱");
+            break;
+        }
+
         Sleep();
     }
     for (let i = 0; i < 30; i++)
@@ -334,6 +350,13 @@ const LoginGoogleAccount = () =>
             hasAcceptBtn_zh.click();
             break;
         }
+
+        let hadYeah = text("예").findOne(100);
+        if (hadYeah)
+        {
+            console.log("click yes");
+            hadYeah.click();
+        }
         let acc = 0;
         if (hasAcceptBtn_kr)
         {
@@ -365,43 +388,150 @@ const LoginGoogleAccount = () =>
     //     Sleep();
     // }
 };
+const SetCountryAndBirth = () =>
+{
+    console.log("SetCountryAndBirth");
+    let hadNeedSelectCountry = textMatches(/(.*국가 선택.*|.*選擇國家.*)/).findOne(20);
+    if (hadNeedSelectCountry)
+    {
+        hadNeedSelectCountry.click();
+        Sleep(3);
+        setText("Korea");
+        let hasCanada = textMatches(/(.*Korea.*)/).findOne(2000);
+        if (hasCanada)
+        {
+            Sleep(3);
+            RandomPress([298, 401, 219, 44]);
+        }
+    }
 
+    let hadNeedInputBirthday = textMatches(/(.*MM.DD.YYYY.*)/).findOne(4000);
+    if (hadNeedInputBirthday)
+    {
+
+        RandomPress([258, 317, 236, 28]);
+        const month = random(1, 12).toString().padStart("0", 2);
+        setText(0, month);
+        const day = random(1, 28).toString().padStart("0", 2);
+        setText(1, day);
+        const year = random(1960, 2004).toString().padStart("0", 2);
+        setText(2, year);
+        console.log("birthday input finished");
+        Sleep(3);
+        for (let i = 0; i < 30; i++)
+        {
+            let hadTermsAndConditions = text("확인").findOne(20);
+            if (hadTermsAndConditions)
+            {
+                console.log("同意条款");
+                hadTermsAndConditions.click();
+            }
+            let hasConfirm_cn = text("下一步").findOne(20);
+            let hasConirm_kr = text("다음").findOne(20);
+            if (hasConfirm_cn)
+            {
+                Sleep(5);
+                hasConfirm_cn.click();
+                console.log("click next");
+                Sleep(3);
+            }
+            else if (hasConirm_kr)
+            {
+                Sleep(5);
+                hasConirm_kr.click();
+                console.log("click next");
+                Sleep(3);
+            }
+            let hasConfirm_2_cn = text("確認").findOne(20);
+            let hasConfirm_2_kr = text("다음").findOne(20);
+            if (hasConfirm_2_cn)
+            {
+                Sleep(5);
+                hasConfirm_2_cn.click();
+                console.log("click confirm");
+                Sleep(3);
+                break;
+            }
+            else if (hasConfirm_2_kr)
+            {
+                Sleep(5);
+                hasConfirm_2_kr.click();
+                console.log("click confirm");
+                Sleep(3);
+                break;
+            }
+            Sleep();
+        }
+
+    }
+    console.log("finish set country and birth");
+};
 const PassGameRules = (accountArray) =>
 {
     console.log("pass game rules...");
 
-    const OrangeConfirmColorList = [
-        ["#fc4420", [[24, -3, "#fc4420"], [53, 4, "#fc4420"], [54, 31, "#fc4420"], [22, 34, "#fc4420"]]],
-        ["#fc4420", [[169, -6, "#fc4420"], [438, 22, "#fc4420"], [172, 43, "#fc4420"], [33, 45, "#fc4420"]]]
-    ];
     console.log("判断是否有橙色确认条");
-    for (let i = 0; i < 30; i++)
+    for (let i = 0; i < 60; i++)
     {
         let shot = captureScreen();
-        if (FindMultiColors(OrangeConfirmColorList, [495, 536, 311, 86], shot))
+        let hadNeedInputBirthday = textMatches(/(.*MM.DD.YYYY.*)/).findOne(20);
+        if (hadNeedInputBirthday)
         {
-            console.log("find orange confirm bar");
-            WaitUntilFindColor(OrangeConfirmColorList, [495, 536, 311, 86], 60) && RandomPress([300, 555, 713, 49]);
-
-            WaitUntilFindColor(OrangeConfirmColorList, [386, 527, 730, 107], 60) && RandomPress([469, 555, 546, 48]);
-            break;
+            console.log("输入生日");
+            SetCountryAndBirth();
+        }
+        let hadOrangeConfirm_KoreadRepublicOf = text("다음").findOne(20);
+        if (hadOrangeConfirm_KoreadRepublicOf)
+        {
+            console.log("korea Republic of");
+            hadOrangeConfirm_KoreadRepublicOf.click();
+            Sleep(3);
+        }
+        let hadOrangeConfirm_AgreeThreeProtocol = text("모두 동의 후 계속하기 (선택항목 포함)").findOne(20);
+        if (hadOrangeConfirm_AgreeThreeProtocol)
+        {
+            console.log("agree three protocol");
+            hadOrangeConfirm_AgreeThreeProtocol.click();
         }
         if (FindMultiColors(BlackBtnColorList, [272, 520, 748, 125], shot)) 
         {
-            console.log("find black confirm btn befor game rule pass");
+            console.log("发现令牌 黑色确认按钮");
+            break;
+        }
+        if (text("게임 기기 등록").findOne(20))
+        {
+            console.log("发现勾选框跳过");
             break;
         }
         Sleep();
     }
 
-
-    WaitUntilFindColor(BlackBtnColorList, [272, 520, 748, 125]) && RandomPress([415, 565, 472, 36]);
-
+    console.log("click black confirm btn; wait for click check box");
     let checkBox_0 = ReadImg("icon/login/checkBox_0");
+    for (let i = 0; i < 30; i++)
+    {
+        if (FindMultiColors(BlackBtnColorList, [272, 520, 748, 125]))
+        {
+            RandomPress([415, 565, 472, 36]);
+            break;
+        }
+        if (FindImg(checkBox_0, [247, 232, 127, 108]))
+        {
+            console.log("find check box");
+            break;
+        }
+        if (text("게임 기기 등록").findOne(20))
+        {
+            console.log("发现勾选框跳过");
+            break;
+        }
+    }
     const hasCheckBox_0 = WaitUntil(() => FindImg(checkBox_0, [247, 232, 127, 108]));
     if (hasCheckBox_0)
     {
-        RandomPress([304, 272, 423, 19]);
+        console.log("点击勾选框");
+        click(300, 280);
+        Sleep();
         RandomPress([337, 561, 632, 32]);
     }
     checkBox_0.recycle();
@@ -421,30 +551,7 @@ const PassGameRules = (accountArray) =>
     console.log("finish pass game rules");
 };
 
-const googleBackgroundIconColorList = [
-    ["#e1392c", [[-19, 20, "#2d9f4c"], [20, 22, "#fbc013"], [-2, 14, "#1a73e8"], [7, 21, "#1a73e8"]]],
-    ["#e23a2d", [[-19, 27, "#2a9c49"], [-2, 21, "#1a73e8"], [17, 23, "#fbc014"], [1, 14, "#1a73e8"]]]
-];
-const IsVertical = () =>
-{
-    for (let i = 0; i < 30; i++)
-    {
-        let shot = captureScreen();
-        if (FindMultiColors(googleBackgroundIconColorList, [312, 143, 103, 107], shot))
-        {
-            console.log("是竖屏");
-            return true;
-        }
-        else if (FindMultiColors(googleBackgroundIconColorList, [630, 19, 110, 107], shot))
-        {
-            console.log("是横屏");
-            return false;
 
-        }
-        Sleep();
-    }
-    return null;
-};
 const InputEmailUrl = () =>
 {
     console.log("start input email url");
@@ -459,7 +566,7 @@ const InputEmailUrl = () =>
     let hasLocationBar = false;
     let hasUrlBar = false;
 
-    for (let i = 0; i < 20; i++)
+    for (let i = 0; i < 90; i++)
     {
         hasHomeIcon = id("home_button").findOne(200);
         if (hasHomeIcon)
@@ -483,10 +590,12 @@ const InputEmailUrl = () =>
                 hasSearchInputBox = id("search_box").findOne(200);
                 if (hasSearchInputBox)
                 {
+                    console.log("find serch box");
                     break;
                 }
             }
         }
+
         hasSearchInputBox = id("search_box").findOne(100);
         if (hasSearchInputBox)
         {
@@ -512,20 +621,20 @@ const InputEmailUrl = () =>
         let hasFre_bottom_group = id("fre_bottom_group").findOne(100);
         if (hasFre_bottom_group)
         {
-            Sleep(5);
-            console.log("find fre_bottom_group.");
-            if (!IsVertical())
-            {
-                click(1130, 630);
-
-            }
-            else
-            {
-                click(350, 1200);
-            }
-
-
-            Sleep();
+            console.log("id: 首次打开谷歌浏览器，确认协议.");
+            click(hasFre_bottom_group.bounds().centerX(), hasFre_bottom_group.bounds().centerY());
+        }
+        let hadAggreeConcept = text("동의하고 계속").findOne(20);
+        if (hadAggreeConcept)
+        {
+            console.log("text:首次打开谷歌浏览器，确认协议.");
+            hadAggreeConcept.click();
+        }
+        let hasAddAccount = text("취소").findOne(20);
+        if (hasAddAccount)
+        {
+            console.log("是否添加账号，点击取消");
+            hasAddAccount.click();
         }
         let hasUseAccount = text("사용").findOne(100);
         if (hasUseAccount)
@@ -555,11 +664,10 @@ const InputEmailUrl = () =>
         Sleep();
         console.log("固定点击第一个");
         RandomPress([117, 195, 348, 48]);
-        Sleep(15);
     }
     return true;
 };
-// InputEmailUrl();
+
 const EnterGoogleEmail = () =>
 {
     console.log("enter google email");
@@ -567,27 +675,32 @@ const EnterGoogleEmail = () =>
     let hasRefreshIcon = false;
 
     console.log("judge if already login");
-    for (let i = 0; i < 30; i++)
+    for (let i = 0; i < 50; i++)
     {
-        // let hasUseWebVersion = text("Use the web version").findOne(20);
-        // if (hasUseWebVersion)
-        // {
-        //     console.log("click web version");
-        //     click(120, 1200);
-        //     Sleep(3);
-        // }
+        let hasUseWebVersion = text("Use the web version").findOne(20);
+        if (hasUseWebVersion)
+        {
+            console.log("click web version");
+            click(hasUseWebVersion.bounds().centerX(), hasUseWebVersion.bounds().centerY());
+            Sleep(3);
+        }
         hasRefreshIcon = text("Refresh").findOne(20);
         if (hasRefreshIcon)
         {
             console.log("already login in google account");
+        }
+        let hasMenu_0 = text("Menu").findOne(20);
+        if (hasMenu_0)
+        {
+            console.log("enter google email. find menu. break");
             break;
         }
         let account_picker_continue_as_button = textMatches(/(.*계속.*)/).findOne(20);
         if (account_picker_continue_as_button)
         {
-            console.log("related , identify login continue...");
+            console.log("发现关联账户弹窗，点击该账户进入邮箱");
             account_picker_continue_as_button.click();
-            Sleep(10);
+            Sleep(3);
         }
 
         Sleep();
@@ -641,7 +754,6 @@ const GetRecoveryCode = () =>
 
     let code = null;
 
-
     let hasRefreshIcon = false;
     let hasInBoxIcon = false;
     for (let i = 0; i < 30; i++)
@@ -652,36 +764,46 @@ const GetRecoveryCode = () =>
             console.log("has refresh icon enter google email success");
             hasRefreshIcon.click();
             Sleep(3);
-            break;
         }
         hasInBoxIcon = text("Inbox").findOne(20);
         if (hasInBoxIcon)
         {
             console.log("has inbox icon. click to inbox");
             hasInBoxIcon.click();
-            hasRefreshIcon = text("Refresh").findOne(15000);
-            if (hasRefreshIcon)
-            {
-                console.log("has refresh icon enter google email success");
-                hasRefreshIcon.click();
-                Sleep();
-                break;
-            }
+        }
+        let hasUseWebVersion = text("Use the web version").findOne(20);
+        if (hasUseWebVersion)
+        {
+            console.log("click web version");
+            click(hasUseWebVersion.bounds().centerX(), hasUseWebVersion.bounds().centerY());
+            Sleep(3);
+        }
+        let hasStoveEmail_0 = textMatches(/(.*인증 메일 안내.*)/).findOne(100);
+        if (hasStoveEmail_0)
+        {
+            console.log("recevie email");
+            hasStoveEmail_0.click();
+            break;
         }
         Sleep();
     }
-    let hasStoveEmail = textMatches(/(.*STOVE.*)/).findOne(15000);
-    if (hasStoveEmail)
+    for (let i = 0; i < 30; i++)
     {
-        console.log("recevie email");
-        hasStoveEmail.click();
-        const hasRecoveryCode = textMatches(/\d{6}/).findOne(15000);
-        if (hasRecoveryCode)
+        let hasStoveEmail = textMatches(/(.*인증 메일 안내.*)/).findOne(100);
+        if (hasStoveEmail)
         {
-            code = hasRecoveryCode.text();
+            console.log("recevie email");
+            hasStoveEmail.click();
+            let hasRecoveryCode = textMatches(/\d{6}/).findOne(100);
+            if (hasRecoveryCode)
+            {
+                code = hasRecoveryCode.text();
+                break;
+            }
         }
-    }
 
+        Sleep();
+    }
     return code;
 };
 
@@ -690,7 +812,11 @@ const LoginFlow = () =>
     console.log("login flow...");
     const accountArray = GetAccountFile();
     WaitUntilEnterAccountPage();
-    LoginGoogleAccount();
+    const hadLoginCheck = HadLoginCheck();
+    if (!hadLoginCheck)
+    {
+        LoginGoogleAccount();
+    }
     PassGameRules(accountArray);
     const hasInputEmailUrlSuccessfully = InputEmailUrl();
     if (hasInputEmailUrlSuccessfully)
@@ -706,16 +832,21 @@ const LoginFlow = () =>
     }
     console.log("code:", code);
     recents();
+    Sleep(3);
+
+    click(30, 600);
     Sleep();
-    if (IsVertical())
+    for (let i = 0; i < 30; i++)
     {
-        click(50, 550); // back to game
+        let hasCodeInputBox = text("게임 기기 등록").findOne(20);
+        if (hasCodeInputBox)
+        {
+            console.log("找到验证码输入框");
+            break;
+        }
+        Sleep();
     }
-    else
-    {
-        click(50, 350);
-    }
-    Sleep();
+
     setText(code);
     for (let i = 0; i < 30; i++)
     {
@@ -733,31 +864,49 @@ const LoginFlow = () =>
         }
         Sleep();
     }
+    const voiceIconColorList = [
+        ["#ccbc8b", [[7, -2, "#d7c692"], [9, -3, "#d4c391"], [10, 1, "#dac894"], [9, 2, "#dac894"]]]
+    ];
+    Sleep(5);
+    if (FindMultiColors(voiceIconColorList, [1207, 27, 48, 47]))
+    {
+        console.log("voice icon found! need download something");
+        for (let i = 0; i < 30; i++)
+        {
+            if (FindMultiColors(voiceIconColorList, [1207, 27, 48, 47]))
+            {
+                console.log("voice icon found! need download something");
+            }
+            else
+            {
+                console.log("voice icon not found! need download something");
+                break;
+            }
+            Sleep(60);
+        }
+    }
 };
 
+const PressServerBar = () => RandomPress([547, 590, 173, 32]);
 const WaitUntilEnterServerSelectPage = () =>
 {
     console.log("wait until enter server select page");
-    const PressServerBar = () => RandomPress([547, 590, 173, 32]);
 
-    out: for (let i = 0; i < 30; i++)
+    for (let i = 0; i < 90; i++)
     {
         if (HasMainUI())
         {
             Sleep(5);
             PressServerBar();
-            for (let j = 0; j < 30; j++)
-            {
-                if (FindMultiColors(WhiteAvatarColorList, [35, 601, 44, 41]))
-                {
-                    PressServerBar();
-                }
-                else if (HasPopupClose([1168, 60, 48, 56]))
-                {
-                    console.log("enter server select page successfullly!!");
-                    break out;
-                }
-            }
+        }
+        if (FindMultiColors(WhiteAvatarColorList, [35, 601, 44, 41]))
+        {
+            PressServerBar();
+        }
+        if (HasPopupClose([1161, 56, 61, 68]))
+        {
+            console.log("enter server select page successfullly!!");
+            break;
         }
         else if (HasSkip())
         {
@@ -922,8 +1071,8 @@ const SetName = () =>
 {
     console.log("start create character...");
     let hasCreateCharacterBtn = false;
-
-    for (let i = 0; i < 30; i++)
+    let verificationCodeImgList = LoadImgList("icon/login/verificationCodePopup");
+    for (let i = 0; i < 90; i++)
     {
         if (FindBlueBtn([894, 621, 348, 97]))
         {
@@ -931,7 +1080,30 @@ const SetName = () =>
             hasCreateCharacterBtn = true;
             break;
         }
+        let hasPopup_verificationCode = FindImgInList(verificationCodeImgList, [530, 235, 215, 78]);
+        if (hasPopup_verificationCode)
+        {
+            console.log("发现验证码弹窗");
+            RandomPress([511, 426, 295, 11]);
+            const code = GetVerificationCode();
+            console.log("验证码为:" + code);
+            setText(code);
+            Sleep();
+            if (FindBlueBtn([531, 500, 222, 73]))
+            {
+                RandomPress([569, 518, 143, 31]);
+                Sleep();
+                break;
+            }
+        }
+        if (FindMultiColors(WhiteAvatarColorList, [35, 601, 44, 41]))
+        {
+            PressBlank();
+        }
+        // let hasNeedInputVerificationCode =
+        Sleep();
     }
+    RecycleServerImgList(verificationCodeImgList);
     if (hasCreateCharacterBtn == true)
     {
         console.log("点击创建角色");
@@ -1005,7 +1177,41 @@ const FirstEnterGameClickSkip = () =>
 const CreateCharacterFlow = (serverName) =>
 {
     console.log("import select server flow");
-    LoginFlow();
+    let hadAlreadyLogin = false;
+    for (let i = 0; i < 60; i++)
+    {
+        if (HasMainUI())
+        {
+            Sleep(5);
+            PressServerBar();
+        }
+        if (HasPopupClose([1168, 60, 48, 56]))
+        {
+            console.log("检测到已经登录账号，跳过登录账号");
+            hadAlreadyLogin = true;
+            break;
+        }
+        if (textMatches(/(.*Google.*)/).findOne(20))
+        {
+            console.log("发现Google账号登录界面，需要登录账号");
+            hadAlreadyLogin = false;
+            break;
+        }
+        if (HasSkip())
+        {
+            ClickSkip();
+        }
+        if (FindMultiColors(WhiteAvatarColorList, [35, 601, 44, 41]))
+        {
+            PressServerBar();
+            break;
+        }
+        Sleep();
+    }
+    if (hadAlreadyLogin == false)
+    {
+        LoginFlow();
+    }
 
     WaitUntilEnterServerSelectPage();
 

@@ -1,9 +1,9 @@
 "ui";
 
-const { RewriteConfig, Sleep, specialConfig } = require("./utils");
-const { ExceptionFlow, MakeSureInGame } = require("./Exception");
+const { RewriteConfig, Sleep, specialConfig, LaunchGame, GetCaptureScreenPermission, } = require("./utils");
+const { ExceptionFlow } = require("./Exception");
 const { MainStoryFlow } = require("./MainStory.js");
-const { ListenServerFlow } = require("./ListenServer.js");
+
 const { InstanceFlow } = require("./Instance.js");
 
 let isRunning = false;
@@ -13,6 +13,9 @@ let launchData = {};
 function StartScript(data)
 {
     console.log("start script data: " + data);
+
+    // GetCaptureScreenPermission();
+
     if (isRunning == true)
     {
         console.log("结束");
@@ -26,12 +29,13 @@ function StartScript(data)
         {
             isRunning = true;
             auto();
-            threads.start(function () { images.requestScreenCapture(true); });
+            images.requestScreenCapture(true);
             threads.start(function ()
             {
                 const hasOpen = textMatches(/(.*시작하기.*|.*立即开始.*)/).findOne(2000);
                 if (hasOpen)
                 {
+                    sleep(1000);
                     hasOpen.click();
                 }
             });
@@ -84,19 +88,19 @@ const AutoInstallApk = (url) =>
     {
         app.viewFile(`/sdcard/${url}`);
 
-        let hasUpdate = text("업데이트").findOne(15000);
-        if (hasUpdate)
-        {
-            hasUpdate.click();
-            // sleep(2000);
-        }
-        let hasOpen = text("열기").findOne(15000);
-        if (hasOpen)
-        {
-            console.log("open");
-            hasOpen.click();
-        }
+        //     let hasUpdate = textMatches(/(.*업데이트.*|.*更新.*)/).findOne(5000);
+        //     if (hasUpdate)
+        //     {
+        //         hasUpdate.click();
+        //         // sleep(2000);
+        //     }
 
+        //     let hasOpen = textMatches(/(.*열기.*|.*打开.*)/).findOne(15000);
+        //     if (hasOpen)
+        //     {
+        //         console.log("open");
+        //         hasOpen.click();
+        //     }
     }
 };
 const UpdateScript = () => DownLoadApk("LordNine.apk", "LordNine/LordNine.apk");
@@ -122,7 +126,7 @@ const UI = () =>
     ui.web.jsBridge.registerHandler("UpdateScript", (data, callBack) =>
     {
         UpdateScript();
-        AutoInstallApk("LordNine/LordNine.apk");
+        // AutoInstallApk("LordNine/LordNine.apk");
         callBack("successful");
     });
     ui.web.jsBridge.registerHandler("DownloadAutoJs", (data, callBack) =>
@@ -139,13 +143,13 @@ console.setGlobalLogConfig({
 
 
 const floaty_window = floaty.window(
-    <frame gravity="center" id="switch" w="12" h="20" bg="#F5EDED" alpha="1">
+    <frame gravity="center" id="switch" w="12" h="20" bg="#79BEDB" alpha="1">
         <text id="debug" textColor="#7FA1C3"></text>
     </frame>
 );
 
 
-floaty_window.setPosition(10, 650);
+floaty_window.setPosition(0, 680);
 
 floaty_window.switch.click(function ()
 {
@@ -163,14 +167,6 @@ floaty_window.switch.click(function ()
         mainThread = threads.start(function ()
         {
             isRunning = true;
-            threads.start(function ()
-            {
-                const hasOpen = textMatches(/(.*시작하기.*|.*立即开始.*)/).findOne(2000);
-                if (hasOpen)
-                {
-                    hasOpen.click();
-                }
-            });
             MainFlow(launchData);
         }
         );
@@ -179,8 +175,13 @@ floaty_window.switch.click(function ()
 
 const Start = (data) =>
 {
+    LaunchGame();
     RewriteConfig("ui", data);
-    MakeSureInGame();
+    if (data.createCharacter == true)
+    {
+        const { CreateCharacterFlow } = require("./CreateCharacter.js");
+        CreateCharacterFlow(data.serverName);
+    }
 };
 
 const Update = () =>
@@ -214,8 +215,6 @@ const MainFlow = (data) =>
 {
     Start(data);
     Update();
-    // app.launch("com.smilegate.lordnine.stove.google");
-    // ListenServerFlow();
 };
 
 UI();

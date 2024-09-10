@@ -318,38 +318,61 @@ const SetApplicationProxy = () =>
 // console.log(IsHaltMode());
 // toast("hello");
 // console.log(textMatches(/(.*시작하기.*|.*立即开始.*)/).findOne(2000));
-const GetVerificationCode = () =>
-{
-    const url = "https://upload.chaojiying.net/Upload/Processing.php";
-    const clip = images.clip(images.captureScreen(), 470, 297, 278, 86);
 
-    // files.create("/sdcard/clip/");
-    // const fileName = `${GetFormatedTimeString("_")}.png`;
-    // images.save(clip, `/sdcard/clip/${fileName}`);
-    // const img = files.read(`/sdcard/clip/${fileName}`);
-    // const img = clip;
-    const img = images.toBase64(clip);
-    const data =
-    {
-        user: "btx159632",
-        pass: "Snhc2024",
-        softid: "6909c4f85873ab3fd2011a6c72e4ed5b",
-        codetype: "1902",
-        // userfile: img
-        file_base64: img
-    };
-    const result = http.post(url, data);
-    // const result = http.request(url, {
-    //     headers: {
-    //         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.8; rv:24.0) Gecko/20100101 Firefox/24.0',
-    //         'Content-Type': 'application/x-www-form-urlencoded'
-    //     },
-    //     method: 'POST',
-    //     contentType: "text/ html; charset=utf-8",
-    //     body: data
-    // });
-    console.log(result.body.json().pic_str);
-};
-setText("111");
-// console.log(GetFormatedTimeString("_"));
-// files.create("/sdcard/clip/");
+// let hadNeedSelectCountry = text("국가 선택").findOne(20);
+// if (hadNeedSelectCountry)
+// {
+//     hadNeedSelectCountry.click();
+//     Sleep();
+//     setText("Canada");
+//     let hasCanada = text("Canada").findOne(2000);
+//     if (hasCanada)
+//     {
+//         Sleep(3);
+//         RandomPress([298, 401, 219, 44]);
+//     }
+// }
+
+// let hadNeedInputBirthday = text("생년월일 MM.DD.YYYY").findOne(20);
+// if (hadNeedInputBirthday)
+// {
+
+//     RandomPress([258, 317, 236, 28]);
+//     const month = random(1, 12).toString().padStart("0", 2);
+//     setText(0, month);
+//     const day = random(1, 28).toString().padStart("0", 2);
+//     setText(1, day);
+//     const year = random(1960, 2004).toString().padStart("0", 2);
+//     setText(2, year);
+//     console.log(`${month}-${day} -${year}`);
+// }
+
+// console.log(textMatches(/(.*다음.*|.*下一步.*)/).findOne(15000));
+// toast("hello");
+// console.log(textMatches(/\d{6}/).findOne(100));
+// console.log(text("동의하고 계속").findOne(20).click());
+// let googleIcon = textMatches(/(.*Google.*)/).findOne(20);
+// if (googleIcon)
+// {
+//     click(googleIcon.bounds().centerX(), googleIcon.bounds().centerY());
+// }
+// let hasUseTheWebVersion = text("Use the web version").findOne(20);
+// if (hasUseTheWebVersion)
+// {
+//     console.log("发现使用网页版图标");
+//     console.log(textMatches(/\d{6}/).findOne(100));
+// }
+// console.log(text("Refresh").findOne(100));
+// console.log(hasUseTheWebVersion);
+// console.log(text("국가 선택").findOne(20).click());
+// setText("Korea");
+// console.log(text("Korea, Republic of").findOne(10));
+// text("국가 선택").findOne().parent().parent();
+// 인증 메일 안내;
+// toast("hello");
+console.log(HasPopupClose([1166, 61, 50, 56]));
+// console.log(text("Menu").findOne(20));
+// console.log(text("Refresh").findOne(20));
+// console.log(textMatches(/(.*인증 메일 안내.*)/).findOne(100));
+
+// console.log(text("동의하고 계속").findOne(20));

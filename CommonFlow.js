@@ -16,6 +16,7 @@ const {
     CloseBackpack,
 } = require("./utils.js");
 
+let lastComprehensiveImproveTime = 0;
 
 const GetEmail = () =>
 {
@@ -428,12 +429,16 @@ const StrengthenHorseEquipment = () =>
     if (FindGoldBtn([869, 653, 171, 63]))
     {
         RandomPress([888, 669, 135, 31]);
-        WaitUntil(() => FindBlueBtn([870, 654, 353, 62]));
+        if (FindBlueBtn([870, 654, 353, 62]))
+        {
+            RandomPress([919, 672, 272, 28]);
+        }
+
     }
 
+    RandomPress([1032, 153, 31, 31]);
     for (let i = 0; i < 3; i++)
     {
-        RandomPress([899, 666, 301, 36]);
         if (FindBlueBtn([650, 439, 211, 73]))
         {
             RandomPress([680, 459, 154, 33]);
@@ -444,10 +449,9 @@ const StrengthenHorseEquipment = () =>
         }
         Sleep(3);
     }
-    RandomPress([1089, 209, 31, 32]);
+    RandomPress([973, 208, 36, 35]);
     for (let i = 0; i < 3; i++)
     {
-        RandomPress([899, 666, 301, 36]);
         if (FindBlueBtn([650, 439, 211, 73]))
         {
             RandomPress([680, 459, 154, 33]);
@@ -458,10 +462,9 @@ const StrengthenHorseEquipment = () =>
         }
         Sleep(3);
     }
-    RandomPress([976, 209, 32, 35]);
+    RandomPress([1087, 208, 31, 34]);
     for (let i = 0; i < 3; i++)
     {
-        RandomPress([899, 666, 301, 36]);
         if (FindBlueBtn([650, 439, 211, 73]))
         {
             RandomPress([680, 459, 154, 33]);
@@ -874,6 +877,7 @@ const UpgradeHolyRelics = () =>
     {
         thirdUnlocked = true;
     }
+
     if (thirdUnlocked)
     {
         Sleep();
@@ -903,6 +907,14 @@ const ComprehensiveImprovement = () =>
 {
     console.log("start comprehensive improvement");
 
+    if (Math.abs(lastComprehensiveImproveTime - new Date().getMinutes()) < 10)
+    {
+        console.log("finish: 两次提升间隔较短，暂不操作");
+        return true;
+    }
+
+    lastComprehensiveImproveTime = new Date().getMinutes();
+
     HasCrucifixIcon() && PickUpAbilityPoint();
 
     const isBackpackFull = IsBackpackFull(captureScreen());
@@ -928,6 +940,7 @@ const ComprehensiveImprovement = () =>
 
     if (!isBackpackFull)
     {
+        console.log("backpack is not full");
         WearEquipments();
         StrengthenEquipment();
         LoginProps();
@@ -941,7 +954,7 @@ const ComprehensiveImprovement = () =>
     StrengthenHorseEquipment();
     UpgradeAbilityLevel();
     ShopBuy();
-
+    console.log("finish");
 };
 
 
@@ -951,12 +964,15 @@ module.exports = {
 };
 
 
+// ComprehensiveImprovement();
+// UpgradeHolyRelics();
+// StrengthenHorseEquipment();
 // HasCrucifixIcon() && PickUpAbilityPoint();
 // PullDownSkill([1060, 650]);
 // PullDownSkill([1130, 650]);
 // PullDownSkill([1190, 650]);
 // ChangeAbility();
-// ComprehensiveImprovement();
+// console.log(FindTipPoint([718, 311, 42, 33]));
 // WearEquipments();
 // OpenAllBox();
 // UpgradeAbilityLevel()

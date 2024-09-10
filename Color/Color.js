@@ -73,14 +73,16 @@ const TipPointColorList = [
     ["#92162e", [[1, 0, "#88112d"], [2, 0, "#88112d"], [0, 1, "#941b3a"], [3, 1, "#8e123b"]]],
     ["#7f0b1e", [[2, 0, "#7f0b1e"], [4, 0, "#8d1125"], [1, 1, "#87112a"], [2, 1, "#87112a"]]],
     ["#921025", [[1, 0, "#921025"], [2, 0, "#921025"], [4, 0, "#a3182f"], [0, 1, "#a31838"]]],
-    ["#99132e", [[2, 0, "#99132e"], [3, 0, "#a3172f"], [1, 1, "#a91b3e"], [2, 1, "#a91b3e"]]]
+    ["#99132e", [[2, 0, "#99132e"], [3, 0, "#a3172f"], [1, 1, "#a91b3e"], [2, 1, "#a91b3e"]]],
+    ["#931127", [[2, 0, "#951127"], [1, 0, "#931127"], [0, 1, "#a6193b"], [2, 1, "#a8193b"]]]
 ];
 const SkipColorList = [
     ["#ffd074", [[3, 0, "#ffd074"], [8, -4, "#ffd074"], [7, 5, "#ffd074"], [12, 0, "#ffd074"]]],
     ["#fff5b5", [[8, 1, "#fcf2b3"], [25, 1, "#fff5b5"], [32, 0, "#fff5b5"], [40, -3, "#fef5b5"]]],
     ["#fff5b5", [[12, 1, "#fff5b5"], [29, -4, "#faf0b2"], [29, 7, "#faf0b2"], [38, 0, "#fff5b5"]]],
     ["#ffd074", [[5, 0, "#fed074"], [7, -5, "#ffd074"], [12, 0, "#ffd074"], [7, 5, "#ffd074"]]],
-    ["#ffd074", [[4, 0, "#fdd073"], [8, -3, "#f3c76e"], [8, 6, "#ffd074"], [18, -2, "#ffd074"]]]
+    ["#ffd074", [[4, 0, "#fdd073"], [8, -3, "#f3c76e"], [8, 6, "#ffd074"], [18, -2, "#ffd074"]]],
+    ["#ffd074", [[3, 0, "#fdcf73"], [8, -4, "#ffd074"], [8, 6, "#ffd074"], [18, -1, "#ffd074"]]]
 ];
 const CheckMarkColorList = [
     ["#ffd561", [[2, 3, "#ffd561"], [7, 6, "#ffd561"], [12, 3, "#ffd561"], [16, -1, "#ffd561"]]], //shop checkmark
@@ -89,7 +91,6 @@ const CheckMarkColorList = [
     ["#e8d680", [[3, 2, "#ffe98b"], [4, 4, "#bfaf67"], [6, 1, "#f4e086"], [9, -1, "#af9e5e"]]],
     ["#f0e0ac", [[2, 3, "#ffeeb8"], [4, 6, "#ffeeb8"], [7, 2, "#ffeeb8"], [10, 0, "#ffeeb8"]]], //server name a name confirm
 ];
-
 
 const GoldBtnColorList = [
     ["#39362f", [[47, -2, "#3a3630"], [97, 0, "#39362f"], [-3, 12, "#39352f"], [45, 24, "#444038"]]],
@@ -128,19 +129,22 @@ const PopupCloseColorList = [
     ["#82765b", [[7, 7, "#5d5540"], [14, 14, "#625944"], [14, 1, "#786d54"], [0, 14, "#6b614a"]]],
     ["#84785d", [[7, 9, "#71654e"], [15, 15, "#625844"], [14, 1, "#82765b"], [1, 14, "#685e49"]]],
     ["#7d7056", [[7, 8, "#81755a"], [17, 16, "#7d7157"], [16, 0, "#a29271"], [2, 15, "#655b46"]]],
-    ["#84785d", [[7, 6, "#625944"], [13, 12, "#6e634c"], [14, -1, "#7a6e55"], [0, 13, "#635945"]]]
+    ["#84785d", [[7, 6, "#625944"], [13, 12, "#6e634c"], [14, -1, "#7a6e55"], [0, 13, "#635945"]]],
+    ["#968965", [[7, 8, "#887c5b"], [15, 14, "#847959"], [13, 1, "#8f8360"], [0, 14, "#7b7052"]]]
 ];
+
 const BackpackFullColorList = [
     ["#fda763", [[3, 0, "#fda763"], [6, 0, "#fda763"], [9, 0, "#fda763"], [13, 0, "#fda763"]]],
     ["#f6a461", [[2, 0, "#f6a361"], [7, 0, "#f6a461"], [13, 0, "#f6a361"], [18, 1, "#c68552"]]],
     ["#f6a461", [[3, 0, "#f6a361"], [5, 0, "#f6a361"], [8, 0, "#f6a461"], [13, 0, "#f6a361"]]],
     ["#f75757", [[3, 0, "#f75857"], [8, 0, "#f75857"], [10, 0, "#f75858"], [19, 0, "#f75857"]]]
 ];
+
 const PleaseTapBlankColorList = [
     ["#f6e49e", [[13, -4, "#fdeba3"], [34, 1, "#f7e59e"], [51, 0, "#fdeba3"], [71, -1, "#ffeca5"]]],
     // []
 ];
 module.exports = {
-    PagebackColorList, MenuColorList, MenuCloseColorList, BlueBtnColorList, RedBtnColorList, TipPointColorList, BackpackColorList,
-    SkipColorList, CheckMarkColorList, GoldBtnColorList, PopupCloseColorList, BackpackFullColorList, PleaseTapBlankColorList
+    PagebackColorList, MenuColorList, MenuCloseColorList, BlueBtnColorList, RedBtnColorList, TipPointColorList, BackpackColorList, BackpackFullColorList,
+    SkipColorList, CheckMarkColorList, GoldBtnColorList, PopupCloseColorList, PleaseTapBlankColorList
 };

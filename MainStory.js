@@ -25,13 +25,13 @@ const {
 } = require("./utils.js");
 
 const { TipColorList, ArrowColorList, BlankColorList, QuestionMarkColorList, NextColorList, Auto_inactiveColorList,
-    Auto_activeColorList, QuestColorList, RidingColorList, TalkColorList, LeaveColorList, TalkBubbleColorList,
+    Auto_activeColorList, QuestColorList, TalkBubbleColorList,
     SpeedUpOffColorList,
 } = require("./Color/MainStoryColorList.js");
 
 const { WearEquipments, StrengthenEquipment, OpenAllBox, DecomposeEquipment } = require("./Backpack.js");
 
-const { ComprehensiveImprovement, StrengthenHorseEquipment, ChangeAbility } = require("./CommonFlow.js");
+const { ComprehensiveImprovement, StrengthenHorseEquipment } = require("./CommonFlow.js");
 
 const PageImg = {
     "abilityPage": ReadImg('icon/beginner/growthMission/abilityPage')
@@ -41,7 +41,7 @@ const PageImg = {
 
 let storyMode = "mainMission";
 let isAttackingfirstBoss = false;
-
+let lastTransformationTime = 0;
 // 点击提示
 const HasTip = () => FindMultiColors(TipColorList, [19, 17, 1238, 688]);
 const FindArrow = (region) =>
@@ -70,7 +70,7 @@ const FindArrow = (region) =>
             return ["right", hasRightArrow];
         }
 
-        sleep(0.02);
+        Sleep(0.1);
     }
     return false;
 };
@@ -132,16 +132,11 @@ const IsInQuest = (region) => FindMultiColors(QuestColorList, region);
 const TapDialog = () =>
 {
     const shot = captureScreen();
-    const hasSkip = HasSkip(shot);
     const hasNext = HasNext(shot);
     const hasTalkBubble = HasTalkBubble(shot);
     const isSpeedUpOff = IsSpeedUpOff(shot);
-    if (hasSkip)
-    {
-        RandomPress([517, 399, 223, 15]);
-        ClickSkip();
-    }
-    else if (hasNext)
+
+    if (hasNext)
     {
         ClickNext();
     }
@@ -149,11 +144,22 @@ const TapDialog = () =>
     {
         RandomPress([538, 399, 206, 17]);
     }
-    else if (isSpeedUpOff)
+    if (isSpeedUpOff)
     {
         RandomPress([1109, 39, 139, 14]);
         RandomPress([1174, 88, 71, 18]);
         RandomPress([1174, 88, 71, 18]);
+    }
+};
+const TransformMainStory = () =>
+{
+    console.log("transform main story");
+    RandomPress([1149, 126, 19, 20]);
+    if (FindBlueBtn([653, 443, 204, 65]))
+    {
+        RandomPress([689, 461, 145, 31]);
+        lastTransformationTime = new Date().getMinutes();
+        Sleep(5);
     }
 };
 const AutoMainStory = () =>
@@ -170,19 +176,45 @@ const AutoMainStory = () =>
 
     if (hasAuto_active && !hasAuto_inactive)
     {
-        ClickMainStory();
+        if (Math.abs(lastTransformationTime - new Date().getMinutes()) < 10)
+        {
+            ClickMainStory();
+        }
+        else
+        {
+            TransformMainStory();
+        }
         return true;
     }
+
     else if (!hasAuto_active && !hasAuto_inactive)
     {
+        if (HasMenu())
+        {
+            if (IsInCity())
+            {
+                console.log("character is in city. directly transform.");
+
+                TransformMainStory();
+
+                return true;
+            }
+        }
         return false;
     }
     else if (!hasAuto_active && hasAuto_inactive)
     {
         if (!IsMoving())
         {
-            ClickMainStory();
-
+            console.log("main story:  character is not moving");
+            if (Math.abs(lastTransformationTime - new Date().getMinutes()) < 10)
+            {
+                ClickMainStory();
+            }
+            else
+            {
+                TransformMainStory();
+            }
         }
         return true;
     }
@@ -222,7 +254,9 @@ const BossTitleColorList = [
     ["#fe2d02", [[4, -1, "#fe2d02"], [10, 2, "#f72f14"], [28, -1, "#f83118"], [28, 4, "#fa2d08"]]],
     ["#ff2d00", [[23, 2, "#f92e0c"], [36, 2, "#fb2d04"], [52, 3, "#ff2d00"], [105, 8, "#fe2d01"]]],
     ["#fb2d05", [[1, 0, "#fd2d02"], [6, 0, "#fe2d00"], [10, 0, "#fb2d07"], [16, 0, "#ff2d00"]]],
-    ["#fd2d03", [[1, 0, "#ff2d00"], [4, 0, "#fb2e07"], [6, 0, "#fd2d01"], [37, -1, "#fb2d03"]]]
+    ["#fd2d03", [[1, 0, "#ff2d00"], [4, 0, "#fb2e07"], [6, 0, "#fd2d01"], [37, -1, "#fb2d03"]]],
+    ["#ff2d00", [[0, 4, "#ff2d00"], [9, 4, "#fc2d05"], [17, 7, "#ff2d00"], [23, 2, "#ff2d00"]]],
+    ["#fa2d07", [[0, 5, "#fa2d04"], [18, -2, "#ff2d00"], [18, 4, "#ff2d00"], [22, 2, "#f72d06"]]]
 ];
 
 const DeathCheck = () =>
@@ -235,7 +269,7 @@ const DeathCheck = () =>
             console.log("character is dead");
             return true;
         }
-        else if (FindImg(DeathImgList[i], [600, 591, 76, 65], shot))
+        else if (FindImg(DeathImgList[i], [527, 584, 217, 85], shot)) 
         {
             console.log("character is dead! lost ability point");
             return true;
@@ -248,16 +282,23 @@ const DeathFlow = () =>
 {
     console.log("Main Story Death Flow: Start  Death Flow!");
     Sleep(3);
-    if (FindBlueBtn([526, 588, 228, 75])) 
+    for (let i = 0; i < 30; i++)
     {
-        Sleep(3);
-        RandomPress([570, 608, 151, 30]);
+        if (FindBlueBtn([524, 581, 245, 94])) 
+        {
+            Sleep(5);
+            RandomPress([572, 611, 141, 29]);
+            break;
+        }
+        if (FindBlueBtn([536, 415, 204, 77]))
+        {
+            Sleep(3);
+            RandomPress([568, 437, 151, 30]);
+            break;
+        }
+        Sleep();
     }
-    else if (FindBlueBtn([536, 415, 204, 77]))
-    {
-        Sleep(3);
-        RandomPress([568, 437, 151, 30]);
-    }
+
 
     storyMode = "growthMission";
     const hasMenu = WaitUntilMenu();
@@ -272,7 +313,6 @@ const DeathFlow = () =>
     config.game.deathTime++;
     if (isAttackingfirstBoss)
     {
-        ChangeAbility();
         console.log("attacking first boss ! change game mode to instance mode");
         if (config.game.today != new Date().getDate())
         {
@@ -368,7 +408,7 @@ const AttackingBossFlow = (number) =>
             console.log("Lost Boss Title!");
             lostTitleCount++;
             console.log("lost title count: " + lostTitleCount);
-            if (lostTitleCount > 10)
+            if (lostTitleCount > 8)
             {
 
                 return true;
@@ -442,7 +482,7 @@ const AttackingBossFlow = (number) =>
             {
                 click(1095, 443);
                 console.log("switch enemy...");
-                Sleep(0.1);
+                Sleep(0.02);
             }
         }
     }
@@ -500,8 +540,8 @@ const MainStoryBranch = () =>
         // start to change weapon
         console.log("start to change weapon...");
         OpenAllBox();
-        OpenAllBox();
         WearEquipments();
+        OpenAllBox();
         Sleep();
 
     }
@@ -688,28 +728,13 @@ const MainStoryException = () =>
             };
             const BossIndex = GetBossIndex();
             console.log("boss index: " + BossIndex);
-            if (BossIndex == 0)
+            if (BossIndex == 1)
             {
                 isAttackingfirstBoss = true;
             }
             AttackingBossFlow(BossIndex);
             console.log("finish boss flow");
         }
-        else if (!IsMoving())
-        {
-            const isQuest = MainStoryQuestCheck();
-            if (isQuest)
-            {
-                return true;
-            }
-            const hasMainStoryQuestIcon = HasMainStoryQuestIcon();
-            if (hasMainStoryQuestIcon && storyMode == "mainMission")
-            {
-                ClickMainStory();
-                console.log("character is stoped moving");
-            }
-        }
-
     }
 
     if (FindMultiColors(BlankColorList, [582, 529, 119, 32], shot))
@@ -814,7 +839,7 @@ const GrowthMissionFlow = () =>
     }
     else
     {
-        console.log("not find growth mission icon");
+        console.log("not find growth mission icon, change story mode to main mission");
         storyMode = "mainMission";
         return true;
     }
@@ -882,7 +907,7 @@ const GrowthMissionFlow = () =>
             }
         }
         RightOnJoinGuildImg.recycle();
-        PageBack();
+        RandomPress([1189, 19, 52, 25]);
     }
     const hasDailyMissionPage = FindImg(GrowthImgList.dailyMissionPage, [26, 60, 105, 51], shot);
     if (hasDailyMissionPage)
@@ -971,16 +996,12 @@ const DailyMissionFlow = () =>
 
 const MainStoryFlow = () =>
 {
-    const hasMenu = HasMenu();
-    if (hasMenu && storyMode == "mainMission")
+    if (storyMode == "mainMission")
     {
         AutoMainStory();
     }
-    else
-    {
-        TapDialog();
-    }
-    if (storyMode == "growthMission")
+
+    else if (storyMode == "growthMission")
     {
         GrowthMissionFlow();
     }
@@ -988,6 +1009,7 @@ const MainStoryFlow = () =>
     {
         DailyMissionFlow();
     }
+    TapDialog();
     TapTip();
     MainStoryBranch();
     MainStoryException();
@@ -995,39 +1017,16 @@ const MainStoryFlow = () =>
 
 
 
+
 module.exports = { HasTip, MainStoryFlow };
 
 
+
+// console.time("MainStoryFlow");
 // while (true)
 // {
 //     MainStoryFlow();
-//     Sleep(1);
 // }
+// console.timeEnd("MainStoryFlow")
 
-// const hasGuildPage = FindImg(GrowthImgList.joinGulidPage, [570, 650, 54, 57]);
-// if (hasGuildPage)
-// {
-//     console.log("growth mission 6: join guild");
-//     const RightOnJoinGuildImg = ReadImg('icon/font/rightNow');
-//     const FindStraightAwayBtn = (region) => FindImg(RightOnJoinGuildImg, region);
-//     let hasStrBtn = false;
-//     for (let i = 0; i < 15; i++)
-//     {
-//         hasStrBtn = FindStraightAwayBtn([1136, 199, 54, 353]);
-//         if (!hasStrBtn)
-//         {
-//             SwipeSlowly([492, 516, 76, 27], [496, 210, 70, 25], 4);
-//         }
-//         else
-//         {
-//             console.log("find straight away btn" + hasStrBtn);
-//             // RandomPress([hasStrBtn.x - 20, hasStrBtn.y, 100, 20]);
-//             // Sleep(3);
-//             // RandomPress([1228, 19, 21, 21]);
-//             break;
-//         }
-//     }
-//     RightOnJoinGuildImg.recycle();
-//     PageBack();
-// }
 

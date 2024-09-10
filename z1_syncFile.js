@@ -73,6 +73,7 @@ const SyncFile = function ()
     toastLog("同步完成");
 };
 SyncFile();
+
 // console.log(getUrl());
 
 // files.createWithDirs("/sdcard/脚本/" + 'img/mainStory_confirm.png')
