@@ -285,7 +285,8 @@ const OpenSuit = () =>
 
     const SwipeBarColorList = [
         ["#3e3f3e", [[30, 0, "#3e403f"], [69, 1, "#3e403f"], [104, 3, "#3f403f"], [163, 4, "#3f4040"]]],
-        ["#3e3f3f", [[30, 0, "#3e3f3f"], [69, 0, "#3e403f"], [137, 0, "#3f4040"], [173, 0, "#404140"]]]
+        ["#3e3f3f", [[30, 0, "#3e3f3f"], [69, 0, "#3e403f"], [137, 0, "#3f4040"], [173, 0, "#404140"]]],
+        ["#3e3f3e", [[24, -1, "#3e403f"], [63, 0, "#3e403f"], [103, 1, "#3f4040"], [158, -1, "#3f4140"]]]
     ];
 
     for (let i = 0; i < suitImgList.length; i++)
@@ -296,18 +297,18 @@ const OpenSuit = () =>
         {
             RandomPress([hasOpenedSuit.x, hasOpenedSuit.y, 30, 30]);
             RandomPress([hasOpenedSuit.x, hasOpenedSuit.y, 30, 30]);
-            Sleep(3);
+            Sleep(5);
             if (HasSkip())
             {
                 ClickSkip();
             }
             else
             {
-                Sleep(30);
+                Sleep(50);
             }
             if (FindMultiColors(SwipeBarColorList, [513, 635, 251, 34]))
             {
-                SwipeSlowly([483, 614, 42, 43], [770, 621, 30, 41], 1);
+                SwipeSlowly([483, 640, 42, 10], [770, 640, 30, 10], 1);
                 Sleep(5);
                 if (!IsJumpAnimation())
                 {
@@ -396,29 +397,23 @@ const WearBestSuit = () =>
     const region = [882, 158, 319, 497];
     const hasBlueSuit = FindMultiColors(BlueSuitColorList, region);
     const hasGreenSuit = FindMultiColors(GreenSuitColorList, region);
-    try
-    {
-        if (hasBlueSuit)
-        {
-            RandomPress([hasBlueSuit.x, hasBlueSuit.y, 30, 30]);
-            if (FindBlueBtn([1034, 656, 190, 61]))
-            {
-                RandomPress([1053, 667, 152, 35]);
-            }
-        }
-        else if (hasGreenSuit)
-        {
-            RandomPress([hasBlueSuit.x, hasBlueSuit.y, 30, 30]);
-            if (FindBlueBtn([1034, 656, 190, 61]))
-            {
-                RandomPress([1053, 667, 152, 35]);
-            }
-        }
-    } catch (error)
-    {
-        alert("wear suit failed", error);
-    }
 
+    if (hasBlueSuit)
+    {
+        RandomPress([hasBlueSuit.x, hasBlueSuit.y, 30, 30]);
+        if (FindBlueBtn([1034, 656, 190, 61]))
+        {
+            RandomPress([1053, 667, 152, 35]);
+        }
+    }
+    else if (hasGreenSuit)
+    {
+        RandomPress([hasGreenSuit.x, hasGreenSuit.y, 30, 30]);
+        if (FindBlueBtn([1034, 656, 190, 61]))
+        {
+            RandomPress([1053, 667, 152, 35]);
+        }
+    }
     PageBack();
 };
 // --------------------------- wear equipment ---------------------------------
@@ -660,14 +655,18 @@ const AutoReleaseSkill = () =>
     RandomPress([944, 309, 37, 34]);
     RandomPress([407, 650, 36, 32]);
     PullDownSkill([420, 650]);
+    RandomPress([407, 650, 36, 32]);
 
     RandomPress([1011, 312, 30, 31]);
     RandomPress([470, 652, 33, 36]);
     PullDownSkill([480, 650]);
+    RandomPress([470, 652, 33, 36]);
 
-    RandomPress([1067, 312, 39, 33]);
+    RandomPress([1072, 305, 35, 35]);
+    RandomPress([529, 653, 40, 32]);
+    PullDownSkill([540, 650]);
     RandomPress([532, 653, 33, 35]);
-    PullDownSkill([540, 550]);
+
     if (HasPopupClose([1208, 102, 38, 42]))
     {
         RandomPress([1217, 112, 20, 21]);
@@ -841,11 +840,10 @@ const UseHolyGrail = () =>
 };
 
 
-module.exports = { OpenAllBox, WearEquipments, OpenSkillBook, StrengthenEquipment, DecomposeEquipment, UseHolyGrail };
+module.exports = { OpenAllBox, WearEquipments, OpenSkillBook, StrengthenEquipment, DecomposeEquipment, UseHolyGrail, WearBestSuit };
 
-
+// WearBestSuit();
 // OpenSkillBook()
-// EquipSkill()
 // OpenAllBox()
 // WearEquipments()
-
+// AutoReleaseSkill();

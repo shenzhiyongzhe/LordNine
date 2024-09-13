@@ -9,10 +9,10 @@ const { InstanceFlow } = require("./Instance.js");
 let isRunning = false;
 
 let mainThread;
-let launchData = {};
-function StartScript(data)
+let launch_ui_config = null;
+function StartScript(uiData)
 {
-    console.log("start script data: " + data);
+    console.log("start script uiData: " + uiData);
 
     // GetCaptureScreenPermission();
 
@@ -32,23 +32,23 @@ function StartScript(data)
             images.requestScreenCapture(true);
             threads.start(function ()
             {
-                const hasOpen = textMatches(/(.*시작하기.*|.*立即开始.*)/).findOne(2000);
+                let hasOpen = textMatches(/(.*시작하기.*|.*立即开始.*)/).findOne(2000);
                 if (hasOpen)
                 {
-                    sleep(1000);
                     hasOpen.click();
                 }
             });
-            data = JSON.parse(data);
-            launchData = data;
+            uiData = JSON.parse(uiData);
+            launch_ui_config = uiData;
             toast("game start");
-            specialConfig.gameMode = data.gameMode;
-            specialConfig.initGameMode = data.gameMode;
-            MainFlow(data);
+            specialConfig.gameMode = uiData.gameMode;
+            specialConfig.initGameMode = uiData.gameMode;
+            MainFlow(uiData);
         }
         );
     }
 }
+
 const DownLoadApk = (downloadUrl, savePath) =>
 {
     threads.start(function ()
@@ -105,7 +105,134 @@ const AutoInstallApk = (url) =>
 };
 const UpdateScript = () => DownLoadApk("LordNine.apk", "LordNine/LordNine.apk");
 const DownloadAutoJs = () => DownLoadApk("AutoJs.apk", "AutoJs.apk");
+const ChangeVPNSetting = () =>
+{
+    app.launch("fun.kitsunebi.kitsunebi4android");
+    let disallowListConfig = {
+        "autoJs": false,
+        "lordnine": false,
+    };
+    for (let i = 0; i < 30; i++)
+    {
+        let hasRefreshBtn_0 = desc("Measure Latency").findOne(20);
+        if (hasRefreshBtn_0)
+        {
+            let add_btn = id("add_btn").findOne(20);
+            if (add_btn)
+            {
+                add_btn.click();
+            }
+        }
+        let has_AddEndpointGroup = text("Add Endpoint Group").findOne(20);
+        if (has_AddEndpointGroup)
+        {
+            let settings = text("Settings").findOne(20);
+            if (settings)
+            {
+                click(settings.bounds().centerX(), settings.bounds().centerY());
+            }
+        }
 
+        let pre_app_vpn = text("Configure Per-App VPN.").findOne(20);
+        if (pre_app_vpn)
+        {
+            click(pre_app_vpn.bounds().centerX(), pre_app_vpn.bounds().centerY());
+        }
+        let enabled_per_app_vpn = text("Enable Per-App VPN").findOne(20);
+        if (enabled_per_app_vpn)
+        {
+            let enabled_per_app_vpn_switch = enabled_per_app_vpn.parent().parent().children()[1].children()[0];
+            let isOpen = enabled_per_app_vpn_switch.checked();
+            console.log("分应用代理是否打开：" + isOpen);
+            if (!isOpen)
+            {
+                click(enabled_per_app_vpn_switch.bounds().centerX(), enabled_per_app_vpn_switch.bounds().centerY());
+                break;
+            }
+        }
+        let current_list = textMatches(/(.*You may either use the allowed list.*)/).findOne(20);
+        if (current_list)
+        {
+            let hasAllowedList = textMatches(/(.*current Allowed List.*)/).findOne(20);
+            if (hasAllowedList)
+            {
+                console.log("当前是允许列表，需要改动");
+                click(hasAllowedList.bounds().centerX(), hasAllowedList.bounds().centerY());
+            }
+            let hasDisallowedList = textMatches(/(.*current Disallowed List.*)/).findOne(20);
+            if (hasDisallowedList)
+            {
+                console.log("当前已经是不允许列表，不需要改动");
+            }
+        }
+        let has_per_app_mode = id("alertTitle").findOne(20);
+        if (has_per_app_mode)
+        {
+            let hasMode_disallowedList = text("Disallowed List").findOne(20);
+            if (hasMode_disallowedList)
+            {
+                hasMode_disallowedList.click();
+            }
+        }
+        let DisallowedList = text("Selected apps are disallowed to use the VPN tunnel, others will be allowed.").findOne(20);
+        if (DisallowedList)
+        {
+            click(DisallowedList.bounds().centerX(), DisallowedList.bounds().centerY());
+        }
+
+        let lordnine = text("com.lordnine").findOne(20);
+        if (lordnine)
+        {
+            let is_lordnine_on = lordnine.parent().children()[3];
+            if (is_lordnine_on.checked == true)
+            {
+                console.log("已经打开，不需要操作");
+                disallowListConfig.lordnine = true;
+            }
+            else if (is_lordnine_on.checked == false)
+            {
+                console.log("autoJs 未打开不允许列表，点击打开");
+                lordnine.parent().click();
+            }
+            let autoJs = text("org.autojs.autoxjs.v6").findOne(20);
+            if (autoJs)
+            {
+                let is_autoJs_on = autoJs.parent().children()[3];
+                if (is_autoJs_on.checked == true)
+                {
+                    console.log("已经打开，不需要操作");
+                    disallowListConfig.autoJs = true;
+                }
+                else if (is_autoJs_on.checked == false)
+                {
+                    console.log("autoJs 未打开不允许列表，点击打开");
+                    autoJs.parent().click();
+                }
+            }
+            else
+            {
+                console.log("没有发现auto js 默认跳过");
+                disallowListConfig.autoJs = true;
+            }
+        }
+        if (disallowListConfig.lordnine == true || disallowListConfig.autoJs == true)
+        {
+            console.log("已设置完毕，返回到主页面");
+            let hasBackIcon = desc("위로 이동").findOne(20);
+            if (hasBackIcon)
+            {
+                hasBackIcon.click();
+            }
+            let hasRefreshBtn = desc("Measure Latency").findOne(20);
+            if (hasRefreshBtn)
+            {
+                hasRefreshBtn.click();
+                break;
+            }
+        }
+        Sleep();
+    }
+};
 const UI = () =>
 {
     ui.layout(`
@@ -114,9 +241,9 @@ const UI = () =>
     </vertical>`);
 
     ui.web.loadUrl("file://" + files.path("./UI/ui.html"));
-    ui.web.jsBridge.registerHandler("StartScript", (data, callBack) =>
+    ui.web.jsBridge.registerHandler("StartScript", (uiData, callBack) =>
     {
-        StartScript(data);
+        StartScript(uiData);
         setTimeout(() =>
         {
             //回调web
@@ -133,6 +260,11 @@ const UI = () =>
     {
         DownloadAutoJs();
         callBack("successful");
+    });
+    ui.web.jsBridge.registerHandler("ChangeVPNSetting", (data, callBack) =>
+    {
+        ChangeVPNSetting();
+        callBack("change vpn successfully");
     });
 };
 
@@ -167,35 +299,39 @@ floaty_window.switch.click(function ()
         mainThread = threads.start(function ()
         {
             isRunning = true;
-            MainFlow(launchData);
+            MainFlow(launch_ui_config);
         }
         );
     }
 });
 
-const Start = (data) =>
+const Start = (uidata) =>
 {
     LaunchGame();
-    RewriteConfig("ui", data);
-    if (data.createCharacter == true)
+    RewriteConfig("ui", uidata);
+    if (uidata.createCharacter == true)
     {
         const { CreateCharacterFlow } = require("./CreateCharacter.js");
-        CreateCharacterFlow(data.serverName);
+        CreateCharacterFlow(uidata.serverName);
     }
+    Sleep(3);
 };
 
 const Update = () =>
 {
     while (true)
     {
+        ExceptionFlow(specialConfig.gameMode);
+
         if (specialConfig.gameMode == "mainStory")
         {
             MainStoryFlow();
         }
         else if (specialConfig.gameMode == "instance")
         {
-            InstanceFlow();
+            InstanceFlow(launch_ui_config);
         }
+
         if (specialConfig.gameMode != specialConfig.initGameMode)
         {
             if (Math.abs(specialConfig.lastModeChangeTime.getTime() - new Date().getTime()) / (3600 * 1000) >= 5)
@@ -206,14 +342,13 @@ const Update = () =>
                 specialConfig.gameMode = "mainStory";
             }
         }
-        ExceptionFlow(specialConfig.gameMode);
         sleep(100);
     }
 };
 
-const MainFlow = (data) =>
+const MainFlow = (uidata) =>
 {
-    Start(data);
+    Start(uidata);
     Update();
 };
 

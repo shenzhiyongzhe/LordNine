@@ -1,21 +1,33 @@
 const { Auto_activeColorList, Auto_inactiveColorList } = require("./Color/MainStoryColorList");
+const { DeathImgList, FindMultiColors, RandomPress, HasMenu, WaitUntilPageBack, FindBlueBtn, Sleep, IsMoving, PageBack, WaitUntil, IsHaltMode, ExitHaltMode,
+    FindImg, IsInCity, WaitUntilMenu, EnterMenuItemPage, FindNumber } = require("./utils");
 const { ComprehensiveImprovement } = require("./CommonFlow");
-const { DeathImgList, FindMultiColors, RandomPress, HasMenu, WaitUntilPageBack, FindBlueBtn, Sleep, IsMoving, PageBack, WaitUntil, IsHaltMode, ExitHaltMode, FindImg, IsInCity, WaitUntilMenu, EnterMenuItemPage, FindNumber } = require("./utils");
 
 
 const MapIconColorList = [
     ["#c9ba89", [[16, 2, "#50452f"], [8, 14, "#d0bf8d"], [-2, 15, "#dccb96"], [16, 16, "#d7c692"]]],
-    ["#cfbe8d", [[-1, 16, "#dccb96"], [7, 20, "#dac994"], [16, 17, "#d1c18f"], [17, 17, "#d7c692"]]]
+    ["#cfbe8d", [[-1, 16, "#dccb96"], [7, 20, "#dac994"], [16, 17, "#d1c18f"], [17, 17, "#d7c692"]]],
+    ["#cbba89", [[4, -7, "#dccb96"], [7, -2, "#dccb96"], [-2, 15, "#dccb96"], [18, 17, "#958863"]]],
+    ["#cbba89", [[6, -1, "#d7c692"], [3, 6, "#dccb96"], [-1, 15, "#dccb96"], [16, 17, "#d9c894"]]],
+    ["#c8b889", [[5, 1, "#dbc996"], [-2, 16, "#dccb96"], [16, 17, "#cebd8b"], [6, 20, "#d3c18f"]]],
+    ["#ccbb89", [[6, 0, "#d7c692"], [-1, 16, "#dccb96"], [7, 20, "#d3c18f"], [16, 18, "#d9c894"]]],
+    ["#c8b888", [[5, 0, "#dbc996"], [-2, 15, "#dccb96"], [6, 19, "#d3c18f"], [16, 16, "#cebd8b"]]]
 
 ];
 const MapIconGrayColorList = [
-    ["#8a8a8b", [[5, -1, "#8f8f8f"], [9, 14, "#494b4b"], [-2, 16, "#989898"], [16, 18, "#3e3f40"]]]
+    ["#8a8a8b", [[5, -1, "#8f8f8f"], [9, 14, "#494b4b"], [-2, 16, "#989898"], [16, 18, "#3e3f40"]]],
+    ["#8b8b8b", [[6, 0, "#949494"], [16, 3, "#888888"], [-1, 15, "#949494"], [7, 19, "#949494"]]]
 ];
-const AutoMovingColorList = [
-    ["#fbfbfa", [[3, 0, "#fbfbfa"], [22, 2, "#f1f1f0"], [28, 2, "#f4f4f4"], [48, 0, "#f9f9f8"]]]
-];
+
 const InInstanceColorList = [
-    ["#ffffff", [[7, -6, "#ffffff"], [7, -4, "#ffffff"], [14, -1, "#fcfcfc"], [13, 12, "#e6e6e5"]]]
+    ["#ffffff", [[7, -6, "#ffffff"], [7, -4, "#ffffff"], [14, -1, "#fcfcfc"], [13, 12, "#e6e6e5"]]],
+    ["#ffffff", [[-6, 3, "#fefefd"], [-5, 15, "#e3e3e3"], [7, 2, "#ededed"], [5, 16, "#e6e6e5"]]]
+];
+
+const GreenLoopColorList = [
+    ["#93c187", [[2, 1, "#95be88"], [0, 1, "#93c187"], [-9, 1, "#8bb87c"], [1, 10, "#88b47e"]]],
+    ["#92bf82", [[2, 0, "#92ba83"], [0, 1, "#93c187"], [2, 1, "#96bf89"], [1, 2, "#95be88"]]],
+    // []
 ];
 const FirstLevel = [
     [18, 137, 26, 30],
@@ -24,16 +36,21 @@ const FirstLevel = [
     [18, 335, 26, 35]
 ];
 const SecondLevel = [
-    [89, 241, 162, 29],
-    [81, 292, 171, 28],
-    [81, 344, 162, 25],
-    [82, 393, 164, 33]
+    [120, 185, 128, 34],
+    [120, 242, 125, 27],
+    [120, 290, 129, 33],
+    [120, 345, 121, 25]
 ];
 const ThirdLevel = [
     [959, 137, 143, 23],
     [964, 191, 158, 28],
     [961, 242, 162, 23]
 ];
+
+
+let instance_mode = "hangUpWild";
+let lastHangUpWildTime = 1726208812345;
+
 
 const PressAuto = () =>
 {
@@ -78,29 +95,14 @@ const OpenMap = () =>
             }
         }
     }
-    return false;
+    else
+    {
+        console.log("not find map icon");
+        return false;
+    }
 };
 
-const IsAutoMoving = () =>
-{
 
-    for (let i = 0; i < 3; i++)
-    {
-        if (FindMultiColors(AutoMovingColorList, [33, 116, 45, 56]))
-        {
-            return true;
-        }
-        Sleep();
-    }
-    if (HasMenu())
-    {
-        if (IsMoving())
-        {
-            return true;
-        }
-    }
-    return false;
-};
 const EnterMap = (mapName) =>
 {
     console.log("enter map");
@@ -132,9 +134,20 @@ const EnterMap = (mapName) =>
 };
 const IsAutoAttacking = () => FindMultiColors(Auto_activeColorList, [1124, 415, 69, 65]);
 
-const AutoLevelingFlow = (mapName) =>
+const HangUpWild = (mapName) =>
 {
-    console.log("auto leveling");
+
+    console.log("进入的地图名称为，mapname：" + mapName);
+    if (mapName == undefined || mapName == "03")
+    {
+        mapName = [0, 3, random(0, 2)];
+        console.log("去被污染的盆地挂机");
+    }
+    else if (mapName == "11")
+    {
+        mapName = [1, 1, random(0, 2)];
+        console.log("去新月湖挂机");
+    }
     const hasOpenMap = OpenMap();
     if (!hasOpenMap)
     {
@@ -147,19 +160,23 @@ const AutoLevelingFlow = (mapName) =>
         console.log("enter map fail");
         return false;
     }
-    console.log("wait until stop moving");
+
+    console.log("等待传送到目的地...");
     WaitUntilMenu();
-    if (!IsAutoAttacking())
+    lastHangUpWildTime = new Date().getTime();
+    for (let i = 0; i < 30; i++)
     {
         if (FindMultiColors(Auto_inactiveColorList, [1129, 420, 59, 63]))
         {
             RandomPress([1144, 433, 30, 24]);
-            console.log("auto leveling success");
+            console.log("去野外挂机成功");
             return true;
         }
+        Sleep();
     }
-    console.log("auto leveling fail");
-    return false;
+
+
+
 };
 
 const DeathCheck = () =>
@@ -191,7 +208,6 @@ const IsExpIncrease = () =>
     Sleep(10);
     if (FindImg(clip, [38, 555, 179, 57]))
     {
-        console.log("no exp increase");
         return false;
     }
     else
@@ -201,13 +217,32 @@ const IsExpIncrease = () =>
 };
 const DeathFlow = () =>
 {
+    console.log("开始死亡提升");
     if (IsHaltMode())
     {
         ExitHaltMode();
     }
+    Sleep(3);
+    for (let i = 0; i < 30; i++)
+    {
+        if (FindBlueBtn([524, 581, 245, 94])) 
+        {
+            Sleep(5);
+            RandomPress([572, 611, 141, 29]);
+            break;
+        }
+        if (FindBlueBtn([536, 415, 204, 77]))
+        {
+            Sleep(3);
+            RandomPress([568, 437, 151, 30]);
+            break;
+        }
+        Sleep();
+    }
     ComprehensiveImprovement();
+    console.log("死亡提升结束");
 };
-const InstanceExceptionCheck = () =>
+const InstanceExceptionCheck = (uiData) =>
 {
     if (DeathCheck())
     {
@@ -215,52 +250,36 @@ const InstanceExceptionCheck = () =>
     }
     else if (IsInCity())
     {
-        console.log("in city, go to map to auoto leveling");
-        AutoLevelingFlow();
+        console.log("in city, go to map");
+        if (instance_mode == "hangUpWild")
+        {
+            HangUpWild(uiData.hangUpMap);
+
+        }
     }
     if (IsHaltMode())
     {
         if (!IsExpIncrease())
         {
-            AutoLevelingFlow();
+            console.log("没有经验增加。");
+            ExitHaltMode();
+            Sleep();
+            HangUpWild(uiData.hangUpMap);
         }
-    }
-};
-
-
-let lastEnterHour = new Date().getHours();
-let hasSuccessfully = false;
-
-const InstanceFlow = () =>
-{
-    const mapName = [0, 2, 0];
-
-    if (hasSuccessfully == false)
-    {
-        let hasEntered = AutoLevelingFlow(mapName);
-        if (hasEntered)
-        {
-            hasSuccessfully = true;
-        }
-        // else
-        // {
-        //     console.log("auto leveling fail");
-        //     if (Math.abs(new Date().getMinutes() - lastEnterMinute) > 10)
-        //     {
-        //         lastEnterMinute = new Date().getMinutes();
-        //         AutoLevelingFlow(mapName);
-        //     }
-        // }
     }
     else
     {
-        if (Math.abs(new Date().getHours() - lastEnterHour) >= 2)
+        if (HasMenu())
         {
-            lastEnterHour = new Date().getHours();
-            AutoLevelingFlow(mapName);
+            if (!IsAutoAttacking())
+            {
+                if (FindMultiColors(Auto_inactiveColorList, [1118, 418, 66, 58]))
+                {
+                    RandomPress([1136, 437, 30, 19]);
+                }
+            }
         }
     }
-    InstanceExceptionCheck();
 };
 
 const InInstanceCheck = () =>
@@ -279,13 +298,20 @@ const InInstanceCheck = () =>
         return false;
     }
 };
-const EnterInstanceFlow = () =>
+const HangUpInstance = () =>
 {
     console.log("EnterInstanceFlow");
     const hasEnterInstancePage = EnterMenuItemPage("instance");
     if (!hasEnterInstancePage)
     {
         console.log("enter instance page failed");
+        return false;
+    }
+    let curCombatPower = FindNumber("combatPower", []);
+    if (curCombatPower < 14000)
+    {
+        console.log("当前战力不足，暂不进入副本,当前战力为：" + curCombatPower);
+        PageBack();
         return false;
     }
     const CanEnterInstance = () => FindBlueBtn([979, 637, 276, 74]);
@@ -296,6 +322,7 @@ const EnterInstanceFlow = () =>
     if (canEnterFirstInstance)
     {
         console.log("enter first instance");
+
         PressEnterInstanceBtn();
         if (InInstanceCheck())
         {
@@ -342,18 +369,44 @@ const EnterInstanceFlow = () =>
     }
 };
 
+const CollectMonsterCollection = () =>
+{
+    const hadOpenMap = OpenMap();
 
+};
+const InstanceFlow = (uiData) =>
+{
+    InstanceExceptionCheck(uiData);
 
-module.exports = {
-    InstanceFlow
+    if (instance_mode == "hangUpWild")
+    {
+        if ((lastHangUpWildTime - new Date().getTime()) / 3600000 >= 2)
+        {
+            HangUpWild(uiData.hangUpMap);
+        }
+    }
+    else if (instance_mode == "monsterCollection")
+    {
+        console.log("monster mode");
+    }
 };
 
+// module.exports = {
+//     InstanceFlow
+// };
 
+//是否有绿环
+// console.log(FindMultiColors(GreenLoopColorList, [916, 238, 41, 41]));
+// while (true)
+// {
+//     InstanceFlow();
+//     sleep(1000);
+// }
 
 // EnterInstanceFlow();
 // FindNumber("combatPower", [1147, 490, 114, 45]);
 // console.log(FindNumber("combatPower", [1162, 535, 82, 49]));
-// AutoLevelingFlow([0, 2, 0]);
+// HangUpWild([0, 2, 0]);
 // InstanceFlow();
 // OpenMap();
 

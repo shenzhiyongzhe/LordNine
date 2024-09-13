@@ -16,6 +16,8 @@ const {
 
 } = require("./utils.js");
 
+let verificationCodeImgList = LoadImgList("icon/login/verificationCodePopup");
+
 
 function GenerateRandomName()
 {
@@ -487,6 +489,13 @@ const PassGameRules = (accountArray) =>
             hadOrangeConfirm_KoreadRepublicOf.click();
             Sleep(3);
         }
+        let hadOrangeConfirm_KoreadRepublicOf_ch = text("下一步").findOne(20);
+        if (hadOrangeConfirm_KoreadRepublicOf_ch)
+        {
+            console.log("korea Republic of");
+            hadOrangeConfirm_KoreadRepublicOf_ch.click();
+            Sleep(3);
+        }
         let hadOrangeConfirm_AgreeThreeProtocol = text("모두 동의 후 계속하기 (선택항목 포함)").findOne(20);
         if (hadOrangeConfirm_AgreeThreeProtocol)
         {
@@ -550,7 +559,16 @@ const PassGameRules = (accountArray) =>
 
     console.log("finish pass game rules");
 };
+const LoginGoogleAccountInGame = () =>
+{
+    console.log("start to log in google account in game");
+    for (let i = 0; i < 200; i++)
+    {
 
+
+        Sleep();
+    }
+};
 
 const InputEmailUrl = () =>
 {
@@ -664,17 +682,19 @@ const InputEmailUrl = () =>
         Sleep();
         console.log("固定点击第一个");
         RandomPress([117, 195, 348, 48]);
+        console.log("输入邮箱网址完成。");
+        return true;
     }
-    return true;
+    return false;
 };
 
 const EnterGoogleEmail = () =>
 {
-    console.log("enter google email");
+    console.log("确保进入到谷歌邮箱页面");
 
     let hasRefreshIcon = false;
 
-    console.log("judge if already login");
+    console.log("判断是否已经登录");
     for (let i = 0; i < 50; i++)
     {
         let hasUseWebVersion = text("Use the web version").findOne(20);
@@ -692,7 +712,7 @@ const EnterGoogleEmail = () =>
         let hasMenu_0 = text("Menu").findOne(20);
         if (hasMenu_0)
         {
-            console.log("enter google email. find menu. break");
+            console.log("发现邮箱的菜单按钮，已经在邮箱页面中，开始下一步获取验证码");
             break;
         }
         let account_picker_continue_as_button = textMatches(/(.*계속.*)/).findOne(20);
@@ -702,7 +722,19 @@ const EnterGoogleEmail = () =>
             account_picker_continue_as_button.click();
             Sleep(3);
         }
-
+        let has_positive_button = text("사용").findOne(20);
+        if (has_positive_button)
+        {
+            console.log("发现关联账号的使用按钮，点击使用");
+            has_positive_button.click();
+        }
+        let has_refresh_page = text("새로고침").findOne(20);
+        if (has_refresh_page)
+        {
+            console.log("发现重新加载按钮，重新加载页面");
+            click(has_refresh_page.bounds().centerX(), has_refresh_page.bounds().centerY());
+            Sleep(3);
+        }
         Sleep();
     }
 
@@ -750,7 +782,7 @@ const EnterGoogleEmail = () =>
 
 const GetRecoveryCode = () =>
 {
-    console.log("get recovery code...");
+    console.log("获取邮箱验证码。。。");
 
     let code = null;
 
@@ -781,7 +813,7 @@ const GetRecoveryCode = () =>
         let hasStoveEmail_0 = textMatches(/(.*인증 메일 안내.*)/).findOne(100);
         if (hasStoveEmail_0)
         {
-            console.log("recevie email");
+            console.log("收到验证邮件，开始下一步，获取最新验证码");
             hasStoveEmail_0.click();
             break;
         }
@@ -794,14 +826,30 @@ const GetRecoveryCode = () =>
         {
             console.log("recevie email");
             hasStoveEmail.click();
-            let hasRecoveryCode = textMatches(/\d{6}/).findOne(100);
-            if (hasRecoveryCode)
+            Sleep(2);
+            let hasRecoveryCode_0 = textMatches(/\d{6}/).findOne(100);
+            if (hasRecoveryCode_0)
             {
-                code = hasRecoveryCode.text();
+                code = hasRecoveryCode_0.text();
+                console.log("发现最新的邮件验证码: " + code);
                 break;
             }
         }
-
+        let hasLatestEmail = textMatches(/(.*minute.*)/).findOne(20);
+        if (hasLatestEmail)
+        {
+            let lastMinute = hasLatestEmail.text().replace(/[^0-9]/ig, "");
+            if (lastMinute == 0 || lastMinute == 1)
+            {
+                let hasRecoveryCode = textMatches(/\d{6}/).findOne(100);
+                if (hasRecoveryCode)
+                {
+                    code = hasRecoveryCode.text();
+                    console.log("发现最新的邮件验证码: " + code);
+                    break;
+                }
+            }
+        }
         Sleep();
     }
     return code;
@@ -955,11 +1003,15 @@ const EnterSelectedServer = (serverName) =>
     console.log("isFull : " + isFull);
     if (isFull)
     {
-        alert("创建角色失败,", "服务器已满");
-        return false;
+        console.log("服务器已满！", "没有可进入的服务器,开始监听服务器,直到有可进入的服务器为止");
+        const hasAvailableServer = ListenServerFlow();
+        if (hasAvailableServer)
+        {
+            EnterRandomServer();
+        }
     }
 
-    console.log("创建角色,选择服务器成功 " + (bigServer + 1) + "区 " + (littleServer + 1));
+    console.log("选择服务器成功 " + (bigServer + 1) + "区 " + (littleServer + 1));
     RandomPress([hasServerName.x + shiftX * 230, hasServerName.y + shiftY * 110, 10, 10]);
     Sleep(5);
     RandomPress([488, 274, 297, 194]);
@@ -995,6 +1047,28 @@ const EnterSelectedServer = (serverName) =>
                 console.log("^_^ 排队结束");
                 break;
 
+            }
+        }
+        if (FindImgInList(verificationCodeImgList, [530, 235, 215, 78]))
+        {
+            console.log("发现图形验证码，开始输入验证码");
+            const verificationCode_0 = GetVerificationCode();
+            if (verificationCode_0)
+            {
+                console.log("验证码：", verificationCode_0);
+                RandomPress([511, 426, 295, 11]);
+                setText(verificationCode_0);
+                Sleep();
+                if (FindBlueBtn([531, 500, 222, 73]))
+                {
+                    RandomPress([569, 518, 143, 31]);
+                    Sleep();
+                }
+                break;
+            }
+            else
+            {
+                console.log("验证码识别失败，请手动输入验证码");
             }
         }
         Sleep();
@@ -1044,7 +1118,7 @@ const EnterRandomServer = () =>
     // serverAvailableList.forEach(item => console.log(item));
     if (serverAvailableList.length == 0)
     {
-        console.log("服务器已满！", "没有可进入的服务器");
+        console.log("服务器已满！", "没有可进入的服务器,开始监听服务器,直到有可进入的服务器为止");
         const hasAvailableServer = ListenServerFlow();
         if (hasAvailableServer)
         {
@@ -1071,12 +1145,11 @@ const SetName = () =>
 {
     console.log("start create character...");
     let hasCreateCharacterBtn = false;
-    let verificationCodeImgList = LoadImgList("icon/login/verificationCodePopup");
-    for (let i = 0; i < 90; i++)
+    for (let i = 0; i < 300; i++)
     {
         if (FindBlueBtn([894, 621, 348, 97]))
         {
-            console.log("find create btn,start create");
+            console.log("发现创建角色按钮，开始创建角色");
             hasCreateCharacterBtn = true;
             break;
         }
@@ -1084,8 +1157,13 @@ const SetName = () =>
         if (hasPopup_verificationCode)
         {
             console.log("发现验证码弹窗");
+            let code = GetVerificationCode();
             RandomPress([511, 426, 295, 11]);
-            const code = GetVerificationCode();
+            if (!code)
+            {
+                alert("获取图形验证码失败", "接验证码有问题");
+                return false;
+            }
             console.log("验证码为:" + code);
             setText(code);
             Sleep();
@@ -1093,17 +1171,20 @@ const SetName = () =>
             {
                 RandomPress([569, 518, 143, 31]);
                 Sleep();
-                break;
             }
         }
         if (FindMultiColors(WhiteAvatarColorList, [35, 601, 44, 41]))
         {
             PressBlank();
         }
+        if (HasSkip())
+        {
+            ClickSkip();
+        }
         // let hasNeedInputVerificationCode =
         Sleep();
     }
-    RecycleServerImgList(verificationCodeImgList);
+    // RecycleServerImgList(verificationCodeImgList);
     if (hasCreateCharacterBtn == true)
     {
         console.log("点击创建角色");
@@ -1121,7 +1202,7 @@ const SetName = () =>
             RandomPress([685, 452, 84, 19]); //confirm 
         }
 
-        for (let i = 0; i < 5; i++)
+        for (let i = 0; i < 30; i++)
         {
             Sleep(5);
             if (FindCheckMark([667, 442, 48, 42]))
@@ -1145,6 +1226,10 @@ const SetName = () =>
                 break;
             }
         }
+    }
+    else
+    {
+        console.log("未发现创建角色按钮，请检查创建流程");
     }
 };
 
@@ -1204,6 +1289,7 @@ const CreateCharacterFlow = (serverName) =>
         if (FindMultiColors(WhiteAvatarColorList, [35, 601, 44, 41]))
         {
             PressServerBar();
+            console.log("发现已经选区，重新选区");
             break;
         }
         Sleep();
@@ -1239,7 +1325,9 @@ module.exports = {
 // GetVerificationCode();
 // EnterGoogleEmail();
 // EnterGameToSendVerificationCode();
-
+// InputEmailUrl();
+// EnterGoogleEmail();
+// GetRecoveryCode();
 // WaitUntilEnterLoginPage();
 // LoginGoogleAccout();
 // app.launch("com.android.chrome");

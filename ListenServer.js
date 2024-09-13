@@ -73,9 +73,15 @@ const ListenServerFlow = () =>
 {
     let time = null;
     let hasAvalableServer = false;
+    let lastTime = null;
     while (hasAvalableServer == false)
     {
         time = new Date().getMinutes();
+        if (lastTime != time)
+        {
+            console.log("正在监听服务器中，当前分钟为：" + time);
+            lastTime = time;
+        }
         if (time == 20 || time == 40 || time == 59)
         {
             for (let i = 0; i < 10; i++)

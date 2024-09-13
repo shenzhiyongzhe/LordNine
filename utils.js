@@ -12,10 +12,12 @@ const defaultConfig = {
     game: {
         deathTime: 0,
         today: 0,
-        reconnectionTime: 0
+        reconnectionTime: 0,
+        lv: 0
     }
 };
-const specialConfig = {
+
+let specialConfig = {
     gameMode: null,
     initGameMode: null,
     lastModeChangeTime: new Date()
@@ -131,7 +133,11 @@ const FindMultiColors = (colorArr, region, shot) =>
     {
         let [color, position] = colorArr[i];
         hasColor = images.findMultiColors(shot, color, position, { region });
-        if (hasColor) break;
+        if (hasColor)
+        {
+            // console.log("find multicolors: " + hasColor + "index: " + i);
+            break;
+        };
     }
     return hasColor;
 };
@@ -287,7 +293,7 @@ const HasBackpackClose = () => FindMultiColors(PopupCloseColorList, [1210, 101, 
 
 
 const HasMenuClose = () => FindMultiColors(MenuCloseColorList, [1204, 17, 46, 45]);
-const HasPopupClose = (region) => FindMultiColors(PopupCloseColorList, region);
+const HasPopupClose = (region, shot) => { shot = shot || captureScreen(); return FindMultiColors(PopupCloseColorList, region, shot); };
 const HasHome = () => FindMultiColors(HomeColorList, [38, 243, 35, 27]);
 const HasOpenTheBackPage = (region) => FindMultiColors(BackpackPageColorList, region);
 const HasBackpackMenuClose = () => FindMultiColors(PopupCloseColorList, [1094, 31, 39, 45]);
@@ -660,12 +666,33 @@ const RewriteConfig = (attr, value) =>
         alert("配置文件参数错误", "请检查配置文件参数");
     }
 };
+const RestartGame = (packageName, time) =>
+{
+    log("强制停止:" + packageName);
 
+    app.openAppSetting(packageName);
+    text(app.getAppName(packageName)).waitFor();
+    let is_sure = textMatches(/(.*강.*|.*종.*|.*료.*|.*FORCE.*|.*STOP.*|.*强.*|.*止.*|.*结.*|.*行.*)/).findOne();
+    if (is_sure.enabled())
+    {
+        textMatches(/(.*강.*|.*종.*|.*료.*|.*FORCE.*|.*STOP.*|.*强.*|.*止.*|.*结.*|.*行.*)/).findOne().click();
+        textMatches(/(.*확.*|.*인.*|.*OK.*|.*确.*|.*定.*)/).findOne().click();
+        log(app.getAppName(packageName) + "应用已被关闭");
+        sleep(1000);
+        back();
+    }
+    home();
+    time = time || random(60, 300);
+    console.log("延迟时间：" + time);
+    Sleep(time);
+    app.launch(packageName);
+};
 
 
 
 const ExitHaltMode = () =>
 {
+    console.log("退出节电模式");
     RandomPress([628, 661, 29, 27]);
     Sleep();
     PageBack();
@@ -690,7 +717,7 @@ const ChangeHaltModeTime = () =>
  *
  * @param {*} pos [x, y]
  */
-const PullDownSkill = (pos) => { gesture(500, pos, [pos[0], pos[1] + 30]); sleep(1000); };
+const PullDownSkill = (pos) => { gesture(500, pos, [pos[0], pos[1] + 30]); Sleep(); };
 
 /*
 * @param {*} type "grocery" "skill" "equipment" "friend" "exchange" "mount" "stockroom"
@@ -740,27 +767,7 @@ const GoToTheNPC = (type) =>
 };
 const PressBlank = () => RandomPress([451, 485, 357, 144]);
 
-function RestartGame(packageName, time)
-{
-    log("强制停止:" + packageName);
 
-    app.openAppSetting(packageName);
-    text(app.getAppName(packageName)).waitFor();
-    let is_sure = textMatches(/(.*강.*|.*종.*|.*료.*|.*FORCE.*|.*STOP.*|.*强.*|.*止.*|.*结.*|.*行.*)/).findOne();
-    if (is_sure.enabled())
-    {
-        textMatches(/(.*강.*|.*종.*|.*료.*|.*FORCE.*|.*STOP.*|.*强.*|.*止.*|.*结.*|.*行.*)/).findOne().click();
-        textMatches(/(.*확.*|.*인.*|.*OK.*|.*确.*|.*定.*)/).findOne().click();
-        log(app.getAppName(packageName) + "应用已被关闭");
-        sleep(1000);
-        back();
-    }
-    home();
-    time = time || random(60, 300);
-    console.log("延迟时间：" + time);
-    Sleep(time);
-    app.launch(packageName);
-}
 
 const EnterMenuItemPage = (item) =>
 {

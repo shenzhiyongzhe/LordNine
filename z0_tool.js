@@ -18,7 +18,11 @@ threads.start(function ()
 });
 
 //com.smilegate.lordnine.stove.google
+//
 //adb -s 10.245.81.17:5555  pull /sdcard/脚本/LordNine/build/lordnine_v1.0.0.apk C:/nginx/Rom/LordNine.apk
+
+//adb -s 10.245.81.17:5555  shell pm enable org.autojs.autoxjs.v6
+
 //adb shell sh /sdcard/Android/data/com.omarea.vtools/up.sh
 //adb shell sh /storage/emulated/0/Android/data/com.omarea.vtools/up.sh
 //*******************************  adb ip list ------------------------------------------------**********************

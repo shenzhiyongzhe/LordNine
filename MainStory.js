@@ -21,6 +21,9 @@ const {
     LoadImgList,
     ReadConfig,
     RewriteConfig,
+    FindNumber,
+    FindRedBtn,
+    FindImgInList,
 
 } = require("./utils.js");
 
@@ -54,6 +57,11 @@ const FindArrow = (region) =>
         {
             return ["up", hasUpArrow];
         }
+        let hasRightArrow = FindMultiColors(ArrowColorList.right, region, shot);
+        if (hasRightArrow)
+        {
+            return ["right", hasRightArrow];
+        }
         let hasDownArrow = FindMultiColors(ArrowColorList.down, region, shot);
         if (hasDownArrow)
         {
@@ -63,11 +71,6 @@ const FindArrow = (region) =>
         if (hasLeftArrow)
         {
             return ["left", hasLeftArrow];
-        }
-        let hasRightArrow = FindMultiColors(ArrowColorList.right, region, shot);
-        if (hasRightArrow)
-        {
-            return ["right", hasRightArrow];
         }
 
         Sleep(0.1);
@@ -82,15 +85,14 @@ const TapTip = () =>
     {
         console.log("提示: " + hasTip);
         const hasArrow = FindArrow();
+        const CommonTipList = [
+            [720, 387, 96, 22], //药水 100
+            [705, 578, 58, 26], //药水 确认
+        ];
         if (!hasArrow)
         {
             console.log("未发现箭头。");
-            // const randomStart_x = hasTip.x - 150 > 0 ? hasTip.x - 150 : 0;
-            // const randomStart_y = hasTip.y - 100 > 0 ? hasTip.y - 100 : 0;
-            // const w = hasTip.x + 150 < 1280 ? 300 : 1280 - hasTip.x;
-            // const h = hasTip.y + 100 < 720 ? 200 : 720 - hasTip.y;
-            // RandomPress([randomStart_x, randomStart_y, w, h]);
-            RandomPress([753, 86, 333, 401]);
+            RandomPress(CommonTipList[random(0, CommonTipList.length - 1)]);
         }
         else
         {
@@ -110,11 +112,9 @@ const TapTip = () =>
                 case "right":
                     RandomPress([position.x + 10, position.y, 30, 10]);
                     break;
-                case "rightUp":
-                    RandomPress([position.x + 30, position.y - 30, 30, 30]);
-                    break;
+
                 default:
-                    RandomPress([508, 196, 265, 264]);
+                    RandomPress(CommonTipList[random(0, CommonTipList.length - 1)]);
                     break;
             }
         }
@@ -126,7 +126,28 @@ const HasNext = (shot) => FindMultiColors(NextColorList, [1219, 670, 31, 31], sh
 const ClickNext = (shot) => RandomPress([1152, 678, 53, 14], shot);
 const HasTalkBubble = (shot) => FindMultiColors(TalkBubbleColorList, [465, 389, 140, 35], shot);
 const IsSpeedUpOff = (shot) => FindMultiColors(SpeedUpOffColorList, [1208, 27, 46, 33], shot);
-const ClickMainStory = () => RandomPress([905, 134, 226, 34]);
+const TransformMainStory = () =>
+{
+    console.log("transform main story");
+    RandomPress([1149, 126, 19, 20]);
+    if (FindBlueBtn([653, 443, 204, 65]))
+    {
+        RandomPress([689, 461, 145, 31]);
+        lastTransformationTime = new Date().getMinutes();
+        Sleep(5);
+    }
+};
+const ClickMainStory = () => 
+{
+    if (Math.abs(lastTransformationTime - new Date().getMinutes()) < 10)
+    {
+        RandomPress([905, 134, 226, 34]);
+    }
+    else
+    {
+        TransformMainStory();
+    }
+};
 const IsInQuest = (region) => FindMultiColors(QuestColorList, region);
 // 点击对话
 const TapDialog = () =>
@@ -151,17 +172,7 @@ const TapDialog = () =>
         RandomPress([1174, 88, 71, 18]);
     }
 };
-const TransformMainStory = () =>
-{
-    console.log("transform main story");
-    RandomPress([1149, 126, 19, 20]);
-    if (FindBlueBtn([653, 443, 204, 65]))
-    {
-        RandomPress([689, 461, 145, 31]);
-        lastTransformationTime = new Date().getMinutes();
-        Sleep(5);
-    }
-};
+
 const AutoMainStory = () =>
 {
 
@@ -176,14 +187,7 @@ const AutoMainStory = () =>
 
     if (hasAuto_active && !hasAuto_inactive)
     {
-        if (Math.abs(lastTransformationTime - new Date().getMinutes()) < 10)
-        {
-            ClickMainStory();
-        }
-        else
-        {
-            TransformMainStory();
-        }
+        ClickMainStory();
         return true;
     }
 
@@ -191,14 +195,12 @@ const AutoMainStory = () =>
     {
         if (HasMenu())
         {
-            if (IsInCity())
+            if (!IsMoving())
             {
                 console.log("character is in city. directly transform.");
-
-                TransformMainStory();
-
-                return true;
+                ClickMainStory();
             }
+            return true;
         }
         return false;
     }
@@ -256,7 +258,8 @@ const BossTitleColorList = [
     ["#fb2d05", [[1, 0, "#fd2d02"], [6, 0, "#fe2d00"], [10, 0, "#fb2d07"], [16, 0, "#ff2d00"]]],
     ["#fd2d03", [[1, 0, "#ff2d00"], [4, 0, "#fb2e07"], [6, 0, "#fd2d01"], [37, -1, "#fb2d03"]]],
     ["#ff2d00", [[0, 4, "#ff2d00"], [9, 4, "#fc2d05"], [17, 7, "#ff2d00"], [23, 2, "#ff2d00"]]],
-    ["#fa2d07", [[0, 5, "#fa2d04"], [18, -2, "#ff2d00"], [18, 4, "#ff2d00"], [22, 2, "#f72d06"]]]
+    ["#fa2d07", [[0, 5, "#fa2d04"], [18, -2, "#ff2d00"], [18, 4, "#ff2d00"], [22, 2, "#f72d06"]]],
+    ["#f22b02", [[0, 3, "#f02b03"], [15, -3, "#fe2d00"], [32, -4, "#ff2d00"], [47, -7, "#fd2d00"]]]
 ];
 
 const DeathCheck = () =>
@@ -313,9 +316,11 @@ const DeathFlow = () =>
     config.game.deathTime++;
     if (isAttackingfirstBoss)
     {
-        console.log("attacking first boss ! change game mode to instance mode");
-        if (config.game.today != new Date().getDate())
+        console.log("判断等级是否是34级");
+        const lv = config.game.lv;
+        if (lv <= 34 || lv == null)
         {
+            console.log("等级小于34级，切换模式为挂机模式，去地图挂机");
             specialConfig.gameMode = "instance";
             specialConfig.lastModeChangeTime = new Date();
             isAttackingfirstBoss = false;
@@ -410,7 +415,6 @@ const AttackingBossFlow = (number) =>
             console.log("lost title count: " + lostTitleCount);
             if (lostTitleCount > 8)
             {
-
                 return true;
             }
         }
@@ -451,27 +455,30 @@ const AttackingBossFlow = (number) =>
 
         isDead = DeathCheck();
         isBossDead = IsBossDead();
-        if (number == 3)
+        if (HasMenu())
         {
-            SwipeLeft(moveTime[0]);
-            Sleep(1);
-            SwipeDown(moveTime[1]);
-            Sleep(1);
-            SwipeRight(moveTime[2]);
-            Sleep(1);
-            SwipeUp(moveTime[3]);
-            Sleep(1);
-        }
-        else
-        {
-            SwipeRight(moveTime[2]);
-            Sleep(1);
-            SwipeUp(moveTime[3]);
-            Sleep(1);
-            SwipeLeft(moveTime[0]);
-            Sleep(1);
-            SwipeDown(moveTime[1]);
-            Sleep(1);
+            if (number == 3)
+            {
+                SwipeLeft(moveTime[0]);
+                Sleep(1);
+                SwipeDown(moveTime[1]);
+                Sleep(1);
+                SwipeRight(moveTime[2]);
+                Sleep(1);
+                SwipeUp(moveTime[3]);
+                Sleep(1);
+            }
+            else
+            {
+                SwipeRight(moveTime[2]);
+                Sleep(1);
+                SwipeUp(moveTime[3]);
+                Sleep(1);
+                SwipeLeft(moveTime[0]);
+                Sleep(1);
+                SwipeDown(moveTime[1]);
+                Sleep(1);
+            }
         }
 
         if (number != 0)
@@ -538,11 +545,47 @@ const MainStoryBranch = () =>
             console.log("change setting failed!");
         }
         // start to change weapon
-        console.log("start to change weapon...");
-        OpenAllBox();
-        WearEquipments();
-        OpenAllBox();
-        Sleep();
+        const LordNineWordColorList = [
+            ["#cca967", [[75, 4, "#deb371"], [138, -6, "#d8b77e"], [195, 3, "#c8a266"], [205, 16, "#a77a40"]]],
+            ["#cda465", [[75, -4, "#d8b773"], [139, -8, "#d8b77e"], [189, -5, "#c79959"], [205, 13, "#a67c41"]]],
+            ["#dbbb87", [[25, 3, "#be985b"], [49, 8, "#c8a263"], [99, 4, "#e2b980"], [124, 1, "#dab66d"]]]
+        ];
+        const WhiteAvatarColorList = [
+            ["#a4a4a3", [[2, 0, "#b1b1b1"], [7, 1, "#b4b4b3"], [2, 4, "#bababa"], [5, 13, "#b6b6b6"]]],
+            ["#a4a4a3", [[1, 0, "#a6a6a5"], [2, 0, "#b1b1b1"], [5, 3, "#b4b4b3"], [3, 10, "#b8b8b8"]]],
+            ["#a5a5a5", [[4, 0, "#b7b7b6"], [1, 2, "#bdbdbc"], [5, 13, "#b3b3b2"], [-4, 13, "#a0a0a0"]]]
+        ];
+        for (let i = 0; i < 30; i++)
+        {
+            if (FindMultiColors(LordNineWordColorList, [313, 333, 728, 354], shot))
+            {
+                if (FindMultiColors(WhiteAvatarColorList, [32, 600, 52, 49], shot))
+                {
+                    PressBlank();
+                    console.log("find main ui find white avatar");
+                }
+                else
+                {
+                    console.log("find main ui");
+                    PressBlank();
+                }
+            }
+            if (FindBlueBtn([931, 639, 261, 71]))
+            {
+                RandomPress([955, 655, 208, 37]); // 点击开始按钮
+            }
+            if (HasMenu())
+            {
+                console.log("start to change weapon...");
+                OpenAllBox();
+                WearEquipments();
+                OpenAllBox();
+                Sleep();
+                break;
+            }
+            Sleep();
+        }
+
 
     }
     const hasBackpackMenuClose = HasBackpackMenuClose();
@@ -623,23 +666,39 @@ const MainStoryException = () =>
         }
         else if (FindBlueBtn([654, 444, 202, 66], shot))
         {
-            console.log("main story transform...");
-            RandomPress([683, 460, 151, 30]);
+            if (FindRedBtn([423, 438, 219, 77]))
+            {
+                console.log("主线传送按钮...");
+                RandomPress([684, 460, 152, 31]);
+            }
+
         }
         else if (FindBlueBtn([1055, 637, 219, 71], shot))
         {
-            console.log("horse page confirm");
+            console.log("坐骑页面，强化装备按钮");
             RandomPress([1077, 656, 173, 35]);
         }
-        else if (FindBlueBtn([481, 620, 316, 76], shot))
-        {
-            console.log("animal confirm");
-            RandomPress([525, 639, 244, 34]);
-        }
+        // else if (FindBlueBtn([481, 620, 316, 76], shot))
+        // {
+        //     console.log("animal confirm");
+        //     RandomPress([525, 639, 244, 34]);
+        // }
         else if (FindBlueBtn([655, 380, 207, 68], shot))
         {
-            console.log("monster collection quickly transform btn");
-            RandomPress([681, 399, 149, 33]);
+            if (FindRedBtn([423, 380, 204, 69], shot))
+            {
+                console.log("怪物图鉴快速移动按钮");
+                RandomPress([681, 399, 149, 33]);
+
+            }
+        }
+        else if (FindBlueBtn([645, 563, 185, 61], shot))
+        {
+            if (FindRedBtn([456, 566, 181, 55], shot))
+            {
+                console.log("发现药水弹窗，点击购买");
+                RandomPress([485, 559, 131, 26]);
+            }
         }
     }
     else
@@ -731,6 +790,7 @@ const MainStoryException = () =>
             if (BossIndex == 1)
             {
                 isAttackingfirstBoss = true;
+                console.log("isAttackingfirstBoss: " + isAttackingfirstBoss);
             }
             AttackingBossFlow(BossIndex);
             console.log("finish boss flow");
@@ -759,25 +819,31 @@ const GrowthMissionColorList = [
     ["#d4affd", [[5, 0, "#d3affc"], [-5, 7, "#c7a5ef"], [1, 9, "#d5b0ff"], [9, 8, "#b595d8"]]],
     ["#d4affd", [[5, 0, "#d3affc"], [-5, 6, "#b696da"], [2, 7, "#d5b0ff"], [10, 7, "#c6a3ed"]]],
     ["#d5b0ff", [[5, 0, "#d1aefc"], [-6, 7, "#d0acf8"], [11, 7, "#c6a3ed"], [2, 9, "#d5b0ff"]]],
-    ["#d3affc", [[1, 1, "#d5b0ff"], [5, 1, "#d5b0ff"], [2, 8, "#d4affd"], [2, 11, "#c6a3ed"]]]
+    ["#d3affc", [[1, 1, "#d5b0ff"], [5, 1, "#d5b0ff"], [2, 8, "#d4affd"], [2, 11, "#c6a3ed"]]],
+    ["#e1befd", [[-1, 4, "#e7c3ff"], [-6, 10, "#e2bfff"], [9, 10, "#d8b7f2"], [1, 12, "#e7c3ff"]]],
+    ["#e3bfff", [[-2, -1, "#d7b6f6"], [4, 0, "#e4c1ff"], [1, 8, "#e4c1ff"], [8, 8, "#e3bfff"]]]
 ];
 const TransformIconColorList = [
     ["#998b5f", [[2, -6, "#c6b37c"], [6, -5, "#c7b57e"], [12, -3, "#a89869"], [9, 5, "#b3a271"]]],
     ["#c8b67f", [[-3, 4, "#ccb981"], [7, 4, "#cbb880"], [-2, 10, "#b9a874"], [5, 11, "#b9a874"]]]
 ];
+
 const GrowthImgList = {
     skillBookMerchantPage: ReadImg("icon/beginner/growthMission/skillBookMerchant"),
     weaponSkillPage: ReadImg("icon/beginner/growthMission/weaponSkillPage"),
-    joinGulidPage: ReadImg("icon/beginner/growthMission/joinGuildPage"),
+    joinGulidPage: LoadImgList("icon/beginner/growthMission/joinGuild"),
     dailyMissionPage: ReadImg("icon/beginner/growthMission/dailyMissionPage"),
     towerOfTrialsPage: ReadImg("icon/beginner/growthMission/towerOfTrialsPage"),
 };
+
 const FinishedMissionColorList = [
     ["#e8e8e7", [[10, -1, "#f0f0ef"], [3, 3, "#dbdbda"], [16, 2, "#eaeae9"], [23, 9, "#fcfcfc"]]],
     ["#3e3d3d", [[3, 7, "#eaeae9"], [13, 4, "#f0f0f0"], [20, 6, "#fdfdfd"], [24, 10, "#f6f6f6"]]],
     ["#fbfbfa", [[3, 0, "#fbfbfa"], [14, 1, "#fefefd"], [21, 5, "#fcfcfc"], [24, 8, "#fafafa"]]],
-    ["#fdfdfd", [[2, 0, "#fdfdfd"], [13, 4, "#fdfdfd"], [20, 8, "#fcfcfc"], [21, 9, "#fafafa"]]]
+    ["#fdfdfd", [[2, 0, "#fdfdfd"], [13, 4, "#fdfdfd"], [20, 8, "#fcfcfc"], [21, 9, "#fafafa"]]],
+    ["#fcfcfc", [[2, 0, "#fcfcfc"], [0, 6, "#ffffff"], [3, 6, "#ffffff"], [14, 1, "#f5f5f4"]]]
 ];
+
 //01: lv5
 //02: buy skill book
 //03 lv10
@@ -883,7 +949,7 @@ const GrowthMissionFlow = () =>
         PageBack();
         StrengthenHorseEquipment();
     }
-    const hasGuildPage = FindImg(GrowthImgList.joinGulidPage, [570, 650, 54, 57], shot);
+    const hasGuildPage = FindImgInList(GrowthImgList.joinGulidPage, [561, 644, 72, 69], shot);
     if (hasGuildPage)
     {
         console.log("growth mission 6: join guild");
@@ -915,9 +981,6 @@ const GrowthMissionFlow = () =>
         console.log("growth mission 10: start daily mission");
         if (FindBlueBtn([1065, 644, 213, 67]))
         {
-            const MissionInProcessingColorList = [
-                ["#314d54", [[0, 3, "#304c54"], [0, 7, "#2f4951"], [50, -1, "#385760"], [47, 5, "#304c54"]]]
-            ];
             RandomPress([1091, 659, 166, 32]); //accept
             storyMode = "dailyMission";
         }
@@ -992,7 +1055,7 @@ const DailyMissionFlow = () =>
 };
 
 
-// storyMode = "growthMission";
+
 
 const MainStoryFlow = () =>
 {
@@ -1016,17 +1079,18 @@ const MainStoryFlow = () =>
 };
 
 
-
-
 module.exports = { HasTip, MainStoryFlow };
 
-
+// console.log(FindMultiColors(Auto_inactiveColorList, [1132, 430, 54, 36]));
+// console.log(FindArrow());
 
 // console.time("MainStoryFlow");
 // while (true)
 // {
 //     MainStoryFlow();
+//     Sleep(0.2);
 // }
+
 // console.timeEnd("MainStoryFlow")
-
-
+// console.log(HasPopupClose([991, 54, 49, 51]));
+// MainStoryException();

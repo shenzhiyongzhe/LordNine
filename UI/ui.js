@@ -1,7 +1,5 @@
 
-
 const serverNameList = document.querySelectorAll("input[name=serverName]");
-const monsterMapList = document.querySelectorAll("input[name=monsterMap]");
 
 const startScript = document.querySelector("#startScript");
 const updateScript = document.querySelector("#updateScript");
@@ -11,13 +9,17 @@ const UIData = {
     createCharacter: false,
     serverName: "00",
     gameMode: "mainStory",
-    monsterMapList: []
+    monsterMapList: [],
+    hangUpMap: "03"
 };
 
+//下拉菜单的点击事件
 const selects = document.querySelectorAll(".select");
 const option_list = document.querySelectorAll(".option-list");
 selects.forEach((select, index) => select.addEventListener("click", () => option_list[index].classList.toggle("active")));
 
+//主线副本的模式选择
+document.querySelectorAll("input[name=gameMode]").forEach(item => item.addEventListener("click", () => UIData.gameMode = item.value));
 
 const SelectServer = () =>
 {
@@ -52,6 +54,7 @@ startScript.addEventListener("click", () =>
 
 });
 
+//更新脚本点击事件
 updateScript.addEventListener("click", () =>
 {
     $autox.callHandler("UpdateScript", "update script", (callBackData) =>
@@ -73,10 +76,20 @@ document.querySelector("#downloadAutoJs").addEventListener("click", () =>
     });
 });
 
+document.querySelector("#vpnSetting").addEventListener("click", () =>
+{
+    $autox.callHandler("ChangeVPNSetting", "ChangeVPNSetting", (callBackData) =>
+    {
+        console.log(callBackData);
+    });
+});
+
 //怪物图鉴地图选择
 const SelectMonsterMap = () =>
 {
-    monsterMapList.forEach((item) =>
+    const monsterMapNodeList = document.querySelectorAll("input[name=monsterMap]");
+
+    monsterMapNodeList.forEach((item) =>
     {
         item.addEventListener("click", () =>
         {
@@ -93,3 +106,17 @@ const SelectMonsterMap = () =>
     );
 };
 SelectMonsterMap();
+
+//选择挂机地图的点击事件
+const SelectHangUpMap = () =>
+{
+    const hangUpMapNodeList = document.querySelectorAll("input[name=hangUpWildMap]");
+    hangUpMapNodeList.forEach(item =>
+    {
+        item.addEventListener("click", () =>
+        {
+            UIData.hangUpMap = item.value;
+        });
+    });
+};
+SelectHangUpMap();

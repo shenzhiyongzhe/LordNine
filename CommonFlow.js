@@ -1,6 +1,5 @@
 
-const { WearEquipments, StrengthenEquipment, OpenAllBox, UseHolyGrail, DecomposeEquipment } = require("./Backpack.js");
-const { ExceptionFlow } = require("./Exception.js");
+const { WearEquipments, StrengthenEquipment, OpenAllBox, UseHolyGrail, DecomposeEquipment, WearBestSuit } = require("./Backpack.js");
 const {
     ReadImg, FindImg, RandomPress, Sleep, FindMultiColors, OpenMenu, CloseMenu, EnterMenuItemPage,
     PageBack,
@@ -14,9 +13,13 @@ const {
     NeedPressBlank,
     PullDownSkill,
     CloseBackpack,
+    FindNumber,
+    ReadConfig,
+    RewriteConfig,
 } = require("./utils.js");
 
-let lastComprehensiveImproveTime = 0;
+let lastComprehensiveImproveTime = 1726208812345;
+let character_lv = 0;
 
 const GetEmail = () =>
 {
@@ -151,6 +154,7 @@ const GetMonsterKnowledgeAward = () =>
 
 const LoginProps = () =>
 {
+    console.log("login props");
     const hasOpenMenu = OpenMenu();
     if (!hasOpenMenu)
     {
@@ -226,7 +230,7 @@ const ShopBuy = () =>
         return false;
     }
     console.log("entered shop page");
-
+    Sleep(3);
     const NotCheckedColorList = [
         ["#303030", [[5, 0, "#303030"], [11, 1, "#303030"], [-2, 7, "#303030"], [7, 7, "#303030"]]]
     ];
@@ -236,7 +240,7 @@ const ShopBuy = () =>
     if (FindBlueBtn([146, 632, 89, 79]))
     {
         RandomPress([166, 657, 45, 34]);
-        const shot = captureScreen();
+
         for (let i = 0; i < 5; i++)
         {
             if (IsNotCheck([234, 144 + i * 85, 56, 62]))
@@ -304,9 +308,10 @@ const PickUpAbilityPoint = () =>
     }
 };
 
-const IncreaseWeaponAbility = () =>
+const IncreaseWeaponFeatures = () =>
 {
-    console.log("increase weapon skill ability");
+    console.log("increase weapon features");
+    console.log("顺便获取当前玩家等级。");
     const hasEntered = EnterMenuItemPage("weaponFeatures");
     if (!hasEntered)
     {
@@ -330,6 +335,12 @@ const IncreaseWeaponAbility = () =>
         [[526, 284, 19, 21], [421, 387, 24, 24], [421, 492, 24, 22]],
         [[525, 282, 21, 22], [525, 388, 24, 21], [526, 493, 21, 20]]
     ];
+    const lv = FindNumber("lv", [46, 468, 61, 51]);
+    console.log("当前玩家等级为：" + lv);
+    const config = ReadConfig();
+    config.game.lv = lv;
+    character_lv = lv;
+    RewriteConfig("game", config.game);
     out: for (let i = 0; i < 3; i++)
     {
         RandomPress([197, 300 + i * 82, 146, 46]);
@@ -376,37 +387,24 @@ const IncreaseWeaponAbility = () =>
 const AddAttributePoint = () =>
 {
     console.log("start add attribute point");
-    const ZeroPointColorList = [
-        ["#5d5b54", [[-3, 2, "#a19d91"], [-3, 4, "#c7c2b5"], [-3, 6, "#c6c1b3"], [-3, 9, "#c7c2b5"], [0, 12, "#646158"], [3, 11, "#bfbbae"], [4, 9, "#c7c2b5"], [3, 8, "#aca89b"], [3, 6, "#aba69b"], [4, 4, "#c7c2b5"]]]
-    ];
+
     const PlusAbilityIcon = [
         ["#8f7f4f", [[14, 0, "#ab995f"], [6, -7, "#b19d62"], [7, 0, "#af9c62"], [7, 6, "#b7a366"]]],
         ["#86774a", [[3, 0, "#90804f"], [15, 0, "#b4a165"], [9, -6, "#e8cf84"], [8, 6, "#928251"]]],
-        ["#86774a", [[7, 0, "#978754"], [14, 0, "#b09d62"], [9, -6, "#e8cf84"], [9, 5, "#b4a165"]]]
+        ["#86774a", [[7, 0, "#978754"], [14, 0, "#b09d62"], [9, -6, "#e8cf84"], [9, 5, "#b4a165"]]],
+        ["#8e7e4e", [[6, 0, "#837448"], [13, 0, "#b7a366"], [7, -7, "#f0d789"], [7, 6, "#b6a266"]]]
     ];
     if (!FindMultiColors(PlusAbilityIcon, [615, 461, 57, 58]))
     {
         console.log("未找到加属性图标");
         return false;
     }
-    RandomPress([62, 27, 234, 24]);
-    console.log("wait until popup close");
+    RandomPress([632, 479, 19, 20]);
+    console.log("等到属性点窗口出现...");
     WaitUntil(() => HasPopupClose([32, 96, 47, 54]));
 
-    RandomPress([283, 360, 16, 19]); // plus btn
     RandomPress([522, 171, 98, 22]); // dex 
-    for (let i = 0; i < 10; i++)
-    {
-        let isZero = FindMultiColors(ZeroPointColorList, [589, 264, 17, 23]);
-        if (!isZero)
-        {
-            RandomPress([686, 350, 20, 18]);
-        }
-        else
-        {
-            break;
-        }
-    }
+    RandomPress([695, 349, 25, 21]); //max dex
     if (FindGoldBtn([580, 657, 167, 29]))
     {
         RandomPress([587, 659, 161, 28]);
@@ -435,46 +433,35 @@ const StrengthenHorseEquipment = () =>
         }
 
     }
-
-    RandomPress([1032, 153, 31, 31]);
+    else
+    {
+        console.log("未发现强化坐骑装备按钮，退出强化操作");
+        return PageBack();
+    }
+    const horseEquipmentRegion = [
+        [1033, 156, 28, 29],
+        [976, 208, 32, 33],
+        [1089, 213, 28, 27]
+    ];
+    Sleep();
     for (let i = 0; i < 3; i++)
     {
-        if (FindBlueBtn([650, 439, 211, 73]))
+        RandomPress(horseEquipmentRegion[i]);
+        Sleep();
+        if (FindBlueBtn([869, 652, 354, 64]))
         {
-            RandomPress([680, 459, 154, 33]);
+            console.log("可以强化此装备：" + i);
+            RandomPress([926, 671, 249, 26]);
+            if (FindBlueBtn([655, 445, 199, 63]))
+            {
+                console.log("启用坐骑装备");
+                RandomPress([683, 462, 150, 28]);
+                Sleep(3);
+            }
+            Sleep(4);
         }
-        else
-        {
-            break;
-        }
-        Sleep(3);
     }
-    RandomPress([973, 208, 36, 35]);
-    for (let i = 0; i < 3; i++)
-    {
-        if (FindBlueBtn([650, 439, 211, 73]))
-        {
-            RandomPress([680, 459, 154, 33]);
-        }
-        else
-        {
-            break;
-        }
-        Sleep(3);
-    }
-    RandomPress([1087, 208, 31, 34]);
-    for (let i = 0; i < 3; i++)
-    {
-        if (FindBlueBtn([650, 439, 211, 73]))
-        {
-            RandomPress([680, 459, 154, 33]);
-        }
-        else
-        {
-            break;
-        }
-        Sleep(3);
-    }
+    console.log("finish horse equipment");
     PageBack();
 };
 
@@ -546,6 +533,15 @@ const GetActivitiesAward = () =>
                         console.log("pick award...");
                         RandomPress([hasGoldenLight.x - 10, hasGoldenLight.y - 30, 20, 30]);
                         PressBlank();
+                    }
+                    else
+                    {
+                        RandomPress([hasTip.x - 40, hasTip.y + 10, 20, 30]);
+                        PressBlank();
+                    }
+                    if (HasPopupClose([745, 97, 46, 47]))
+                    {
+                        RandomPress([760, 108, 19, 20]);
                     }
                 }
             }
@@ -761,7 +757,7 @@ const ChangeAbility = (changeList) =>
         RandomPress(optionPosArr[optionPos]);
         RandomPress(optionPosArr[optionPos]);
         RandomPress(equipedPosArr[equipPos]);
-        Sleep(3);
+        Sleep(4);
         if (NeedPressBlank())
         {
             PressBlank();
@@ -778,7 +774,7 @@ const ChangeAbility = (changeList) =>
     }
     PullDownSkill([1060, 650]);
     PullDownSkill([1130, 650]);
-    PullDownSkill([1090, 650]);
+    PullDownSkill([1190, 650]);
     console.log("finish change ability");
 };
 const UpgradeHolyRelics = () =>
@@ -907,13 +903,13 @@ const ComprehensiveImprovement = () =>
 {
     console.log("start comprehensive improvement");
 
-    if (Math.abs(lastComprehensiveImproveTime - new Date().getMinutes()) < 10)
+    if ((lastComprehensiveImproveTime - new Date().getTime()) / 3600000 >= 1)
     {
         console.log("finish: 两次提升间隔较短，暂不操作");
         return true;
     }
 
-    lastComprehensiveImproveTime = new Date().getMinutes();
+    lastComprehensiveImproveTime = new Date().getTime();
 
     HasCrucifixIcon() && PickUpAbilityPoint();
 
@@ -947,34 +943,39 @@ const ComprehensiveImprovement = () =>
         DecomposeEquipment();
     }
 
-    AddAttributePoint();
 
-    IncreaseWeaponAbility();
+    IncreaseWeaponFeatures();
     UpgradeHolyRelics();
     StrengthenHorseEquipment();
+    if (character_lv == 34 || character_lv == null)
+    {
+        console.log("角色等级为34，改变符文");
+        ChangeAbility();
+    }
     UpgradeAbilityLevel();
     ShopBuy();
+    AddAttributePoint();
+
+    WearBestSuit();
     console.log("finish");
 };
 
 
-module.exports = {
-    ChangeAbility, GetEmail, GetAchievement, GetMonsterKnowledgeAward, LoginProps, HasCrucifixIcon,
-    ShopBuy, PickUpAbilityPoint, AddAttributePoint, ComprehensiveImprovement, StrengthenHorseEquipment
-};
+// module.exports = {
+//     ChangeAbility, GetEmail, GetAchievement, GetMonsterKnowledgeAward, LoginProps, HasCrucifixIcon,
+//     ShopBuy, PickUpAbilityPoint, AddAttributePoint, ComprehensiveImprovement, StrengthenHorseEquipment
+// };
 
+// ChangeAbility();
 
 // ComprehensiveImprovement();
-// UpgradeHolyRelics();
-// StrengthenHorseEquipment();
-// HasCrucifixIcon() && PickUpAbilityPoint();
-// PullDownSkill([1060, 650]);
-// PullDownSkill([1130, 650]);
-// PullDownSkill([1190, 650]);
-// ChangeAbility();
-// console.log(FindTipPoint([718, 311, 42, 33]));
-// WearEquipments();
-// OpenAllBox();
-// UpgradeAbilityLevel()
-// UpgradeHolyRelics();
 // GetActivitiesAward();
+// StrengthenHorseEquipment();
+// WearEquipments();
+// StrengthenEquipment();
+// LoginProps();
+// WearBestSuit();
+// DecomposeEquipment();
+// AddAttributePoint();
+// console.log(FindTipPoint([416, 370, 42, 45]));
+// GetEmail();
