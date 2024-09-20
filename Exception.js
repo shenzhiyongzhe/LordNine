@@ -1,11 +1,12 @@
 
 
 const {
-    ClickSkip, CloseMenu,
+    ClickSkip, CloseMenu, ChangeHaltModeTime, CloseBackpack,
     ExitHaltMode,
-    ReadImg, FindImg, RandomPress, Sleep, FindMultiColors, OpenMenu,
+    FindImg, FindMultiColors, FindRedBtn, FindImgInList, FindBlueBtn,
+    ReadImg, RandomPress, Sleep, OpenMenu,
     HollowPress,
-    FindBlueBtn, HasPageback, PageBack, HasMenu, CloseBackpack,
+    HasPageback, PageBack, HasMenu,
     GetVerificationCode,
     IsInCity, SwipeSlowly,
     WaitUntilMenu, WaitUntilPageBack,
@@ -14,9 +15,13 @@ const {
     IsHaltMode,
     LoadImgList, IsBackpackFull, LaunchGame,
     RewriteConfig,
-    FindImgInList,
+    PressBlank,
     HasPopupClose,
     RestartGame,
+    TapBlankToContinue,
+    WaitUntil,
+
+
 
 } = require("./utils.js");
 
@@ -26,7 +31,7 @@ const { LoginProps } = require("./CommonFlow.js");
 
 const { HasTip } = require("./MainStory.js");
 
-const { NoPotionColorList, LordNineWordColorList, WhiteAvatarColorList } = require("./Color/ExceptionColorList.js");
+const { NoPotionColorList, LordNineWordColorList, WhiteAvatarColorList, StartBtnSettingColorList } = require("./Color/ExceptionColorList.js");
 
 let lastTimeOfBuyingPotion = 99;
 let lastDebugModeTime = 0;
@@ -46,7 +51,10 @@ const ExceptionImgList = {
 };
 
 const popupCloseRegionList = [
-    [989, 54, 59, 52]
+    [989, 54, 59, 52],//
+    [795, 94, 40, 45],//购买药水弹窗
+    [746, 98, 44, 46], //活动页面卡片弹窗
+    [1130, 58, 58, 48], //活动页面窗口
 ];
 // flow -----
 const NoPotionFlow = (shot) =>
@@ -90,35 +98,95 @@ const NoPotionFlow = (shot) =>
 
         RandomPress([995, 433, 42, 41]); //grocery store
         Sleep(5);
-        if (WaitUntilPageBack())
+        const BuySomeItem = () =>
         {
-            RandomPress([154, 93, 164, 39]); //potion
-            RandomPress([474, 434, 146, 25]); // 80%
+            let isBuyPotion = false;
+            let isBuySpeedBook = false;
+            let isBuyHealBook = false;
+            RandomPress([154, 93, 164, 39]); //小药的图标位置
+            RandomPress([600, 338, 30, 5]); //药水滚动条，购买量为50% ~ 60%负重
             if (FindBlueBtn([648, 566, 175, 56]))
             {
                 RandomPress([667, 578, 133, 29]);
+                Sleep();
                 console.log("购买药水成功！");
+                isBuyPotion = true;
+            }
+            RandomPress([168, 336, 126, 32]);
+            WaitUntil(() => HasPopupClose([791, 114, 46, 46]), 200, 30);
+            if (FindBlueBtn([644, 543, 180, 62]))
+            {
+                console.log("购买速度增加咒文书");
+                RandomPress([669, 556, 134, 32]);
+                Sleep();
+                isBuySpeedBook = true;
+            }
+            if (HasPopupClose([789, 86, 54, 58]))
+            {
+                RandomPress([806, 106, 18, 20]);
+            }
+            RandomPress([159, 489, 148, 40]);
+            WaitUntil(() => HasPopupClose([791, 114, 46, 46]), 200, 30);
+            if (FindBlueBtn([644, 543, 180, 62]))
+            {
+                RandomPress([669, 556, 134, 32]);
+                console.log("购买恢复增加咒文书");
+                isBuyHealBook = true;
+            }
+            if (isBuyPotion && isBuySpeedBook && isBuyHealBook)
+            {
+                return true;
             }
             else
             {
-                RandomPress([953, 77, 242, 503]);
+                return false;
+            }
+        };
+        if (WaitUntilPageBack())
+        {
+
+            BuySomeItem();
+            if (HasPopupClose([794, 91, 45, 50]))
+            {
+                console.log("购买药水失败，当前背包已满，需要先清理背包");
+                RandomPress([482, 576, 131, 29]); //点击取消购买
+                console.log("点击取消购买");
+                PageBack();
+                BackpackFullFlow();
+                RandomPress([995, 433, 42, 41]); //grocery store
+                if (WaitUntilPageBack())
+                {
+                    BuySomeItem();
+                }
             }
             Sleep();
             PageBack();
         }
     }
 };
+
 const BackpackFullFlow = (shot) =>
 {
     const isBackpackFull = IsBackpackFull(shot);
     if (isBackpackFull)
     {
-        console.log("backpack is full");
+        console.log("背包已满，开始清理背包");
         WearEquipments();
         StrengthenEquipment();
         LoginProps();
         DecomposeEquipment();
     }
+};
+
+const IsTimeout = () =>
+{
+    app.launch("fun.kitsunebi.kitsunebi4android");
+    let hasTimeOut = text("timeout").findOne(3000);
+    if (hasTimeOut)
+    {
+        return true;
+    }
+    return false;
 };
 const DisconnectionFlow = (shot) =>
 {
@@ -140,6 +208,13 @@ const DisconnectionFlow = (shot) =>
             RandomPress([hasBlueBtn.x, hasBlueBtn.y, 15, 5]);
             const delayTime = random(300, 600);
             console.log("延迟启动时间: " + delayTime + "s");
+            let isTimeout = IsTimeout();
+            if (isTimeout)
+            {
+                console.log("vpn is time out");
+                alert("vpn time out", "需要更换ip");
+            }
+
             Sleep(delayTime);
             LaunchGame();
             if (typeof gameConfig.reconnectionTime == "number")
@@ -206,21 +281,16 @@ const MainUIFlow = (shot) =>
         if (FindMultiColors(WhiteAvatarColorList, [32, 600, 52, 49], shot))
         {
             PressBlank();
-            console.log("find main ui find white avatar");
+            console.log("点击开始游戏 有区服的主页面");
         }
         else
         {
-            console.log("find main ui");
+            console.log("点击开始 主页面");
             PressBlank();
         }
     }
 };
 
-
-const PressBlank = () => RandomPress([361, 264, 525, 263]);
-
-const HasStartBlueBtn = () => FindBlueBtn([931, 639, 261, 71]);
-const PressStartBtn = () => RandomPress([955, 655, 208, 37]);
 
 const ResetConfig = () =>
 {
@@ -241,7 +311,7 @@ const ReLoginFlow = () =>
     {
         hasGoogleLogin.parent().click();
     }
-    const hasSelectAccount = textMatches(/(.*选择账号.*|.*계정 선택.*)/).findOne(20);
+    const hasSelectAccount = textMatches(/(.*选择账号.*|.*계정 선택.*|.*Choose an account.*)/).findOne(20);
     if (hasSelectAccount)
     {
         const hasAccount = textMatches(/(.*@gmail.com.*)/).findOne(20).parent().parent();
@@ -252,6 +322,7 @@ const ReLoginFlow = () =>
     }
 
 };
+
 const ClosePopupWindows = (shot) =>
 {
     let hasPopup = null;
@@ -265,6 +336,7 @@ const ClosePopupWindows = (shot) =>
         }
     }
 };
+
 const ExceptionFlow = (gameMode) =>
 {
     const shot = captureScreen();
@@ -276,22 +348,14 @@ const ExceptionFlow = (gameMode) =>
         lastDebugModeTime = curMinute;
     }
 
-    if (gameMode == "mainStory")
-    {
-        if (IsHaltMode())
-        {
-            ExitHaltMode();
-        }
-    }
-
-    NoPotionFlow(shot);
     BackpackFullFlow(shot);
-    DisconnectionFlow(shot);
+    NoPotionFlow(shot);
 
     ResetConfig();
-
     MakeSureInGame(shot);
+
 };
+
 // *******************************************************************  确保在游戏中 *********************************************************************
 
 const ClickRate = () =>
@@ -307,15 +371,17 @@ const LongTimeSamePage = (shot) =>
 {
     if (fullScreenClip == null)
     {
-        fullScreenClip = captureScreen();
+        fullScreenClip = shot;
         return true;
     }
-    let screenInterval = (new Date().getTime() - lastGetFullScreen) / 600000;
+    let screenInterval = (new Date().getTime() - lastGetFullScreen) / 1000;
+    console.log("screen interval:" + screenInterval);
     if (screenInterval > 10)
     {
         console.log("全屏截图");
         lastGetFullScreen = new Date().getTime();
-        let isSame = FindImg(fullScreenClip, [0, 0, 1280, 720], shot);
+        let isSame = FindImg(fullScreenClip);
+        console.log("当前页面是否无变化：" + isSame);
         if (isSame)
         {
             console.log("10分钟了，屏幕内容一样，重启游戏。");
@@ -323,30 +389,117 @@ const LongTimeSamePage = (shot) =>
         }
     }
 };
-const MakeSureInGame = (shot) =>
+
+const PressCommonBtn = () =>
 {
-    CloseBackpack();
-    PageBack();
-    ClickSkip();
-    CloseMenu();
-    ClosePopupWindows(shot);
-    ClickRate();
+    const shot = captureScreen();
+    if (FindBlueBtn([931, 639, 261, 71], shot))
+    {
+        if (FindMultiColors(StartBtnSettingColorList, [1205, 15, 56, 53], shot))
+        {
+            console.log("发现游戏开始按钮，点击开始");
+            RandomPress([955, 655, 208, 37]);
+        }
+        else
+        {
+            console.log("右下角蓝色按钮,制作");
+            RandomPress([1030, 659, 95, 34]);
+        }
+    }
+    else if (FindBlueBtn([657, 382, 203, 68], shot))
+    {
+        if (FindRedBtn([419, 381, 207, 69], shot))
+        {
+            console.log("发现地图传送弹窗，点击传送");
+            RandomPress([684, 400, 152, 30]);
+        }
+    }
+    else if (FindBlueBtn([654, 444, 202, 66], shot))
+    {
+        if (FindRedBtn([423, 438, 219, 77]))
+        {
+            console.log("主线传送按钮...");
+            RandomPress([684, 460, 152, 31]);
+        }
 
-    ReLoginFlow();
-    MainUIFlow(shot);
-    HasStartBlueBtn() && PressStartBtn();
-    InputVerificationFlow(shot);
-    LongTimeSamePage(shot);
+    }
+    else if (FindBlueBtn([655, 380, 207, 68], shot))
+    {
+        if (FindRedBtn([423, 380, 204, 69], shot))
+        {
+            console.log("怪物图鉴快速移动按钮");
+            RandomPress([681, 399, 149, 33]);
 
+        }
+    }
+    else if (FindBlueBtn([645, 563, 185, 61], shot))
+    {
+        if (FindRedBtn([456, 566, 181, 55], shot))
+        {
+            console.log("发现药水弹窗，点击购买");
+            RandomPress([485, 559, 131, 26]);
+        }
+    }
+    else if (FindBlueBtn([1055, 637, 219, 71], shot))
+    {
+        if (HasPageback())
+        {
+            console.log("坐骑页面，强化装备按钮");
+            RandomPress([1077, 656, 173, 35]);
+        }
+
+    }
+    else if (FindBlueBtn([655, 443, 197, 65], shot))
+    {
+        if (FindRedBtn([429, 445, 200, 63], shot))
+        {
+            console.log("发现申请加入工会弹窗，点击确认");
+            RandomPress([678, 460, 156, 30]);
+        }
+    }
+    else if (FindBlueBtn([487, 621, 307, 76], shot))
+    {
+        console.log("发现制作核萌的确认按钮，点击确认");
+        RandomPress([527, 639, 243, 36]);
+    }
 };
 
+const MakeSureInGame = (shot) =>
+{
+    if (!HasMenu())
+    {
+        if (IsHaltMode())
+        {
+            ExitHaltMode();
+            ChangeHaltModeTime();
+        }
+        TapBlankToContinue();
 
+        PressCommonBtn();
+
+        CloseBackpack();
+        PageBack();
+        ClickSkip();
+        CloseMenu();
+        ClosePopupWindows(shot);
+        ClickRate();
+
+        ReLoginFlow();
+        MainUIFlow(shot);
+        InputVerificationFlow(shot);
+        // LongTimeSamePage(shot);
+        DisconnectionFlow(shot);
+    }
+};
 
 
 module.exports = {
     ExceptionFlow
 };
 
+
+
+// console.log(FindBlueBtn([645, 562, 179, 61]));
 
 // console.log(CloseBackpack());
 // console.time("exception");
@@ -355,6 +508,11 @@ module.exports = {
 // console.log(HasTouchToStart());
 // MakeSureInGame();
 // DeathFlow();
+// while (true)
+// {
+//     ExceptionFlow("mainStory");
+//     Sleep();
+// }
 // GameModeFlow("mainStory");
 // ExceptionFlow();
 // MakeSureInGame();

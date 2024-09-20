@@ -1,7 +1,7 @@
 
 const { WearEquipments, StrengthenEquipment, OpenAllBox, UseHolyGrail, DecomposeEquipment, WearBestSuit } = require("./Backpack.js");
 const {
-    ReadImg, FindImg, RandomPress, Sleep, FindMultiColors, OpenMenu, CloseMenu, EnterMenuItemPage,
+    ReadImg, FindImg, RandomPress, Sleep, FindMultiColors, OpenMenu, CloseMenu, EnterMenuItemPage, CloseBackpack,
     PageBack,
     WaitUntilPageBack,
     SwipeSlowly,
@@ -10,39 +10,36 @@ const {
     PressBlank, WaitUntil,
     HasMenu,
     HasPageback, IsBackpackFull,
-    NeedPressBlank,
-    PullDownSkill,
-    CloseBackpack,
-    FindNumber,
-    ReadConfig,
-    RewriteConfig,
+    TapBlankToContinue,
+    PullDownSkill, FindNumber, ReadConfig, RewriteConfig,
+
 } = require("./utils.js");
 
 let lastComprehensiveImproveTime = 1726208812345;
 let character_lv = 0;
-
 const GetEmail = () =>
 {
+    console.log("开始领取邮件");
     const hasOpenMenu = OpenMenu();
     const hasEmailPoint = FindTipPoint([1054, 520, 25, 27]);
     if (!hasOpenMenu)
     {
-        console.log("do not have menu button");
+        console.log("没有发现菜单按钮，退出");
         return false;
     }
     if (!hasEmailPoint)
     {
-        console.log("do not have avaliable email");
+        console.log("没有可领取邮件，退出");
         return false;
     }
     RandomPress([1033, 555, 25, 16]); // email icon
     const hasEnterEmailPage = WaitUntilPageBack();
     if (!hasEnterEmailPage)
     {
-        console.log("enter email page failed!");
+        console.log("进入邮件页面失败，退出");
         return false;
     }
-    console.log("entered email page");
+    console.log("已进入邮件页面，点击全部领取");
     let shot = captureScreen();
     let hasTipPoint;
     for (let i = 0; i < 6; i++)
@@ -70,32 +67,32 @@ const GetEmail = () =>
         }
     }
     PageBack();
-    console.log("get email finish");
+    console.log("邮件领取完毕");
 };
 
 const GetAchievement = () =>
 {
-    console.log("get achievement");
+    console.log("开始领取成就奖励");
     const hasOpenMenu = OpenMenu();
     if (!hasOpenMenu)
     {
-        console.log("do not have menu button");
+        console.log("没有发现菜单按钮，退出");
         return false;
     }
     const hasAchievementPoint = FindTipPoint([1173, 182, 22, 25]);
     if (!hasAchievementPoint)
     {
-        console.log("do not have avaliable achievement");
+        console.log("没有可领取的成就奖励，退出");
         return false;
     }
     RandomPress([1153, 204, 21, 33]);
     const hasEnterAchievementPage = WaitUntilPageBack();
     if (!hasEnterAchievementPage)
     {
-        console.log("enter achievement page failed!");
+        console.log("进入成就界面失败，退出");
         return false;
     }
-    console.log("entered achievement page");
+    console.log("已经进入领取成就奖励页面");
     let hasTipPoint;
     hasTipPoint = FindTipPoint([114, 63, 31, 26]);
 
@@ -121,26 +118,28 @@ const GetAchievement = () =>
             Sleep();
         }
     }
-    console.log("finish get achievement");
+    console.log("领取成就奖励完毕");
     PageBack();
 };
 
 const GetMonsterKnowledgeAward = () =>
 {
+    console.log("开始领取怪物图鉴奖励");
     const hasOpenMenu = OpenMenu();
     if (!hasOpenMenu)
     {
-        console.log("do not have menu button");
+        console.log("没有发现菜单按钮，退出");
         return false;
     }
     const hasMonsterKnowledgeAwardPoint = FindTipPoint([1111, 269, 29, 29]);
     if (!hasMonsterKnowledgeAwardPoint)
     {
-        console.log("do not have avaliable monster knowledge award");
+        console.log("没有可领取的怪物图鉴奖励，退出");
         return false;
     }
     RandomPress([1091, 292, 25, 28]);
     WaitUntilPageBack();
+    Sleep(3);
     if (FindBlueBtn([131, 651, 115, 63]))
     {
         RandomPress([161, 670, 61, 27]);
@@ -149,12 +148,13 @@ const GetMonsterKnowledgeAward = () =>
         Sleep();
     }
     PageBack();
-    console.log("get monster knowledge award");
+    console.log("领取怪物图鉴奖励完毕");
+
 };
 
 const LoginProps = () =>
 {
-    console.log("login props");
+    console.log("开始道具记录");
     const hasOpenMenu = OpenMenu();
     if (!hasOpenMenu)
     {
@@ -208,12 +208,13 @@ const LoginProps = () =>
         }
     }
     PageBack();
-    console.log("finish get login props, login count: " + loginCount);
+    console.log("道具记录完毕，记录数量为: " + loginCount);
 };
 
 const ShopBuy = () =>
 {
     //buy strengthening stone 
+    console.log("开始商城购买");
     const hasOpenMenu = HasMenu();
     if (!hasOpenMenu)
     {
@@ -261,9 +262,8 @@ const ShopBuy = () =>
         }
     }
     PageBack();
-    console.log("finish bulk buy! isSuccess: " + isSuccess);
+    console.log("商城购买完毕，是否成功购买 " + isSuccess);
 };
-
 
 
 const CrucifixColorList = [
@@ -275,7 +275,7 @@ const HasCrucifixIcon = () => FindMultiColors(CrucifixColorList, [327, 60, 40, 4
 
 const PickUpAbilityPoint = () =>
 {
-    console.log("pick up ability point");
+    console.log("开始恢属性力点");
     RandomPress([337, 73, 21, 23]);
     if (WaitUntil(() => HasPopupClose([34, 94, 46, 53])))
     {
@@ -310,7 +310,7 @@ const PickUpAbilityPoint = () =>
 
 const IncreaseWeaponFeatures = () =>
 {
-    console.log("increase weapon features");
+    console.log("开始增加武器特性");
     console.log("顺便获取当前玩家等级。");
     const hasEntered = EnterMenuItemPage("weaponFeatures");
     if (!hasEntered)
@@ -382,11 +382,11 @@ const IncreaseWeaponFeatures = () =>
 
     }
     PageBack();
+    return true;
 };
-
 const AddAttributePoint = () =>
 {
-    console.log("start add attribute point");
+    console.log("开始添加属性点");
 
     const PlusAbilityIcon = [
         ["#8f7f4f", [[14, 0, "#ab995f"], [6, -7, "#b19d62"], [7, 0, "#af9c62"], [7, 6, "#b7a366"]]],
@@ -417,7 +417,7 @@ const AddAttributePoint = () =>
 };
 const StrengthenHorseEquipment = () =>
 {
-    console.log("Start Strengthen horse equipment");
+    console.log("开始强化坐骑装备");
     const hasEnter = EnterMenuItemPage("horse");
     if (!hasEnter)
     {
@@ -467,7 +467,7 @@ const StrengthenHorseEquipment = () =>
 
 const GetPassAward = () =>
 {
-    console.log("start to get pass award");
+    console.log("开始领取通行证奖励");
     if (!FindTipPoint([882, 2, 19, 20]))
     {
         console.log("no award could get");
@@ -492,12 +492,12 @@ const GetPassAward = () =>
 };
 const GetActivitiesAward = () =>
 {
+    console.log("开始领取活动奖励");
     const CanPickUpAwardHighGoldenColorList = [
         ["#cdb646", [[2, 0, "#d0ba47"], [3, 0, "#d1ba47"], [5, 0, "#cfb946"], [8, 0, "#c6af43"]]],
         ["#c4af47", [[1, 0, "#cbb54a"], [3, 0, "#d6be4a"], [8, 0, "#e0c74f"], [11, 0, "#dcc34e"]]],
         ["#b5a03f", [[3, 0, "#bfab43"], [5, 0, "#c3af45"], [7, 0, "#c3ae44"], [12, 0, "#b4a03e"]]]
     ];
-    console.log("start get daily award");
     if (!FindTipPoint([942, 3, 17, 19]))
     {
         console.log("no award could get");
@@ -509,7 +509,7 @@ const GetActivitiesAward = () =>
         console.log("enter failed");
         return false;
     }
-    Sleep(3);
+    Sleep(5);
     const shot = captureScreen();
     let hasTip = false;
     let hasGoldenLight = false;
@@ -548,7 +548,7 @@ const GetActivitiesAward = () =>
         }
     }
 
-    for (let i = 0; i < 5; i++)
+    for (let i = 0; i < 30; i++)
     {
         if (HasPopupClose([745, 97, 46, 47]))
         {
@@ -557,6 +557,9 @@ const GetActivitiesAward = () =>
         else if (HasPopupClose([1143, 55, 42, 51]))
         {
             RandomPress([1157, 74, 14, 18]);
+        }
+        else if (HasMenu())
+        {
             break;
         }
         Sleep();
@@ -565,17 +568,17 @@ const GetActivitiesAward = () =>
 };
 const GetTravelLogAward = () =>
 {
-    console.log("start get travel log award...");
+    console.log("开始领取日志奖励");
     const hasOpenMenu = OpenMenu();
     if (!hasOpenMenu)
     {
-        console.log("open menu failed!");
+        console.log("打开菜单失败!");
         return false;
     }
     const hasLogTip = FindTipPoint([1232, 187, 21, 20]);
     if (!hasLogTip)
     {
-        console.log("no log award can pick up");
+        console.log("没有可以领取的奖励，退出");
         return false;
     }
 
@@ -587,16 +590,17 @@ const GetTravelLogAward = () =>
         PageBack();
         return false;
     }
+    Sleep(3);
     // WaitUntil(() => FindBlueBtn([552, 451, 204, 72]));
     if (!FindTipPoint([602, 608, 28, 38]))
     {
-        console.log("no awrd can pick up");
+        console.log("没有发现小红点，退出");
         PageBack();
         return false;
     }
     if (!FindBlueBtn([551, 448, 209, 74]))
     {
-        console.log("not find blue btn! ");
+        console.log("没有发现可领取按钮，退出");
         PageBack();
         return false;
     }
@@ -614,12 +618,12 @@ const GetTravelLogAward = () =>
                 RandomPress([hasItemTipPoint.x - 40, hasItemTipPoint.y, 40, 40]);
                 Sleep(3);
                 PressBlank();
-                console.log("get award successful");
+                console.log("领取奖励成功");
             }
         }
         else
         {
-            console.log("no award can get return ");
+            console.log("没有可领取奖励，退出 ");
             break;
         }
     }
@@ -629,7 +633,7 @@ const GetTravelLogAward = () =>
 };
 const UpgradeAbilityLevel = () =>
 {
-    console.log("start upgrade ability level");
+    console.log("开始升级能力等级");
     const hasEntered = EnterMenuItemPage("ability");
     if (!hasEntered)
     {
@@ -683,13 +687,16 @@ const UpgradeAbilityLevel = () =>
 };
 const ChangeAbility = (changeList) =>
 {
-    console.log("start change ability");
+    console.log("开始改变能力配置，默认配置为战斗，防御，咒术");
     const hasEnter = EnterMenuItemPage("ability");
     if (!hasEnter)
     {
         console.log("enter ability failed");
         return false;
     }
+    const isNotMatchingColorList = [
+        ["#f64f4e", [[3, 4, "#f75050"], [3, 11, "#f9564b"], [3, 41, "#fa5454"], [-2, 54, "#f85050"]]]
+    ];
     changeList = changeList || [[0, 0, 0], [0, 1, 1], [3, 1, 2], [3, 0, 3], [2, 1, 4], [2, 0, 5]];
 
     const typePosArr = [
@@ -743,27 +750,36 @@ const ChangeAbility = (changeList) =>
             RandomPress([39, 662, 96, 27]);
         }
     };
-
-    for (let i = 0; i < changeList.length; i++)
+    const MatchingAbility = () =>
     {
-        let type = changeList[i][0];
-        let optionPos = changeList[i][1];
-        let equipPos = changeList[i][2];
-
-        TapSelect();
-        TapClear();
-        RandomPress(typePosArr[type]);
-        TapConfirm();
-        RandomPress(optionPosArr[optionPos]);
-        RandomPress(optionPosArr[optionPos]);
-        RandomPress(equipedPosArr[equipPos]);
-        Sleep(4);
-        if (NeedPressBlank())
+        for (let i = 0; i < changeList.length; i++)
         {
-            PressBlank();
-        }
-    }
+            let type = changeList[i][0];
+            let optionPos = changeList[i][1];
+            let equipPos = changeList[i][2];
+            if (i % 2 == 0)
+            {
+                TapSelect();
+                TapClear();
+                RandomPress(typePosArr[type]);
+                TapConfirm();
+            }
 
+            RandomPress(optionPosArr[optionPos]);
+            RandomPress(optionPosArr[optionPos]);
+            RandomPress(equipedPosArr[equipPos]);
+            Sleep(4);
+            TapBlankToContinue();
+
+        }
+    };
+    MatchingAbility();
+    let isMatchingWrong = FindMultiColors(isNotMatchingColorList, [138, 132, 594, 100]);
+    if (isMatchingWrong)
+    {
+        console.log("配置错误，重新配置");
+        MatchingAbility();
+    }
     PageBack();
     if (!HasMenu())
     {
@@ -779,7 +795,7 @@ const ChangeAbility = (changeList) =>
 };
 const UpgradeHolyRelics = () =>
 {
-    console.log("start upgrade holy relics");
+    console.log("开始升级圣物");
     const hasEnter = EnterMenuItemPage("holyRelics");
     if (!hasEnter)
     {
@@ -901,14 +917,15 @@ const UpgradeHolyRelics = () =>
 
 const ComprehensiveImprovement = () =>
 {
-    console.log("start comprehensive improvement");
+    console.log("开始综合提升");
+
+    let isImprovement = false;
 
     if ((lastComprehensiveImproveTime - new Date().getTime()) / 3600000 >= 1)
     {
         console.log("finish: 两次提升间隔较短，暂不操作");
         return true;
     }
-
     lastComprehensiveImproveTime = new Date().getTime();
 
     HasCrucifixIcon() && PickUpAbilityPoint();
@@ -916,7 +933,7 @@ const ComprehensiveImprovement = () =>
     const isBackpackFull = IsBackpackFull(captureScreen());
     if (isBackpackFull)
     {
-        console.log("backpack is full");
+        console.log("背包是满的，需要先清理背包");
         WearEquipments();
         StrengthenEquipment();
         LoginProps();
@@ -947,28 +964,34 @@ const ComprehensiveImprovement = () =>
     IncreaseWeaponFeatures();
     UpgradeHolyRelics();
     StrengthenHorseEquipment();
-    if (character_lv == 34 || character_lv == null)
+
+    if (character_lv <= 40 || character_lv == null)
     {
-        console.log("角色等级为34，改变符文");
+        console.log(`角色等级为${character_lv}，改变符文配置`);
         ChangeAbility();
     }
+
     UpgradeAbilityLevel();
-    ShopBuy();
+    let isExcuted = ShopBuy();
     AddAttributePoint();
 
     WearBestSuit();
     console.log("finish");
+
+
+    return isExcuted;
 };
 
 
-// module.exports = {
-//     ChangeAbility, GetEmail, GetAchievement, GetMonsterKnowledgeAward, LoginProps, HasCrucifixIcon,
-//     ShopBuy, PickUpAbilityPoint, AddAttributePoint, ComprehensiveImprovement, StrengthenHorseEquipment
-// };
+module.exports = {
+    ChangeAbility, GetEmail, GetAchievement, GetMonsterKnowledgeAward, LoginProps, HasCrucifixIcon,
+    ShopBuy, PickUpAbilityPoint, AddAttributePoint, ComprehensiveImprovement, StrengthenHorseEquipment
+};
+// WearEquipments();
 
-// ChangeAbility();
-
+// GetActivitiesAward();
 // ComprehensiveImprovement();
+// OpenAllBox();
 // GetActivitiesAward();
 // StrengthenHorseEquipment();
 // WearEquipments();

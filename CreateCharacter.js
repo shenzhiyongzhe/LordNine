@@ -2,7 +2,7 @@ const { ListenServerFlow } = require("./ListenServer.js");
 const {
     ReadImg, FindImg, RandomPress, Sleep, FindMultiColors, SwipeSlowly,
     ClickSkip,
-    FindBlueBtn, FindCheckMark, PressBlank,
+    FindBlueBtn, FindCheckMark, PressBlank, FindRedBtn,
     HasSkip,
     HasPopupClose,
     ReadConfig,
@@ -62,9 +62,6 @@ const CanNotCreateCharacterColorList = [
     ["#8a3031", [[17, 1, "#862f30"], [27, 1, "#8b3031"], [32, 1, "#8a3031"], [46, -2, "#8b3031"]]]
 ];
 
-const RedBtnColorList = [
-    ["#381a1a", [[41, -2, "#3d1c1c"], [137, 1, "#3d1d1d"], [120, 27, "#421f1f"], [16, 27, "#432020"]]],
-];
 const BlackBtnColorList = [
     ["#000000", [[51, -4, "#000000"], [86, 33, "#000000"], [35, 51, "#000000"], [-42, 27, "#000000"]]],
     ["#000000", [[64, -1, "#000000"], [110, 23, "#000000"], [55, 51, "#000000"], [-3, 12, "#000000"]]],
@@ -72,11 +69,7 @@ const BlackBtnColorList = [
     ["#000000", [[100, 0, "#000000"], [237, 19, "#000000"], [210, 41, "#000000"], [32, 33, "#000000"]]]
 ];
 
-const ImgList = {
-    "googleLogin": ReadImg("icon/login/googleLogin"),
-    "selectAccount_zh": ReadImg("icon/login/selectAccount_zh"),
-    "selectAccount_kr": ReadImg("icon/login/selectAccount_kr")
-};
+
 
 const serverNameImgList = [];
 
@@ -94,10 +87,6 @@ const LoadServerImgList = () =>
     }
 };
 
-const RecycleServerImgList = () =>
-{
-    serverNameImgList.forEach(Item => Item.recycle());
-};
 
 LoadServerImgList();
 
@@ -105,7 +94,7 @@ const HasMainUI = () => FindMultiColors(LordNineWordColorList, [313, 333, 728, 3
 
 //*****************************************************main******************************************** */
 
-const FindRedBtn = (region) => FindMultiColors(RedBtnColorList, region);
+
 const GetAccountFile = () =>
 {
     if (files.exists("/sdcard/disposition.txt"))
@@ -319,7 +308,7 @@ const LoginGoogleAccount = () =>
         if (hasAggreeBtn_zh)
         {
             console.log("我同意");
-            hasAggreeBtn.click();
+            hasAggreeBtn_zh.click();
             break;
         }
         else if (hasAggreeBtn_kr)
@@ -392,10 +381,10 @@ const LoginGoogleAccount = () =>
 };
 const SetCountryAndBirth = () =>
 {
-    console.log("SetCountryAndBirth");
     let hadNeedSelectCountry = textMatches(/(.*국가 선택.*|.*選擇國家.*)/).findOne(20);
     if (hadNeedSelectCountry)
     {
+        console.log("SetCountryAndBirth");
         hadNeedSelectCountry.click();
         Sleep(3);
         setText("Korea");
@@ -465,8 +454,8 @@ const SetCountryAndBirth = () =>
             Sleep();
         }
 
+        console.log("finish set country and birth");
     }
-    console.log("finish set country and birth");
 };
 const PassGameRules = (accountArray) =>
 {
@@ -559,15 +548,195 @@ const PassGameRules = (accountArray) =>
 
     console.log("finish pass game rules");
 };
-const LoginGoogleAccountInGame = () =>
+const ClickNextBtn = (findTime) =>
 {
-    console.log("start to log in google account in game");
-    for (let i = 0; i < 200; i++)
+    findTime = findTime || 20;
+    const hasNext_kr = text("다음").findOne(findTime);
+    const hasNext_zh = text("下一步").findOne(findTime);
+    if (hasNext_zh)
     {
-
-
+        hasNext_zh.click();
+        console.log("检测到中文 下一步按钮，点击下一步");
+    }
+    else if (hasNext_kr)
+    {
+        hasNext_kr.click();
+        console.log("检测到韩文 下一步按钮，点击下一步");
+    }
+};
+const InputGoogleAccount = (accountArray) =>
+{
+    let hasFacebookLogin = textMatches(/(.*Facebook.*)/).findOne(20);
+    if (hasFacebookLogin)
+    {
+        let googleIcon = textMatches(/(.*Google.*)/).findOne(20);
+        if (googleIcon)
+        {
+            click(googleIcon.bounds().centerX(), googleIcon.bounds().centerY());
+            console.log("发现谷歌登录选项。点击选择谷歌账号登录。");
+        }
+    }
+    let hasAppleLoginPopup = text("Apple 계정을 사용하여 로드나인에 로그인하십시오.").findOne(20);
+    if (hasAppleLoginPopup)
+    {
+        console.log("误点击苹果账号登录，点击关闭苹果登录弹窗");
+        let close_btn = id("close_button").findOne(20);
+        if (close_btn)
+        {
+            close_btn.click();
+        }
+    }
+    let hasSelectAccount = textMatches(/(.*选择账号.*|.*계정 선택.*)/).findOne(20);
+    if (hasSelectAccount)
+    {
+        let hasAccount = textMatches(/(.*@gmail.com.*)/).findOne(20);
+        if (hasAccount)
+        {
+            console.log("发现谷歌账号选择页面，点击使用该账号直接登录");
+            hasAccount.parent().parent().click();
+        }
+    }
+    let hasForgetEmail_zh = text("忘记了电子邮件地址？").findOne(20);
+    let hasForgetEmail_kr = text("이메일을 잊으셨나요?").findOne(20);
+    if (hasForgetEmail_zh || hasForgetEmail_kr)
+    {
+        console.log("发现忘记电子邮件地址。 开始输入邮箱。");
+        console.log("input email account!");
+        setText(accountArray[0]);
+        Sleep();
+        ClickNextBtn(3000);
+    }
+    let hasPasswordInputBox_kr = text("비밀번호 표시").findOne(20);
+    let hasPasswordInputBox_zh = text("显示密码").findOne(20);
+    if (hasPasswordInputBox_kr || hasPasswordInputBox_zh)
+    {
+        console.log("发现密码输入框，开始输入密码");
+        setText(accountArray[1]);
+        Sleep();
+        ClickNextBtn(3000);
+    }
+    let hasRecoveryEmailOption = desc("복구 이메일 확인").findOne(20);
+    if (hasRecoveryEmailOption)
+    {
+        console.log("发现账号验证页面，选择使用辅助邮箱验证");
+        hasRecoveryEmailOption.click();
+    }
+    let hasInputRecovery = text("다른 방법 시도").findOne(20);
+    if (hasInputRecovery)
+    {
+        console.log("发现辅助邮箱输入框，开始输入辅助邮箱账号");
+        setText(accountArray[2]);
+        ClickNextBtn();
+    }
+    let hasAggreeBtn_zh = text("我同意").findOne(20);
+    let hasAggreeBtn_kr = text("동의").findOne(20);
+    if (hasAggreeBtn_zh)
+    {
+        console.log("中文：我同意");
+        hasAggreeBtn_zh.click();
+    }
+    else if (hasAggreeBtn_kr)
+    {
+        console.log("韩文：我同意");
+        hasAggreeBtn_kr.click();
+    }
+    let hasMoreBtn_zh = text("更多").findOne(100);
+    let hasMoreBtn_kr = text("더보기").findOne(100);
+    if (hasMoreBtn_zh)
+    {
+        console.log("更多");
+        hasMoreBtn_zh.click();
+    }
+    if (hasMoreBtn_kr)
+    {
+        console.log("韩文：更多");
+        hasMoreBtn_kr.click();
         Sleep();
     }
+    let hasAcceptBtn_zh = text("接受").findOne(100);
+    let hasAcceptBtn_kr = text("동의").findOne(100);
+    if (hasAcceptBtn_zh)
+    {
+        console.log("接受");
+        hasAcceptBtn_zh.click();
+    }
+    else if (hasAcceptBtn_kr)
+    {
+        console.log("韩文：接受");
+        hasAcceptBtn_kr.click();
+    }
+    let hadYeah = text("예").findOne(100);
+    if (hadYeah)
+    {
+        console.log("click yes");
+        hadYeah.click();
+    }
+};
+const AgreeGameRules = () =>
+{
+    let checkBox_0 = ReadImg("icon/login/checkBox_0");
+
+    let hadOrangeConfirm_KoreadRepublicOf = text("다음").findOne(20);
+    if (hadOrangeConfirm_KoreadRepublicOf)
+    {
+        console.log("韩文：发现橙色确认按钮，点击下一步");
+        hadOrangeConfirm_KoreadRepublicOf.click();
+        Sleep(3);
+    }
+    let hadOrangeConfirm_KoreadRepublicOf_ch = text("下一步").findOne(20);
+    if (hadOrangeConfirm_KoreadRepublicOf_ch)
+    {
+        console.log("发现中文橙色按钮：点击下一步");
+        hadOrangeConfirm_KoreadRepublicOf_ch.click();
+        Sleep(3);
+    }
+    let hadOrangeConfirm_AgreeThreeProtocol = text("모두 동의 후 계속하기 (선택항목 포함)").findOne(20);
+    if (hadOrangeConfirm_AgreeThreeProtocol)
+    {
+        console.log("发现3个协议，点击同意");
+        hadOrangeConfirm_AgreeThreeProtocol.click();
+    }
+    if (FindMultiColors(BlackBtnColorList, [272, 520, 748, 125]))
+    {
+        RandomPress([415, 565, 472, 36]);
+    }
+    const hasCheckBox_0 = FindImg(checkBox_0, [247, 232, 127, 108]);
+    if (hasCheckBox_0)
+    {
+        console.log("点击勾选框");
+        click(300, 280);
+        Sleep();
+        RandomPress([337, 561, 632, 32]);
+    }
+    checkBox_0.recycle();
+};
+const LoginGoogleAccountInGame = () =>
+{
+    console.log("开始登录谷歌账号");
+    let hadSentEmail = false;
+    const accountArray = GetAccountFile();
+    let input_placeholder_recoveryEmail = ReadImg("icon/login/input_placeholder_recoveryEmail");
+
+    for (let i = 0; i < 400; i++)
+    {
+        InputGoogleAccount(accountArray);
+        SetCountryAndBirth();
+        AgreeGameRules();
+        let hasInput_placeholder_recoveryEmail = FindImg(input_placeholder_recoveryEmail, [280, 359, 170, 119]);
+        if (hasInput_placeholder_recoveryEmail)
+        {
+            setText(accountArray[0]);
+            RandomPress([413, 558, 539, 41]);
+            console.log("发送邮箱验证码。");
+            hadSentEmail = true;
+            break;
+        }
+        ClickNextBtn();
+        Sleep();
+        console.log("loop： " + i);
+    }
+    input_placeholder_recoveryEmail.recycle();
+    return hadSentEmail;
 };
 
 const InputEmailUrl = () =>
@@ -890,12 +1059,13 @@ const LoginFlow = () =>
         if (hasCodeInputBox)
         {
             console.log("找到验证码输入框");
+            setText(code);
+            Sleep();
             break;
         }
         Sleep();
     }
 
-    setText(code);
     for (let i = 0; i < 30; i++)
     {
         if (FindMultiColors(BlackBtnColorList, [270, 516, 745, 134]))
@@ -936,9 +1106,10 @@ const LoginFlow = () =>
 };
 
 const PressServerBar = () => RandomPress([547, 590, 173, 32]);
+
 const WaitUntilEnterServerSelectPage = () =>
 {
-    console.log("wait until enter server select page");
+    console.log("等待直到进入服务器选择页面...");
 
     for (let i = 0; i < 90; i++)
     {
@@ -960,6 +1131,26 @@ const WaitUntilEnterServerSelectPage = () =>
         {
             ClickSkip();
             Sleep();
+        }
+        let hasPopup_verificationCode = FindImgInList(verificationCodeImgList, [530, 235, 215, 78]);
+        if (hasPopup_verificationCode)
+        {
+            console.log("发现验证码弹窗");
+            let code = GetVerificationCode();
+            RandomPress([511, 426, 295, 11]);
+            if (!code)
+            {
+                alert("获取图形验证码失败", "接验证码有问题");
+                return false;
+            }
+            console.log("验证码为:" + code);
+            setText(code);
+            Sleep();
+            if (FindBlueBtn([531, 500, 222, 73]))
+            {
+                RandomPress([569, 518, 143, 31]);
+                Sleep();
+            }
         }
         Sleep();
     }
@@ -1188,6 +1379,10 @@ const SetName = () =>
     if (hasCreateCharacterBtn == true)
     {
         console.log("点击创建角色");
+        //随机头型和发型
+        RandomPress([83, 94, 192, 538]);
+        RandomPress([944, 123, 251, 284]);
+
         RandomPress([945, 670, 248, 31]); //create btn
         Sleep();
         if (FindCheckMark([669, 431, 45, 41]))
@@ -1269,6 +1464,7 @@ const CreateCharacterFlow = (serverName) =>
         {
             Sleep(5);
             PressServerBar();
+            // PressBlank();
         }
         if (HasPopupClose([1168, 60, 48, 56]))
         {
@@ -1290,10 +1486,12 @@ const CreateCharacterFlow = (serverName) =>
         {
             PressServerBar();
             console.log("发现已经选区，重新选区");
+            hadAlreadyLogin = true;
             break;
         }
         Sleep();
     }
+
     if (hadAlreadyLogin == false)
     {
         LoginFlow();
@@ -1321,7 +1519,7 @@ module.exports = {
 };
 
 // LoginFlow();
-
+// LoginGoogleAccountInGame();
 // GetVerificationCode();
 // EnterGoogleEmail();
 // EnterGameToSendVerificationCode();
@@ -1332,7 +1530,7 @@ module.exports = {
 // LoginGoogleAccout();
 // app.launch("com.android.chrome");
 
-// CreateCharacterFlow("28");
+
 // WaitUntilEnterServerSelectPage();
 // EnterRandomServer();
 // console.log(FindMultiColors(CanNotCreateCharacterColorList, [515, 317, 106, 58]));

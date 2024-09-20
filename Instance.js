@@ -1,7 +1,12 @@
 const { Auto_activeColorList, Auto_inactiveColorList } = require("./Color/MainStoryColorList");
 const { DeathImgList, FindMultiColors, RandomPress, HasMenu, WaitUntilPageBack, FindBlueBtn, Sleep, IsMoving, PageBack, WaitUntil, IsHaltMode, ExitHaltMode,
-    FindImg, IsInCity, WaitUntilMenu, EnterMenuItemPage, FindNumber } = require("./utils");
+    FindImg, IsInCity, WaitUntilMenu, EnterMenuItemPage, FindNumber,
+    ChangeHaltModeTime,
+    ChangeRecoverPotionPercentToNormal,
+    ReadConfig,
+    RewriteConfig } = require("./utils");
 const { ComprehensiveImprovement } = require("./CommonFlow");
+const { UnAutoPotion } = require("./Backpack");
 
 
 const MapIconColorList = [
@@ -50,9 +55,14 @@ const ThirdLevel = [
 
 let instance_mode = "hangUpWild";
 let lastHangUpWildTime = 1726208812345;
+let lastTimeEnterInstance = 1726208812345;
+let changeRecoverPotionPercentTime = 0;
 
+const comprehensiveTime = [[random(0, 11), random(0, 59)], [random(12, 23), random(0, 59)]];
+// const comprehensiveTime = [[11, new Date().getMinutes()], [random(12, 23), random(0, 59)]];
+console.log("初始化副本模式挂机随机提升战力时刻，为：" + comprehensiveTime[0][0] + "时" + comprehensiveTime[0][1] + "分；" + comprehensiveTime[1][0] + "时" + comprehensiveTime[1][1] + "分");
 
-const PressAuto = () =>
+const PressToAuto = () =>
 {
     const hasAuto_inactive = FindMultiColors(Auto_inactiveColorList, [1123, 421, 55, 52]);
     if (hasAuto_inactive)
@@ -66,6 +76,7 @@ const PressAuto = () =>
         return true;
     }
 };
+const PressAuto = () => RandomPress([1137, 434, 29, 23]);
 const OpenMap = () =>
 {
     console.log("open map");
@@ -168,15 +179,28 @@ const HangUpWild = (mapName) =>
     {
         if (FindMultiColors(Auto_inactiveColorList, [1129, 420, 59, 63]))
         {
+            const config = ReadConfig();
+            if (config.game.autoPotion == true)
+            {
+                let isSuccess = UnAutoPotion();
+                if (isSuccess)
+                {
+                    console.log("关闭自动使用药水");
+                    config.game.autoPotion = false;
+                    ReadConfig("game", config.game);
+                }
+            }
             RandomPress([1144, 433, 30, 24]);
             console.log("去野外挂机成功");
+            if (changeRecoverPotionPercentTime < 3)
+            {
+                ChangeRecoverPotionPercentToNormal();
+                changeRecoverPotionPercentTime++;
+            }
             return true;
         }
         Sleep();
     }
-
-
-
 };
 
 const DeathCheck = () =>
@@ -215,6 +239,7 @@ const IsExpIncrease = () =>
         return true;
     }
 };
+
 const DeathFlow = () =>
 {
     console.log("开始死亡提升");
@@ -239,7 +264,18 @@ const DeathFlow = () =>
         }
         Sleep();
     }
-    ComprehensiveImprovement();
+    let isSuccessfully = ComprehensiveImprovement();
+    if (!isSuccessfully)
+    {
+        console.log("提升中断，重新提升");
+        if (IsHaltMode())
+        {
+            ExitHaltMode();
+            ChangeHaltModeTime();
+        }
+        PageBack();
+        ComprehensiveImprovement();
+    }
     console.log("死亡提升结束");
 };
 const InstanceExceptionCheck = (uiData) =>
@@ -251,32 +287,28 @@ const InstanceExceptionCheck = (uiData) =>
     else if (IsInCity())
     {
         console.log("in city, go to map");
+        if (uiData.manualInstance == true)
+        {
+            const config = ReadConfig();
+            if (!config.game.dailyInstance)
+            {
+                HangUpInstance();
+                return true;
+            }
+        }
         if (instance_mode == "hangUpWild")
         {
             HangUpWild(uiData.hangUpMap);
+        }
+    }
 
-        }
-    }
-    if (IsHaltMode())
+    if (HasMenu())
     {
-        if (!IsExpIncrease())
+        if (!IsAutoAttacking())
         {
-            console.log("没有经验增加。");
-            ExitHaltMode();
-            Sleep();
-            HangUpWild(uiData.hangUpMap);
-        }
-    }
-    else
-    {
-        if (HasMenu())
-        {
-            if (!IsAutoAttacking())
+            if (FindMultiColors(Auto_inactiveColorList, [1118, 418, 66, 58]))
             {
-                if (FindMultiColors(Auto_inactiveColorList, [1118, 418, 66, 58]))
-                {
-                    RandomPress([1136, 437, 30, 19]);
-                }
+                RandomPress([1136, 437, 30, 19]);
             }
         }
     }
@@ -287,6 +319,7 @@ const InInstanceCheck = () =>
     if (IsHaltMode())
     {
         ExitHaltMode();
+        ChangeHaltModeTime();
     }
     const hasInstanceIcon = FindMultiColors(InInstanceColorList, [86, 290, 35, 39]);
     if (hasInstanceIcon)
@@ -298,6 +331,7 @@ const InInstanceCheck = () =>
         return false;
     }
 };
+
 const HangUpInstance = () =>
 {
     console.log("EnterInstanceFlow");
@@ -307,94 +341,132 @@ const HangUpInstance = () =>
         console.log("enter instance page failed");
         return false;
     }
-    let curCombatPower = FindNumber("combatPower", []);
-    if (curCombatPower < 14000)
-    {
-        console.log("当前战力不足，暂不进入副本,当前战力为：" + curCombatPower);
-        PageBack();
-        return false;
-    }
+    const config = ReadConfig();
+
+    const instancePos = [
+        [90, 100, 250, 100],
+        [90, 280, 250, 100],
+        [90, 450, 250, 100],
+        [90, 620, 250, 50]
+    ];
+    let curCombatPower = FindNumber("combatPower", [1141, 535, 115, 47]);
+    console.log("当前战力为：" + curCombatPower);
+
     const CanEnterInstance = () => FindBlueBtn([979, 637, 276, 74]);
-    const PressEnterInstanceBtn = () => { RandomPress([1010, 656, 214, 37]); Sleep(10); WaitUntilMenu(); PressAuto(); };
+    const PressEnterInstanceBtn = () => { RandomPress([1010, 656, 214, 37]); Sleep(10); WaitUntilMenu(); PressToAuto(); };
 
-    RandomPress([72, 107, 294, 96]); //first instance
-    const canEnterFirstInstance = CanEnterInstance();
-    if (canEnterFirstInstance)
+    for (let i = 0; i < instancePos.length; i++)
     {
-        console.log("enter first instance");
-
-        PressEnterInstanceBtn();
-        if (InInstanceCheck())
+        RandomPress(instancePos[i]);
+        let canEnterInstance = CanEnterInstance();
+        if (canEnterInstance)
         {
-            return true;
-        }
-        else
-        {
-            return false;
+            let requireCombatPower = FindNumber("combatPower", [1143, 494, 108, 45]);
+            if (curCombatPower > requireCombatPower)
+            {
+                console.log("需求战力为：" + requireCombatPower);
+                console.log("当前战力大于需求战力，可以进入副本" + i);
+                PressEnterInstanceBtn();
+                lastTimeEnterInstance = new Date().getTime();
+                instance_mode = "hangUpInstance";
+                return true;
+            }
         }
     }
 
-    RandomPress([78, 280, 304, 103]); //second instance
-    const canEnterSecondendInstance = CanEnterInstance();
-    if (canEnterSecondendInstance)
-    {
-        console.log("enter second instance");
-        PressEnterInstanceBtn();
-
-        if (InInstanceCheck())
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
-
-    RandomPress([75, 449, 276, 90]); // third instance
-    const canEnterThirdInstance = CanEnterInstance();
-    if (canEnterThirdInstance)
-    {
-        console.log("enter third instance");
-        PressEnterInstanceBtn();
-
-        if (InInstanceCheck())
-        {
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
+    instance_mode = "hangUpWild";
+    console.log("没有副本可以进入，返回野外挂机");
+    config.game.dailyInstance = true;
+    RewriteConfig("game", config.game);
+    return false;
 };
 
-const CollectMonsterCollection = () =>
+const CollectMonsterCollection = (uiData) =>
 {
+    console.log("开始怪物图鉴");
     const hadOpenMap = OpenMap();
-
+    for (let i = 0; i < uiData.monsterMapList.length; i++)
+    {
+        let monsterMap = uiData.monsterMapList[i];
+        if (monsterMap)
+        {
+            let bigMap = monsterMap.split();
+        }
+    }
 };
+
+const IsTimeToComprehensive = (curTime) =>
+{
+    let hours = curTime.getHours();
+    let minute = curTime.getMinutes();
+    let isTimeToComprehensive = false;
+    comprehensiveTime.forEach(time =>
+    {
+        if (time[0] == hours && time[1] == minute)
+        {
+            isTimeToComprehensive = true;
+            console.log("当前时间：" + hours + ":" + minute);
+            console.log("综合提升时间为：" + time[0] + "时" + time[1] + "分");
+        }
+    });
+    return isTimeToComprehensive;
+};
+
 const InstanceFlow = (uiData) =>
 {
     InstanceExceptionCheck(uiData);
 
+    let curTime = new Date();
+
+    if (IsTimeToComprehensive(curTime))
+    {
+        console.log("到达随机提升时间，开始提升。");
+        if (IsHaltMode())
+        {
+            ExitHaltMode();
+        }
+        if (IsAutoAttacking())
+        {
+            PressAuto();
+        }
+        ComprehensiveImprovement();
+    }
+    if (uiData.manualInstance == true)
+    {
+        if ((curTime.getTime() - lastTimeEnterInstance) / 3600000 > 1)
+        {
+            let config = ReadConfig();
+
+            if (!config.game.dailyInstance)
+            {
+                console.log("今日副本暂未完成，优先进副本");
+                HangUpInstance();
+            }
+
+        }
+
+    }
     if (instance_mode == "hangUpWild")
     {
-        if ((lastHangUpWildTime - new Date().getTime()) / 3600000 >= 2)
+        if ((curTime.getTime() - lastHangUpWildTime) / 3600000 >= 8)
         {
             HangUpWild(uiData.hangUpMap);
+
         }
+
     }
     else if (instance_mode == "monsterCollection")
     {
         console.log("monster mode");
     }
+
 };
 
-// module.exports = {
-//     InstanceFlow
-// };
+module.exports = {
+    InstanceFlow
+};
 
+// ChangeRecoverPotionPercentToNormal();
 //是否有绿环
 // console.log(FindMultiColors(GreenLoopColorList, [916, 238, 41, 41]));
 // while (true)
@@ -402,6 +474,8 @@ const InstanceFlow = (uiData) =>
 //     InstanceFlow();
 //     sleep(1000);
 // }
+
+
 
 // EnterInstanceFlow();
 // FindNumber("combatPower", [1147, 490, 114, 45]);

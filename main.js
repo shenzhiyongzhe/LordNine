@@ -108,131 +108,162 @@ const DownloadAutoJs = () => DownLoadApk("AutoJs.apk", "AutoJs.apk");
 const ChangeVPNSetting = () =>
 {
     app.launch("fun.kitsunebi.kitsunebi4android");
+
     let disallowListConfig = {
         "autoJs": false,
         "lordnine": false,
     };
-    for (let i = 0; i < 30; i++)
+    threads.start(function ()
     {
-        let hasRefreshBtn_0 = desc("Measure Latency").findOne(20);
-        if (hasRefreshBtn_0)
+        for (let i = 0; i < 10; i++)
         {
-            let add_btn = id("add_btn").findOne(20);
-            if (add_btn)
+            let hasRefreshBtn_0 = desc("Measure Latency").findOne(20);
+            if (hasRefreshBtn_0)
             {
-                add_btn.click();
-            }
-        }
-        let has_AddEndpointGroup = text("Add Endpoint Group").findOne(20);
-        if (has_AddEndpointGroup)
-        {
-            let settings = text("Settings").findOne(20);
-            if (settings)
-            {
-                click(settings.bounds().centerX(), settings.bounds().centerY());
-            }
-        }
-
-        let pre_app_vpn = text("Configure Per-App VPN.").findOne(20);
-        if (pre_app_vpn)
-        {
-            click(pre_app_vpn.bounds().centerX(), pre_app_vpn.bounds().centerY());
-        }
-        let enabled_per_app_vpn = text("Enable Per-App VPN").findOne(20);
-        if (enabled_per_app_vpn)
-        {
-            let enabled_per_app_vpn_switch = enabled_per_app_vpn.parent().parent().children()[1].children()[0];
-            let isOpen = enabled_per_app_vpn_switch.checked();
-            console.log("分应用代理是否打开：" + isOpen);
-            if (!isOpen)
-            {
-                click(enabled_per_app_vpn_switch.bounds().centerX(), enabled_per_app_vpn_switch.bounds().centerY());
-                break;
-            }
-        }
-        let current_list = textMatches(/(.*You may either use the allowed list.*)/).findOne(20);
-        if (current_list)
-        {
-            let hasAllowedList = textMatches(/(.*current Allowed List.*)/).findOne(20);
-            if (hasAllowedList)
-            {
-                console.log("当前是允许列表，需要改动");
-                click(hasAllowedList.bounds().centerX(), hasAllowedList.bounds().centerY());
-            }
-            let hasDisallowedList = textMatches(/(.*current Disallowed List.*)/).findOne(20);
-            if (hasDisallowedList)
-            {
-                console.log("当前已经是不允许列表，不需要改动");
-            }
-        }
-        let has_per_app_mode = id("alertTitle").findOne(20);
-        if (has_per_app_mode)
-        {
-            let hasMode_disallowedList = text("Disallowed List").findOne(20);
-            if (hasMode_disallowedList)
-            {
-                hasMode_disallowedList.click();
-            }
-        }
-        let DisallowedList = text("Selected apps are disallowed to use the VPN tunnel, others will be allowed.").findOne(20);
-        if (DisallowedList)
-        {
-            click(DisallowedList.bounds().centerX(), DisallowedList.bounds().centerY());
-        }
-
-        let lordnine = text("com.lordnine").findOne(20);
-        if (lordnine)
-        {
-            let is_lordnine_on = lordnine.parent().children()[3];
-            if (is_lordnine_on.checked == true)
-            {
-                console.log("已经打开，不需要操作");
-                disallowListConfig.lordnine = true;
-            }
-            else if (is_lordnine_on.checked == false)
-            {
-                console.log("autoJs 未打开不允许列表，点击打开");
-                lordnine.parent().click();
-            }
-            let autoJs = text("org.autojs.autoxjs.v6").findOne(20);
-            if (autoJs)
-            {
-                let is_autoJs_on = autoJs.parent().children()[3];
-                if (is_autoJs_on.checked == true)
+                let add_btn = id("add_btn").findOne(20);
+                if (add_btn)
                 {
-                    console.log("已经打开，不需要操作");
-                    disallowListConfig.autoJs = true;
-                }
-                else if (is_autoJs_on.checked == false)
-                {
-                    console.log("autoJs 未打开不允许列表，点击打开");
-                    autoJs.parent().click();
+                    add_btn.click();
                 }
             }
-            else
+            let has_AddEndpointGroup = text("Add Endpoint Group").findOne(20);
+            if (has_AddEndpointGroup)
             {
-                console.log("没有发现auto js 默认跳过");
-                disallowListConfig.autoJs = true;
+                let settings = text("Settings").findOne(20);
+                if (settings)
+                {
+                    click(settings.bounds().centerX(), settings.bounds().centerY());
+                }
             }
+
+            let per_app_vpn = text("Configure Per-App VPN.").findOne(20);
+            if (per_app_vpn)
+            {
+                if (text("Settings").findOne(20))
+                {
+                    click(per_app_vpn.bounds().centerX(), per_app_vpn.bounds().centerY());
+                }
+            }
+            let enabled_per_app_vpn = text("Enable Per-App VPN").findOne(20);
+            if (enabled_per_app_vpn)
+            {
+                let enabled_per_app_vpn_switch = enabled_per_app_vpn.parent().parent().children()[1].children()[0];
+                let isOpen = enabled_per_app_vpn_switch.checked();
+                console.log("分应用代理是否打开：" + isOpen);
+                if (!isOpen)
+                {
+
+                    console.log("点击打开: " + enabled_per_app_vpn.parent().parent().click());
+                }
+            }
+            let current_list = textMatches(/(.*You may either use the allowed list.*)/).findOne(20);
+            if (current_list)
+            {
+                let hasAllowedList = textMatches(/(.*current Allowed List.*)/).findOne(20);
+                if (hasAllowedList)
+                {
+                    console.log("当前是允许列表，需要改动");
+                    click(hasAllowedList.bounds().centerX(), hasAllowedList.bounds().centerY());
+
+                    let has_per_app_mode = id("alertTitle").findOne(1000);
+                    if (has_per_app_mode)
+                    {
+                        let hasMode_disallowedList = text("Disallowed List").findOne(1000);
+                        if (hasMode_disallowedList)
+                        {
+                            hasMode_disallowedList.click();
+                        }
+                    }
+                    let DisallowedList = text("Selected apps are disallowed to use the VPN tunnel, others will be allowed.").findOne(2000);
+                    if (DisallowedList)
+                    {
+                        click(DisallowedList.bounds().centerX(), DisallowedList.bounds().centerY());
+                    }
+                }
+                let hasDisallowedList = textMatches(/(.*current Disallowed List.*)/).findOne(20);
+                if (hasDisallowedList)
+                {
+                    console.log("当前已经是不允许列表，不需要改动");
+                }
+            }
+            let select_disallowedList = textMatches(/(.*Selected apps are disallowed.*)/).findOne(20);
+            if (select_disallowedList)
+            {
+                click(select_disallowedList.bounds().centerX(), select_disallowedList.bounds().centerY());
+            }
+            //确保当前页面为不允许列表
+            if (desc("위로 이동").findOne(20) && text("Disallowed List").findOne(20) && id("add_btn").findOne(20))
+            {
+                let lordnine = text("com.lordnine").findOne(20);
+                if (lordnine)
+                {
+                    let is_lordnine_on = lordnine.parent().children()[3];
+                    if (is_lordnine_on.checked() == true)
+                    {
+                        console.log("已经打开，不需要操作");
+                        disallowListConfig.lordnine = true;
+                    }
+                    else if (is_lordnine_on.checked() == false)
+                    {
+                        console.log("autoJs 未打开不允许列表，点击打开");
+                        lordnine.parent().click();
+                    }
+                    let autoJs = text("org.autojs.autoxjs.v6").findOne(20);
+                    if (autoJs)
+                    {
+                        let is_autoJs_on = autoJs.parent().children()[3];
+                        if (is_autoJs_on.checked() == true)
+                        {
+                            console.log("已经打开，不需要操作");
+                            disallowListConfig.autoJs = true;
+                        }
+                        else if (is_autoJs_on.checked() == false)
+                        {
+                            console.log("autoJs 未打开不允许列表，点击打开");
+                            autoJs.parent().click();
+                        }
+                    }
+                    else
+                    {
+                        console.log("没有发现auto js 默认跳过");
+                        disallowListConfig.autoJs = true;
+                    }
+                }
+                else
+                {
+                    console.log("滚动当前页面");
+                    scrollForward();
+                }
+                if (disallowListConfig.lordnine == true && disallowListConfig.autoJs == true)
+                {
+                    console.log("已设置完毕，返回到主页面");
+                    break;
+                }
+            }
+
+            Sleep(1);
         }
-        if (disallowListConfig.lordnine == true || disallowListConfig.autoJs == true)
+
+        for (let i = 0; i < 10; i++)
         {
-            console.log("已设置完毕，返回到主页面");
-            let hasBackIcon = desc("위로 이동").findOne(20);
-            if (hasBackIcon)
+            let backBtn = desc("위로 이동").findOne(20);
+            if (backBtn)
             {
-                hasBackIcon.click();
+                backBtn.click();
             }
-            let hasRefreshBtn = desc("Measure Latency").findOne(20);
-            if (hasRefreshBtn)
+            let refreshBtn = desc("Measure Latency").findOne(20);
+            if (refreshBtn)
             {
-                hasRefreshBtn.click();
+                refreshBtn.click();
                 break;
             }
+            Sleep(0.5);
         }
-        Sleep();
-    }
+    });
+
+    console.log("设置完毕");
 };
+
 const UI = () =>
 {
     ui.layout(`
@@ -353,3 +384,4 @@ const MainFlow = (uidata) =>
 };
 
 UI();
+// ChangeVPNSetting();

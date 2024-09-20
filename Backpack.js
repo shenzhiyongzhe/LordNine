@@ -33,12 +33,6 @@ const EquipColorList = [
     ["#d5d5d4", [[0, 1, "#d6d6d6"], [0, 2, "#e5e5e5"], [0, 4, "#d5d5d4"], [0, 5, "#d6d6d6"]]],
     ["#efefef", [[0, 1, "#efefef"], [0, 2, "#f4f4f4"], [0, 3, "#efefef"], [0, 5, "#efefef"]]],
 ];
-const NormalBoxColorList = [
-    ["#282828", [[43, 0, "#292929"], [2, 35, "#3b3b3b"], [4, 7, "#835f2b"], [4, 12, "#584125"], [16, 10, "#6b4e30"], [26, 8, "#453932"], [32, 8, "#715832"], [39, 20, "#335066"], [31, 30, "#563e21"], [16, 25, "#342924"], [10, 19, "#211b1a"]]],
-    ["#222221", [[3, 38, "#343434"], [44, 2, "#282828"], [4, 12, "#674b25"], [17, 12, "#6a5030"], [32, 13, "#6e4e2f"], [9, 22, "#1e1a19"], [27, 24, "#1e1a18"], [39, 23, "#3a5d76"], [23, 31, "#221f1b"], [9, 28, "#362b26"]]],
-    ["#2c2c2c", [[4, 3, "#765527"], [18, 3, "#77643d"], [32, 3, "#735b33"], [13, 15, "#231d1c"], [25, 16, "#221e1d"], [11, 21, "#342d28"], [25, 23, "#2a2421"], [32, 26, "#493319"], [38, 22, "#14232d"]]]
-];
-
 
 const BackpackItemDetailColorList = {
     "white": [
@@ -57,10 +51,8 @@ const BackpackItemDetailColorList = {
     ]
 
 };
-const GridEmptyColorList = [
-    ["#151618", [[13, 0, "#161818"], [27, 1, "#151618"], [0, 14, "#181618"], [15, 14, "#18181b"], [34, 14, "#151618"], [-3, 27, "#151518"], [10, 27, "#161818"], [27, 28, "#151618"]]]
-];
 
+const emptyGridImgList = LoadImgList("backpack/emptyGrid");
 
 const DetailOnColorList = [
     ["#1d5d55", [[5, 0, "#1d5d55"], [10, 3, "#1d5d55"], [0, 4, "#1d5d55"], [6, 8, "#1d5d55"]]]
@@ -70,21 +62,11 @@ const SingleStrengthenColorList = [
     ["#e6e5e5", [[2, 0, "#e6e5e5"], [5, 0, "#e6e5e5"], [10, 0, "#e6e5e5"], [2, 1, "#d7d6d4"]]]
 ];
 
-const IdentifyClickScreenColorList = [
-    ["#9e8c52", [[3, -3, "#b09d5b"], [5, -1, "#b29e5d"], [2, 2, "#9b8a50"], [2, -1, "#242014"]]]
-];
-
-
 // ********************  check ----------------------
 const IsEquiped = (region, shot) => { shot = shot || captureScreen(); return FindMultiColors(EquipColorList, region, shot); };
 
-const IsEmpty = (region, shot) => FindMultiColors(GridEmptyColorList, region, shot);
+const IsEmpty = (region, shot) => FindImgInList(emptyGridImgList, region, shot);
 const IsOnDetail = () => FindMultiColors(DetailOnColorList, [1044, 572, 30, 27]);
-
-
-// **************   check ----------------------
-
-
 
 
 // ***** operation ---------------------
@@ -114,26 +96,6 @@ const SingleStrengthen = () =>
  * @param {string} type "normalBox" 
  */
 const IsMultipleBox = () => FindBlueBtn([646, 506, 177, 59]);
-const OpenNormalBox = () =>
-{
-    console.log("open normal box");
-    let hasOpenedBox = false;
-    const hasNormalBox = FindMultiColors(NormalBoxColorList, [928, 157, 262, 437]);
-    if (hasNormalBox)
-    {
-        RandomPress([hasNormalBox.x, hasNormalBox.y, 30, 30]);
-        RandomPress([hasNormalBox.x, hasNormalBox.y, 30, 30]);
-        if (IsMultipleBox())
-        {
-            RandomPress([665, 519, 140, 35]);
-        }
-        Sleep();
-        PressBlank();
-        hasOpenedBox = true;
-    }
-    console.log("hasOpenedBox: " + hasOpenedBox);
-    return hasOpenedBox;
-};
 
 /**
  * 
@@ -141,33 +103,24 @@ const OpenNormalBox = () =>
  */
 const OpenEquipmentBox = (type) =>
 {
-    console.log("open " + type + " box ");
-    const equipmentImgList = [];
-    let img = null;
+    let equipmentImgList = LoadImgList(`backpack/box/${type}Box`);
     let tapRegion = null;
     let hasOpenedBox = false;
 
     if (type == "weapon")
     {
         tapRegion = [518, 359, 39, 36];
+        console.log("打开武器箱子");
     }
     else if (type == "armor")
     {
         tapRegion = [660, 294, 33, 31];
-    }
-    for (let i = 0; i < 10; i++)
-    {
-        img = ReadImg(`backpack/box/${type}Box/${i}`);
-        if (img == null)
-        {
-            break;
-        }
-        equipmentImgList.push(img);
+        console.log("打开防具箱子");
     }
 
     let hasEquipment = null;
     const shot = captureScreen();
-    console.log("equipmentImgList length " + equipmentImgList.length);
+    console.log("装备素材数量：" + equipmentImgList.length);
     for (let i = 0; i < equipmentImgList.length; i++)
     {
         hasEquipment = FindImg(equipmentImgList[i], [933, 158, 258, 438], shot);
@@ -180,7 +133,7 @@ const OpenEquipmentBox = (type) =>
                 RandomPress([666, 520, 138, 30]);
             }
             console.log("wait until popup close " + tapRegion);
-            if (WaitUntil(() => HasPopupClose([823, 211, 35, 38])))
+            if (WaitUntil(() => HasPopupClose([823, 211, 35, 38]), 10, 500))
             {
                 console.log("has popup");
                 RandomPress(tapRegion);
@@ -193,29 +146,18 @@ const OpenEquipmentBox = (type) =>
             }
         }
     }
-    for (let i = 0; i < equipmentImgList.length; i++)
-    {
-        equipmentImgList[i].recycle();
-    }
-    console.log("finish: had opened box:  " + hasOpenedBox);
+    RecycleImgList(equipmentImgList);
+    console.log("是否打开箱子:  " + hasOpenedBox);
     return hasOpenedBox;
 };
+
 const OpenPropsBox = () =>
 {
-    console.log("open props box");
-    const PropsImgList = [];
+    console.log("打开道具箱子");
+    const PropsImgList = LoadImgList("backpack/box/propsBox");
     let hasOpenPropsBox = false;
     let hasPropsBox = null;
-    let img = null;
-    for (let i = 0; i < 10; i++)
-    {
-        img = ReadImg(`backpack/box/propsBox/${i}`);
-        if (img == null)
-        {
-            break;
-        }
-        PropsImgList.push(img);
-    }
+
     for (let i = 0; i < PropsImgList.length; i++)
     {
         hasPropsBox = FindImg(PropsImgList[i], [933, 158, 258, 438]);
@@ -232,16 +174,15 @@ const OpenPropsBox = () =>
             hasOpenPropsBox = true;
         }
     }
-    for (let i = 0; i < PropsImgList.length; i++)
-    {
-        PropsImgList[i].recycle();
-    }
-    console.log("finish: hasOpenedPropsBox: " + hasOpenPropsBox);
+
+    RecycleImgList(PropsImgList);
+    console.log("结束，是否打开道具箱子 " + hasOpenPropsBox);
     return hasOpenPropsBox;
 };
+
 const OpenSkillBook = () =>
 {
-    console.log("start open skill book");
+    console.log("开始打开技能书");
     let hasSkillBook = false;
     let hasOpened = false;
     const skillBookImgList = LoadImgList("backpack/skillBook");
@@ -251,22 +192,22 @@ const OpenSkillBook = () =>
         if (hasSkillBook)
         {
             RandomPress([hasSkillBook.x, hasSkillBook.y, 30, 30]);
+            Sleep(3);
             RandomPress([hasSkillBook.x, hasSkillBook.y, 30, 30]);
             Sleep(3);
             hasOpened = true;
         }
-
     }
     RecycleImgList(skillBookImgList);
     Sleep();
-    console.log("finish: hasOpenedSkillBook: " + hasOpened);
+    console.log("结束，是否使用技能书： " + hasOpened);
 
     return hasOpened;
 };
 
 const OpenSuit = () =>
 {
-    console.log("open suit");
+    console.log("开始打开时装");
     const hasOpenBackpack = OpenBackpack("props");
     if (!hasOpenBackpack)
     {
@@ -283,11 +224,7 @@ const OpenSuit = () =>
 
     const suitImgList = LoadImgList("backpack/suit");
 
-    const SwipeBarColorList = [
-        ["#3e3f3e", [[30, 0, "#3e403f"], [69, 1, "#3e403f"], [104, 3, "#3f403f"], [163, 4, "#3f4040"]]],
-        ["#3e3f3f", [[30, 0, "#3e3f3f"], [69, 0, "#3e403f"], [137, 0, "#3f4040"], [173, 0, "#404140"]]],
-        ["#3e3f3e", [[24, -1, "#3e403f"], [63, 0, "#3e403f"], [103, 1, "#3f4040"], [158, -1, "#3f4140"]]]
-    ];
+    const swipeToConfirmImgList = LoadImgList("icon/font/swipeToConfirm");
 
     for (let i = 0; i < suitImgList.length; i++)
     {
@@ -297,35 +234,50 @@ const OpenSuit = () =>
         {
             RandomPress([hasOpenedSuit.x, hasOpenedSuit.y, 30, 30]);
             RandomPress([hasOpenedSuit.x, hasOpenedSuit.y, 30, 30]);
-            Sleep(5);
-            if (HasSkip())
+            for (let i = 0; i < 60; i++)
             {
-                ClickSkip();
-            }
-            else
-            {
-                Sleep(50);
-            }
-            if (FindMultiColors(SwipeBarColorList, [513, 635, 251, 34]))
-            {
-                SwipeSlowly([483, 640, 42, 10], [770, 640, 30, 10], 1);
-                Sleep(5);
-                if (!IsJumpAnimation())
+                if (HasSkip())
                 {
-                    RandomPress([61, 675, 137, 14]);
+                    ClickSkip();
                 }
-            }
-            if (FindBlueBtn([1055, 639, 214, 72]))
-            {
-                RandomPress([1080, 656, 166, 36]);
-                hadOpenSuit = true;
+                if (FindImgInList(swipeToConfirmImgList, [504, 598, 254, 66]))
+                {
+                    // SwipeSlowly([483, 640, 42, 10], [770, 640, 30, 10], 1);
+                    swipe(520, 650, 770, 650, 500);
+                    Sleep(5);
+                    if (!IsJumpAnimation())
+                    {
+                        RandomPress([61, 675, 137, 14]);
+                    }
+                }
+                if (FindBlueBtn([1055, 639, 214, 72]))
+                {
+                    RandomPress([1080, 656, 166, 36]);
+                    hadOpenSuit = true;
+                    break;
+                }
+                Sleep();
             }
         }
     }
-    console.log("finish");
+    console.log("结束，是否打开时装：" + hadOpenSuit);
+    RecycleImgList(swipeToConfirmImgList);
     return hadOpenSuit;
 };
+const OpenSelectedPropsBox = () =>
+{
+    console.log("打开道具自选箱子，默认第三个选项");
+    const hasOpenBackpack = OpenBackpack("props");
+    if (!hasOpenBackpack)
+    {
+        console.log("打开背包失败");
+        return false;
+    }
+    for (let i = 0; i < 5; i++)
+    {
 
+    }
+};
 const OpenAllBox = () =>
 {
     const hasOpenBackpack = OpenBackpack("props");
@@ -334,9 +286,6 @@ const OpenAllBox = () =>
         console.log("open backpack failed");
         return false;
     }
-
-    OpenNormalBox();
-
     let hasOpenedWeaponBox = OpenEquipmentBox("weapon");
     let hasOpenedArmorBox = OpenEquipmentBox("armor");
     let hasOpenPropsBox = OpenPropsBox();
@@ -345,11 +294,10 @@ const OpenAllBox = () =>
     {
         console.log("no box to open");
     }
-
     const hasOpenSkill = OpenSkillBook();
     if (hasOpenSkill)
     {
-        console.log("had open skill book, start to auto release skill");
+        console.log("使用了技能书，开始自动释放");
         AutoReleaseSkill();
         OpenMenu();
         OpenBackpack("props");
@@ -361,7 +309,8 @@ const OpenAllBox = () =>
         WearBestSuit();
     }
     Sleep();
-    console.log("finish: open all box");
+    console.log("结束：已打开所有箱子");
+    return true;
 };
 
 
@@ -486,11 +435,11 @@ const IsBetterQuality = () =>
 const SortEquipment = () => { RandomPress([1097, 668, 17, 19]); Sleep(3); };
 const WearEquipment = () =>
 {
-    console.log("start to wear equipment");
+    console.log("开始穿装备");
     const hasOpenBackpack = OpenBackpack("equipment");
     if (!hasOpenBackpack)
     {
-        console.log("open backpack failed");
+        console.log("打开背包失败");
         return false;
     }
     SortEquipment();
@@ -501,6 +450,8 @@ const WearEquipment = () =>
         "green": ReadImg("icon/font/magicWand_green"),
         "blue": ReadImg("icon/font/magicWand_blue")
     };
+    const identifyTapScreenImgList = LoadImgList("backpack/identifyTapScreen");
+
     let hasWornEquipment = false;
     const IdentifyEquipment = () =>
     {
@@ -511,11 +462,11 @@ const WearEquipment = () =>
             {
                 RandomPress([411, 582, 169, 35]);
                 Sleep(2);
-                if (WaitUntil(() => FindMultiColors(IdentifyClickScreenColorList, [670, 604, 35, 33])))
+                if (WaitUntil(() => FindImgInList(identifyTapScreenImgList, [573, 597, 123, 51]), 20, 500))
                 {
                     RandomPress([243, 434, 899, 153]);
                 }
-                if (WaitUntil(() => FindBlueBtn([509, 593, 270, 69])))
+                if (WaitUntil(() => FindBlueBtn([509, 593, 270, 69]), 20, 500))
                 {
                     RandomPress([536, 611, 212, 29]);
                 }
@@ -524,6 +475,7 @@ const WearEquipment = () =>
             }
         }
     };
+
     out: for (let i = 0; i < 6; i++)
     {
         shot = captureScreen();
@@ -550,7 +502,7 @@ const WearEquipment = () =>
             Sleep();
             if (FindImg(magicWandImgList.white, [618, 152, 56, 36]) || FindImg(magicWandImgList.green, [618, 152, 56, 36]) || FindImg(magicWandImgList.blue, [618, 152, 56, 36]))
             {
-                console.log("find magic wand");
+                console.log("发现发张");
                 if (FindImg(magicWandImgList.white, [307, 147, 65, 41]) || FindImg(magicWandImgList.green, [307, 147, 65, 41]) || FindImg(magicWandImgList.blue, [307, 147, 65, 41]))
                 {
                     if (IsBetterQuality())
@@ -622,6 +574,7 @@ const WearEquipment = () =>
     {
         magicWandImgList[key].recycle();
     }
+    RecycleImgList(identifyTapScreenImgList);
     return hasWornEquipment;
 };
 const WearEquipments = () =>
@@ -805,7 +758,7 @@ const DecomposeEquipment = () =>
     if (FindBlueBtn([379, 562, 230, 79]))
     {
         RandomPress([407, 583, 171, 34]);
-        Sleep();
+        Sleep(3);
         PressBlank();
     }
     CloseBackpack();
@@ -839,11 +792,75 @@ const UseHolyGrail = () =>
     return hasUsedHolyGrail;
 };
 
-
-module.exports = { OpenAllBox, WearEquipments, OpenSkillBook, StrengthenEquipment, DecomposeEquipment, UseHolyGrail, WearBestSuit };
+const AutoPotion = () =>
+{
+    console.log("自动使用身上的药水");
+    const autoPotionImgList = LoadImgList("icon/font/autoPotion");
+    const hadOpenBackpack = OpenBackpack("auto");
+    if (!hadOpenBackpack)
+    {
+        console.log("打开背包失败");
+    }
+    let shot = captureScreen();
+    let isSuccess = false;
+    out: for (let i = 0; i < 5; i++)
+    {
+        for (let j = 0; j < 4; j++)
+        {
+            if (IsEmpty([917 + j * 62, 144 + i * 62, 96, 93], shot))
+            {
+                console.log("已经遍历完，退出");
+                break out;
+            }
+            RandomPress([948 + j * 62, 175 + i * 62, 33, 31], 1);
+            if (FindImgInList(autoPotionImgList, [685, 579, 90, 60]))
+            {
+                RandomPress([704, 596, 50, 24], 0.5);
+                isSuccess = true;
+            }
+        }
+    }
+    RecycleImgList(autoPotionImgList);
+    CloseBackpack();
+    return isSuccess;
+};
+const UnAutoPotion = () =>
+{
+    console.log("取消自动使用药水");
+    const unAutoPotionImgList = LoadImgList("icon/font/unAutoPotion");
+    const hadOpenBackpack = OpenBackpack("auto");
+    if (!hadOpenBackpack)
+    {
+        console.log("打开背包失败");
+    }
+    let shot = captureScreen();
+    let isSuccess = false;
+    out: for (let i = 0; i < 5; i++)
+    {
+        for (let j = 0; j < 4; j++)
+        {
+            if (IsEmpty([917 + j * 62, 144 + i * 62, 96, 93], shot))
+            {
+                console.log("已经遍历完，退出");
+                break out;
+            }
+            RandomPress([948 + j * 62, 175 + i * 62, 33, 31], 1);
+            if (FindImgInList(unAutoPotionImgList, [685, 579, 90, 60]))
+            {
+                RandomPress([704, 596, 50, 24], 0.5);
+                isSuccess = true;
+            }
+        }
+    }
+    RecycleImgList(unAutoPotionImgList);
+    CloseBackpack();
+    return isSuccess;
+};
+module.exports = { OpenAllBox, AutoReleaseSkill, WearEquipments, OpenSkillBook, StrengthenEquipment, DecomposeEquipment, UseHolyGrail, WearBestSuit, AutoPotion, UnAutoPotion, };
+// UnAutoPotion();
 
 // WearBestSuit();
 // OpenSkillBook()
-// OpenAllBox()
+// OpenAllBox();
 // WearEquipments()
 // AutoReleaseSkill();

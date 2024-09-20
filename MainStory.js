@@ -2,12 +2,10 @@
 const {
     specialConfig,
     DeathImgList,
-    ReadImg, FindImg, RandomPress, Sleep, FindMultiColors, OpenMenu, CloseMenu,
-    HollowPress,
+    ReadImg, FindImg, RandomPress, Sleep, FindMultiColors, OpenMenu, CloseMenu, ChangeRecoverPotionPercentToMax, CloseBackpack,
     FindBlueBtn,
     PageBack,
-    CloseBackpack,
-    HasMenu, HasPageback, HasBackpackMenuClose, HasSkip, ClickSkip,
+    HasMenu, HasPageback, HasBackpackMenuClose, HasSkip, ClickSkip, FindImgInList, IsHaltMode, ExitHaltMode,
     IsInCity, IsMoving,
     PullDownSkill,
     WaitUntilPageBack, WaitUntilMenu,
@@ -23,7 +21,8 @@ const {
     RewriteConfig,
     FindNumber,
     FindRedBtn,
-    FindImgInList,
+
+
 
 } = require("./utils.js");
 
@@ -32,7 +31,9 @@ const { TipColorList, ArrowColorList, BlankColorList, QuestionMarkColorList, Nex
     SpeedUpOffColorList,
 } = require("./Color/MainStoryColorList.js");
 
-const { WearEquipments, StrengthenEquipment, OpenAllBox, DecomposeEquipment } = require("./Backpack.js");
+const { LordNineWordColorList, WhiteAvatarColorList } = require("./Color/ExceptionColorList.js");
+
+const { WearEquipments, StrengthenEquipment, OpenAllBox, DecomposeEquipment, AutoReleaseSkill, AutoPotion } = require("./Backpack.js");
 
 const { ComprehensiveImprovement, StrengthenHorseEquipment } = require("./CommonFlow.js");
 
@@ -41,10 +42,17 @@ const PageImg = {
 };
 
 
-
 let storyMode = "mainMission";
-let isAttackingfirstBoss = false;
+
 let lastTransformationTime = 0;
+let changeRecoverPotionPercentTime = 0;
+let tapTipIndex = 0;
+const CommonTipList = [
+    [720, 387, 96, 22], //药水 100
+    [705, 578, 58, 26], //药水 确认
+    [907, 132, 35, 34],//游戏开始的第一个tip
+    [807, 142, 21, 29],//游戏开始的第一个紫色问好
+];
 // 点击提示
 const HasTip = () => FindMultiColors(TipColorList, [19, 17, 1238, 688]);
 const FindArrow = (region) =>
@@ -73,7 +81,7 @@ const FindArrow = (region) =>
             return ["left", hasLeftArrow];
         }
 
-        Sleep(0.1);
+        sleep(100);
     }
     return false;
 };
@@ -85,14 +93,21 @@ const TapTip = () =>
     {
         console.log("提示: " + hasTip);
         const hasArrow = FindArrow();
-        const CommonTipList = [
-            [720, 387, 96, 22], //药水 100
-            [705, 578, 58, 26], //药水 确认
-        ];
+
         if (!hasArrow)
         {
             console.log("未发现箭头。");
-            RandomPress(CommonTipList[random(0, CommonTipList.length - 1)]);
+            if (tapTipIndex < CommonTipList.length)
+            {
+                RandomPress(CommonTipList[tapTipIndex]);
+                tapTipIndex++;
+            }
+            else
+            {
+                RandomPress([720, 387, 96, 22]);
+                tapTipIndex = 0;
+            }
+            console.log("按顺序点击常见卡点提示,当前索引为：" + tapTipIndex);
         }
         else
         {
@@ -197,7 +212,7 @@ const AutoMainStory = () =>
         {
             if (!IsMoving())
             {
-                console.log("character is in city. directly transform.");
+                console.log("玩家在主城，继续主线");
                 ClickMainStory();
             }
             return true;
@@ -259,7 +274,9 @@ const BossTitleColorList = [
     ["#fd2d03", [[1, 0, "#ff2d00"], [4, 0, "#fb2e07"], [6, 0, "#fd2d01"], [37, -1, "#fb2d03"]]],
     ["#ff2d00", [[0, 4, "#ff2d00"], [9, 4, "#fc2d05"], [17, 7, "#ff2d00"], [23, 2, "#ff2d00"]]],
     ["#fa2d07", [[0, 5, "#fa2d04"], [18, -2, "#ff2d00"], [18, 4, "#ff2d00"], [22, 2, "#f72d06"]]],
-    ["#f22b02", [[0, 3, "#f02b03"], [15, -3, "#fe2d00"], [32, -4, "#ff2d00"], [47, -7, "#fd2d00"]]]
+    ["#f22b02", [[0, 3, "#f02b03"], [15, -3, "#fe2d00"], [32, -4, "#ff2d00"], [47, -7, "#fd2d00"]]],
+    ["#ff2d00", [[-2, 2, "#fe2d00"], [16, -2, "#ff2d00"], [27, 0, "#fe2d00"], [44, 5, "#ff2d00"]]],
+    ["#fe2d00", [[6, 0, "#fe2d00"], [20, -4, "#ff2d00"], [21, 5, "#fe2d01"], [49, -4, "#fe2d01"]]]
 ];
 
 const DeathCheck = () =>
@@ -301,39 +318,46 @@ const DeathFlow = () =>
         }
         Sleep();
     }
-
-
-    storyMode = "growthMission";
     const hasMenu = WaitUntilMenu();
     if (!hasMenu)
     {
         console.log("Death Flow: 未发现菜单按钮");
     }
+    if (changeRecoverPotionPercentTime < 3)
+    {
+        let isChangePotion = ChangeRecoverPotionPercentToMax();
+        if (isChangePotion)
+        {
+            console.log("改变药水百分比成功，当前修改次数加一：" + changeRecoverPotionPercentTime);
+            changeRecoverPotionPercentTime++;
+        }
+    }
+    let isSuccess = ComprehensiveImprovement();
+    if (isSuccess == false)
+    {
+        console.log("综合提升没有执行到位,重新执行");
+        if (IsHaltMode())
+        {
+            ExitHaltMode();
+            ChangeGameSetting();
+        }
+        CloseMenu();
+        CloseBackpack();
+        PageBack();
+    }
 
-    ComprehensiveImprovement();
+    storyMode = "growthMission";
 
     const config = ReadConfig();
     config.game.deathTime++;
-    if (isAttackingfirstBoss)
-    {
-        console.log("判断等级是否是34级");
-        const lv = config.game.lv;
-        if (lv <= 34 || lv == null)
-        {
-            console.log("等级小于34级，切换模式为挂机模式，去地图挂机");
-            specialConfig.gameMode = "instance";
-            specialConfig.lastModeChangeTime = new Date();
-            isAttackingfirstBoss = false;
-        }
 
-    }
-    else if (config.game.deathTime >= 100)
+    if (config.game.deathTime >= 100)
     {
         alert("异常处理", "死亡次数过多，当前死亡次数为： " + config.game.deathTime);
     }
     RewriteConfig("game", config.game);
-
 };
+
 const ChangeGameSetting = () =>
 {
 
@@ -404,15 +428,14 @@ let lostTitleCount = 0;
 
 const AttackingBossFlow = (number) =>
 {
-
+    const BossLowHPImgList = LoadImgList("icon/bossHP");
     const IsBossDead = () =>
     {
         const bossTitle = FindMultiColors(BossTitleColorList, [899, 151, 114, 27]);
         if (!bossTitle)
         {
-            console.log("Lost Boss Title!");
             lostTitleCount++;
-            console.log("lost title count: " + lostTitleCount);
+            console.log("失去boss目标次数: " + lostTitleCount);
             if (lostTitleCount > 8)
             {
                 return true;
@@ -420,26 +443,46 @@ const AttackingBossFlow = (number) =>
         }
         return false;
     };
-
+    const IsBossLowHP = () => FindImgInList(BossLowHPImgList, [519, 67, 80, 30]);
+    if (number != 0)
+    {
+        console.log("是四个大boss中的一个，需要使用攻速与恢复药水");
+        const config = ReadConfig();
+        if (!config.game.autoPotion)
+        {
+            console.log("自动药水未开启，首先自动使用药水");
+            let isSuccess = AutoPotion();
+            if (isSuccess)
+            {
+                config.game.autoPotion = true;
+                RewriteConfig("game", config.game);
+            }
+        }
+        else
+        {
+            console.log("已经打开了恢复药水");
+        }
+    }
     if (number == 0 || number == 1)
     {
         console.log("swipe to right: 3s");
         SwipeRight(3);
     }
-    // else if (number == 2)
-    // {
-    //     console.log("swipe to left: 5s");
-    //     SwipeLeft(5);
-    // }
+    else if (number == 2)
+    {
+        console.log("swipe to left: 5s");
+        SwipeLeft(5);
+    }
     let isDead = false;
     let isBossDead = false;
     let time = 0;
 
     let moveTimeArr = [
         [2, 2, 2, 2],
-        [2.5, 2.5, 2.5, 2.5],
+        [3, 3, 3, 3],
         [2.8, 2.8, 2.8, 2.8],
         [3.2, 3.2, 3.2, 3.2],
+        [3, 3, 3, 3],
     ];
 
     while (isDead == false && isBossDead == false)
@@ -447,11 +490,10 @@ const AttackingBossFlow = (number) =>
         const moveTime = moveTimeArr[number];
         if (FindMultiColors(Auto_inactiveColorList, [1127, 431, 51, 33]))
         {
-            console.log("not auot! start auto attack boss");
+            console.log("没有自动攻击，点击自动攻击");
             click(1150, 450);
             sleep(20);
         }
-
 
         isDead = DeathCheck();
         isBossDead = IsBossDead();
@@ -468,6 +510,38 @@ const AttackingBossFlow = (number) =>
                 SwipeUp(moveTime[3]);
                 Sleep(1);
             }
+            else if (number == 1)
+            {
+                SwipeRight(moveTime[2]);
+                Sleep(5);
+                if (IsBossLowHP())
+                {
+                    console.log("boss当前血量较低，即将发绝招，需躲避,向左移动15秒");
+                    SwipeLeft(15);
+                }
+                SwipeUp(moveTime[3]);
+                Sleep(5);
+                if (IsBossLowHP())
+                {
+                    console.log("boss当前血量较低，即将发绝招，需躲避,向下移动15秒");
+                    SwipeDown(15);
+                }
+
+                SwipeLeft(moveTime[0]);
+                Sleep(5);
+                if (IsBossLowHP())
+                {
+                    console.log("boss当前血量较低，即将发绝招，需躲避，向右移动15秒");
+                    SwipeRight(15);
+                }
+                SwipeDown(moveTime[1]);
+                Sleep(5);
+                if (IsBossLowHP())
+                {
+                    console.log("boss当前血量较低，即将发绝招，需躲避，向上移动15秒");
+                    SwipeUp(15);
+                }
+            }
             else
             {
                 SwipeRight(moveTime[2]);
@@ -481,7 +555,7 @@ const AttackingBossFlow = (number) =>
             }
         }
 
-        if (number != 0)
+        if (number != 0 && number != 1)
         {
             time++;
             console.log("time: " + time);
@@ -545,16 +619,7 @@ const MainStoryBranch = () =>
             console.log("change setting failed!");
         }
         // start to change weapon
-        const LordNineWordColorList = [
-            ["#cca967", [[75, 4, "#deb371"], [138, -6, "#d8b77e"], [195, 3, "#c8a266"], [205, 16, "#a77a40"]]],
-            ["#cda465", [[75, -4, "#d8b773"], [139, -8, "#d8b77e"], [189, -5, "#c79959"], [205, 13, "#a67c41"]]],
-            ["#dbbb87", [[25, 3, "#be985b"], [49, 8, "#c8a263"], [99, 4, "#e2b980"], [124, 1, "#dab66d"]]]
-        ];
-        const WhiteAvatarColorList = [
-            ["#a4a4a3", [[2, 0, "#b1b1b1"], [7, 1, "#b4b4b3"], [2, 4, "#bababa"], [5, 13, "#b6b6b6"]]],
-            ["#a4a4a3", [[1, 0, "#a6a6a5"], [2, 0, "#b1b1b1"], [5, 3, "#b4b4b3"], [3, 10, "#b8b8b8"]]],
-            ["#a5a5a5", [[4, 0, "#b7b7b6"], [1, 2, "#bdbdbc"], [5, 13, "#b3b3b2"], [-4, 13, "#a0a0a0"]]]
-        ];
+
         for (let i = 0; i < 30; i++)
         {
             if (FindMultiColors(LordNineWordColorList, [313, 333, 728, 354], shot))
@@ -580,13 +645,12 @@ const MainStoryBranch = () =>
                 OpenAllBox();
                 WearEquipments();
                 OpenAllBox();
+                AutoReleaseSkill();
                 Sleep();
                 break;
             }
             Sleep();
         }
-
-
     }
     const hasBackpackMenuClose = HasBackpackMenuClose();
     if (hasBackpackMenuClose)
@@ -645,17 +709,17 @@ const MainStoryQuestIconColorList = [
     ["#dccb96", [[1, 8, "#cebd8d"], [12, 0, "#dccb96"], [12, 3, "#dcc996"], [7, 10, "#bfb082"]]],
     ["#dccb96", [[7, -8, "#d8c692"], [13, -2, "#dccb96"], [13, 1, "#dbc996"], [9, 6, "#d8c794"]]]
 ];
+
 const MissionAwardSelectColorList = [
     ["#564926", [[2, 0, "#564926"], [5, 0, "#564926"], [6, 0, "#564926"], [25, 0, "#554926"]]]
 ];
+
 const HasMainStoryQuestIcon = () => FindMultiColors(MainStoryQuestIconColorList, [1208, 125, 33, 40]);
 
 const PressBlank = () => RandomPress([417, 496, 401, 160]);
 
-
 const MainStoryException = () =>
 {
-
     const shot = captureScreen();
     const hasMenu = HasMenu();
     if (!hasMenu)
@@ -664,49 +728,13 @@ const MainStoryException = () =>
         {
             DeathFlow();
         }
-        else if (FindBlueBtn([654, 444, 202, 66], shot))
-        {
-            if (FindRedBtn([423, 438, 219, 77]))
-            {
-                console.log("主线传送按钮...");
-                RandomPress([684, 460, 152, 31]);
-            }
-
-        }
-        else if (FindBlueBtn([1055, 637, 219, 71], shot))
-        {
-            console.log("坐骑页面，强化装备按钮");
-            RandomPress([1077, 656, 173, 35]);
-        }
-        // else if (FindBlueBtn([481, 620, 316, 76], shot))
-        // {
-        //     console.log("animal confirm");
-        //     RandomPress([525, 639, 244, 34]);
-        // }
-        else if (FindBlueBtn([655, 380, 207, 68], shot))
-        {
-            if (FindRedBtn([423, 380, 204, 69], shot))
-            {
-                console.log("怪物图鉴快速移动按钮");
-                RandomPress([681, 399, 149, 33]);
-
-            }
-        }
-        else if (FindBlueBtn([645, 563, 185, 61], shot))
-        {
-            if (FindRedBtn([456, 566, 181, 55], shot))
-            {
-                console.log("发现药水弹窗，点击购买");
-                RandomPress([485, 559, 131, 26]);
-            }
-        }
     }
     else
     {
         if (IsAttackBoss())
         {
             console.log("start attacking boss");
-            for (let i = 0; i < 60; i++)
+            for (let i = 0; i < 30; i++)
             {
                 if (HasSkip())
                 {
@@ -740,7 +768,7 @@ const MainStoryException = () =>
                     3: [],
                     4: []
                 };
-                for (let i = 0; i < 4; i++)
+                for (let i = 0; i < 5; i++)
                 {
                     for (let j = 0; j < 10; j++)
                     {
@@ -786,30 +814,17 @@ const MainStoryException = () =>
                 }
             };
             const BossIndex = GetBossIndex();
-            console.log("boss index: " + BossIndex);
-            if (BossIndex == 1)
-            {
-                isAttackingfirstBoss = true;
-                console.log("isAttackingfirstBoss: " + isAttackingfirstBoss);
-            }
+            console.log("正在打第" + BossIndex + " boss");
+
             AttackingBossFlow(BossIndex);
-            console.log("finish boss flow");
+            console.log("boss流程结束");
         }
     }
 
-    if (FindMultiColors(BlankColorList, [582, 529, 119, 32], shot))
-    {
-        console.log("need press blank...");
-        RandomPress([461, 520, 309, 114]);
-    }
 
-    else if (FindMultiColors(BlankColorList, [588, 650, 109, 39], shot))
+    if (FindMultiColors(MissionAwardSelectColorList, [587, 257, 118, 36], shot))
     {
-        RandomPress([492, 498, 332, 142]);
-    }
-
-    else if (FindMultiColors(MissionAwardSelectColorList, [587, 257, 118, 36], shot))
-    {
+        console.log("选择奖励...");
         RandomPress([779, 438, 50, 50]);
         Sleep(3);
     }
@@ -880,7 +895,6 @@ const GrowthMissionFlow = () =>
             {
                 RandomPress([909, 197, 181, 31]);
             }
-
         }
         else
         {
@@ -888,11 +902,20 @@ const GrowthMissionFlow = () =>
             Sleep(3);
             let clip = images.clip(captureScreen(), 931, 196, 115, 34);
             Sleep(5);
-            const isNoReaction = FindImg(clip, [876, 184, 208, 59]);
+            let isNoReaction = FindImg(clip, [876, 184, 208, 59]);
             if (isNoReaction)
             {
-                storyMode = "mainMission";
-                console.log("switch story mode to main mission");
+                RandomPress([901, 194, 259, 38]);
+                Sleep(3);
+                clip = images.clip(captureScreen(), 931, 196, 115, 34);
+                Sleep(5);
+                isNoReaction = FindImg(clip, [876, 184, 208, 59]);
+                if (isNoReaction)
+                {
+                    storyMode = "mainMission";
+                    console.log("点击成长任务没有反应，改变模式为 主线任务");
+                }
+
             }
         }
     }
@@ -905,37 +928,49 @@ const GrowthMissionFlow = () =>
     }
     else
     {
-        console.log("not find growth mission icon, change story mode to main mission");
+        console.log("没有发现成长任务图标，改变模式为主线任务");
         storyMode = "mainMission";
+
+    }
+    if (storyMode == "mainMission")
+    {
+        console.log("判断等级是否是34级");
+        const config = ReadConfig();
+        const lv = config.game.lv;
+        console.log("当前等级为：" + lv);
+        if (lv < 35 || lv == null)
+        {
+            console.log("等级小于34级，切换模式为挂机模式，去地图挂机");
+            specialConfig.gameMode = "instance";
+            specialConfig.lastModeChangeTime = new Date();
+        }
         return true;
     }
-
     const shot = captureScreen();
 
-    const hasSkillBookPage = FindImg(GrowthImgList.skillBookMerchantPage, [83, 160, 60, 59], shot);
+    const hasSkillBookPage = FindImg(GrowthImgList.skillBookMerchantPage, [1031, 3, 202, 60], shot);
     if (hasSkillBookPage)
     {
-        console.log("growthMission 2: buy skill book");
-        const AlreadyLearnedSkillColorList = [
-            ["#dbd373", [[18, 3, "#d4cc6f"], [31, 3, "#dcd474"], [45, 6, "#dcd474"], [29, 6, "#d8cf72"]]]
-        ];
-        const HasLearnTheSkill = (region) => FindMultiColors(AlreadyLearnedSkillColorList, region);
+        console.log("成长任务2: 购买技能书");
+        const skillBookImgList = LoadImgList("backpack/skillBook");
+
         for (let i = 0; i < 5; i++)
         {
-            if (HasLearnTheSkill([74, 88 + i * 79, 79, 45]))
+            let hasSkillBook = FindImgInList(skillBookImgList, [72, 69 + i * 79, 82, 92]);
+            if (hasSkillBook)
             {
-                continue;
-            }
-            else
-            {
-                RandomPress([162, 98 + i * 79, 136, 32]);
+                RandomPress([hasSkillBook.x + 50, hasSkillBook.y, 100, 30]);
                 if (FindBlueBtn([645, 544, 179, 58]))
                 {
                     RandomPress([664, 558, 142, 30]);
+                    console.log("购买技能书成功");
                 }
             }
+            Sleep();
         }
+        console.log("没有可以购买的技能书了");
         PageBack();
+        OpenAllBox();
     }
     const hasWeaponSkillPage = FindImg(GrowthImgList.weaponSkillPage, [116, 288, 73, 73], shot);
     if (hasWeaponSkillPage)
@@ -997,6 +1032,7 @@ const GrowthMissionFlow = () =>
         }
         storyMode = "mainMission";
     }
+
     const hasDecomposeEquipmentPage = HasBackpackMenuClose();
     if (hasDecomposeEquipmentPage)
     {
@@ -1053,9 +1089,6 @@ const DailyMissionFlow = () =>
         }
     }
 };
-
-
-
 
 const MainStoryFlow = () =>
 {

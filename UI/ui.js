@@ -10,7 +10,8 @@ const UIData = {
     serverName: "00",
     gameMode: "mainStory",
     monsterMapList: [],
-    hangUpMap: "03"
+    hangUpMap: "03",
+    manualInstance: false
 };
 
 //下拉菜单的点击事件
@@ -83,7 +84,11 @@ document.querySelector("#vpnSetting").addEventListener("click", () =>
         console.log(callBackData);
     });
 });
-
+document.querySelector("input[name=manualInstance]").addEventListener("click", () =>
+{
+    UIData.manualInstance = document.querySelector("input[name=manualInstance]").checked;
+    UIData.gameMode = "instance";
+});
 //怪物图鉴地图选择
 const SelectMonsterMap = () =>
 {

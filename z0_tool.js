@@ -16,7 +16,7 @@ threads.start(function ()
         hasOpen.click();
     }
 });
-
+// engines.stopAllAndToast();
 //com.smilegate.lordnine.stove.google
 //
 //adb -s 10.245.81.17:5555  pull /sdcard/脚本/LordNine/build/lordnine_v1.0.0.apk C:/nginx/Rom/LordNine.apk

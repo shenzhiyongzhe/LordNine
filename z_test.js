@@ -49,6 +49,9 @@ const { Sleep, RandomPress, ReadImg, FindImg, FindMultiColors,
     GetFormatedTimeString,
     FindNumber,
     FindRedBtn,
+    IsBackpackFull,
+    WaitUntil,
+    FindImgInList,
 } = require("./utils.js");
 
 
@@ -383,178 +386,21 @@ const SetApplicationProxy = () =>
 // console.log(time.replace(/[^0-9]/ig, ''));
 // console.log(FindNumber("lv", [416, 382, 215, 120]));
 // console.log(FindRedBtn([423, 380, 204, 69]));
-const ChangeVPNSetting = () =>
-{
-    app.launch("fun.kitsunebi.kitsunebi4android");
-    let disallowListConfig = {
-        "autoJs": false,
-        "lordnine": false,
-    };
-    for (let i = 0; i < 30; i++)
-    {
-        let hasRefreshBtn_0 = desc("Measure Latency").findOne(20);
-        if (hasRefreshBtn_0)
-        {
-            let add_btn = id("add_btn").findOne(20);
-            if (add_btn)
-            {
-                add_btn.click();
-            }
-        }
-        let has_AddEndpointGroup = text("Add Endpoint Group").findOne(20);
-        if (has_AddEndpointGroup)
-        {
-            let settings = text("Settings").findOne(20);
-            if (settings)
-            {
-                click(settings.bounds().centerX(), settings.bounds().centerY());
-            }
-        }
 
-        let pre_app_vpn = text("Configure Per-App VPN.").findOne(20);
-        if (pre_app_vpn)
-        {
-            click(pre_app_vpn.bounds().centerX(), pre_app_vpn.bounds().centerY());
-        }
-        let enabled_per_app_vpn = text("Enable Per-App VPN").findOne(20);
-        if (enabled_per_app_vpn)
-        {
-            let enabled_per_app_vpn_switch = enabled_per_app_vpn.parent().parent().children()[1].children()[0];
-            let isOpen = enabled_per_app_vpn_switch.checked();
-            console.log("分应用代理是否打开：" + isOpen);
-            if (!isOpen)
-            {
-                click(enabled_per_app_vpn_switch.bounds().centerX(), enabled_per_app_vpn_switch.bounds().centerY());
-                break;
-            }
-        }
-        let current_list = textMatches(/(.*You may either use the allowed list.*)/).findOne(20);
-        if (current_list)
-        {
-            let hasAllowedList = textMatches(/(.*current Allowed List.*)/).findOne(20);
-            if (hasAllowedList)
-            {
-                console.log("当前是允许列表，需要改动");
-                click(hasAllowedList.bounds().centerX(), hasAllowedList.bounds().centerY());
-            }
-            let hasDisallowedList = textMatches(/(.*current Disallowed List.*)/).findOne(20);
-            if (hasDisallowedList)
-            {
-                console.log("当前已经是不允许列表，不需要改动");
-            }
-        }
-        let has_per_app_mode = id("alertTitle").findOne(20);
-        if (has_per_app_mode)
-        {
-            let hasMode_disallowedList = text("Disallowed List").findOne(20);
-            if (hasMode_disallowedList)
-            {
-                hasMode_disallowedList.click();
-            }
-        }
-        let DisallowedList = text("Selected apps are disallowed to use the VPN tunnel, others will be allowed.").findOne(20);
-        if (DisallowedList)
-        {
-            click(DisallowedList.bounds().centerX(), DisallowedList.bounds().centerY());
-        }
 
-        let lordnine = text("com.lordnine").findOne(20);
-        if (lordnine)
-        {
-            let is_lordnine_on = lordnine.parent().children()[3];
-            if (is_lordnine_on.checked == true)
-            {
-                console.log("已经打开，不需要操作");
-                disallowListConfig.lordnine = true;
-            }
-            else if (is_lordnine_on.checked == false)
-            {
-                console.log("autoJs 未打开不允许列表，点击打开");
-                lordnine.parent().click();
-            }
-            let autoJs = text("org.autojs.autoxjs.v6").findOne(20);
-            if (autoJs)
-            {
-                let is_autoJs_on = autoJs.parent().children()[3];
-                if (is_autoJs_on.checked == true)
-                {
-                    console.log("已经打开，不需要操作");
-                    disallowListConfig.autoJs = true;
-                }
-                else if (is_autoJs_on.checked == false)
-                {
-                    console.log("autoJs 未打开不允许列表，点击打开");
-                    autoJs.parent().click();
-                }
-            }
-            else
-            {
-                console.log("没有发现auto js 默认跳过");
-                disallowListConfig.autoJs = true;
-            }
-        }
-        if (disallowListConfig.lordnine == true && disallowListConfig.autoJs == true)
-        {
-            console.log("已设置完毕，返回到主页面");
-            let hasBackIcon = desc("위로 이동").findOne(20);
-            if (hasBackIcon)
-            {
-                hasBackIcon.click();
-            }
-            let hasRefreshBtn = desc("Measure Latency").findOne(20);
-            if (hasRefreshBtn)
-            {
-                hasRefreshBtn.click();
-                break;
-            }
-        }
-        Sleep();
-    }
-};
+// console.log(WaitUntil(HasPopupClose));
 // ChangeVPNSetting();
-// let disallowListConfig = {
-//     "autoJs": false,
-//     "lordnine": false,
-// };
-// let lordnine = text("com.lordnine").findOne(20);
-// if (lordnine)
-// {
-//     let is_lordnine_on = lordnine.parent().children()[3];
-//     if (is_lordnine_on.checked == true)
-//     {
-//         console.log("已经打开，不需要操作");
-//         disallowListConfig.lordnine = true;
-//     }
-//     else if (is_lordnine_on.checked == false)
-//     {
-//         console.log("autoJs 未打开不允许列表，点击打开");
-//         lordnine.parent().click();
-//     }
-//     let autoJs = text("org.autojs.autoxjs.v6").findOne(20);
-//     if (autoJs)
-//     {
-//         let is_autoJs_on = autoJs.parent().children()[3];
-//         if (is_autoJs_on.checked == true)
-//         {
-//             console.log("已经打开，不需要操作");
-//             disallowListConfig.autoJs = true;
-//         }
-//         else if (is_autoJs_on.checked == false)
-//         {
-//             console.log("autoJs 未打开不允许列表，点击打开");
-//             autoJs.parent().click();
-//         }
-//     }
-//     else
-//     {
-//         console.log("没有发现auto js 默认跳过");
-//         disallowListConfig.autoJs = true;
-//     }
-// }
-// console.log(text("org.autojs.autoxjs.v6").findOne(20));
-// console.log(text("org.autojs.autoxjs.v6").findOne(20).parent().children()[3]);
-// console.log(text("Add Endpoint Group").findOne(20));
-let time_1 = new Date().getTime();
-Sleep(2);
+// const comprehensiveTime = [[random(0, 11), random(0, 59)], [random(12, 23), random(0, 59)]];
+// console.log("副本模式挂机随机提升战力时刻为：" + comprehensiveTime[0][0] + "时" + comprehensiveTime[0][1] + "分；" + comprehensiveTime[1][0] + "时" + comprehensiveTime[1][1] + "分");
 
-console.log((new Date().getTime() - time_1) / 60000);
+// const a = [1, 2, 4];
+// console.log(a.indexOf(3));
+// RandomPress([440, 457, 10, 5]);
+// console.log(HasPopupClose([515, 314, 56, 53]));
+// swipe(370, 460, 370 + random(0, 20), 470, 200);
+// console.log(LoadImgList("icon/font/swipeToConfirm"));
+// console.log(IsBackpackFull());
+// const hasSkillBookPage = FindImg(GrowthImgList.skillBookMerchantPage, [1035, 3, 203, 56], shot);
+
+// console.log(HasPopupClose([1202, 96, 47, 48]));
+// engines.stopAllAndToast();

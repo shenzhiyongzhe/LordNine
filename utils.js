@@ -1,3 +1,4 @@
+
 const { PagebackColorList, MenuColorList, MenuCloseColorList, BlueBtnColorList, BackpackColorList,
     SkipColorList, CheckMarkColorList, TipPointColorList, GoldBtnColorList, RedBtnColorList, PopupCloseColorList, BackpackFullColorList,
     PleaseTapBlankColorList,
@@ -7,22 +8,25 @@ const defaultConfig = {
     ui: {
         createCharacter: "false",
         serverName: "33",
-        gameMode: "mainStory"
+        gameMode: "mainStory",
+        manualInstance: "false",
+
     },
     game: {
         deathTime: 0,
         today: 0,
         reconnectionTime: 0,
-        lv: 0
+        lv: 0,
+        autoPotion: false,
+        dailyInstance: false
     }
 };
 
 let specialConfig = {
     gameMode: null,
     initGameMode: null,
-    lastModeChangeTime: new Date()
+    lastModeChangeTime: new Date(),
 };
-
 
 const configFile = "/sdcard/LordNine/config.json";
 
@@ -70,6 +74,7 @@ const HomeColorList = [
 const BackpackPageColorList = [
     ["#fbfbfa", [[0, 4, "#fbfbfa"], [3, 6, "#ffffff"], [0, 7, "#fbfbfa"], [0, 10, "#fcfcfc"]]]
 ];
+
 const ClickRandomly = ([startX, startY, w, h]) =>
 {
     const x = Math.round(Math.random() * w + startX);
@@ -116,8 +121,51 @@ const ClickSkip = () =>
     }
     return false;
 };
+const ChangeRecoverPotionPercentToMax = () =>
+{
+    console.log("开始更改药水百分比为100%");
+    if (!HasMenu())
+    {
+        console.log("没有发现菜单按钮，退出");
+        return false;
+    }
+    RandomPress([341, 615, 29, 19]);
+    if (HasPopupClose([517, 310, 45, 57]))
+    {
+        swipe(360, 460, 470 + random(0, 30), 460, 200);
+        Sleep();
+        RandomPress([537, 327, 19, 24]);
+        return true;
+    }
+    return false;
+};
 
+const ChangeRecoverPotionPercentToNormal = () =>
+{
+    console.log("开始更改药水百分比为70%");
+    if (!HasMenu())
+    {
+        console.log("没有发现菜单按钮，退出");
+        return false;
+    }
+    RandomPress([341, 615, 29, 19]);
+    if (HasPopupClose([517, 310, 45, 57]))
+    {
+        swipe(370, 460, 370 + random(0, 20), 470, 200);
+        Sleep();
+        RandomPress([537, 327, 19, 24]);
+        return true;
+    }
+    return false;
+};
 
+const ClearPage = () =>
+{
+    for (let i = 0; i < 10; i++)
+    {
+
+    }
+};
 
 /**
  * @param {Array} colorArr
@@ -291,7 +339,6 @@ const HasMenu = () => FindMultiColors(MenuColorList, [1198, 13, 55, 47]);
 const HasBackpack = () => FindMultiColors(BackpackColorList, [1143, 12, 40, 50]);
 const HasBackpackClose = () => FindMultiColors(PopupCloseColorList, [1210, 101, 33, 35]);
 
-
 const HasMenuClose = () => FindMultiColors(MenuCloseColorList, [1204, 17, 46, 45]);
 const HasPopupClose = (region, shot) => { shot = shot || captureScreen(); return FindMultiColors(PopupCloseColorList, region, shot); };
 const HasHome = () => FindMultiColors(HomeColorList, [38, 243, 35, 27]);
@@ -363,7 +410,7 @@ const IsMoving = () =>
     }
 
 };
-const IsBackpackFull = (shot) => FindMultiColors(BackpackFullColorList, [1145, 48, 36, 13], shot);
+const IsBackpackFull = (shot) => FindMultiColors(BackpackFullColorList, [1144, 35, 39, 27], shot);
 const IsInCity = () => FindMultiColors(GroceryColorList, [983, 422, 207, 64]);
 const IsHaltMode = () => FindMultiColors(HaltModeColorList, [606, 643, 76, 62]);
 
@@ -387,10 +434,32 @@ const LoadImgList = (url) =>
     }
     return list;
 };
-const NeedPressBlank = (region, shot) =>
+const TapBlankToContinue = (region, shot) =>
 {
     shot = shot || captureScreen();
-    return FindMultiColors(PleaseTapBlankColorList, region, shot);
+    region = region || [573, 627, 130, 43]; //获得能力弹窗，请点击空白
+
+    if (FindMultiColors(PleaseTapBlankColorList, [582, 529, 119, 32], shot))
+    {
+        console.log("点击空白...");
+        RandomPress([461, 520, 309, 114]);
+    }
+
+    else if (FindMultiColors(PleaseTapBlankColorList, [588, 650, 109, 39], shot))
+    {
+        console.log("点击空白...");
+        RandomPress([492, 498, 332, 142]);
+    }
+    else if (FindMultiColors(PleaseTapBlankColorList, region, shot))
+    {
+        console.log("点击空白...");
+        RandomPress([461, 520, 309, 114]);
+    }
+    else if (FindMultiColors(PleaseTapBlankColorList, [572, 524, 134, 48], shot))
+    {
+        console.log("分解装备结束，点击空白");
+        PressBlank();
+    }
 };
 
 const OpenMenu = () =>
@@ -433,70 +502,69 @@ const OpenBackpack = (type) =>
 
     if (hasBackpackClose)
     {
-        console.log("backpack has already opened");
-
+        console.log("背包已经打开");
     }
-    else if (hasBackpack && hasBackpackClose == null)
+    else if (hasBackpack != null && hasBackpackClose == null)
     {
-        console.log("open backpack");
+        console.log("打开背包");
         RandomPress([1154, 22, 18, 27]);
         if (!WaitUntilBackOpen())
         {
-            console.log("backpack did not open!");
+            console.log("openbackpack ： 打开背包失败");
             return false;
         }
-
     }
 
     if (type == undefined)
     {
         console.log("open all");
-        return true;
     }
+
     if (type == "equipment")
     {
         const isEquipmentPage = HasOpenTheBackPage([1187, 217, 22, 79]);
         if (!isEquipmentPage)
         {
-            console.log("open equipment page");
+            console.log("打开装备页面");
             RandomPress([1212, 238, 29, 40]);
         }
-        return true;
-
     }
     else if (type == "props")
     {
         const isPropsPage = HasOpenTheBackPage([1185, 285, 21, 81]);
         if (!isPropsPage)
         {
-            console.log("open props");
+            console.log("打开道具页面");
             RandomPress([1212, 303, 29, 47]);
         }
-        return true;
-
     }
     else if (type == "gold")
     {
         const isGoldPage = HasOpenTheBackPage([1183, 351, 27, 83]);
-        if (isGoldPage)
+        if (!isGoldPage)
         {
-            console.log("open gold page");
+            console.log("打开自动使用药水页面");
             RandomPress([1217, 383, 20, 17]);
         }
-        return true;
     }
     else if (type == "auto")
     {
         const isAutoPage = HasOpenTheBackPage([1186, 422, 18, 76]);
-        if (isAutoPage)
+        if (!isAutoPage)
         {
             console.log("open auto page");
             RandomPress([1217, 450, 19, 19]);
         }
+    }
+    if (HasPopupClose([1203, 96, 41, 45]))
+    {
         return true;
     }
-    console.log("open backpack failed !");
-    return false;
+    else
+    {
+        console.log("打开背包失败");
+        return false;
+    }
 };
 const OpenBackpackMenu = (type) =>
 {
@@ -550,13 +618,14 @@ const OpenBackpackMenu = (type) =>
 };
 const Sleep = (time) => { time = time || 1.5; sleep(time * 1000); };
 
-const RandomPress = ([startX, startY, w, h]) =>
+const RandomPress = ([startX, startY, w, h], delay) =>
 {
-    const time = random(16, 256);
+    const time = random(20, 100);
+    delay = delay || 1.5;
     const x = Math.round(Math.random() * w + startX);
     const y = Math.round(Math.random() * h + startY);
     press(x, y, time);
-    Sleep();
+    Sleep(delay);
 };
 
 const ReadImg = (name) => images.read(`./img/${name}.png`);
@@ -571,7 +640,7 @@ const RecycleImgList = (list) =>
 
 const WaitUntil = (func, frequence, loopTime) =>
 {
-    frequence = frequence || 1.5;
+    frequence = frequence || 1500;
     loopTime = loopTime || 30;
     for (let i = 0; i < loopTime; i++)
     {
@@ -579,10 +648,11 @@ const WaitUntil = (func, frequence, loopTime) =>
         {
             return true;
         }
-        Sleep(frequence);
+        sleep(frequence);
     }
     return false;
 };
+
 const WaitUntilMenu = () => WaitUntil(HasMenu);
 
 const WaitUntilPageBack = () => WaitUntil(HasPageback);
@@ -688,8 +758,6 @@ const RestartGame = (packageName, time) =>
     app.launch(packageName);
 };
 
-
-
 const ExitHaltMode = () =>
 {
     console.log("退出节电模式");
@@ -706,17 +774,27 @@ const ChangeHaltModeTime = () =>
     if (!hasOpenMenu)
     {
         console.log("open menu failed");
-        return false;
+        CloseBackpack();
+        PageBack();
+        let hasOpenMenu_1 = OpenMenu();
+        if (!hasOpenMenu_1)
+        {
+            return false;
+        }
     }
-    RandomPress([1153, 550, 21, 27]);
+    RandomPress([1151, 549, 24, 30]);
     WaitUntilPageBack();
-    RandomPress([342, 76, 61, 28]);
+    RandomPress([174, 74, 107, 27]);
+    RandomPress([631, 324, 115, 23]);
+    PageBack();
 };
+
 /**
  * 下拉技能，自动释放
  *
  * @param {*} pos [x, y]
  */
+
 const PullDownSkill = (pos) => { gesture(500, pos, [pos[0], pos[1] + 30]); Sleep(); };
 
 /*
@@ -765,9 +843,7 @@ const GoToTheNPC = (type) =>
     console.log("enter npc success!" + type);
     return true;
 };
-const PressBlank = () => RandomPress([451, 485, 357, 144]);
-
-
+const PressBlank = () => RandomPress([402, 240, 508, 244]);
 
 const EnterMenuItemPage = (item) =>
 {
@@ -793,21 +869,20 @@ DeathImgList = LoadImgList("special/death");
 
 module.exports = {
     specialConfig, DeathImgList,
-    CloseBackpack, CloseMenu, ClickSkip, ClickRandomly,
+    CloseBackpack, CloseMenu, ClickSkip, ClickRandomly, ChangeHaltModeTime, ChangeRecoverPotionPercentToMax, ChangeRecoverPotionPercentToNormal,
     EnterMenuItemPage, ExitHaltMode,
     FindBlueBtn, FindTipPoint, FindImg, FindMultiColors, FindCheckMark, FindRedBtn, FindGoldBtn, FindImgInList, FindNumber,
     GetFormatedTimeString, GoToTheNPC, GetVerificationCode, GetCaptureScreenPermission,
     HasPageback, HasMenu, HollowPress, HasSkip, HasBackpackClose, HasBackpackMenuClose, HasPopupClose,
     IsMoving, IsBackpackFull, IsInCity, IsHaltMode,
     LoadImgList, LaunchGame,
-    NeedPressBlank,
+    TapBlankToContinue,
     OpenMenu, OpenBackpack, OpenBackpackMenu,
     PageBack, PressBlank, PullDownSkill,
     RandomPress, ReadImg, ReturnHome, RestartGame, RecycleImgList, ReadConfig, RewriteConfig,
     Sleep,
     WaitUntil, WaitUntilMenu, WaitUntilPageBack, WaitUntilFindColor,
     SwipeSlowly,
-
 };
 
 

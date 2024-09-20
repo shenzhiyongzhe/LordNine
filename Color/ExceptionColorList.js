@@ -7,7 +7,7 @@ const NoPotionColorList = [
     ["#555555", [[0, 8, "#414140"], [-2, 18, "#fbfbfa"], [4, 18, "#fefefd"], [1, 14, "#f8f8f8"]]],
     ["#626262", [[2, 0, "#555555"], [5, 0, "#535353"], [1, 19, "#ffffff"], [6, 19, "#fbfbfa"]]],
     ["#585858", [[2, 6, "#454545"], [4, 2, "#4c4c4b"], [1, 22, "#fefefd"], [6, 22, "#fbfbfa"]]],
-    // ["#505050", [[-3, 5, "#696969"], [-2, 11, "#414140"], [-1, 19, "#ffffff"], [4, 21, "#fbfbfa"]]]
+
 ];
 
 
@@ -22,10 +22,10 @@ const WhiteAvatarColorList = [
     ["#a4a4a3", [[1, 0, "#a6a6a5"], [2, 0, "#b1b1b1"], [5, 3, "#b4b4b3"], [3, 10, "#b8b8b8"]]],
     ["#a5a5a5", [[4, 0, "#b7b7b6"], [1, 2, "#bdbdbc"], [5, 13, "#b3b3b2"], [-4, 13, "#a0a0a0"]]]
 ];
-
-
-
+const StartBtnSettingColorList = [
+    ["#bfaf89", [[-1, 17, "#a49574"], [16, 16, "#9b8e6e"], [14, 1, "#bfaf89"], [7, -2, "#bfaf88"]]]
+];
 
 module.exports = {
-    NoPotionColorList, LordNineWordColorList, WhiteAvatarColorList
+    NoPotionColorList, LordNineWordColorList, WhiteAvatarColorList, StartBtnSettingColorList
 };

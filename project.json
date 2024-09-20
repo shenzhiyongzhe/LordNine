@@ -1,10 +1,59 @@
 {
-    "name": "lordnine",
-    "main": "main.js",
-    "ignore": [
+    "abis": [
+        "arm64-v8a",
+        "armeabi-v7a",
+        "x86",
+        "x86_64"
+    ],
+    "assets": [
+        {
+            "form": "/storage/emulated/0/脚本/LordNine",
+            "to": "/project"
+        }
+    ],
+    "buildDir": "build",
+    "build": {
+        "build_id": null,
+        "build_number": 0,
+        "build_time": 0
+    },
+    "useFeatures": [ ],
+    "icon": null,
+    "ignoredDirs": [
         "build"
     ],
+    "encrypt-code": false,
+    "launchConfig": {
+        "displaySplash": true,
+        "hideAccessibilityServices": false,
+        "hideLauncher": false,
+        "hideLogs": false,
+        "stableMode": false,
+        "volumeUpcontrol": false,
+        "permissions": [
+            "accessibility_services"
+        ],
+        "serviceDesc": "스크립트 작업(클릭, 길게 누르기, 스와이프 등)을 자동화하는 데 필요하며 비활성화된 경우 자동 작업이 포함되지 않은 스크립트만 실행할 수 있습니다.",
+        "splashIcon": null,
+        "splashText": "Powered by Autoxjs.com"
+    },
+    "libs": [
+        "libopencv_java4.so",
+        "libc++_shared.so",
+        "libjackpal-androidterm5.so",
+        "libjackpal-termexec2.so"
+    ],
+    "main": "main.js",
+    "name": "lordnine",
+    "outputPath": "/storage/emulated/0/脚本/LordNine/build",
     "packageName": "com.lordnine",
-    "versionName": "1.0.0",
-    "versionCode": 1
+    "projectDirectory": "/storage/emulated/0/脚本/LordNine",
+    "scripts": { },
+    "signingConfig": {
+        "alias": "lordnine",
+        "keystore": "/storage/emulated/0/脚本/.keyStore/LordNine"
+    },
+    "sourcePath": "/storage/emulated/0/脚本/LordNine/main.js",
+    "versionCode": 1,
+    "versionName": "1.0.0"
 }
