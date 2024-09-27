@@ -123,6 +123,27 @@ body {
     border-bottom: 1px solid white;
 }
 
+.horizental_label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.text-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.horizental_flex {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+    padding-left: 10px;
+}
+
 .temp {
     width: 100%;
     display: flex;
@@ -130,6 +151,7 @@ body {
     align-items: center;
     flex-direction: column;
     gap: 10px;
+    margin-top: 20px;
 }
 
 #startScript {

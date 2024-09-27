@@ -49,7 +49,6 @@ const getUrl = (path) =>
     return finalResult;
 };
 
-
 const downloadFile = (url) =>
 {
     http.get(`http://10.6.130.129:82/LordNine/${url}`, {}, function (res, err)

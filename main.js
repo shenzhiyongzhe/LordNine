@@ -12,7 +12,7 @@ let mainThread;
 let launch_ui_config = null;
 function StartScript(uiData)
 {
-    console.log("start script uiData: " + uiData);
+    console.log("JSBridge，页面数据为: " + uiData);
 
     // GetCaptureScreenPermission();
 
@@ -30,17 +30,17 @@ function StartScript(uiData)
             isRunning = true;
             auto();
             images.requestScreenCapture(true);
-            threads.start(function ()
-            {
-                let hasOpen = textMatches(/(.*시작하기.*|.*立即开始.*)/).findOne(2000);
-                if (hasOpen)
-                {
-                    hasOpen.click();
-                }
-            });
+            // threads.start(function ()
+            // {
+            //     let hasOpen = textMatches(/(.*시작하기.*|.*立即开始.*)/).findOne(2000);
+            //     if (hasOpen)
+            //     {
+            //         hasOpen.click();
+            //     }
+            // });
             uiData = JSON.parse(uiData);
             launch_ui_config = uiData;
-            toast("game start");
+            toast("启动游戏");
             specialConfig.gameMode = uiData.gameMode;
             specialConfig.initGameMode = uiData.gameMode;
             MainFlow(uiData);
@@ -304,13 +304,11 @@ console.setGlobalLogConfig({
     "filePattern": "%d{dd日}%m%n"
 });
 
-
 const floaty_window = floaty.window(
     <frame gravity="center" id="switch" w="12" h="20" bg="#79BEDB" alpha="1">
         <text id="debug" textColor="#7FA1C3"></text>
     </frame>
 );
-
 
 floaty_window.setPosition(0, 680);
 
@@ -339,9 +337,11 @@ floaty_window.switch.click(function ()
 const Start = (uidata) =>
 {
     LaunchGame();
+    console.log("Start: ui data:" + uidata.createCharacter);
     RewriteConfig("ui", uidata);
     if (uidata.createCharacter == true)
     {
+        console.log("开始导入创建角色模块");
         const { CreateCharacterFlow } = require("./CreateCharacter.js");
         CreateCharacterFlow(uidata.serverName);
     }
@@ -352,7 +352,7 @@ const Update = () =>
 {
     while (true)
     {
-        ExceptionFlow(specialConfig.gameMode);
+        ExceptionFlow();
 
         if (specialConfig.gameMode == "mainStory")
         {
@@ -362,7 +362,6 @@ const Update = () =>
         {
             InstanceFlow(launch_ui_config);
         }
-
         if (specialConfig.gameMode != specialConfig.initGameMode)
         {
             if (Math.abs(specialConfig.lastModeChangeTime.getTime() - new Date().getTime()) / (3600 * 1000) >= 5)

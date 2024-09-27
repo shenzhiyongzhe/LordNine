@@ -19,6 +19,7 @@ const {
     LoadImgList,
     RecycleImgList,
     FindImgInList,
+    ClearPage,
 } = require("./utils.js");
 
 const EquipColorList = [
@@ -53,6 +54,10 @@ const BackpackItemDetailColorList = {
 };
 
 const emptyGridImgList = LoadImgList("backpack/emptyGrid");
+const isEquipedImgList = LoadImgList("backpack/isEquiped");
+const EmptyGridColorList = [
+    ["#131415", [[16, 2, "#181618"], [32, 2, "#151618"], [0, 15, "#151518"], [19, 17, "#18181b"], [30, 17, "#181818"], [6, 28, "#161718"], [22, 29, "#181818"], [38, 31, "#151518"]]]
+];
 
 const DetailOnColorList = [
     ["#1d5d55", [[5, 0, "#1d5d55"], [10, 3, "#1d5d55"], [0, 4, "#1d5d55"], [6, 8, "#1d5d55"]]]
@@ -63,9 +68,12 @@ const SingleStrengthenColorList = [
 ];
 
 // ********************  check ----------------------
-const IsEquiped = (region, shot) => { shot = shot || captureScreen(); return FindMultiColors(EquipColorList, region, shot); };
+// const IsEquiped = (region, shot) => { shot = shot || captureScreen(); return FindMultiColors(EquipColorList, region, shot); };
+const IsEquiped = (region, shot) => { shot = shot || captureScreen(); return FindImgInList(isEquipedImgList, region, shot); };
 
-const IsEmpty = (region, shot) => FindImgInList(emptyGridImgList, region, shot);
+// const IsEmpty = (region, shot) => { shot = shot || captureScreen(); return FindMultiColors(EmptyGridColorList, region, shot); };
+const IsEmpty = (region, shot) => { shot = shot || captureScreen(); return FindImgInList(emptyGridImgList, region, shot); };
+
 const IsOnDetail = () => FindMultiColors(DetailOnColorList, [1044, 572, 30, 27]);
 
 
@@ -183,6 +191,13 @@ const OpenPropsBox = () =>
 const OpenSkillBook = () =>
 {
     console.log("开始打开技能书");
+    const hadOpenBackpack = OpenBackpack("props");
+    if (!hadOpenBackpack)
+    {
+        console.log("打开背包失败，退出");
+        return false;
+    }
+
     let hasSkillBook = false;
     let hasOpened = false;
     const skillBookImgList = LoadImgList("backpack/skillBook");
@@ -192,9 +207,7 @@ const OpenSkillBook = () =>
         if (hasSkillBook)
         {
             RandomPress([hasSkillBook.x, hasSkillBook.y, 30, 30]);
-            Sleep(3);
             RandomPress([hasSkillBook.x, hasSkillBook.y, 30, 30]);
-            Sleep(3);
             hasOpened = true;
         }
     }
@@ -288,11 +301,13 @@ const OpenAllBox = () =>
     }
     let hasOpenedWeaponBox = OpenEquipmentBox("weapon");
     let hasOpenedArmorBox = OpenEquipmentBox("armor");
-    let hasOpenPropsBox = OpenPropsBox();
+    OpenPropsBox();
 
-    if (!hasOpenedWeaponBox && !hasOpenedArmorBox && !hasOpenPropsBox)
+    if (hasOpenedWeaponBox || hasOpenedArmorBox)
     {
-        console.log("no box to open");
+        console.log("有装备箱子被打开，优先穿装备");
+        WearEquipments();
+        OpenBackpack("props");
     }
     const hasOpenSkill = OpenSkillBook();
     if (hasOpenSkill)
@@ -308,6 +323,7 @@ const OpenAllBox = () =>
         console.log("had open suit card, start to wear suit");
         WearBestSuit();
     }
+    UseHolyGrail();
     Sleep();
     console.log("结束：已打开所有箱子");
     return true;
@@ -436,74 +452,73 @@ const SortEquipment = () => { RandomPress([1097, 668, 17, 19]); Sleep(3); };
 const WearEquipment = () =>
 {
     console.log("开始穿装备");
-    const hasOpenBackpack = OpenBackpack("equipment");
+    let hasOpenBackpack = OpenBackpack("equipment");
     if (!hasOpenBackpack)
     {
-        console.log("打开背包失败");
-        return false;
+        console.log("打开背包失败，清理页面尝试重新打开");
+        ClearPage();
+        hasOpenBackpack = OpenBackpack("equipment");
+        if (!hasOpenBackpack)
+        {
+            return false;
+        }
     }
-    SortEquipment();
 
-    let shot = null;
-    const magicWandImgList = {
-        "white": ReadImg("icon/font/magicWand_white"),
-        "green": ReadImg("icon/font/magicWand_green"),
-        "blue": ReadImg("icon/font/magicWand_blue")
-    };
+    SortEquipment();
+    const magicWandImgList = LoadImgList("backpack/magicWand");
     const identifyTapScreenImgList = LoadImgList("backpack/identifyTapScreen");
 
     let hasWornEquipment = false;
     const IdentifyEquipment = () =>
     {
-        console.log("identify equipment");
-        for (let i = 0; i < 10; i++)
+        console.log("开始鉴定装备");
+        for (let i = 0; i < 30; i++)
         {
             if (FindBlueBtn([383, 565, 222, 75]))
             {
-                RandomPress([411, 582, 169, 35]);
-                Sleep(2);
-                if (WaitUntil(() => FindImgInList(identifyTapScreenImgList, [573, 597, 123, 51]), 20, 500))
-                {
-                    RandomPress([243, 434, 899, 153]);
-                }
-                if (WaitUntil(() => FindBlueBtn([509, 593, 270, 69]), 20, 500))
-                {
-                    RandomPress([536, 611, 212, 29]);
-                }
+                RandomPress([411, 582, 169, 35], 4);
+            }
+            if (FindImgInList(identifyTapScreenImgList, [568, 595, 136, 58]))
+            {
+                console.log("鉴定，点击空白继续");
+                PressBlank();
+            }
+            if (FindBlueBtn([509, 593, 270, 69]))
+            {
+                console.log("鉴定成功，确认");
+                RandomPress([543, 611, 196, 30]);
+            }
+            if (HasBackpackMenuClose())
+            {
+                console.log("鉴定完成，退回到背包页面");
                 CloseBackpack();
                 break;
             }
+            Sleep();
         }
     };
 
     out: for (let i = 0; i < 6; i++)
     {
-        shot = captureScreen();
         for (let j = 0; j < 4; j++)
         {
-            if (IsEmpty([922 + j * 62, 148 + i * 62, 42, 40], shot))
-            {
-                console.log(" found blank! 已经遍历完所有装备,结束");
-                break out;
-            }
-
             if (IsEquiped([922 + j * 62, 148 + i * 62, 42, 40]))
             {
-                console.log("equiped jump...");
+                console.log("已穿戴，跳过...");
                 continue;
             }
             if (!HasMenu())
             {
-                console.log("not find menu break out");
+                console.log("不在背包页面跳过");
                 break out;
             }
 
             RandomPress([955 + j * 62, 179 + i * 62, 24, 26]);
             Sleep();
-            if (FindImg(magicWandImgList.white, [618, 152, 56, 36]) || FindImg(magicWandImgList.green, [618, 152, 56, 36]) || FindImg(magicWandImgList.blue, [618, 152, 56, 36]))
+            if (FindImgInList(magicWandImgList, [618, 152, 56, 36]))
             {
-                console.log("发现发张");
-                if (FindImg(magicWandImgList.white, [307, 147, 65, 41]) || FindImg(magicWandImgList.green, [307, 147, 65, 41]) || FindImg(magicWandImgList.blue, [307, 147, 65, 41]))
+                console.log("发现武器法杖。");
+                if (FindImgInList(magicWandImgList, [307, 147, 65, 41])) //当前身上是不是法杖
                 {
                     if (IsBetterQuality())
                     {
@@ -517,7 +532,6 @@ const WearEquipment = () =>
                             RandomPress([955 + j * 62, 179 + i * 62, 24, 26]);
                             RandomPress([955 + j * 62, 179 + i * 62, 24, 26]);
                             Sleep();
-                            shot = captureScreen();
                         }
                         hasWornEquipment = true;
                         return hasWornEquipment;
@@ -537,7 +551,6 @@ const WearEquipment = () =>
                         RandomPress([955 + j * 62, 179 + i * 62, 24, 26]);
                         RandomPress([955 + j * 62, 179 + i * 62, 24, 26]);
                         Sleep();
-                        shot = captureScreen();
                     }
                     hasWornEquipment = true;
                     return hasWornEquipment;
@@ -549,7 +562,7 @@ const WearEquipment = () =>
 
             if (IsBetterQuality())
             {
-                console.log("the equipment is better quality");
+                console.log("当前装备品质更高");
                 RandomPress([955 + j * 62, 179 + i * 62, 24, 26]);
                 Sleep(3.5);
                 if (!HasBackpackClose() && HasBackpackMenuClose())
@@ -566,9 +579,14 @@ const WearEquipment = () =>
                 return hasWornEquipment;
                 // SortEquipment();
             }
+            if (IsEmpty([935 + j * 62, 155 + i * 62, 70, 70]))
+            {
+                console.log("已经遍历完所有装备,结束");
+                break out;
+            }
         }
     }
-    console.log("finish wearing equipment");
+    console.log("穿戴完成");
 
     for (let key in magicWandImgList)
     {
@@ -579,15 +597,15 @@ const WearEquipment = () =>
 };
 const WearEquipments = () =>
 {
-    console.log("start to wear equipmentssss");
+    console.log("//开始连续穿戴装备//");
     for (let i = 0; i < 6; i++)
     {
         let hasWornNewEquipment = WearEquipment();
         if (!hasWornNewEquipment)
             break;
     }
+    console.log("//连续穿戴装备结束//");
 };
-
 
 // --------------------------- skill book ---------------------------------
 
@@ -595,15 +613,21 @@ const WearEquipments = () =>
 
 const AutoReleaseSkill = () =>
 {
-    console.log("start to release skill");
-    const hasMenu = HasMenu();
-    if (!hasMenu)
+    console.log("开始自动释放技能");
+    const skillBookPageImgList = LoadImgList("backpack/skillBookPage");
+    for (let i = 0; i < 30; i++)
     {
-        console.log("not find menu. return false");
-        return false;
+        if (FindImgInList(skillBookPageImgList, [1010, 99, 93, 47]))
+        {
+            console.log("已打开技能书页面");
+            break;
+        }
+        if (HasMenu())
+        {
+            RandomPress([1096, 23, 18, 26]);
+        }
+        Sleep();
     }
-    RandomPress([1095, 26, 21, 21]); // icon
-    Sleep();
 
     RandomPress([944, 309, 37, 34]);
     RandomPress([407, 650, 36, 32]);
@@ -625,75 +649,115 @@ const AutoReleaseSkill = () =>
         RandomPress([1217, 112, 20, 21]);
     }
 };
-
-const StrengthenEquipment = () =>
+const CheckSkillAutoRelease = () =>
 {
-    console.log("start to strengthen equipment");
-    const hasOpenBackpackMenu = OpenBackpackMenu("strengthen");
-    if (!hasOpenBackpackMenu)
+    console.log("检查技能是否装备与自动是否");
+    const checkPos = [
+        [390, 620, 90, 90],
+        [450, 620, 90, 90],
+        [510, 620, 90, 90]
+    ];
+    const quickItem_skillImgList = [
+        LoadImgList("icon/quickItem_skill/firstSkill"),
+        LoadImgList("icon/quickItem_skill/secondSkill"),
+        LoadImgList("icon/quickItem_skill/thirdSkill")
+    ];
+    const isReleaseSkill = [];
+
+    let shot = captureScreen();
+    for (let i = 0; i < checkPos.length; i++)
     {
-        return false;
+        let isAuto = FindImgInList(quickItem_skillImgList[i], checkPos[i], shot);
+        if (isAuto)
+        {
+            console.log("第" + (i + 1) + "个技能已开启自动释放");
+            isReleaseSkill.push(true);
+        } else
+        {
+            console.log("第" + (i + 1) + "个技能未开启自动释放");
+        }
     }
 
+    quickItem_skillImgList.forEach(imgList => RecycleImgList(imgList));
+    if (isReleaseSkill.length == 3)
+    {
+        console.log("技能已全部开启自动释放");
+    }
+    else
+    {
+        console.log("技能未全部开启自动释放");
+        console.log("开始使用技能书与装备技能");
+        OpenSkillBook();
+        AutoReleaseSkill();
+    }
+    console.log("检查完毕");
+};
+const StrengthenEquipment = () =>
+{
+    console.log("开始强化装备");
+    let hasOpenBackpackMenu = OpenBackpackMenu("strengthen");
+    if (!hasOpenBackpackMenu)
+    {
+        ClearPage();
+        hasOpenBackpackMenu = OpenBackpackMenu("strengthen");
+        if (!hasOpenBackpackMenu)
+        {
+            console.log("打开强化页面失败，退出");
+            return false;
+        }
+    }
     const Strengthen100RateColorList = [
         ["#ffffff", [[6, 0, "#ffffff"], [20, 1, "#ffffff"], [33, -2, "#ffffff"], [49, 5, "#ffffff"]]],
         ["#ffffff", [[5, 2, "#ffffff"], [12, 2, "#ffffff"], [15, 2, "#ffffff"], [22, 2, "#ffffff"]]]
     ];
 
-    const CanStillStrengthen = (region) => FindMultiColors(Strengthen100RateColorList, region);
+    const CanStillStrengthen = () => FindMultiColors(Strengthen100RateColorList, [446, 198, 92, 95]);
 
-    RandomPress([384, 41, 90, 27]);
+    RandomPress([384, 41, 90, 27]); //强化页面
     CloseDetail();
     SingleStrengthen();
     // first to strengthen weapon
-    RandomPress([1102, 159, 25, 33]);
-    const hasEquipedWeapon = IsEquiped([842, 76, 233, 37], captureScreen());
-    if (!hasEquipedWeapon)
-    {
-        console.log("没有装备武器，无法强化");
-    }
-    else
-    {
-        RandomPress([hasEquipedWeapon.x, hasEquipedWeapon.y, 25, 33]);
-        for (let i = 0; i < 7; i++)
-        {
-            let canStillStrengthenWeapon = CanStillStrengthen();
-            if (canStillStrengthenWeapon)
-            {
-                if (FindBlueBtn([387, 566, 213, 70]))
-                {
-                    RandomPress([422, 581, 154, 36]);
-                    Sleep(4);
-                }
-            }
-        }
-    }
-    //-----------------------------  strengthen armor and ornement---------------------------------
-    const LoopStrengthen = (region) =>
-    {
-        const pageShot = captureScreen();
-        let isEquiped = false;
 
+    //-----------------------------  strengthen armor and ornement---------------------------------
+    const LoopStrengthen = (type) =>
+    {
+        let isEquiped = false;
+        let hadStrengthened = false;
+        if (type == "weapon")
+        {
+            RandomPress([1090, 152, 39, 43]);
+        }
+        else if (type == "armor")
+        {
+            RandomPress([1088, 214, 40, 48]); //防具页面
+        }
+        else if (type == "ornement")
+        {
+            RandomPress([1090, 279, 40, 38]); //ornement页面
+        }
         out: for (let i = 0; i < 2; i++)
         {
             for (let j = 0; j < 4; j++)
             {
-                RandomPress([720, 96, 102, 84]);
-                RandomPress([720, 96, 102, 84]);
-                RandomPress([720, 96, 102, 84]);
-                isEquiped = IsEquiped([836 + j * 58, 69 + i * 58, 38, 42], pageShot);
+                RandomPress([863 + j * 58, 94 + i * 58, 27, 30]);
+                isEquiped = IsEquiped([284, 207, 33, 34]);
                 if (isEquiped)
                 {
-                    RandomPress([863 + j * 58, 101 + i * 58, 24, 22]);
                     for (let k = 0; k < 5; k++)
                     {
-                        let canStillStrengthenArmor = CanStillStrengthen(region);
+                        let canStillStrengthenArmor = CanStillStrengthen();
                         if (canStillStrengthenArmor)
                         {
                             if (FindBlueBtn([387, 566, 213, 70]))
                             {
                                 RandomPress([422, 581, 154, 36]);
                                 Sleep(4);
+                                hadStrengthened = true;
+                            }
+                            else
+                            {
+                                console.log("无法继续强化，退出");
+                                break;
                             }
                         }
                     }
@@ -701,21 +765,25 @@ const StrengthenEquipment = () =>
                 }
                 else
                 {
+                    console.log("遍历到没有穿戴的装备，退出");
+                    break out;
+                }
+                if (IsEmpty([845 + j * 58, 80 + i * 58, 60, 60]))
+                {
+                    console.log("点击到空白，退出强化");
                     break out;
                 }
             }
         };
+        return hadStrengthened;
     };
 
-    RandomPress([1094, 220, 38, 34]);
-    LoopStrengthen([459, 242, 68, 25]);
-    //ornament
-    RandomPress([1093, 276, 38, 41]);
-    LoopStrengthen([468, 217, 53, 25]);
-    CloseBackpack();
-
-    CloseMenu();
-    console.log("stengthen equipment finish");
+    const hadStrengthenedWeapon = LoopStrengthen("weapon");
+    const hadStrengthenArmor = LoopStrengthen("armor");
+    const hadStrengthenOrnament = LoopStrengthen("ornement");
+    console.log("强化装备结束，是否强化武器：" + hadStrengthenedWeapon);
+    console.log("是否强化武器：" + hadStrengthenArmor);
+    console.log("是否强化武器：" + hadStrengthenOrnament);
 };
 const DecomposeEquipment = () =>
 {
@@ -726,47 +794,63 @@ const DecomposeEquipment = () =>
     }
     if (!WaitUntilEnterBackpackMenu())
     {
-        console.log("cannot find enter backpack menu button");
+        console.log("进入分解页面失败");
         return false;
     }
-    const isAutoSelectCheckedColorList = [
-        ["#1b1b1b", [[16, 0, "#1a1a1a"], [33, 9, "#1a1a1a"], [28, 30, "#181919"], [-1, 20, "#1a1a1a"]]]
+    const isDetailOnColorList = [
+        ["#1d5d55", [[4, 0, "#ffffff"], [8, 0, "#ffffff"], [15, 0, "#1d5d55"], [36, 0, "#1d5d55"]]]
     ];
+    if (!FindMultiColors(isDetailOnColorList, [1015, 570, 64, 31]))
+    {
+        RandomPress([962, 575, 102, 16]);
+        console.log("展开详细资讯");
+    }
+
     if (FindGoldBtn([960, 599, 123, 52]))
     {
-        RandomPress([975, 615, 92, 23]);
-    }
-    // change setting
-    if (FindMultiColors(isAutoSelectCheckedColorList, [490, 109, 168, 66]))
-    {
-        console.log("selected equipment is few check setting");
-        RandomPress([1105, 619, 16, 18]);
-        if (FindCheckMark([397, 394, 54, 50]))
+        RandomPress([975, 615, 92, 23], 2);
+        console.log("自动登录");
+        RandomPress([575, 123, 40, 40]);
+        // change setting
+        if (!HasPopupClose([1088, 69, 41, 36]))
         {
-            RandomPress([421, 409, 83, 17]);
-        }
-        if (FindCheckMark([525, 395, 57, 50]))
-        {
-            RandomPress([541, 410, 95, 15]);
-        }
-        if (FindGoldBtn([552, 542, 181, 55]))
-        {
-            RandomPress([572, 557, 141, 25]);
+            console.log("分解数量较少，检查自动分解选项");
+            RandomPress([1105, 619, 16, 18]);
+            for (let i = 0; i < 10; i++)
+            {
+                if (FindCheckMark([397, 394, 54, 50])) //包含强化装备
+                {
+                    RandomPress([540, 408, 105, 17]);
+                }
+                if (FindGoldBtn([552, 542, 181, 55]))
+                {
+                    RandomPress([572, 557, 141, 25]);
+                    break;
+                }
+                Sleep();
+            }
+
         }
     }
 
-    if (FindBlueBtn([379, 562, 230, 79]))
+    for (let i = 0; i < 10; i++)
     {
-        RandomPress([407, 583, 171, 34]);
-        Sleep(3);
-        PressBlank();
+        if (FindBlueBtn([379, 562, 230, 79]))
+        {
+            RandomPress([407, 583, 171, 34], 3);
+            PressBlank();
+            CloseBackpack();
+            console.log("分解装备结束");
+        }
+        ClearPage();
+        Sleep();
     }
-    CloseBackpack();
+
 };
 
 const UseHolyGrail = () =>
 {
-    console.log("start to use holy grail");
+    console.log("开始使用圣杯");
     let hasUsedHolyGrail = false;
     OpenBackpack("props");
     SortEquipment();
@@ -795,11 +879,17 @@ const UseHolyGrail = () =>
 const AutoPotion = () =>
 {
     console.log("自动使用身上的药水");
-    const autoPotionImgList = LoadImgList("icon/font/autoPotion");
-    const hadOpenBackpack = OpenBackpack("auto");
+    const autoPotionImgList = LoadImgList("backpack/autoPotion");
+    let hadOpenBackpack = OpenBackpack("auto");
     if (!hadOpenBackpack)
     {
         console.log("打开背包失败");
+        ClearPage();
+        hadOpenBackpack = OpenBackpack("auto");
+        if (!hadOpenBackpack)
+        {
+            return false;
+        }
     }
     let shot = captureScreen();
     let isSuccess = false;
@@ -807,16 +897,16 @@ const AutoPotion = () =>
     {
         for (let j = 0; j < 4; j++)
         {
-            if (IsEmpty([917 + j * 62, 144 + i * 62, 96, 93], shot))
-            {
-                console.log("已经遍历完，退出");
-                break out;
-            }
-            RandomPress([948 + j * 62, 175 + i * 62, 33, 31], 1);
+            RandomPress([948 + j * 62, 175 + i * 62, 33, 31]);
             if (FindImgInList(autoPotionImgList, [685, 579, 90, 60]))
             {
                 RandomPress([704, 596, 50, 24], 0.5);
                 isSuccess = true;
+            }
+            if (IsEmpty([917 + j * 62, 144 + i * 62, 96, 93], shot))
+            {
+                console.log("已经遍历完，退出");
+                break out;
             }
         }
     }
@@ -827,11 +917,12 @@ const AutoPotion = () =>
 const UnAutoPotion = () =>
 {
     console.log("取消自动使用药水");
-    const unAutoPotionImgList = LoadImgList("icon/font/unAutoPotion");
+    const unAutoPotionImgList = LoadImgList("backpack/unAutoPotion");
     const hadOpenBackpack = OpenBackpack("auto");
     if (!hadOpenBackpack)
     {
         console.log("打开背包失败");
+        return false;
     }
     let shot = captureScreen();
     let isSuccess = false;
@@ -844,7 +935,7 @@ const UnAutoPotion = () =>
                 console.log("已经遍历完，退出");
                 break out;
             }
-            RandomPress([948 + j * 62, 175 + i * 62, 33, 31], 1);
+            RandomPress([948 + j * 62, 175 + i * 62, 33, 31]);
             if (FindImgInList(unAutoPotionImgList, [685, 579, 90, 60]))
             {
                 RandomPress([704, 596, 50, 24], 0.5);
@@ -856,11 +947,31 @@ const UnAutoPotion = () =>
     CloseBackpack();
     return isSuccess;
 };
-module.exports = { OpenAllBox, AutoReleaseSkill, WearEquipments, OpenSkillBook, StrengthenEquipment, DecomposeEquipment, UseHolyGrail, WearBestSuit, AutoPotion, UnAutoPotion, };
-// UnAutoPotion();
 
+
+module.exports = {
+    OpenAllBox,
+    OpenSkillBook, AutoReleaseSkill, CheckSkillAutoRelease,
+    WearEquipments, StrengthenEquipment, DecomposeEquipment,
+    UseHolyGrail, WearBestSuit,
+    AutoPotion, UnAutoPotion,
+};
+// DecomposeEquipment();
+// WearEquipment();
+// const magicWandImgList = LoadImgList("backpack/magicWand");
+// console.log(FindImgInList(magicWandImgList, [296, 141, 73, 49]));
+// console.log(IsEmpty([990, 345, 70, 64]));
+
+// UnAutoPotion();
+// OpenEquipmentBox("armor");
 // WearBestSuit();
-// OpenSkillBook()
+// OpenSkillBook();
 // OpenAllBox();
-// WearEquipments()
+// WearEquipments();
+// console.log(FindImgInList(magicWandImgList, [616, 147, 58, 40]));
 // AutoReleaseSkill();
+// OpenBackpack();
+// AutoPotion();
+// UnAutoPotion();
+// StrengthenEquipment();
+

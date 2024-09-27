@@ -56,7 +56,6 @@ const ThirdLevel = [
 let instance_mode = "hangUpWild";
 let lastHangUpWildTime = 1726208812345;
 let lastTimeEnterInstance = 1726208812345;
-let changeRecoverPotionPercentTime = 0;
 
 const comprehensiveTime = [[random(0, 11), random(0, 59)], [random(12, 23), random(0, 59)]];
 // const comprehensiveTime = [[11, new Date().getMinutes()], [random(12, 23), random(0, 59)]];
@@ -182,21 +181,17 @@ const HangUpWild = (mapName) =>
             const config = ReadConfig();
             if (config.game.autoPotion == true)
             {
+                ChangeRecoverPotionPercentToNormal();
                 let isSuccess = UnAutoPotion();
                 if (isSuccess)
                 {
-                    console.log("关闭自动使用药水");
+                    console.log("关闭自动使用药水成功");
                     config.game.autoPotion = false;
-                    ReadConfig("game", config.game);
+                    RewriteConfig("game", config.game);
                 }
             }
-            RandomPress([1144, 433, 30, 24]);
+            PressToAuto();
             console.log("去野外挂机成功");
-            if (changeRecoverPotionPercentTime < 3)
-            {
-                ChangeRecoverPotionPercentToNormal();
-                changeRecoverPotionPercentTime++;
-            }
             return true;
         }
         Sleep();

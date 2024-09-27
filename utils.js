@@ -2,12 +2,13 @@
 const { PagebackColorList, MenuColorList, MenuCloseColorList, BlueBtnColorList, BackpackColorList,
     SkipColorList, CheckMarkColorList, TipPointColorList, GoldBtnColorList, RedBtnColorList, PopupCloseColorList, BackpackFullColorList,
     PleaseTapBlankColorList,
+    GreenBtnColorList,
 } = require("./Color/Color.js");
 
 const defaultConfig = {
     ui: {
         createCharacter: "false",
-        serverName: "33",
+        serverName: "00",
         gameMode: "mainStory",
         manualInstance: "false",
 
@@ -69,22 +70,66 @@ const HaltModeColorList = [
 ];
 
 const HomeColorList = [
-    ["#d3c28f", [[1, 2, "#cfbe8d"], [1, 5, "#d9c794"], [4, 2, "#dccb96"], [10, 2, "#d9c794"]]]
+    ["#c9b989", [[1, 0, "#c9ba89"], [1, 3, "#c8b888"], [8, -1, "#d4c28f"], [11, 2, "#dccb96"]]],
+    ["#c4b586", [[0, 8, "#b6a67b"], [3, -5, "#dccb96"], [11, 5, "#dccb96"], [14, 5, "#dac894"]]],
+    ["#d7c692", [[-1, 0, "#d3c18f"], [-1, 2, "#c8b888"], [5, -3, "#d7c692"], [10, 2, "#d9c794"]]]
+];
+const QIconColorList = [
+    ["#dccb96", [[0, 3, "#dccb96"], [13, 1, "#dccb96"], [13, 4, "#dcc996"], [13, 5, "#dccb96"]]]
 ];
 const BackpackPageColorList = [
     ["#fbfbfa", [[0, 4, "#fbfbfa"], [3, 6, "#ffffff"], [0, 7, "#fbfbfa"], [0, 10, "#fcfcfc"]]]
 ];
-
-const ClickRandomly = ([startX, startY, w, h]) =>
+const BackpackDetailOnColorList = [
+    ["#3e6759", [[6, -2, "#ffffff"], [8, 0, "#ffffff"], [14, 0, "#3f675a"], [43, 0, "#40685a"]]]
+];
+const popupCloseRegionList = [
+    // [989, 54, 59, 52],//
+    [795, 94, 40, 45],//购买药水弹窗
+    [746, 98, 44, 46], //活动页面卡片弹窗
+    [1130, 58, 58, 48], //活动页面窗口
+    [1182, 51, 46, 45],//能力提升弹窗
+    [1200, 96, 51, 48],//背包弹窗
+    [1090, 32, 43, 43],//背包菜单
+    [34, 100, 42, 46],//属性点弹窗
+    [600, 103, 48, 50], //制作装备详细卡片
+    [995, 55, 46, 50], //加入公会 弹窗页面
+];
+const tapBlankRegionColorList = [
+    [565, 596, 135, 50], //鉴定装备后，点击空白继续
+    [570, 630, 150, 50], //获得新能力，点击空白弹窗
+    [570, 520, 134, 50], //分解装备，点击空白
+    [570, 640, 136, 50],//制作完成，点击空白
+];
+const ReadImg = (name) => images.read(`./img/${name}.png`);
+const LoadImgList = (url) =>
 {
-    const x = Math.round(Math.random() * w + startX);
-    const y = Math.round(Math.random() * h + startY);
-    click(x, y);
+    const list = [];
+    let img = null;
+    for (let i = 0; i < 20; i++)
+    {
+        img = ReadImg(`${url}/${i}`);
+        if (img == null)
+        {
+            break;
+        }
+        list.push(img);
+    }
+    if (list.length == 0)
+    {
+        alert("加载文件失败", "路径：" + url + "无文件");
+    }
+    return list;
 };
-const CloseMenu = () =>
+
+const tapBlankImgList = LoadImgList("icon/font/pleaseTapBlank");
+const backpackTrashIcon = LoadImgList("backpack/trash");
+const inCityIconImgList = LoadImgList("icon/inCity");
+
+const CloseMenu = (shot) =>
 {
 
-    const hasMenuClose = HasMenuClose();
+    const hasMenuClose = HasMenuClose(shot);
     if (hasMenuClose)
     {
         RandomPress([1213, 25, 23, 24]);
@@ -100,7 +145,20 @@ const CloseBackpack = () =>
     const hasBackpackMenuClose = HasBackpackMenuClose();
     if (hasBackpackMenuClose)
     {
-        RandomPress([1105, 44, 16, 18]);
+        RandomPress([1103, 46, 19, 16]);
+    }
+};
+const ClosePopupWindows = (shot) =>
+{
+    let hasPopup = null;
+    for (let i = 0; i < popupCloseRegionList.length; i++)
+    {
+        hasPopup = HasPopupClose(popupCloseRegionList[i], shot);
+        if (hasPopup)
+        {
+            console.log("发现弹窗：" + i);
+            RandomPress([hasPopup.x, hasPopup.y, 10, 10]);
+        }
     }
 };
 const ClickSkip = () =>
@@ -161,10 +219,16 @@ const ChangeRecoverPotionPercentToNormal = () =>
 
 const ClearPage = () =>
 {
-    for (let i = 0; i < 10; i++)
+    let shot = captureScreen();
+    if (HasMenu(shot) && HasQIcon(shot) && HasHome(shot))
     {
-
+        return true;
     }
+    ClosePopupWindows(shot);
+    CloseMenu(shot);
+    PageBack(shot);
+    TapBlankToContinue(shot);
+    return false;
 };
 
 /**
@@ -198,12 +262,13 @@ const FindBlueBtn = (region, shot) => { shot = shot || captureScreen(); return F
 
 const FindRedBtn = (region, shot) => { shot = shot || captureScreen(); return FindMultiColors(RedBtnColorList, region, shot); };
 const FindTipPoint = (region, shot) => { shot = shot || captureScreen(); return FindMultiColors(TipPointColorList, region, shot); };
-const FindGoldBtn = (region) => FindMultiColors(GoldBtnColorList, region);
+const FindGoldBtn = (region, shot) => { shot = shot || captureScreen(); return FindMultiColors(GoldBtnColorList, region, shot); };
+const FindGreenBtn = (region, shot) => { shot = shot || captureScreen(); return FindMultiColors(GreenBtnColorList, region, shot); };
 const FindCheckMark = (region) => FindMultiColors(CheckMarkColorList, region);
 
 const FindImgInList = (imgList, region, shot) =>
 {
-    shot = shot = shot || captureScreen();
+    shot = shot || captureScreen();
     let hasImg = false;
     for (let i = 0; i < imgList.length; i++)
     {
@@ -332,16 +397,17 @@ const GetCaptureScreenPermission = () =>
         }
     });
 };
-const HasPageback = () => FindMultiColors(PagebackColorList, [1216, 9, 41, 43]);
+const HasPageback = (shot) => { shot = shot || captureScreen(); return FindMultiColors(PagebackColorList, [1216, 9, 41, 43], shot); };
 
-const HasMenu = () => FindMultiColors(MenuColorList, [1198, 13, 55, 47]);
 
 const HasBackpack = () => FindMultiColors(BackpackColorList, [1143, 12, 40, 50]);
 const HasBackpackClose = () => FindMultiColors(PopupCloseColorList, [1210, 101, 33, 35]);
 
-const HasMenuClose = () => FindMultiColors(MenuCloseColorList, [1204, 17, 46, 45]);
+const HasMenuClose = (shot) => { shot = shot || captureScreen(); return FindMultiColors(MenuCloseColorList, [1204, 17, 46, 45], shot); };
 const HasPopupClose = (region, shot) => { shot = shot || captureScreen(); return FindMultiColors(PopupCloseColorList, region, shot); };
-const HasHome = () => FindMultiColors(HomeColorList, [38, 243, 35, 27]);
+const HasMenu = (shot) => { shot = shot || captureScreen(); return FindMultiColors(MenuColorList, [1198, 13, 55, 47], shot); };
+const HasHome = (shot) => { shot = shot || captureScreen(); return FindMultiColors(HomeColorList, [37, 240, 36, 45], shot); };
+const HasQIcon = (shot) => { shot = shot || captureScreen(); return FindMultiColors(QIconColorList, [1200, 125, 54, 46], shot); };
 const HasOpenTheBackPage = (region) => FindMultiColors(BackpackPageColorList, region);
 const HasBackpackMenuClose = () => FindMultiColors(PopupCloseColorList, [1094, 31, 39, 45]);
 const HasSkip = () =>
@@ -389,7 +455,10 @@ const IsMoving = () =>
     {
         moveObj.movingClip = images.clip(captureScreen(), 180, 180, 40, 40);
     }
-    if (moveObj.clipCount >= 20)
+
+    moveObj.clipCount++;
+
+    if (moveObj.clipCount > 5)
     {
         moveObj.clipCount = 0;
         const hasClip = FindImg(moveObj.movingClip, [180, 180, 40, 40]);
@@ -401,64 +470,33 @@ const IsMoving = () =>
         {
             return false;
         }
-
     }
-    else
-    {
-        moveObj.clipCount++;
-        return true;
-    }
+    return true;
 
 };
 const IsBackpackFull = (shot) => FindMultiColors(BackpackFullColorList, [1144, 35, 39, 27], shot);
-const IsInCity = () => FindMultiColors(GroceryColorList, [983, 422, 207, 64]);
+const IsInCity = () => FindImgInList(inCityIconImgList, [979, 416, 71, 72]);
 const IsHaltMode = () => FindMultiColors(HaltModeColorList, [606, 643, 76, 62]);
 
 const LaunchGame = () => app.launch("com.smilegate.lordnine.stove.google");
-const LoadImgList = (url) =>
-{
-    const list = [];
-    let img = null;
-    for (let i = 0; i < 20; i++)
-    {
-        img = ReadImg(`${url}/${i}`);
-        if (img == null)
-        {
-            break;
-        }
-        list.push(img);
-    }
-    if (list.length == 0)
-    {
-        alert("加载文件有误", "无照片文件");
-    }
-    return list;
-};
-const TapBlankToContinue = (region, shot) =>
+
+
+
+const TapBlankToContinue = (shot) =>
 {
     shot = shot || captureScreen();
-    region = region || [573, 627, 130, 43]; //获得能力弹窗，请点击空白
-
-    if (FindMultiColors(PleaseTapBlankColorList, [582, 529, 119, 32], shot))
+    let hadTapBlank;
+    for (let i = 0; i < tapBlankImgList.length; i++)
     {
-        console.log("点击空白...");
-        RandomPress([461, 520, 309, 114]);
-    }
-
-    else if (FindMultiColors(PleaseTapBlankColorList, [588, 650, 109, 39], shot))
-    {
-        console.log("点击空白...");
-        RandomPress([492, 498, 332, 142]);
-    }
-    else if (FindMultiColors(PleaseTapBlankColorList, region, shot))
-    {
-        console.log("点击空白...");
-        RandomPress([461, 520, 309, 114]);
-    }
-    else if (FindMultiColors(PleaseTapBlankColorList, [572, 524, 134, 48], shot))
-    {
-        console.log("分解装备结束，点击空白");
-        PressBlank();
+        for (let j = 0; j < tapBlankRegionColorList.length; j++)
+        {
+            hadTapBlank = FindImg(tapBlankImgList[i], tapBlankRegionColorList[j], shot);
+            if (hadTapBlank)
+            {
+                console.log("发现需要点击空白处。");
+                PressBlank();
+            }
+        }
     }
 };
 
@@ -480,9 +518,10 @@ const OpenMenu = () =>
     }
     return false;
 };
-const PageBack = () => 
+const PageBack = (shot) => 
 {
-    const hasPageBack = HasPageback();
+    shot = shot || captureScreen();
+    const hasPageBack = HasPageback(shot);
     if (hasPageBack)
     {
         RandomPress([1226, 19, 18, 23]);
@@ -497,27 +536,34 @@ const PageBack = () =>
  */
 const OpenBackpack = (type) =>
 {
-    const hasBackpack = HasBackpack();
-    const hasBackpackClose = HasBackpackClose();
-
-    if (hasBackpackClose)
+    for (let i = 0; i < 30; i++)
     {
-        console.log("背包已经打开");
-    }
-    else if (hasBackpack != null && hasBackpackClose == null)
-    {
-        console.log("打开背包");
-        RandomPress([1154, 22, 18, 27]);
-        if (!WaitUntilBackOpen())
+        if (FindImgInList(backpackTrashIcon, [975, 646, 55, 57]))
         {
-            console.log("openbackpack ： 打开背包失败");
-            return false;
+            console.log("背包已打开");
+            break;
         }
+        let hasBackpack = HasBackpack();
+        if (hasBackpack)
+        {
+            RandomPress([1154, 23, 20, 26]);
+        }
+        else
+        {
+            ClearPage();
+        }
+
+        sleep(256);
     }
 
+    if (FindMultiColors(BackpackDetailOnColorList, [1121, 98, 76, 41]))
+    {
+        console.log("背包整理打开了，点击关闭");
+        RandomPress([1138, 113, 46, 14]);
+    }
     if (type == undefined)
     {
-        console.log("open all");
+        console.log("打开所有");
     }
 
     if (type == "equipment")
@@ -618,6 +664,12 @@ const OpenBackpackMenu = (type) =>
 };
 const Sleep = (time) => { time = time || 1.5; sleep(time * 1000); };
 
+/**
+ * 随机点击
+ *
+ * @param {*} [startX, startY, w, h]
+ * @param {*} delay 单位秒
+ */
 const RandomPress = ([startX, startY, w, h], delay) =>
 {
     const time = random(20, 100);
@@ -628,7 +680,6 @@ const RandomPress = ([startX, startY, w, h], delay) =>
     Sleep(delay);
 };
 
-const ReadImg = (name) => images.read(`./img/${name}.png`);
 
 const RecycleImgList = (list) =>
 {
@@ -676,29 +727,37 @@ const WaitUntilFindColor = (colorList, region, time) =>
 };
 const ReturnHome = () =>
 {
-    if (IsInCity())
+    for (let i = 0; i < 100; i++)
     {
-        console.log("ReturnHome success: already in city");
-        return true;
-    }
-    else if (HasHome())
-    {
-        RandomPress([45, 252, 22, 23]);
-        Sleep(10);
-        for (let i = 0; i < 10; i++)
+        if (IsInCity())
         {
-            if (IsInCity())
-            {
-                console.log("ReturnHome success: return home success");
-                return true;
-            }
-            Sleep();
+            console.log("已经在主城，回主城成功。");
+            return true;
         }
-    }
-    else
-    {
-        console.log("ReturnHome failed");
-        alert("回家失败", "返回首页失败");
+        else if (HasHome())
+        {
+            RandomPress([45, 252, 22, 23]);
+            if (FindBlueBtn([657, 443, 197, 66]))
+            {
+                console.log("离开副本，回家");
+                RandomPress([678, 458, 157, 33]);
+            }
+            Sleep(10);
+            for (let i = 0; i < 10; i++)
+            {
+                if (IsInCity())
+                {
+                    console.log("回城成功");
+                    return true;
+                }
+                Sleep();
+            }
+        }
+        else
+        {
+            ClearPage();
+        }
+        sleep(256);
     }
 };
 const SwipeSlowly = (startRegion, endRegion, sec) =>
@@ -729,7 +788,7 @@ const RewriteConfig = (attr, value) =>
     {
         config[attr] = value;
         files.write(configFile, JSON.stringify(config));
-        console.log("rewrite config: " + JSON.stringify(config));
+        console.log("更新配置: " + JSON.stringify(config));
     }
     else if (config[attr] == null)
     {
@@ -843,7 +902,7 @@ const GoToTheNPC = (type) =>
     console.log("enter npc success!" + type);
     return true;
 };
-const PressBlank = () => RandomPress([402, 240, 508, 244]);
+const PressBlank = () => RandomPress([434, 55, 467, 155]);
 
 const EnterMenuItemPage = (item) =>
 {
@@ -869,9 +928,9 @@ DeathImgList = LoadImgList("special/death");
 
 module.exports = {
     specialConfig, DeathImgList,
-    CloseBackpack, CloseMenu, ClickSkip, ClickRandomly, ChangeHaltModeTime, ChangeRecoverPotionPercentToMax, ChangeRecoverPotionPercentToNormal,
+    CloseBackpack, CloseMenu, ClickSkip, ChangeHaltModeTime, ChangeRecoverPotionPercentToMax, ChangeRecoverPotionPercentToNormal, ClearPage,
     EnterMenuItemPage, ExitHaltMode,
-    FindBlueBtn, FindTipPoint, FindImg, FindMultiColors, FindCheckMark, FindRedBtn, FindGoldBtn, FindImgInList, FindNumber,
+    FindBlueBtn, FindTipPoint, FindImg, FindMultiColors, FindCheckMark, FindRedBtn, FindGoldBtn, FindGreenBtn, FindImgInList, FindNumber,
     GetFormatedTimeString, GoToTheNPC, GetVerificationCode, GetCaptureScreenPermission,
     HasPageback, HasMenu, HollowPress, HasSkip, HasBackpackClose, HasBackpackMenuClose, HasPopupClose,
     IsMoving, IsBackpackFull, IsInCity, IsHaltMode,
@@ -886,5 +945,7 @@ module.exports = {
 };
 
 
-
+// console.log(FindMultiColors(PleaseTapBlankColorList, [568, 520, 154, 55]));
+// ClearPage()
+// ReturnHome()
 

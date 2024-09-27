@@ -1,27 +1,16 @@
 
 
 const {
-    ClickSkip, CloseMenu, ChangeHaltModeTime, CloseBackpack,
+    ClickSkip, ChangeHaltModeTime, ClearPage,
     ExitHaltMode,
-    FindImg, FindMultiColors, FindRedBtn, FindImgInList, FindBlueBtn,
-    ReadImg, RandomPress, Sleep, OpenMenu,
-    HollowPress,
-    HasPageback, PageBack, HasMenu,
+    FindImg, FindMultiColors, FindRedBtn, FindImgInList, FindBlueBtn, FindGoldBtn,
     GetVerificationCode,
-    IsInCity, SwipeSlowly,
-    WaitUntilMenu, WaitUntilPageBack,
-    ReadConfig,
-    HasSkip,
-    IsHaltMode,
-    LoadImgList, IsBackpackFull, LaunchGame,
-    RewriteConfig,
-    PressBlank,
-    HasPopupClose,
-    RestartGame,
-    TapBlankToContinue,
-    WaitUntil,
-
-
+    HasPageback, HasMenu, HasPopupClose,
+    IsInCity, IsHaltMode, LoadImgList, IsBackpackFull, LaunchGame,
+    PressBlank, PageBack, RewriteConfig,
+    ReadConfig, RestartGame, ReadImg, RandomPress, Sleep,
+    WaitUntil, WaitUntilMenu, WaitUntilPageBack,
+    ReturnHome,
 
 } = require("./utils.js");
 
@@ -31,9 +20,10 @@ const { LoginProps } = require("./CommonFlow.js");
 
 const { HasTip } = require("./MainStory.js");
 
-const { NoPotionColorList, LordNineWordColorList, WhiteAvatarColorList, StartBtnSettingColorList } = require("./Color/ExceptionColorList.js");
+const { NoPotionColorList, LordNineWordColorList, WhiteAvatarColorList, StartBtnSettingColorList, CrucifixColorList } = require("./Color/ExceptionColorList.js");
 
-let lastTimeOfBuyingPotion = 99;
+let lastTimeOfBuyingPotion = 1726208812345;
+let lastTimeClearBackpack = 1726208812345;
 let lastDebugModeTime = 0;
 let lastGetVerificationCodeTime = 0;
 let totalGetVerificationCodeTimes = 0;
@@ -50,37 +40,22 @@ const ExceptionImgList = {
     preventAutoLogin: LoadImgList("special/preventAutoLogin"),
 };
 
-const popupCloseRegionList = [
-    [989, 54, 59, 52],//
-    [795, 94, 40, 45],//购买药水弹窗
-    [746, 98, 44, 46], //活动页面卡片弹窗
-    [1130, 58, 58, 48], //活动页面窗口
-];
+
 // flow -----
 const NoPotionFlow = (shot) =>
 {
     const hasNoPotion = FindMultiColors(NoPotionColorList, [325, 636, 55, 60], shot);
-    const hasNoPotion_haltMode = FindMultiColors(NoPotionColorList, [1143, 639, 61, 68], shot);
-    if (hasNoPotion || hasNoPotion_haltMode)
+    if (hasNoPotion)
     {
-        console.log("character is use out of  potion. ");
-        const buyPotionInterval = Math.abs(lastTimeOfBuyingPotion - new Date().getHours());
-        if (buyPotionInterval < 1) 
+        console.log("角色当前没有药水了 ");
+        const buyPotionInterval = (new Date().getTime() - lastTimeOfBuyingPotion) / 60000;
+        if (buyPotionInterval < 10) 
         {
-            console.log("连续购买药水时间间隔较短，不重复购买");
-            console.log("last time of buying potion: " + lastTimeOfBuyingPotion);
-            console.log("current time: " + new Date().getHours());
-            console.log("interval: " + buyPotionInterval);
+            console.log("连续购买药水时间间隔小于10分钟，不重复购买");
             return true;
         }
-
         console.log("回家买药水...");
-        lastTimeOfBuyingPotion = new Date().getHours();
-
-        if (IsHaltMode())
-        {
-            ExitHaltMode();
-        }
+        lastTimeOfBuyingPotion = new Date().getTime();
         const hasMenu = HasMenu();
         if (!hasMenu)
         {
@@ -90,10 +65,7 @@ const NoPotionFlow = (shot) =>
         if (!IsInCity())
         {
             console.log("不在主城，先传送回家");
-            RandomPress([46, 253, 19, 19]);
-            Sleep(10);
-            WaitUntilMenu();
-            Sleep(2);
+            ReturnHome();
         }
 
         RandomPress([995, 433, 42, 41]); //grocery store
@@ -144,21 +116,7 @@ const NoPotionFlow = (shot) =>
         };
         if (WaitUntilPageBack())
         {
-
             BuySomeItem();
-            if (HasPopupClose([794, 91, 45, 50]))
-            {
-                console.log("购买药水失败，当前背包已满，需要先清理背包");
-                RandomPress([482, 576, 131, 29]); //点击取消购买
-                console.log("点击取消购买");
-                PageBack();
-                BackpackFullFlow();
-                RandomPress([995, 433, 42, 41]); //grocery store
-                if (WaitUntilPageBack())
-                {
-                    BuySomeItem();
-                }
-            }
             Sleep();
             PageBack();
         }
@@ -171,6 +129,11 @@ const BackpackFullFlow = (shot) =>
     if (isBackpackFull)
     {
         console.log("背包已满，开始清理背包");
+        if ((new Date().getTime() - lastTimeClearBackpack) / 6000 < 10)
+        {
+            console.log("退出：连续清理背包时间间隔小于10分钟");
+        }
+        lastTimeClearBackpack = new Date().getTime();
         WearEquipments();
         StrengthenEquipment();
         LoginProps();
@@ -181,6 +144,13 @@ const BackpackFullFlow = (shot) =>
 const IsTimeout = () =>
 {
     app.launch("fun.kitsunebi.kitsunebi4android");
+    let refreshBtn = id("measure_latency_btn").findOne(5000);
+    if (refreshBtn)
+    {
+        refreshBtn.click();
+        console.log("点击刷新");
+        Sleep(5);
+    }
     let hasTimeOut = text("timeout").findOne(3000);
     if (hasTimeOut)
     {
@@ -190,15 +160,7 @@ const IsTimeout = () =>
 };
 const DisconnectionFlow = (shot) =>
 {
-    let hasDisconnection = false;
-    for (let i = 0; i < ExceptionImgList.disconnection.length; i++)
-    {
-        hasDisconnection = FindImg(ExceptionImgList.disconnection[i], [451, 264, 381, 225], shot);
-        if (hasDisconnection)
-        {
-            break;
-        }
-    }
+    let hasDisconnection = FindImgInList(ExceptionImgList.disconnection, [595, 229, 84, 49], shot);
     if (hasDisconnection)
     {
         console.log("game disconnection");
@@ -207,12 +169,12 @@ const DisconnectionFlow = (shot) =>
         {
             RandomPress([hasBlueBtn.x, hasBlueBtn.y, 15, 5]);
             const delayTime = random(300, 600);
-            console.log("延迟启动时间: " + delayTime + "s");
+            console.log("游戏延迟启动时间: " + delayTime + "s");
             let isTimeout = IsTimeout();
             if (isTimeout)
             {
                 console.log("vpn is time out");
-                alert("vpn time out", "需要更换ip");
+                alert("time out", "需要更换ip");
             }
 
             Sleep(delayTime);
@@ -291,7 +253,106 @@ const MainUIFlow = (shot) =>
     }
 };
 
+const HasCrucifixIcon = () => FindMultiColors(CrucifixColorList, [327, 60, 40, 43]);
+const PickUpAbilityPoint = () =>
+{
+    console.log("开始恢复属性点或装备");
+    let hadPickupEquipment = false;
 
+    const LostEquipmentColorList = [
+        ["#b6b6b6", [[1, 0, "#b7b7b6"], [9, 0, "#b6b6b6"], [11, 0, "#b7b7b6"], [5, 4, "#b7b7b6"]]]
+    ];
+    RandomPress([337, 73, 21, 23]);
+    if (WaitUntil(() => HasPopupClose([34, 94, 46, 53])))
+    {
+        if (FindBlueBtn([142, 602, 214, 70]))
+        {
+            RandomPress([167, 619, 162, 37]);
+        }
+        else
+        {
+            console.log("免费次数使用完，使用金币恢复");
+            RandomPress([365, 263, 16, 17]);
+            RandomPress([123, 547, 98, 43]);
+            if (FindBlueBtn([138, 604, 216, 66]))
+            {
+                RandomPress([170, 622, 157, 30]);
+            }
+        }
+        if (FindMultiColors(LostEquipmentColorList, [272, 103, 58, 41]))
+        {
+            console.log("发现死亡次数过多，丢失装备");
+            RandomPress([286, 112, 94, 25]); //装备页面
+            RandomPress([186, 174, 203, 39]); //固定点击第一个装备
+            //是否有免费次数
+            if (FindBlueBtn([142, 602, 214, 70]))
+            {
+                RandomPress([167, 619, 162, 37]);
+            }
+            else
+            {
+                RandomPress([122, 548, 98, 40]);
+                if (FindBlueBtn([147, 607, 201, 61]))
+                {
+                    console.log("使用金币恢复装备");
+                    RandomPress([174, 621, 150, 33]);
+                }
+                else
+                {
+                    console.log("没有金币，无法恢复装备");
+                }
+            }
+            hadPickupEquipment = true;
+        }
+    }
+    if (HasPopupClose([34, 94, 46, 53]))
+    {
+        console.log("拾取能力或装备结束");
+        RandomPress([47, 109, 20, 21]);
+    }
+    if (hadPickupEquipment)
+    {
+        WearEquipments();
+    }
+};
+const AddAttributePoint = () =>
+{
+    const PlusAbilityIcon = [
+        ["#8f7f4f", [[14, 0, "#ab995f"], [6, -7, "#b19d62"], [7, 0, "#af9c62"], [7, 6, "#b7a366"]]],
+        ["#86774a", [[3, 0, "#90804f"], [15, 0, "#b4a165"], [9, -6, "#e8cf84"], [8, 6, "#928251"]]],
+        ["#86774a", [[7, 0, "#978754"], [14, 0, "#b09d62"], [9, -6, "#e8cf84"], [9, 5, "#b4a165"]]],
+        ["#8e7e4e", [[6, 0, "#837448"], [13, 0, "#b7a366"], [7, -7, "#f0d789"], [7, 6, "#b6a266"]]]
+    ];
+    if (!FindMultiColors(PlusAbilityIcon, [615, 461, 57, 58]))
+    {
+        return false;
+    }
+    else
+    {
+        console.log("开始点击属性点");
+        RandomPress([632, 479, 19, 20]);
+        console.log("等到属性点窗口出现...");
+        WaitUntil(() => HasPopupClose([32, 96, 47, 54]));
+        for (let i = 0; i < 10; i++)
+        {
+            RandomPress([522, 171, 98, 22]); // dex 
+            RandomPress([695, 349, 25, 21]); //max dex
+            if (FindGoldBtn([580, 657, 167, 29]))
+            {
+                RandomPress([587, 659, 161, 28]);
+            }
+            if (HasPopupClose([37, 107, 33, 33]))
+            {
+                RandomPress([45, 112, 21, 21]);
+                break;
+            }
+            Sleep(1);
+        }
+
+    }
+
+
+};
 const ResetConfig = () =>
 {
     if (gameConfig.today != new Date().getDate())
@@ -300,6 +361,7 @@ const ResetConfig = () =>
         gameConfig.today = new Date().getDate();
         gameConfig.deathTime = 0;
         gameConfig.reconnectionTime = 0;
+        gameConfig.dailyInstance = false;
         RewriteConfig("game", gameConfig);
     }
 };
@@ -323,37 +385,24 @@ const ReLoginFlow = () =>
 
 };
 
-const ClosePopupWindows = (shot) =>
-{
-    let hasPopup = null;
-    for (let i = 0; i < popupCloseRegionList.length; i++)
-    {
-        hasPopup = HasPopupClose(popupCloseRegionList[i], shot);
-        if (hasPopup)
-        {
-            console.log("发现弹窗：" + i);
-            RandomPress([hasPopup.x, hasPopup.y, 10, 10]);
-        }
-    }
-};
 
-const ExceptionFlow = (gameMode) =>
+
+const ExceptionFlow = () =>
 {
     const shot = captureScreen();
-
-    let curMinute = new Date().getMinutes();
-    if (curMinute != lastDebugModeTime)
-    {
-        console.log("debug mode: " + gameMode);
-        lastDebugModeTime = curMinute;
-    }
+    // let curMinute = new Date().getMinutes();
+    // if (curMinute != lastDebugModeTime)
+    // {
+    //     console.log("debug mode: " + gameMode);
+    //     lastDebugModeTime = curMinute;
+    // }
 
     BackpackFullFlow(shot);
     NoPotionFlow(shot);
+    DisconnectionFlow(shot);
 
     ResetConfig();
     MakeSureInGame(shot);
-
 };
 
 // *******************************************************************  确保在游戏中 *********************************************************************
@@ -468,28 +517,20 @@ const MakeSureInGame = (shot) =>
 {
     if (!HasMenu())
     {
-        if (IsHaltMode())
-        {
-            ExitHaltMode();
-            ChangeHaltModeTime();
-        }
-        TapBlankToContinue();
-
-        PressCommonBtn();
-
-        CloseBackpack();
-        PageBack();
-        ClickSkip();
-        CloseMenu();
-        ClosePopupWindows(shot);
-        ClickRate();
-
-        ReLoginFlow();
         MainUIFlow(shot);
+        ReLoginFlow();
+        PressCommonBtn();
+        ClickSkip();
         InputVerificationFlow(shot);
-        // LongTimeSamePage(shot);
-        DisconnectionFlow(shot);
     }
+    else
+    {
+        AddAttributePoint();
+        HasCrucifixIcon() && PickUpAbilityPoint();
+
+    }
+    ClickRate();
+    ClearPage();
 };
 
 
@@ -497,7 +538,7 @@ module.exports = {
     ExceptionFlow
 };
 
-
+// console.log(FindImgInList(ExceptionImgList.disconnection, [595, 229, 84, 49]));
 
 // console.log(FindBlueBtn([645, 562, 179, 61]));
 

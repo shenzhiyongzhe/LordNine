@@ -1,19 +1,18 @@
 
-const { WearEquipments, StrengthenEquipment, OpenAllBox, UseHolyGrail, DecomposeEquipment, WearBestSuit } = require("./Backpack.js");
 const {
     ReadImg, FindImg, RandomPress, Sleep, FindMultiColors, OpenMenu, CloseMenu, EnterMenuItemPage, CloseBackpack,
-    PageBack,
+    HasMenu, HasPageback, IsBackpackFull,
     WaitUntilPageBack,
     SwipeSlowly,
-    FindBlueBtn, FindTipPoint, FindCheckMark, FindRedBtn, FindGoldBtn,
+    FindBlueBtn, FindTipPoint, FindCheckMark, FindRedBtn, FindGoldBtn, FindGreenBtn, FindNumber,
     HasPopupClose,
     PressBlank, WaitUntil,
-    HasMenu,
-    HasPageback, IsBackpackFull,
-    TapBlankToContinue,
-    PullDownSkill, FindNumber, ReadConfig, RewriteConfig,
+    TapBlankToContinue, PullDownSkill, ReadConfig, RewriteConfig, PageBack,
+    ClearPage,
 
 } = require("./utils.js");
+
+const { WearEquipments, StrengthenEquipment, OpenAllBox, UseHolyGrail, DecomposeEquipment, WearBestSuit, CheckSkillAutoRelease } = require("./Backpack.js");
 
 let lastComprehensiveImproveTime = 1726208812345;
 let character_lv = 0;
@@ -56,8 +55,8 @@ const GetEmail = () =>
                 {
                     RandomPress([682, 461, 150, 29]);
                 }
-                PressBlank();
                 Sleep();
+                PressBlank();
                 shot = captureScreen();
             }
         }
@@ -66,8 +65,19 @@ const GetEmail = () =>
             break;
         }
     }
-    PageBack();
+    for (let i = 0; i < 10; i++)
+    {
+        PressBlank();
+        PageBack();
+        if (HasMenu())
+        {
+            break;
+        }
+        Sleep();
+    }
+
     console.log("邮件领取完毕");
+    return true;
 };
 
 const GetAchievement = () =>
@@ -100,8 +110,7 @@ const GetAchievement = () =>
     {
         if (FindBlueBtn([1103, 651, 164, 56]))
         {
-            RandomPress([1118, 661, 136, 34]);
-            Sleep();
+            RandomPress([1118, 661, 136, 34], 4);
             PressBlank();
             Sleep();
         }
@@ -112,14 +121,14 @@ const GetAchievement = () =>
         RandomPress([201, 74, 69, 29]);
         if (FindBlueBtn([1103, 651, 164, 56]))
         {
-            RandomPress([1118, 661, 136, 34]);
-            Sleep();
+            RandomPress([1118, 661, 136, 34], 4);
             PressBlank();
             Sleep();
         }
     }
     console.log("领取成就奖励完毕");
     PageBack();
+    return true;
 };
 
 const GetMonsterKnowledgeAward = () =>
@@ -140,54 +149,217 @@ const GetMonsterKnowledgeAward = () =>
     RandomPress([1091, 292, 25, 28]);
     WaitUntilPageBack();
     Sleep(3);
-    if (FindBlueBtn([131, 651, 115, 63]))
+    if (FindBlueBtn([7, 657, 160, 55]))
     {
-        RandomPress([161, 670, 61, 27]);
-        Sleep();
+        RandomPress([47, 669, 103, 29], 4);
         PressBlank();
-        Sleep();
+        Sleep(3);
     }
     PageBack();
     console.log("领取怪物图鉴奖励完毕");
 
 };
+const GetPassAward = () =>
+{
+    console.log("开始领取通行证奖励");
+    if (!FindTipPoint([882, 2, 19, 20]))
+    {
+        console.log("退出：没有可以领取的通行证奖励");
+        return false;
+    }
+    RandomPress([855, 20, 29, 25]);
+    const hasEnterPassPage = WaitUntilPageBack();
+    if (!hasEnterPassPage)
+    {
+        console.log("enter pass page failed");
+        PageBack();
+        return false;
+    }
+    if (FindBlueBtn([749, 244, 202, 72]))
+    {
+        RandomPress([770, 265, 158, 31], 5);
+        PressBlank();
+        PageBack();
+        console.log("领取通行证奖励结束");
+        return true;
+    }
+    PageBack();
+    return false;
+};
+const GetActivitiesAward = () =>
+{
+    console.log("开始领取活动奖励");
+    const CanPickUpAwardHighGoldenColorList = [
+        ["#cdb646", [[2, 0, "#d0ba47"], [3, 0, "#d1ba47"], [5, 0, "#cfb946"], [8, 0, "#c6af43"]]],
+        ["#c4af47", [[1, 0, "#cbb54a"], [3, 0, "#d6be4a"], [8, 0, "#e0c74f"], [11, 0, "#dcc34e"]]],
+        ["#b5a03f", [[3, 0, "#bfab43"], [5, 0, "#c3af45"], [7, 0, "#c3ae44"], [12, 0, "#b4a03e"]]]
+    ];
+    if (!FindTipPoint([942, 3, 17, 19]))
+    {
+        console.log("没有可以领取的活动奖励");
+        return false;
+    }
+    RandomPress([917, 18, 27, 28]);
+    if (!WaitUntil(() => HasPopupClose([1145, 63, 36, 36])))
+    {
+        console.log("enter failed");
+        return false;
+    }
+    Sleep(5);
+    const shot = captureScreen();
+    let hasTip = false;
+    let hasGoldenLight = false;
+    for (let i = 0; i < 9; i++)
+    {
+        hasTip = FindTipPoint([284, 157 + 47 * i, 27, 20], shot);
+        if (hasTip)
+        {
+            RandomPress([hasTip.x - 180, hasTip.y, 180, 30]);
+            Sleep();
+            for (let j = 0; j < 3; j++)
+            {
+                hasTip = FindTipPoint([345, 265, 820, 378]);
+                if (hasTip)
+                {
+                    console.log("hasTip: " + hasTip);
+                    hasGoldenLight = FindMultiColors(CanPickUpAwardHighGoldenColorList, [hasTip.x - 70, hasTip.y + 50, 70, 30]);
+                    console.log("hasGoldenLight: " + hasGoldenLight);
+                    if (hasGoldenLight)
+                    {
+                        console.log("pick award...");
+                        RandomPress([hasGoldenLight.x - 10, hasGoldenLight.y - 30, 20, 30], 4);
+                        PressBlank();
+                    }
+                    else
+                    {
+                        RandomPress([hasTip.x - 40, hasTip.y + 10, 20, 30], 4);
+                        PressBlank();
+                    }
+                    if (HasPopupClose([745, 97, 46, 47]))
+                    {
+                        RandomPress([760, 108, 19, 20]);
+                    }
+                }
+            }
+        }
+    }
 
+    for (let i = 0; i < 30; i++)
+    {
+        if (HasPopupClose([745, 97, 46, 47]))
+        {
+            RandomPress([760, 108, 19, 20]);
+        }
+        else if (HasPopupClose([1143, 55, 42, 51]))
+        {
+            RandomPress([1157, 74, 14, 18]);
+        }
+        else if (HasMenu())
+        {
+            break;
+        }
+        PageBack();
+        Sleep();
+    }
+    console.log("结束：已领取活动奖励");
+    return true;
+};
+const GetTravelLogAward = () =>
+{
+    console.log("开始领取日志奖励");
+    const hasOpenMenu = OpenMenu();
+    if (!hasOpenMenu)
+    {
+        console.log("打开菜单失败!");
+        return false;
+    }
+    const hasLogTip = FindTipPoint([1232, 187, 21, 20]);
+    if (!hasLogTip)
+    {
+        console.log("没有可以领取的奖励，退出");
+        return false;
+    }
+
+    RandomPress([1207, 201, 31, 36]);
+    const hasEnterLogPage = WaitUntilPageBack();
+    if (!hasEnterLogPage)
+    {
+        console.log("enter page failed");
+        PageBack();
+        return false;
+    }
+    Sleep(3);
+
+    if (!FindTipPoint([602, 608, 28, 38]))
+    {
+        console.log("没有发现小红点，退出");
+        PageBack();
+        return false;
+    }
+    if (!FindBlueBtn([551, 448, 209, 74]))
+    {
+        console.log("没有发现可领取按钮，退出");
+        PageBack();
+        return false;
+    }
+    RandomPress([581, 466, 151, 33]); // open travel log
+    Sleep(3);
+    for (let i = 0; i < 5; i++)
+    {
+        let hasTipPoint = FindTipPoint([249, 101, 27, 340]);
+        if (hasTipPoint)
+        {
+            RandomPress([hasTipPoint.x - 200, hasTipPoint.y, 200, 40]);
+            let hasItemTipPoint = FindTipPoint([468, 166, 199, 47]);
+            if (hasItemTipPoint)
+            {
+                RandomPress([hasItemTipPoint.x - 40, hasItemTipPoint.y, 40, 40], 3);
+                PressBlank();
+                console.log("领取奖励成功");
+            }
+        }
+        else
+        {
+            console.log("没有可领取奖励，退出 ");
+            break;
+        }
+    }
+    PageBack();
+    return true;
+};
 const LoginProps = () =>
 {
     console.log("开始道具记录");
     const hasOpenMenu = OpenMenu();
     if (!hasOpenMenu)
     {
-        console.log("do not have menu button");
+        console.log("退出：没有找到菜单按钮");
         return false;
     }
 
     const hasLoginPropsPoint = FindTipPoint([1232, 96, 22, 23]);
     if (!hasLoginPropsPoint)
     {
-        console.log("do not have avaliable login props");
+        console.log("退出：没有可以记录的装备");
         return false;
     }
-    const LoginBtnColorList = [
-        ["#283735", [[18, -1, "#283735"], [113, 0, "#283735"], [0, 16, "#283735"], [128, 15, "#283735"]]]
-    ];
-
-    const CanPressLoginBtn = () => FindMultiColors(LoginBtnColorList, [1088, 506, 170, 50]);
+    const CanPressLoginBtn = () => FindGreenBtn([1089, 508, 171, 47]);
 
     RandomPress([1209, 116, 21, 26]); // login props icon
     const hasEnterLoginPropsPage = WaitUntilPageBack();
     if (!hasEnterLoginPropsPage)
     {
-        console.log("enter login props page failed!");
+        console.log("退出：进入登录页面失败!");
         return false;
     }
-    console.log("entered login props page");
+    console.log("进入到道具记录页面");
     let hasTipPoint;
-    let loginCount = 0;
+    let loginCount = null;
+    let hasItemToLogin = 0;
     for (let i = 0; i < 10; i++)
     {
         RandomPress([176, 76, 74, 24]);
-        for (let j = 0; j < 10; j++)
+        for (let j = 0; j < 6; j++)
         {
             hasTipPoint = FindTipPoint([511, 122, 421, 494]);
             if (hasTipPoint)
@@ -200,9 +372,14 @@ const LoginProps = () =>
                     loginCount++;
                 }
             }
+            else
+            {
+                SwipeSlowly([243, 549, 423, 35], [255, 157, 374, 29], 3);
+            }
         }
         RandomPress([43, 75, 80, 23]);
-        if (!FindTipPoint([511, 122, 421, 494]))
+        hasItemToLogin = FindNumber("combatPower", [209, 73, 62, 38]);
+        if (!hasItemToLogin)
         {
             break;
         }
@@ -230,14 +407,13 @@ const ShopBuy = () =>
         PageBack();
         return false;
     }
-    console.log("entered shop page");
-    Sleep(3);
+    console.log("已进入商城页面");
+    Sleep(10);
     const NotCheckedColorList = [
         ["#303030", [[5, 0, "#303030"], [11, 1, "#303030"], [-2, 7, "#303030"], [7, 7, "#303030"]]]
     ];
     const IsNotCheck = (region) => FindMultiColors(NotCheckedColorList, region);
 
-    let isSuccess = false;
     if (FindBlueBtn([146, 632, 89, 79]))
     {
         RandomPress([166, 657, 45, 34]);
@@ -251,10 +427,8 @@ const ShopBuy = () =>
         }
         if (FindBlueBtn([652, 556, 238, 78])) // comfirm button
         {
-            RandomPress([679, 574, 191, 41]);
-            Sleep();
+            RandomPress([679, 574, 191, 41], 3);
             PressBlank();
-            isSuccess = true;
         }
         else if (FindRedBtn([383, 560, 240, 65]))
         {
@@ -262,52 +436,9 @@ const ShopBuy = () =>
         }
     }
     PageBack();
-    console.log("商城购买完毕，是否成功购买 " + isSuccess);
+    console.log("商城购买完毕，是否成功购买 ");
+    return true;
 };
-
-
-const CrucifixColorList = [
-    ["#bcaa51", [[19, 0, "#bba950"], [10, -10, "#eed967"], [9, 18, "#bca952"], [9, 0, "#1a1d1a"]]],
-    ["#f0dc69", [[-11, 11, "#baa850"], [8, 11, "#b8a64f"], [-1, 28, "#bdab53"], [0, 28, "#bdab53"]]]
-];
-
-const HasCrucifixIcon = () => FindMultiColors(CrucifixColorList, [327, 60, 40, 43]);
-
-const PickUpAbilityPoint = () =>
-{
-    console.log("开始恢属性力点");
-    RandomPress([337, 73, 21, 23]);
-    if (WaitUntil(() => HasPopupClose([34, 94, 46, 53])))
-    {
-        if (FindBlueBtn([142, 602, 214, 70]))
-        {
-            RandomPress([167, 619, 162, 37]);
-            if (HasPopupClose([38, 102, 36, 38]))
-            {
-                RandomPress([44, 108, 24, 25]);
-            }
-            console.log("finish pick up ability point");
-
-        }
-        else
-        {
-            console.log("use out of recover time");
-            RandomPress([365, 263, 16, 17]);
-            RandomPress([123, 547, 98, 43]);
-            if (FindBlueBtn([138, 604, 216, 66]))
-            {
-                RandomPress([170, 622, 157, 30]);
-            }
-            console.log("finish pick up ability point");
-        }
-    }
-    if (HasPopupClose([34, 94, 46, 53]))
-    {
-        console.log("finish");
-        RandomPress([47, 109, 20, 21]);
-    }
-};
-
 const IncreaseWeaponFeatures = () =>
 {
     console.log("开始增加武器特性");
@@ -384,37 +515,7 @@ const IncreaseWeaponFeatures = () =>
     PageBack();
     return true;
 };
-const AddAttributePoint = () =>
-{
-    console.log("开始添加属性点");
 
-    const PlusAbilityIcon = [
-        ["#8f7f4f", [[14, 0, "#ab995f"], [6, -7, "#b19d62"], [7, 0, "#af9c62"], [7, 6, "#b7a366"]]],
-        ["#86774a", [[3, 0, "#90804f"], [15, 0, "#b4a165"], [9, -6, "#e8cf84"], [8, 6, "#928251"]]],
-        ["#86774a", [[7, 0, "#978754"], [14, 0, "#b09d62"], [9, -6, "#e8cf84"], [9, 5, "#b4a165"]]],
-        ["#8e7e4e", [[6, 0, "#837448"], [13, 0, "#b7a366"], [7, -7, "#f0d789"], [7, 6, "#b6a266"]]]
-    ];
-    if (!FindMultiColors(PlusAbilityIcon, [615, 461, 57, 58]))
-    {
-        console.log("未找到加属性图标");
-        return false;
-    }
-    RandomPress([632, 479, 19, 20]);
-    console.log("等到属性点窗口出现...");
-    WaitUntil(() => HasPopupClose([32, 96, 47, 54]));
-
-    RandomPress([522, 171, 98, 22]); // dex 
-    RandomPress([695, 349, 25, 21]); //max dex
-    if (FindGoldBtn([580, 657, 167, 29]))
-    {
-        RandomPress([587, 659, 161, 28]);
-    }
-    if (HasPopupClose([37, 107, 33, 33]))
-    {
-        RandomPress([45, 112, 21, 21]);
-    }
-
-};
 const StrengthenHorseEquipment = () =>
 {
     console.log("开始强化坐骑装备");
@@ -465,172 +566,6 @@ const StrengthenHorseEquipment = () =>
     PageBack();
 };
 
-const GetPassAward = () =>
-{
-    console.log("开始领取通行证奖励");
-    if (!FindTipPoint([882, 2, 19, 20]))
-    {
-        console.log("no award could get");
-        return false;
-    }
-    RandomPress([855, 20, 29, 25]);
-    const hasEnterPassPage = WaitUntilPageBack();
-    if (!hasEnterPassPage)
-    {
-        console.log("enter pass page failed");
-        PageBack();
-        return false;
-    }
-    if (FindBlueBtn([749, 244, 202, 72]))
-    {
-        RandomPress([770, 265, 158, 31]);
-        Sleep();
-        PressBlank();
-        PageBack();
-    }
-    console.log("finished pass award");
-};
-const GetActivitiesAward = () =>
-{
-    console.log("开始领取活动奖励");
-    const CanPickUpAwardHighGoldenColorList = [
-        ["#cdb646", [[2, 0, "#d0ba47"], [3, 0, "#d1ba47"], [5, 0, "#cfb946"], [8, 0, "#c6af43"]]],
-        ["#c4af47", [[1, 0, "#cbb54a"], [3, 0, "#d6be4a"], [8, 0, "#e0c74f"], [11, 0, "#dcc34e"]]],
-        ["#b5a03f", [[3, 0, "#bfab43"], [5, 0, "#c3af45"], [7, 0, "#c3ae44"], [12, 0, "#b4a03e"]]]
-    ];
-    if (!FindTipPoint([942, 3, 17, 19]))
-    {
-        console.log("no award could get");
-        return false;
-    }
-    RandomPress([917, 18, 27, 28]);
-    if (!WaitUntil(() => HasPopupClose([1145, 63, 36, 36])))
-    {
-        console.log("enter failed");
-        return false;
-    }
-    Sleep(5);
-    const shot = captureScreen();
-    let hasTip = false;
-    let hasGoldenLight = false;
-    for (let i = 0; i < 9; i++)
-    {
-        hasTip = FindTipPoint([284, 157 + 47 * i, 27, 20], shot);
-        if (hasTip)
-        {
-            RandomPress([hasTip.x - 180, hasTip.y, 180, 30]);
-            Sleep();
-            for (let j = 0; j < 3; j++)
-            {
-                hasTip = FindTipPoint([345, 265, 820, 378]);
-                if (hasTip)
-                {
-                    console.log("hasTip: " + hasTip);
-                    hasGoldenLight = FindMultiColors(CanPickUpAwardHighGoldenColorList, [hasTip.x - 70, hasTip.y + 50, 70, 30]);
-                    console.log("hasGoldenLight: " + hasGoldenLight);
-                    if (hasGoldenLight)
-                    {
-                        console.log("pick award...");
-                        RandomPress([hasGoldenLight.x - 10, hasGoldenLight.y - 30, 20, 30]);
-                        PressBlank();
-                    }
-                    else
-                    {
-                        RandomPress([hasTip.x - 40, hasTip.y + 10, 20, 30]);
-                        PressBlank();
-                    }
-                    if (HasPopupClose([745, 97, 46, 47]))
-                    {
-                        RandomPress([760, 108, 19, 20]);
-                    }
-                }
-            }
-        }
-    }
-
-    for (let i = 0; i < 30; i++)
-    {
-        if (HasPopupClose([745, 97, 46, 47]))
-        {
-            RandomPress([760, 108, 19, 20]);
-        }
-        else if (HasPopupClose([1143, 55, 42, 51]))
-        {
-            RandomPress([1157, 74, 14, 18]);
-        }
-        else if (HasMenu())
-        {
-            break;
-        }
-        Sleep();
-    }
-    console.log("finish: get activities award");
-};
-const GetTravelLogAward = () =>
-{
-    console.log("开始领取日志奖励");
-    const hasOpenMenu = OpenMenu();
-    if (!hasOpenMenu)
-    {
-        console.log("打开菜单失败!");
-        return false;
-    }
-    const hasLogTip = FindTipPoint([1232, 187, 21, 20]);
-    if (!hasLogTip)
-    {
-        console.log("没有可以领取的奖励，退出");
-        return false;
-    }
-
-    RandomPress([1207, 201, 31, 36]);
-    const hasEnterLogPage = WaitUntilPageBack();
-    if (!hasEnterLogPage)
-    {
-        console.log("enter page failed");
-        PageBack();
-        return false;
-    }
-    Sleep(3);
-    // WaitUntil(() => FindBlueBtn([552, 451, 204, 72]));
-    if (!FindTipPoint([602, 608, 28, 38]))
-    {
-        console.log("没有发现小红点，退出");
-        PageBack();
-        return false;
-    }
-    if (!FindBlueBtn([551, 448, 209, 74]))
-    {
-        console.log("没有发现可领取按钮，退出");
-        PageBack();
-        return false;
-    }
-    RandomPress([581, 466, 151, 33]); // open travel log
-    Sleep(3);
-    for (let i = 0; i < 5; i++)
-    {
-        let hasTipPoint = FindTipPoint([249, 101, 27, 340]);
-        if (hasTipPoint)
-        {
-            RandomPress([hasTipPoint.x - 200, hasTipPoint.y, 200, 40]);
-            let hasItemTipPoint = FindTipPoint([468, 166, 199, 47]);
-            if (hasItemTipPoint)
-            {
-                RandomPress([hasItemTipPoint.x - 40, hasItemTipPoint.y, 40, 40]);
-                Sleep(3);
-                PressBlank();
-                console.log("领取奖励成功");
-            }
-        }
-        else
-        {
-            console.log("没有可领取奖励，退出 ");
-            break;
-        }
-    }
-    WaitUntil(() => HasPageback());
-    PageBack();
-    return true;
-};
 const UpgradeAbilityLevel = () =>
 {
     console.log("开始升级能力等级");
@@ -678,12 +613,19 @@ const UpgradeAbilityLevel = () =>
             }
         }
     }
-    if (HasPopupClose([1184, 55, 42, 39]))
+    for (let i = 0; i < 10; i++)
     {
-
-        RandomPress([1198, 65, 15, 19]);
+        if (HasPopupClose([1185, 52, 44, 46]))
+        {
+            RandomPress([1195, 65, 19, 20]);
+        }
+        if (HasPageback())
+        {
+            PageBack();
+            break;
+        }
+        Sleep();
     }
-    PageBack();
 };
 const ChangeAbility = (changeList) =>
 {
@@ -914,42 +856,38 @@ const UpgradeHolyRelics = () =>
     PageBack();
 };
 
-
-const ComprehensiveImprovement = () =>
+const ComprehensiveImprovement = (retry) =>
 {
     console.log("开始综合提升");
-
-    let isImprovement = false;
-
-    if ((lastComprehensiveImproveTime - new Date().getTime()) / 3600000 >= 1)
+    retry = retry || false;
+    if (retry == false)
     {
-        console.log("finish: 两次提升间隔较短，暂不操作");
-        return true;
+        if ((new Date().getTime() - lastComprehensiveImproveTime) / 3600000 < 1)
+        {
+            console.log("提升结束: 两次提升间隔较短，暂不操作");
+            return true;
+        }
     }
-    lastComprehensiveImproveTime = new Date().getTime();
-
-    HasCrucifixIcon() && PickUpAbilityPoint();
 
     const isBackpackFull = IsBackpackFull(captureScreen());
     if (isBackpackFull)
     {
-        console.log("背包是满的，需要先清理背包");
+        console.log("提升：背包是满的，需要先清理背包");
         WearEquipments();
         StrengthenEquipment();
         LoginProps();
         DecomposeEquipment();
     }
 
-    GetPassAward();
-    GetActivitiesAward();
-    GetMonsterKnowledgeAward();
+    GetPassAward() && ClearPage();
+    GetActivitiesAward() && ClearPage();
+    GetMonsterKnowledgeAward() && ClearPage();
+    GetTravelLogAward() && ClearPage();
+    GetAchievement() && ClearPage();
     GetEmail();
-    GetAchievement();
-    GetTravelLogAward();
+    ClearPage();
     // first open all box
     OpenAllBox();
-
-    UseHolyGrail();
 
     if (!isBackpackFull)
     {
@@ -959,8 +897,8 @@ const ComprehensiveImprovement = () =>
         LoginProps();
         DecomposeEquipment();
     }
-
-
+    ClearPage();
+    ClearPage();
     IncreaseWeaponFeatures();
     UpgradeHolyRelics();
     StrengthenHorseEquipment();
@@ -972,23 +910,31 @@ const ComprehensiveImprovement = () =>
     }
 
     UpgradeAbilityLevel();
+
     let isExcuted = ShopBuy();
-    AddAttributePoint();
 
     WearBestSuit();
-    console.log("finish");
+    CheckSkillAutoRelease();
+    console.log("综合提升结束");
 
+    if (isExcuted)
+    {
 
+        lastComprehensiveImproveTime = new Date().getTime();
+    }
     return isExcuted;
 };
 
 
 module.exports = {
-    ChangeAbility, GetEmail, GetAchievement, GetMonsterKnowledgeAward, LoginProps, HasCrucifixIcon,
-    ShopBuy, PickUpAbilityPoint, AddAttributePoint, ComprehensiveImprovement, StrengthenHorseEquipment
+    ChangeAbility, GetEmail, GetAchievement, GetMonsterKnowledgeAward, LoginProps,
+    ShopBuy, ComprehensiveImprovement, StrengthenHorseEquipment, IncreaseWeaponFeatures
 };
-// WearEquipments();
 
+
+// IncreaseWeaponFeatures();
+// WearEquipments();
+// UpgradeHolyRelics();
 // GetActivitiesAward();
 // ComprehensiveImprovement();
 // OpenAllBox();
@@ -999,6 +945,6 @@ module.exports = {
 // LoginProps();
 // WearBestSuit();
 // DecomposeEquipment();
-// AddAttributePoint();
+
 // console.log(FindTipPoint([416, 370, 42, 45]));
 // GetEmail();

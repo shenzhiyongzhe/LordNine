@@ -52,6 +52,10 @@ const { Sleep, RandomPress, ReadImg, FindImg, FindMultiColors,
     IsBackpackFull,
     WaitUntil,
     FindImgInList,
+    RecycleImgList,
+    ClearPage,
+    CloseBackpack,
+    OpenBackpack,
 } = require("./utils.js");
 
 
@@ -404,3 +408,76 @@ const SetApplicationProxy = () =>
 
 // console.log(HasPopupClose([1202, 96, 47, 48]));
 // engines.stopAllAndToast();
+const CheckSkillAutoRelease = () =>
+{
+    console.log("检查技能是否装备与自动是否");
+    const checkPos = [
+        [390, 620, 90, 90],
+        [450, 620, 90, 90],
+        [510, 620, 90, 90]
+    ];
+    const quickItem_skillImgList = [
+        LoadImgList("icon/quickItem_skill/firstSkill"),
+        LoadImgList("icon/quickItem_skill/secondSkill"),
+        LoadImgList("icon/quickItem_skill/thirdSkill")
+    ];
+    const isReleaseSkill = [];
+
+    let shot = captureScreen();
+    for (let i = 0; i < checkPos.length; i++)
+    {
+        let isAuto = FindImgInList(quickItem_skillImgList[i], checkPos[i], shot);
+        if (isAuto)
+        {
+            console.log("第" + (i + 1) + "个技能已开启自动释放");
+            isReleaseSkill.push(true);
+        } else
+        {
+            console.log("第" + (i + 1) + "个技能未开启自动释放");
+        }
+    }
+
+    quickItem_skillImgList.forEach(imgList => RecycleImgList(imgList));
+    if (isReleaseSkill.length == 3)
+    {
+        console.log("技能已全部开启自动释放");
+    }
+    else
+    {
+        console.log("技能未全部开启自动释放");
+        console.log("开始使用技能书与装备技能");
+
+    }
+    console.log("检查完毕");
+};
+// console.log(FindNumber("lv", [46, 158, 63, 52]));
+// const AimAtBossColorList = [
+//     ["#d80802", [[0, -3, "#ea0700"], [17, -2, "#e70700"], [30, -2, "#d90904"], [38, -3, "#eb0700"]]],
+//     ["#d80701", [[17, -1, "#df0700"], [34, -2, "#e30700"], [49, -2, "#de0701"], [57, 4, "#cb0600"]]],
+//     ["#cc0b06", [[1, 0, "#e40700"], [1, 3, "#d80701"], [18, -3, "#f00700"], [18, 0, "#e60700"]]]
+// ];
+// const IsAimAtBoss = () => FindMultiColors(AimAtBossColorList, [540, 11, 205, 31]);
+// console.log(IsAimAtBoss());
+// device.setMusicVolume(0);
+// console.log(FindNumber("combatPower", [411, 342, 43, 49]));
+// SwipeSlowly([243, 549, 423, 35], [255, 157, 374, 29], 3);
+// console.log(FindBlueBtn([6, 657, 161, 55]));
+// ClearPage();
+// console.log(FindNumber("combatPower", [1161, 536, 80, 43]));
+// FindNumber("lv", [54, 472, 47, 44]);
+// console.log(HasPopupClose([869, 41, 43, 48]));
+// ClearPage();
+// toast("hee");
+// OpenBackpack();
+// const arrow_right = LoadImgList("icon/arrow/right");
+// console.log(FindImgInList(arrow_right, [817, 143, 44, 64]));
+
+// let a = "abcd";
+// console.log(random(0, 4));
+
+// console.log(a.includes("a"));
+// console.log(FindBlueBtn());
+// toast("he");
+// console.log(FindRedBtn([417, 642, 224, 74]));
+console.log(HasPopupClose([990, 59, 50, 43]));
+// console.log(6 % 6);

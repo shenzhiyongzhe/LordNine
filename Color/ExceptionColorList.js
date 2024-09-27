@@ -7,15 +7,16 @@ const NoPotionColorList = [
     ["#555555", [[0, 8, "#414140"], [-2, 18, "#fbfbfa"], [4, 18, "#fefefd"], [1, 14, "#f8f8f8"]]],
     ["#626262", [[2, 0, "#555555"], [5, 0, "#535353"], [1, 19, "#ffffff"], [6, 19, "#fbfbfa"]]],
     ["#585858", [[2, 6, "#454545"], [4, 2, "#4c4c4b"], [1, 22, "#fefefd"], [6, 22, "#fbfbfa"]]],
+    ["#2f2f2f", [[-3, 8, "#5d5d5d"], [-2, 22, "#ffffff"], [-2, 24, "#fefefd"], [3, 23, "#fcfcfc"]]]
 
 ];
-
-
 
 const LordNineWordColorList = [
     ["#cca967", [[75, 4, "#deb371"], [138, -6, "#d8b77e"], [195, 3, "#c8a266"], [205, 16, "#a77a40"]]],
     ["#cda465", [[75, -4, "#d8b773"], [139, -8, "#d8b77e"], [189, -5, "#c79959"], [205, 13, "#a67c41"]]],
-    ["#dbbb87", [[25, 3, "#be985b"], [49, 8, "#c8a263"], [99, 4, "#e2b980"], [124, 1, "#dab66d"]]]
+    ["#dbbb87", [[25, 3, "#be985b"], [49, 8, "#c8a263"], [99, 4, "#e2b980"], [124, 1, "#dab66d"]]],
+    ["#d3af6c", [[80, -1, "#dab66d"], [138, -1, "#dbb87c"], [93, 7, "#be9957"], [144, 26, "#c8a25a"]]],
+    ["#d3af6c", [[74, -1, "#dcbb77"], [79, -1, "#dab66d"], [139, -3, "#d8b77e"], [206, 21, "#b18646"]]]
 ];
 const WhiteAvatarColorList = [
     ["#a4a4a3", [[2, 0, "#b1b1b1"], [7, 1, "#b4b4b3"], [2, 4, "#bababa"], [5, 13, "#b6b6b6"]]],
@@ -26,6 +27,11 @@ const StartBtnSettingColorList = [
     ["#bfaf89", [[-1, 17, "#a49574"], [16, 16, "#9b8e6e"], [14, 1, "#bfaf89"], [7, -2, "#bfaf88"]]]
 ];
 
+const CrucifixColorList = [
+    ["#bcaa51", [[19, 0, "#bba950"], [10, -10, "#eed967"], [9, 18, "#bca952"], [9, 0, "#1a1d1a"]]],
+    ["#f0dc69", [[-11, 11, "#baa850"], [8, 11, "#b8a64f"], [-1, 28, "#bdab53"], [0, 28, "#bdab53"]]]
+];
+
 module.exports = {
-    NoPotionColorList, LordNineWordColorList, WhiteAvatarColorList, StartBtnSettingColorList
+    NoPotionColorList, LordNineWordColorList, WhiteAvatarColorList, StartBtnSettingColorList, CrucifixColorList
 };

@@ -1,6 +1,7 @@
 
-const { FindImg, ReadImg, FindMultiColors, SwipeSlowly, RestartGame, Sleep, HasSkip, ClickSkip, RandomPress, HasPopupClose, LoadImgList } = require("./utils");
+const { FindImg, ReadImg, FindMultiColors, SwipeSlowly, RestartGame, Sleep, HasSkip, ClickSkip, RandomPress, HasPopupClose, LoadImgList, FindImgInList } = require("./utils");
 
+const { LordNineWordColorList, WhiteAvatarColorList } = require("./Color/ExceptionColorList.js");
 
 const CanNotCreateCharacterColorList = [
     ["#862f30", [[5, 0, "#802d2f"], [14, 0, "#8a3031"], [20, 1, "#893031"], [37, -1, "#882f30"]]],
@@ -12,22 +13,18 @@ const CanNotCreateCharacterColorList = [
     ["#8b3031", [[20, 1, "#8b3031"], [32, 4, "#882f30"], [45, -2, "#882f30"], [49, 2, "#7d2d2e"]]],
     ["#8b3031", [[14, 0, "#8b3031"], [20, 0, "#8b3031"], [33, 3, "#8b3031"], [50, 2, "#8b3031"]]]
 ];
-const LordNineWordColorList = [
-    ["#cca967", [[75, 4, "#deb371"], [138, -6, "#d8b77e"], [195, 3, "#c8a266"], [205, 16, "#a77a40"]]],
-    ["#cda465", [[75, -4, "#d8b773"], [139, -8, "#d8b77e"], [189, -5, "#c79959"], [205, 13, "#a67c41"]]],
-    ["#dbbb87", [[25, 3, "#be985b"], [49, 8, "#c8a263"], [99, 4, "#e2b980"], [124, 1, "#dab66d"]]]
-];
-const WhiteAvatarColorList = [
-    ["#a4a4a3", [[2, 0, "#b1b1b1"], [7, 1, "#b4b4b3"], [2, 4, "#bababa"], [5, 13, "#b6b6b6"]]],
-    ["#a4a4a3", [[1, 0, "#a6a6a5"], [2, 0, "#b1b1b1"], [5, 3, "#b4b4b3"], [3, 10, "#b8b8b8"]]]
-];
 const HasMainUI = () => FindMultiColors(LordNineWordColorList, [313, 333, 728, 354]);
 
 const ListenServer = () =>
 {
     console.log("start server...");
 
-    serverNameImgList = LoadImgList("icon/beginner/serverNameList");
+    let serverNameImgList = [];
+    for (let i = 0; i < 7; i++)
+    {
+        let imgList = LoadImgList(`icon/beginner/serverNameList/${i}`);
+        serverNameImgList.push(imgList);
+    }
 
     let hasServer = null;
     let isServerFull = null;
@@ -37,7 +34,7 @@ const ListenServer = () =>
         {
             SwipeSlowly([600, 540, 10, 10], [600, 320, 10, 10], 6);
         }
-        hasServer = FindImg(serverNameImgList[n], [73, 162, 228, 434]);
+        hasServer = FindImgInList(serverNameImgList[n], [73, 162, 228, 434]);
         if (hasServer)
         {
             console.log("find server: " + (n + 1));
@@ -45,7 +42,7 @@ const ListenServer = () =>
             {
                 SwipeSlowly([750, 500, 10, 10], [750, 400, 10, 10], 1);
             }
-            hasServer = FindImg(serverNameImgList[n], [73, 162, 228, 434]);
+            hasServer = FindImgInList(serverNameImgList[n], [73, 162, 228, 434]);
             for (let i = 0; i < 2; i++)
             {
                 for (let j = 0; j < 5; j++)
