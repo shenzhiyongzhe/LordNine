@@ -72,7 +72,8 @@ const HaltModeColorList = [
 const HomeColorList = [
     ["#c9b989", [[1, 0, "#c9ba89"], [1, 3, "#c8b888"], [8, -1, "#d4c28f"], [11, 2, "#dccb96"]]],
     ["#c4b586", [[0, 8, "#b6a67b"], [3, -5, "#dccb96"], [11, 5, "#dccb96"], [14, 5, "#dac894"]]],
-    ["#d7c692", [[-1, 0, "#d3c18f"], [-1, 2, "#c8b888"], [5, -3, "#d7c692"], [10, 2, "#d9c794"]]]
+    ["#d7c692", [[-1, 0, "#d3c18f"], [-1, 2, "#c8b888"], [5, -3, "#d7c692"], [10, 2, "#d9c794"]]],
+    ["#cbba89", [[2, 1, "#c7b788"], [4, 0, "#dccb96"], [8, 0, "#d7c692"], [12, 3, "#c9b989"]]]
 ];
 const QIconColorList = [
     ["#dccb96", [[0, 3, "#dccb96"], [13, 1, "#dccb96"], [13, 4, "#dcc996"], [13, 5, "#dccb96"]]]
@@ -125,7 +126,10 @@ const LoadImgList = (url) =>
 const tapBlankImgList = LoadImgList("icon/font/pleaseTapBlank");
 const backpackTrashIcon = LoadImgList("backpack/trash");
 const inCityIconImgList = LoadImgList("icon/inCity");
-
+const menuCloseImgList = LoadImgList("icon/menuClose");
+const popupCloseImgList = LoadImgList("icon/popupClose");
+const mainstoryIconImgList = LoadImgList("icon/mainStoryIcon");
+const mapPlusIconImgList = LoadImgList("icon/mapPlus");
 const CloseMenu = (shot) =>
 {
 
@@ -158,6 +162,17 @@ const ClosePopupWindows = (shot) =>
         {
             console.log("发现弹窗：" + i);
             RandomPress([hasPopup.x, hasPopup.y, 10, 10]);
+            return true;
+        }
+    }
+    for (let i = 0; i < popupCloseRegionList.length; i++)
+    {
+        hasPopup = FindImgInList(popupCloseImgList, popupCloseRegionList[i], shot);
+        if (hasPopup)
+        {
+            console.log("发现弹窗：" + i);
+            RandomPress([hasPopup.x, hasPopup.y, 10, 10]);
+            return true;
         }
     }
 };
@@ -220,8 +235,12 @@ const ChangeRecoverPotionPercentToNormal = () =>
 const ClearPage = () =>
 {
     let shot = captureScreen();
-    if (HasMenu(shot) && HasQIcon(shot) && HasHome(shot))
+    if (HasMenu(shot) && HasMainStoryIcon(shot) && HasHome(shot))
     {
+        if (!HasMap(shot))
+        {
+            RandomPress([45, 129, 24, 30]);
+        }
         return true;
     }
     ClosePopupWindows(shot);
@@ -403,11 +422,62 @@ const HasPageback = (shot) => { shot = shot || captureScreen(); return FindMulti
 const HasBackpack = () => FindMultiColors(BackpackColorList, [1143, 12, 40, 50]);
 const HasBackpackClose = () => FindMultiColors(PopupCloseColorList, [1210, 101, 33, 35]);
 
-const HasMenuClose = (shot) => { shot = shot || captureScreen(); return FindMultiColors(MenuCloseColorList, [1204, 17, 46, 45], shot); };
-const HasPopupClose = (region, shot) => { shot = shot || captureScreen(); return FindMultiColors(PopupCloseColorList, region, shot); };
+const HasMenuClose = (shot) =>
+{
+    shot = shot || captureScreen();
+    if (FindMultiColors(MenuCloseColorList, [1204, 17, 46, 45], shot))
+    {
+        return true;
+    }
+    else if (FindImgInList(menuCloseImgList, [1194, 11, 62, 56], shot))
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+};
+const HasPopupClose = (region, shot) =>
+{
+    shot = shot || captureScreen();
+    let hasPopup;
+    hasPopup = FindMultiColors(PopupCloseColorList, region, shot);
+    if (hasPopup)
+    {
+        return hasPopup;
+    }
+    hasPopup = FindImgInList(popupCloseImgList, region, shot);
+    if (hasPopup)
+    {
+        return hasPopup;
+    }
+    else
+    {
+        return false;
+    }
+};
+
 const HasMenu = (shot) => { shot = shot || captureScreen(); return FindMultiColors(MenuColorList, [1198, 13, 55, 47], shot); };
 const HasHome = (shot) => { shot = shot || captureScreen(); return FindMultiColors(HomeColorList, [37, 240, 36, 45], shot); };
-const HasQIcon = (shot) => { shot = shot || captureScreen(); return FindMultiColors(QIconColorList, [1200, 125, 54, 46], shot); };
+const HasMainStoryIcon = (shot) =>
+{
+    shot = shot || captureScreen();
+    if (FindMultiColors(QIconColorList, [1200, 125, 54, 46], shot))
+    {
+        return true;
+    }
+    if (FindImgInList(mainstoryIconImgList, [1198, 118, 55, 53], shot))
+    {
+        return true;
+    }
+    return false;
+};
+const HasMap = (shot) =>
+{
+    shot = shot || captureScreen();
+    return FindImgInList(mapPlusIconImgList, [91, 243, 33, 38], shot);
+};
 const HasOpenTheBackPage = (region) => FindMultiColors(BackpackPageColorList, region);
 const HasBackpackMenuClose = () => FindMultiColors(PopupCloseColorList, [1094, 31, 39, 45]);
 const HasSkip = () =>
@@ -451,6 +521,7 @@ let moveObj = {
 
 const IsMoving = () =>
 {
+    let isMoving = true;
     if (moveObj.clipCount == 0)
     {
         moveObj.movingClip = images.clip(captureScreen(), 180, 180, 40, 40);
@@ -464,14 +535,15 @@ const IsMoving = () =>
         const hasClip = FindImg(moveObj.movingClip, [180, 180, 40, 40]);
         if (!hasClip)
         {
-            return true;
+            isMoving = true;
         }
         else
         {
-            return false;
+            console.log("@...没有移动");
+            isMoving = false;
         }
     }
-    return true;
+    return isMoving;
 
 };
 const IsBackpackFull = (shot) => FindMultiColors(BackpackFullColorList, [1144, 35, 39, 27], shot);
@@ -495,9 +567,11 @@ const TapBlankToContinue = (shot) =>
             {
                 console.log("发现需要点击空白处。");
                 PressBlank();
+                return true;
             }
         }
     }
+    return false;
 };
 
 const OpenMenu = () =>
@@ -741,6 +815,9 @@ const ReturnHome = () =>
             {
                 console.log("离开副本，回家");
                 RandomPress([678, 458, 157, 33]);
+                Sleep(12);
+                WaitUntilMenu();
+                RandomPress([45, 252, 22, 23]);
             }
             Sleep(10);
             for (let i = 0; i < 10; i++)
@@ -856,7 +933,7 @@ const ChangeHaltModeTime = () =>
 
 const PullDownSkill = (pos) => { gesture(500, pos, [pos[0], pos[1] + 30]); Sleep(); };
 
-/*
+/** 
 * @param {*} type "grocery" "skill" "equipment" "friend" "exchange" "mount" "stockroom"
 */
 const GoToTheNPC = (type) =>
@@ -899,39 +976,111 @@ const GoToTheNPC = (type) =>
         console.log("enter npc failed!");
         return false;
     }
-    console.log("enter npc success!" + type);
+    console.log("已到达npc：" + type);
     return true;
+};
+const BuySkillBook = () =>
+{
+    const skillBookImgList = LoadImgList("backpack/skillBook");
+
+    const config = ReadConfig();
+    let maxSkillBook = 2;
+    if (!config.game["lv"])
+    {
+        maxSkillBook = 2;
+    }
+    else if (config.game["lv"] > 33)
+    {
+        maxSkillBook = 3;
+    }
+    for (let i = 0; i < maxSkillBook; i++)
+    {
+        let hasSkillBook = FindImgInList(skillBookImgList, [72, 69 + i * 79, 82, 92]);
+        if (hasSkillBook)
+        {
+            RandomPress([hasSkillBook.x + 50, hasSkillBook.y, 100, 30]);
+            if (FindBlueBtn([645, 544, 179, 58]))
+            {
+                RandomPress([664, 558, 142, 30]);
+                console.log("购买技能书成功");
+            }
+        }
+        Sleep();
+    }
+    console.log("没有可以购买的技能书了");
+    PageBack();
+    ClearPage();
 };
 const PressBlank = () => RandomPress([434, 55, 467, 155]);
 
+/**
+ * 
+ * @param {*} item  "master""weaponFeatures""ability""suit""horse"
+    
+     "animal" "propsLogin" "trade" "equipment" "manufacture""episode""mission" "achievement" "log"
+     "instance" "trialOfTower" "holyRelics" "mark" "monsterKnowledge" "friendship" "boss"
+    "guild" "email" "setting"
+   
+ * @returns 
+ */
 const EnterMenuItemPage = (item) =>
 {
-    const hasOpenMenu = OpenMenu();
-    if (!hasOpenMenu)
+    for (let i = 0; i < 10; i++)
     {
-        console.log("open menu failed.");
+        if (HasMenu())
+        {
+            break;
+        }
+        ClearPage();
+        Sleep();
+    }
+    if (!HasMenu())
+    {
+        console.log("打开菜单失败.");
         return false;
     }
+    OpenMenu();
     RandomPress(MenuItemRegionList[item]);
     const hasEnterItemPage = WaitUntilPageBack();
     if (!hasEnterItemPage)
     {
-        console.log("enter page failed");
+        console.log("进入页面失败，退出");
         return false;
     }
     return true;
 };
-
+const GetCharacterLv = () =>
+{
+    console.log("获取玩家等级，默认为法杖等级");
+    EnterMenuItemPage("weaponFeatures");
+    let lv = FindNumber("lv", [46, 468, 61, 51]);
+    if (!lv)
+    {
+        for (let i = 0; i < 10; i++)
+        {
+            lv = FindNumber("lv", [46, 468, 61, 51]);
+            if (lv)
+            {
+                break;
+            }
+            Sleep();
+        }
+    }
+    console.log("玩家等级为：" + lv);
+    PageBack();
+    return lv;
+};
 
 let DeathImgList = [];
 DeathImgList = LoadImgList("special/death");
 
 module.exports = {
     specialConfig, DeathImgList,
+    BuySkillBook,
     CloseBackpack, CloseMenu, ClickSkip, ChangeHaltModeTime, ChangeRecoverPotionPercentToMax, ChangeRecoverPotionPercentToNormal, ClearPage,
     EnterMenuItemPage, ExitHaltMode,
     FindBlueBtn, FindTipPoint, FindImg, FindMultiColors, FindCheckMark, FindRedBtn, FindGoldBtn, FindGreenBtn, FindImgInList, FindNumber,
-    GetFormatedTimeString, GoToTheNPC, GetVerificationCode, GetCaptureScreenPermission,
+    GetFormatedTimeString, GoToTheNPC, GetVerificationCode, GetCaptureScreenPermission, GetCharacterLv,
     HasPageback, HasMenu, HollowPress, HasSkip, HasBackpackClose, HasBackpackMenuClose, HasPopupClose,
     IsMoving, IsBackpackFull, IsInCity, IsHaltMode,
     LoadImgList, LaunchGame,
@@ -944,7 +1093,7 @@ module.exports = {
     SwipeSlowly,
 };
 
-
+// console.log(ClearPage());
 // console.log(FindMultiColors(PleaseTapBlankColorList, [568, 520, 154, 55]));
 // ClearPage()
 // ReturnHome()

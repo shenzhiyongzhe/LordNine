@@ -31,10 +31,8 @@
 //     }
 // }, 4000);
 
-
-const { HasMainUI } = require("./Exception.js");
-const { HasTip } = require("./MainStory.js");
-const { Sleep, RandomPress, ReadImg, FindImg, FindMultiColors,
+const {
+    Sleep, RandomPress, ReadImg, FindImg, FindMultiColors,
     HasPageback, HasMenu, FindTipPoint,
     FindBlueBtn,
 
@@ -43,7 +41,6 @@ const { Sleep, RandomPress, ReadImg, FindImg, FindMultiColors,
     LoadImgList,
     FindCheckMark,
     FindGoldBtn,
-    NeedPressBlank,
     IsHaltMode,
     HasSkip,
     GetFormatedTimeString,
@@ -56,6 +53,10 @@ const { Sleep, RandomPress, ReadImg, FindImg, FindMultiColors,
     ClearPage,
     CloseBackpack,
     OpenBackpack,
+    GetCharacterLv,
+    ReadConfig,
+    RewriteConfig,
+    IsMoving,
 } = require("./utils.js");
 
 
@@ -479,5 +480,11 @@ const CheckSkillAutoRelease = () =>
 // console.log(FindBlueBtn());
 // toast("he");
 // console.log(FindRedBtn([417, 642, 224, 74]));
-console.log(HasPopupClose([990, 59, 50, 43]));
-// console.log(6 % 6);
+// console.log(HasPopupClose([990, 59, 50, 43]));
+// console.log(FindBlueBtn([72, 642, 158, 64]));
+// console.log(FindTipPoint([1227, 93, 29, 29]));
+
+
+// console.log(HasMenu());
+// console.log(ClearPage());
+ClearPage();

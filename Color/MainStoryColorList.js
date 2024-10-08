@@ -365,7 +365,10 @@ const TalkBubbleColorList = [
     ["#f6f9f6", [[1, 1, "#fcfcfc"], [3, 1, "#f5f5f4"], [7, 0, "#f8f8f8"], [2, 5, "#ffffff"]]],
     ["#fbfafa", [[2, 0, "#f8f8f8"], [4, -1, "#f0f0f0"], [3, 5, "#fdfdfd"], [7, 7, "#eeeeed"]]]
 ];
-
+const NPCTalkBubbleColorList = [
+    ["#dac894", [[4, 0, "#d6c492"], [6, 0, "#d6c492"], [1, 4, "#dccb96"], [11, 3, "#c6b686"]]],
+    ["#d9c794", [[3, 0, "#d5c291"], [6, 0, "#d7c692"], [9, 0, "#d7c692"], [3, 4, "#dccb96"]]]
+];
 const SpeedUpOffColorList = [
     ["#999999", [[23, -7, "#939392"], [18, 2, "#9e9e9e"], [33, -7, "#949492"], [30, 2, "#9e9e9d"]]],
     ["#989898", [[0, -3, "#9b9b9b"], [10, 0, "#9e9e9e"], [17, -4, "#3b3a38"], [28, -2, "#9e9e9e"]]]
@@ -373,5 +376,5 @@ const SpeedUpOffColorList = [
 
 module.exports = {
     TipColorList, ArrowColorList, BlankColorList, QuestionMarkColorList, NextColorList, Auto_inactiveColorList, Auto_activeColorList, QuestColorList, RidingColorList,
-    LeaveColorList, TalkBubbleColorList, SpeedUpOffColorList
+    LeaveColorList, TalkBubbleColorList, SpeedUpOffColorList, NPCTalkBubbleColorList
 };

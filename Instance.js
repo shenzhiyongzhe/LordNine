@@ -329,11 +329,11 @@ const InInstanceCheck = () =>
 
 const HangUpInstance = () =>
 {
-    console.log("EnterInstanceFlow");
+    console.log("开始进入副本");
     const hasEnterInstancePage = EnterMenuItemPage("instance");
     if (!hasEnterInstancePage)
     {
-        console.log("enter instance page failed");
+        console.log("进入副本失败");
         return false;
     }
     const config = ReadConfig();
@@ -478,4 +478,4 @@ module.exports = {
 // HangUpWild([0, 2, 0]);
 // InstanceFlow();
 // OpenMap();
-
+// HangUpInstance();

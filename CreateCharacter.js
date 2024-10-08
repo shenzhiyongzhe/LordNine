@@ -45,7 +45,7 @@ const GenerateRandomName = () =>
     {
         name.push(CharDiction[Math.floor(random() * CharDiction.length)]);
     }
-    naem[0] = CharDiction[Math.floor(random() * 51)];
+    name[0] = CharDiction[Math.floor(random() * 51)];
     return name.join("");
 };
 const LoadServerImgList = () =>
@@ -128,6 +128,12 @@ const CheckLogin = () =>
             let googleIcon = textMatches(/(.*Google.*)/).findOne(20);
             if (googleIcon)
             {
+                if (googleIcon.bounds().centerY() > 720)
+                {
+                    swipe(1000, 670, 1000, 200, 1);
+                    Sleep();
+                }
+                googleIcon = textMatches(/(.*Google.*)/).findOne(20);
                 click(googleIcon.bounds().centerX(), googleIcon.bounds().centerY());
                 console.log("发现谷歌登录选项。点击选择谷歌账号登录。");
             }
@@ -152,6 +158,12 @@ const CheckLogin = () =>
                 hasAccount.parent().parent().click();
             }
         }
+        let hasAgreeConcept = text("모두 동의 후 계속하기 (선택항목 포함)").findOne(20);
+        if (hasAgreeConcept)
+        {
+            click(hasAgreeConcept.bounds().centerX(), hasAgreeConcept.bounds().centerY());
+            console.log("点击同意全部协议");
+        }
         let hasForgetEmail_zh = text("忘记了电子邮件地址？").findOne(20);
         let hasForgetEmail_kr = text("이메일을 잊으셨나요?").findOne(20);
         if (hasForgetEmail_zh || hasForgetEmail_kr)
@@ -165,6 +177,20 @@ const CheckLogin = () =>
             console.log("发现到了选区页面，已经登录账号，跳过登录流程");
             isLogin = true;
             break;
+        }
+        let hasGameRegisterBook = text("게임 기기 등록 서비스 안내").findOne(20);
+        if (hasGameRegisterBook)
+        {
+            let hasBlackConfrimBtn = text("다음").findOne(20);
+            if (hasBlackConfrimBtn)
+            {
+                Sleep(3);
+                console.log("${发现游戏注册指南，需要辅助邮箱验证，需要登录}");
+                console.log("点击黑色的确认按钮");
+                hasBlackConfrimBtn.click();
+                isLogin = false;
+                break;
+            }
         }
         Sleep();
     }
@@ -284,6 +310,12 @@ const LoginGoogleAccount = () =>
             RandomPress([hasBlackBtn.x, hasBlackBtn.y, 10, 10]);
             console.log("点击黑色按钮");
         }
+        let hasBlackBtn_node = text("다음").findOne(20);
+        if (hasBlackBtn_node)
+        {
+            hasBlackBtn_node.click();
+            console.log("点击黑色按钮节点");
+        }
         const hasCheckBox_0 = FindImg(checkBox_0, [247, 232, 127, 108]);
         if (hasCheckBox_0)
         {
@@ -297,8 +329,13 @@ const LoginGoogleAccount = () =>
         {
             setText(accountArray[0]);
             Sleep(3);
-            RandomPress([413, 558, 539, 41]);
+            RandomPress([413, 558, 539, 41], 3);
             console.log("邮箱验证码已发送！");
+            if (FindMultiColors(BlackBtnColorList, [361, 359, 562, 112]))
+            {
+                console.log("点击确认发送弹窗按钮");
+                RandomPress([414, 392, 453, 42]);
+            }
             break;
         }
 
@@ -327,6 +364,12 @@ const InputEmailUrl = () =>
                 console.log("find search box !");
                 break;
             }
+        }
+        let has_optional_boolbar_button = id("optional_boolbar_button").findOne(20);
+        if (has_optional_boolbar_button)
+        {
+            console.log("点击新建页");
+            has_optional_boolbar_button.click();
         }
         hasPlusIcon = id("new_tab_view").findOne(20);
         if (hasPlusIcon)
@@ -400,30 +443,53 @@ const InputEmailUrl = () =>
         Sleep();
         console.log("loop: " + i);
     }
-
-    if (!hasSearchInputBox && !hasLocationBar && !hasUrlBar)
+    for (let i = 0; i < 10; i++)
     {
-        alert("未发现输入框：", "输入网址失败");
-        return false;
-    }
-
-    console.log("set text: url: https://mail.google.com");
-    setText("https://accounts.google.com/v3/signin/identifier?continue=https%3A%2F%2Fmail.google.com%2Fmail%2F&ifkv=Ab5oB3qf7n2kJ0DkeNfW4CCNqYU37pmOSMWBPtyZzVGDdJnrZfPwECRIX01Jayqe0Yc5cR29ifDZGA&rip=1&sacu=1&service=mail&flowName=GlifWebSignIn&flowEntry=ServiceLogin&dsh=S18480657%3A1724727896300825&ddm=0");
-    Sleep();
-    if (textMatches(/(.*mail.google.com.*)/).findOne(3000))
-    {
+        RandomPress([345, 100, 56, 14]);
+        console.log("set text: url: https://mail.google.com");
+        setText("https://accounts.google.com/v3/signin/identifier?continue=https%3A%2F%2Fmail.google.com%2Fmail%2F&ifkv=Ab5oB3qf7n2kJ0DkeNfW4CCNqYU37pmOSMWBPtyZzVGDdJnrZfPwECRIX01Jayqe0Yc5cR29ifDZGA&rip=1&sacu=1&service=mail&flowName=GlifWebSignIn&flowEntry=ServiceLogin&dsh=S18480657%3A1724727896300825&ddm=0");
         Sleep();
-        console.log("固定点击第一个");
-        RandomPress([117, 195, 348, 48]);
-        console.log("输入邮箱网址完成。");
-        return true;
+        if (textMatches(/(.*mail.google.com.*)/).findOne(3000))
+        {
+            Sleep(3);
+            console.log("固定点击第一个");
+            RandomPress([117, 195, 348, 48]);
+            console.log("输入邮箱网址完成。");
+            Sleep(15);
+            for (let i = 0; i < 30; i++)
+            {
+                let hasAccountSelect = text("건너뛰기").findOne(20);
+                if (hasAccountSelect)
+                {
+                    console.log("发现邮箱关联账户，点击关联");
+                    Sleep(3);
+                    RandomPress([252, 1084, 218, 41]);
+                }
+                if (text("Use the web version").findOne(20))
+                {
+                    console.log("发现网页邮箱，输入邮箱地址成功，退出");
+                    return true;
+                }
+                if (text("Refresh").findOne(20))
+                {
+                    console.log("发现刷新按钮，输入邮箱地址成功退出");
+                    return true;
+                }
+                Sleep();
+            }
+
+        }
+        Sleep();
+
     }
+
     return false;
 };
 const GetEmailVerificationCode = () =>
 {
     console.log("开始获取邮箱验证码");
     app.launch("com.android.chrome");
+
 
     InputEmailUrl();
 
@@ -438,6 +504,13 @@ const GetEmailVerificationCode = () =>
             console.log("click web version");
             click(hasUseWebVersion.bounds().centerX(), hasUseWebVersion.bounds().centerY());
             Sleep(3);
+        }
+        let hasTranslateFlowty = text("한국어").findOne(20);
+        if (hasTranslateFlowty)
+        {
+            console.log("发现谷歌翻译，点击关闭");
+            Sleep(3);
+            RandomPress([651, 1211, 28, 29]);
         }
         hasRefreshIcon = text("Refresh").findOne(20);
         if (hasRefreshIcon)
@@ -463,30 +536,47 @@ const GetEmailVerificationCode = () =>
             has_positive_button.click();
         }
         let has_refresh_page = text("새로고침").findOne(20);
-        if (has_refresh_page)
+        let has_refreshBtn = text("Refresh").findOne(20);
+        if (has_refresh_page || has_refreshBtn)
         {
             console.log("发现重新加载按钮，重新加载页面");
-            click(has_refresh_page.bounds().centerX(), has_refresh_page.bounds().centerY());
-            Sleep(3);
-        }
-        let hasStoveEmail = textMatches(/(.*인증 메일 안내.*)/).findOne(20);
-        if (hasStoveEmail)
-        {
-            console.log("收到Stove邮件");
-            hasStoveEmail.click();
-            Sleep(2);
-        }
-        let hasLatestEmail = textMatches(/(.*minute.*)/).findOne(20);
-        if (hasLatestEmail)
-        {
-            console.log("发现最新的邮件");
-            let hasRecoveryCode = textMatches(/\d{6}/).findOne(20);
-            if (hasRecoveryCode)
+            if (has_refresh_page)
             {
-                code = hasRecoveryCode.text();
-                console.log("发现最新的邮件验证码: " + code);
-                break;
+                click(has_refresh_page.bounds().centerX(), has_refresh_page.bounds().centerY());
+                Sleep(5);
             }
+            if (has_refreshBtn)
+            {
+                has_refreshBtn.click();
+                Sleep(5);
+            }
+
+            let hasStoveEmail = textMatches(/(.*인증 메일 안내.*)/).findOne(20);
+            if (hasStoveEmail)
+            {
+                console.log("收到Stove邮件");
+                hasStoveEmail.click();
+                Sleep(2);
+            }
+            let hasLatestEmail = textMatches(/(.*minute.*)/).findOne(20);
+            if (hasLatestEmail)
+            {
+                console.log("发现最新的邮件");
+                //回到邮箱界面，才重新进入，刷新，避免获取旧的验证码
+                let hasRecoveryCode = textMatches(/\d{6}/).findOne(20);
+                if (hasRecoveryCode)
+                {
+                    code = hasRecoveryCode.text();
+                    console.log("发现最新的邮件验证码: " + code);
+                    break;
+                }
+            }
+        }
+        let hasInboxBtn = text("Inbox").findOne(20);
+        if (hasInboxBtn)
+        {
+            console.log("发现inbox 按钮");
+            hasInboxBtn.click();
         }
         Sleep();
     }
@@ -517,6 +607,14 @@ const LoginFlow = () =>
             Sleep();
             break;
         }
+        if (FindMultiColors(BlackBtnColorList, [270, 516, 745, 134]))
+        {
+            RandomPress([329, 558, 639, 40]);
+        }
+        if (FindMultiColors(BlackBtnColorList, [370, 362, 542, 107]))
+        {
+            RandomPress([420, 390, 438, 55]);
+        }
         Sleep();
     }
 
@@ -529,10 +627,23 @@ const LoginFlow = () =>
         if (FindMultiColors(BlackBtnColorList, [364, 354, 552, 136])) 
         {
             RandomPress([415, 391, 465, 48]);
-            console.log("邮箱验证完成！");
-            WaitUntilFindColor(BlackBtnColorList, [271, 524, 751, 119]) && RandomPress([338, 556, 606, 47]);
-            WaitUntilFindColor(BlackBtnColorList, [362, 363, 561, 116]) && RandomPress([431, 392, 424, 48]);
-            break;
+        }
+        if (FindMultiColors(BlackBtnColorList, [271, 524, 751, 119]))
+        {
+            RandomPress([338, 556, 606, 47]);
+        }
+        if (FindMultiColors(BlackBtnColorList, [362, 363, 561, 116]))
+        {
+            RandomPress([431, 392, 424, 48]);
+        }
+        if (FindMultiColors(BlackBtnColorList, [284, 529, 719, 106]))
+        {
+            RandomPress([373, 559, 561, 47]);
+        }
+        if (FindBlueBtn([651, 428, 172, 58]))
+        {
+            console.log("已验证完成，需要下载");
+            alert("已完成登录", "需要更新补丁");
         }
         Sleep();
     }
@@ -814,10 +925,11 @@ const SetName = () =>
         {
             ClickSkip();
         }
-        // let hasNeedInputVerificationCode =
         Sleep();
     }
     // RecycleServerImgList(verificationCodeImgList);
+    const config = ReadConfig();
+    let name = null;
     if (hasCreateCharacterBtn == true)
     {
         console.log("点击创建角色");
@@ -830,9 +942,10 @@ const SetName = () =>
         if (FindCheckMark([669, 431, 45, 41]))
         {
             RandomPress([509, 338, 263, 23]); //input box
-            setText(GenerateRandomName());
+            name = GenerateRandomName();
+            setText(name);
             Sleep();
-            RandomPress([1175, 647, 51, 22]); // keyboard confirm btn
+            RandomPress([1172, 520, 56, 25]); // keyboard confirm btn
             Sleep();
             RandomPress([686, 452, 77, 17]); //confirm
             Sleep();
@@ -849,9 +962,10 @@ const SetName = () =>
                 {
                     console.log("name error, try again");
                     RandomPress([496, 338, 288, 20]); //input box
-                    setText(GenerateRandomName());
+                    name = GenerateRandomName();
+                    setText(name);
                     Sleep();
-                    RandomPress([1175, 647, 51, 22]); // keyboard confirm btn
+                    RandomPress([1172, 520, 56, 25]); // keyboard confirm btn
                     RandomPress([685, 452, 84, 19]); //confirm
                     RandomPress([685, 452, 84, 19]); //confirm
                 }
@@ -863,6 +977,8 @@ const SetName = () =>
                 break;
             }
         }
+        config.game.name = name;
+        RewriteConfig("game", config.game);
     }
     else
     {
@@ -900,6 +1016,7 @@ const CreateCharacterFlow = (serverName) =>
     const isLogin = CheckLogin();
     if (!isLogin)
     {
+        console.log("**需要登录账号**");
         LoginFlow();
     }
     WaitUntilEnterServerSelectPage();
@@ -919,3 +1036,7 @@ const CreateCharacterFlow = (serverName) =>
 module.exports = {
     CreateCharacterFlow,
 };
+
+
+// console.log(GetEmailVerificationCode());
+// InputEmailUrl();

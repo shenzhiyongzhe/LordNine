@@ -6,15 +6,18 @@ const {
     FindImg, FindMultiColors, FindRedBtn, FindImgInList, FindBlueBtn, FindGoldBtn,
     GetVerificationCode,
     HasPageback, HasMenu, HasPopupClose,
-    IsInCity, IsHaltMode, LoadImgList, IsBackpackFull, LaunchGame,
-    PressBlank, PageBack, RewriteConfig,
-    ReadConfig, RestartGame, ReadImg, RandomPress, Sleep,
+    IsInCity, IsHaltMode, LoadImgList, IsBackpackFull,
+    LaunchGame,
+    PressBlank, PageBack, RewriteConfig, RecycleImgList,
+    ReadConfig, RestartGame, ReadImg, RandomPress,
+    Sleep, SwipeSlowly,
     WaitUntil, WaitUntilMenu, WaitUntilPageBack,
     ReturnHome,
 
+
 } = require("./utils.js");
 
-const { WearEquipments, StrengthenEquipment, DecomposeEquipment } = require("./Backpack.js");
+const { WearEquipments, StrengthenEquipment, DecomposeEquipment, BuyPotion } = require("./Backpack.js");
 
 const { LoginProps } = require("./CommonFlow.js");
 
@@ -38,6 +41,7 @@ gameConfig = gameConfig.game;
 const ExceptionImgList = {
     disconnection: LoadImgList("special/disconnection"),
     preventAutoLogin: LoadImgList("special/preventAutoLogin"),
+    missionFinishPickAward: LoadImgList("special/missionFinishPickAward"),
 };
 
 
@@ -56,70 +60,7 @@ const NoPotionFlow = (shot) =>
         }
         console.log("回家买药水...");
         lastTimeOfBuyingPotion = new Date().getTime();
-        const hasMenu = HasMenu();
-        if (!hasMenu)
-        {
-            console.log("未发现菜单按钮");
-            return false;
-        }
-        if (!IsInCity())
-        {
-            console.log("不在主城，先传送回家");
-            ReturnHome();
-        }
-
-        RandomPress([995, 433, 42, 41]); //grocery store
-        Sleep(5);
-        const BuySomeItem = () =>
-        {
-            let isBuyPotion = false;
-            let isBuySpeedBook = false;
-            let isBuyHealBook = false;
-            RandomPress([154, 93, 164, 39]); //小药的图标位置
-            RandomPress([600, 338, 30, 5]); //药水滚动条，购买量为50% ~ 60%负重
-            if (FindBlueBtn([648, 566, 175, 56]))
-            {
-                RandomPress([667, 578, 133, 29]);
-                Sleep();
-                console.log("购买药水成功！");
-                isBuyPotion = true;
-            }
-            RandomPress([168, 336, 126, 32]);
-            WaitUntil(() => HasPopupClose([791, 114, 46, 46]), 200, 30);
-            if (FindBlueBtn([644, 543, 180, 62]))
-            {
-                console.log("购买速度增加咒文书");
-                RandomPress([669, 556, 134, 32]);
-                Sleep();
-                isBuySpeedBook = true;
-            }
-            if (HasPopupClose([789, 86, 54, 58]))
-            {
-                RandomPress([806, 106, 18, 20]);
-            }
-            RandomPress([159, 489, 148, 40]);
-            WaitUntil(() => HasPopupClose([791, 114, 46, 46]), 200, 30);
-            if (FindBlueBtn([644, 543, 180, 62]))
-            {
-                RandomPress([669, 556, 134, 32]);
-                console.log("购买恢复增加咒文书");
-                isBuyHealBook = true;
-            }
-            if (isBuyPotion && isBuySpeedBook && isBuyHealBook)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        };
-        if (WaitUntilPageBack())
-        {
-            BuySomeItem();
-            Sleep();
-            PageBack();
-        }
+        BuyPotion();
     }
 };
 
@@ -129,15 +70,21 @@ const BackpackFullFlow = (shot) =>
     if (isBackpackFull)
     {
         console.log("背包已满，开始清理背包");
-        if ((new Date().getTime() - lastTimeClearBackpack) / 6000 < 10)
+        if ((new Date().getTime() - lastTimeClearBackpack) / 6000 > 10)
         {
             console.log("退出：连续清理背包时间间隔小于10分钟");
+            lastTimeClearBackpack = new Date().getTime();
+            WearEquipments();
+            StrengthenEquipment();
+            LoginProps();
+            DecomposeEquipment();
         }
-        lastTimeClearBackpack = new Date().getTime();
-        WearEquipments();
-        StrengthenEquipment();
-        LoginProps();
-        DecomposeEquipment();
+        else
+        {
+            LoginProps();
+            DecomposeEquipment();
+        }
+
     }
 };
 
@@ -508,11 +455,52 @@ const PressCommonBtn = () =>
     }
     else if (FindBlueBtn([487, 621, 307, 76], shot))
     {
-        console.log("发现制作核萌的确认按钮，点击确认");
-        RandomPress([527, 639, 243, 36]);
+        const joinGuildPageImgList = LoadImgList("icon/beginner/growthMission/joinGuild");
+        const hasGuildPage = FindImgInList(joinGuildPageImgList, [561, 644, 72, 69], shot);
+        if (hasGuildPage)
+        {
+            console.log("成长任务 6: 加入公会");
+            const RightOnJoinGuildImg = ReadImg('icon/font/rightNow');
+            const FindStraightAwayBtn = (region) => FindImg(RightOnJoinGuildImg, region);
+            let hasStrBtn = false;
+            for (let i = 0; i < 15; i++)
+            {
+                hasStrBtn = FindStraightAwayBtn([1136, 199, 54, 353]);
+                if (!hasStrBtn)
+                {
+                    SwipeSlowly([492, 516, 76, 27], [496, 210, 70, 25], 4);
+                }
+                else
+                {
+                    console.log("发现立即加入的按钮" + hasStrBtn);
+                    RandomPress([hasStrBtn.x - 20, hasStrBtn.y, 100, 20]);
+                    Sleep(3);
+                    RandomPress([1228, 19, 21, 21]);
+                }
+            }
+            RightOnJoinGuildImg.recycle();
+            RecycleImgList(joinGuildPageImgList);
+            Sleep();
+            RandomPress([1228, 20, 36, 25]);
+        }
+        const blueBtnImgList = LoadImgList("blueBtn/confirmBtn");
+        if (FindImgInList(blueBtnImgList, [588, 621, 99, 74]))
+        {
+            console.log("发现制作核萌的确认按钮，点击确认");
+            RandomPress([529, 637, 226, 37]);
+        }
+        RecycleImgList(blueBtnImgList);
+        RecycleImgList(joinGuildPageImgList);
     }
 };
-
+const PickMissionFinishAward = () =>
+{
+    if (FindImgInList(ExceptionImgList.missionFinishPickAward, [556, 159, 159, 69]))
+    {
+        console.log("发现任务完成，点击选择奖励");
+        RandomPress([449, 437, 384, 45]);
+    }
+};
 const MakeSureInGame = (shot) =>
 {
     if (!HasMenu())
@@ -522,6 +510,7 @@ const MakeSureInGame = (shot) =>
         PressCommonBtn();
         ClickSkip();
         InputVerificationFlow(shot);
+        PickMissionFinishAward();
     }
     else
     {

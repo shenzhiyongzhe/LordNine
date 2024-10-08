@@ -414,9 +414,9 @@ const ShopBuy = () =>
     ];
     const IsNotCheck = (region) => FindMultiColors(NotCheckedColorList, region);
 
-    if (FindBlueBtn([146, 632, 89, 79]))
+    if (FindBlueBtn([44, 641, 192, 69]))
     {
-        RandomPress([166, 657, 45, 34]);
+        RandomPress([87, 658, 119, 31]);
 
         for (let i = 0; i < 5; i++)
         {
@@ -467,7 +467,7 @@ const IncreaseWeaponFeatures = () =>
         [[525, 282, 21, 22], [525, 388, 24, 21], [526, 493, 21, 20]]
     ];
     const lv = FindNumber("lv", [46, 468, 61, 51]);
-    console.log("当前玩家等级为：" + lv);
+    console.log("武器特性，当前玩家等级为：" + lv);
     const config = ReadConfig();
     config.game.lv = lv;
     character_lv = lv;
@@ -897,7 +897,6 @@ const ComprehensiveImprovement = (retry) =>
         LoginProps();
         DecomposeEquipment();
     }
-    ClearPage();
     ClearPage();
     IncreaseWeaponFeatures();
     UpgradeHolyRelics();

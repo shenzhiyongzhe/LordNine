@@ -1,25 +1,19 @@
 
 const {
-    FindImg, FindBlueBtn, FindGoldBtn, FindCheckMark,
-    CloseBackpack,
-    RandomPress, ReadImg, Sleep, CloseMenu, ClickSkip,
-    FindMultiColors,
-    HasSkip, HasMenu, HasPopupClose, HasBackpackMenuClose,
-    PullDownSkill,
-    HasBackpackClose,
-
-
-    PressBlank,
-
-    WaitUntil,
-    OpenBackpack, OpenBackpackMenu, OpenMenu,
-    SwipeSlowly,
-    WaitUntilPageBack,
-    PageBack,
+    BuySkillBook,
+    CloseBackpack, ClearPage, ClickSkip, CloseMenu,
+    FindImg, FindBlueBtn, FindGoldBtn, FindCheckMark, FindImgInList, FindMultiColors,
+    GoToTheNPC,
+    HasSkip, HasMenu, HasPopupClose, HasBackpackMenuClose, HasBackpackClose,
+    IsInCity,
     LoadImgList,
-    RecycleImgList,
-    FindImgInList,
-    ClearPage,
+    WaitUntil, WaitUntilPageBack,
+    OpenBackpack, OpenBackpackMenu, OpenMenu,
+    PageBack, PressBlank, PullDownSkill,
+    RecycleImgList, RandomPress, ReadImg, ReturnHome,
+    SwipeSlowly, Sleep,
+
+
 } = require("./utils.js");
 
 const EquipColorList = [
@@ -33,6 +27,7 @@ const EquipColorList = [
     ["#f4f4f4", [[0, 1, "#f4f4f4"], [0, 3, "#f4f4f4"], [0, 4, "#f4f4f4"], [0, 5, "#f4f4f4"]]],
     ["#d5d5d4", [[0, 1, "#d6d6d6"], [0, 2, "#e5e5e5"], [0, 4, "#d5d5d4"], [0, 5, "#d6d6d6"]]],
     ["#efefef", [[0, 1, "#efefef"], [0, 2, "#f4f4f4"], [0, 3, "#efefef"], [0, 5, "#efefef"]]],
+    ["#fefefd", [[0, 1, "#fefefd"], [0, 2, "#fefefd"], [0, 3, "#fefefd"], [3, 2, "#f0f0f0"]]]
 ];
 
 const BackpackItemDetailColorList = {
@@ -68,8 +63,8 @@ const SingleStrengthenColorList = [
 ];
 
 // ********************  check ----------------------
-// const IsEquiped = (region, shot) => { shot = shot || captureScreen(); return FindMultiColors(EquipColorList, region, shot); };
-const IsEquiped = (region, shot) => { shot = shot || captureScreen(); return FindImgInList(isEquipedImgList, region, shot); };
+const IsEquiped = (region, shot) => { shot = shot || captureScreen(); return FindMultiColors(EquipColorList, region, shot); };
+// const IsEquiped = (region, shot) => { shot = shot || captureScreen(); return FindImgInList(isEquipedImgList, region, shot); };
 
 // const IsEmpty = (region, shot) => { shot = shot || captureScreen(); return FindMultiColors(EmptyGridColorList, region, shot); };
 const IsEmpty = (region, shot) => { shot = shot || captureScreen(); return FindImgInList(emptyGridImgList, region, shot); };
@@ -509,7 +504,7 @@ const WearEquipment = () =>
             }
             if (!HasMenu())
             {
-                console.log("不在背包页面跳过");
+                console.log("不在背包页面，退出");
                 break out;
             }
 
@@ -520,6 +515,7 @@ const WearEquipment = () =>
                 console.log("发现武器法杖。");
                 if (FindImgInList(magicWandImgList, [307, 147, 65, 41])) //当前身上是不是法杖
                 {
+                    console.log("当前装备已是法杖，判断品质是否更好");
                     if (IsBetterQuality())
                     {
                         RandomPress([955 + j * 62, 179 + i * 62, 24, 26]);
@@ -541,6 +537,7 @@ const WearEquipment = () =>
                 }
                 else
                 {
+                    console.log("当前身上穿的不是法杖，切换武器为法杖");
                     RandomPress([955 + j * 62, 179 + i * 62, 24, 26]);
                     Sleep(3.5);
                     if (!HasBackpackClose() && HasBackpackMenuClose())
@@ -554,14 +551,18 @@ const WearEquipment = () =>
                     }
                     hasWornEquipment = true;
                     return hasWornEquipment;
-                    // SortEquipment();
-                    continue;
+
                 }
 
             }
 
-            if (IsBetterQuality())
+            else if (IsBetterQuality())
             {
+                if (FindImgInList(magicWandImgList, [307, 147, 65, 41])) //当前身上是不是法杖
+                {
+                    console.log("当前穿的是法杖，暂不穿戴更高级的非法杖装备");
+                    continue;
+                }
                 console.log("当前装备品质更高");
                 RandomPress([955 + j * 62, 179 + i * 62, 24, 26]);
                 Sleep(3.5);
@@ -652,36 +653,49 @@ const AutoReleaseSkill = () =>
 const CheckSkillAutoRelease = () =>
 {
     console.log("检查技能是否装备与自动是否");
-    const checkPos = [
-        [390, 620, 90, 90],
-        [450, 620, 90, 90],
-        [510, 620, 90, 90]
-    ];
-    const quickItem_skillImgList = [
-        LoadImgList("icon/quickItem_skill/firstSkill"),
-        LoadImgList("icon/quickItem_skill/secondSkill"),
-        LoadImgList("icon/quickItem_skill/thirdSkill")
-    ];
-    const isReleaseSkill = [];
-
-    let shot = captureScreen();
-    for (let i = 0; i < checkPos.length; i++)
+    const HaveThreeSkill = () =>
     {
-        let isAuto = FindImgInList(quickItem_skillImgList[i], checkPos[i], shot);
-        if (isAuto)
+        const checkPos = [
+            [390, 620, 90, 90],
+            [450, 620, 90, 90],
+            [510, 620, 90, 90]
+        ];
+        const quickItem_skillImgList = [
+            LoadImgList("icon/quickItem_skill/firstSkill"),
+            LoadImgList("icon/quickItem_skill/secondSkill"),
+            LoadImgList("icon/quickItem_skill/thirdSkill")
+        ];
+        const isReleaseSkill = [];
+
+        let shot = captureScreen();
+        for (let i = 0; i < checkPos.length; i++)
         {
-            console.log("第" + (i + 1) + "个技能已开启自动释放");
-            isReleaseSkill.push(true);
-        } else
-        {
-            console.log("第" + (i + 1) + "个技能未开启自动释放");
+            let isAuto = FindImgInList(quickItem_skillImgList[i], checkPos[i], shot);
+            if (isAuto)
+            {
+                console.log("第" + (i + 1) + "个技能已开启自动释放");
+                isReleaseSkill.push(true);
+            } else
+            {
+                console.log("第" + (i + 1) + "个技能未开启自动释放");
+            }
         }
-    }
 
-    quickItem_skillImgList.forEach(imgList => RecycleImgList(imgList));
-    if (isReleaseSkill.length == 3)
+        quickItem_skillImgList.forEach(imgList => RecycleImgList(imgList));
+        if (isReleaseSkill.length == 3)
+        {
+            console.log("技能已全部开启自动释放");
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    };
+    let haveThreeSkill = HaveThreeSkill();
+    if (haveThreeSkill)
     {
-        console.log("技能已全部开启自动释放");
+        return true;
     }
     else
     {
@@ -689,6 +703,17 @@ const CheckSkillAutoRelease = () =>
         console.log("开始使用技能书与装备技能");
         OpenSkillBook();
         AutoReleaseSkill();
+        haveThreeSkill = HaveThreeSkill();
+        if (!haveThreeSkill)
+        {
+            console.log("需要去技能书商人那里购买技能书");
+            GoToTheNPC("skill");
+            BuySkillBook();
+            ClearPage();
+            OpenSkillBook();
+            AutoReleaseSkill();
+            ClearPage();
+        }
     }
     console.log("检查完毕");
 };
@@ -785,17 +810,28 @@ const StrengthenEquipment = () =>
     console.log("是否强化武器：" + hadStrengthenArmor);
     console.log("是否强化武器：" + hadStrengthenOrnament);
 };
+const DropSomeItem = () =>
+{
+    console.log("丢弃一些物品");
+
+};
 const DecomposeEquipment = () =>
 {
-    const hasOpen = OpenBackpack();
+    console.log("开始分解装备");
+    let hasOpen = OpenBackpack();
     if (hasOpen)
     {
         RandomPress([1043, 665, 23, 26]);
     }
     if (!WaitUntilEnterBackpackMenu())
     {
-        console.log("进入分解页面失败");
-        return false;
+        ClearPage();
+        hasOpen = OpenBackpack();
+        if (!hasOpen)
+        {
+            console.log("进入分解页面失败，退出");
+            return false;
+        }
     }
     const isDetailOnColorList = [
         ["#1d5d55", [[4, 0, "#ffffff"], [8, 0, "#ffffff"], [15, 0, "#1d5d55"], [36, 0, "#1d5d55"]]]
@@ -818,6 +854,10 @@ const DecomposeEquipment = () =>
             RandomPress([1105, 619, 16, 18]);
             for (let i = 0; i < 10; i++)
             {
+                if (FindCheckMark([407, 397, 37, 44])) //取消可记录装备
+                {
+                    RandomPress([420, 408, 96, 17]);
+                }
                 if (FindCheckMark([397, 394, 54, 50])) //包含强化装备
                 {
                     RandomPress([540, 408, 105, 17]);
@@ -837,12 +877,49 @@ const DecomposeEquipment = () =>
     {
         if (FindBlueBtn([379, 562, 230, 79]))
         {
-            RandomPress([407, 583, 171, 34], 3);
-            PressBlank();
-            CloseBackpack();
-            console.log("分解装备结束");
+            RandomPress([415, 582, 137, 36], 3);
+            if (FindBlueBtn([379, 562, 230, 79]))
+            {
+                console.log("背包空间不足，先不分解");
+                for (let i = 0; i < 8; i++)
+                {
+                    RandomPress([240, 127, 37, 36], 2);
+                }
+                if (FindBlueBtn([379, 562, 230, 79]))
+                {
+                    RandomPress([415, 582, 137, 36], 3);
+                    PressBlank();
+                    CloseBackpack();
+
+                    console.log("分解装备结束");
+                    if (HasMenu())
+                    {
+                        return true;
+                    }
+                }
+
+            }
+            else
+            {
+                PressBlank();
+                CloseBackpack();
+                console.log("分解装备结束");
+                if (HasMenu())
+                {
+                    return true;
+                }
+            }
+
+
         }
-        ClearPage();
+        if (HasMenu())
+        {
+            return true;
+        }
+        else
+        {
+            ClearPage();
+        }
         Sleep();
     }
 
@@ -947,20 +1024,105 @@ const UnAutoPotion = () =>
     CloseBackpack();
     return isSuccess;
 };
+const BuyPotion = () =>
+{
+    const hasMenu = HasMenu();
+    if (!hasMenu)
+    {
+        for (let i = 0; i < 10; i++)
+        {
+            ClearPage();
+            Sleep();
+            if (HasMenu())
+            {
+                break;
+            }
+        }
+        console.log("未发现菜单按钮,退出");
+        return false;
+    }
+    ClearPage();
+    if (!IsInCity())
+    {
+        console.log("不在主城，先传送回家");
+        ReturnHome();
+    }
+    RandomPress([995, 433, 42, 41]); //grocery store
+    Sleep(5);
+    const BuySomeItem = () =>
+    {
+        let isBuyPotion = false;
+        let isBuySpeedBook = false;
+        let isBuyHealBook = false;
+        RandomPress([154, 93, 164, 39]); //小药的图标位置
+        RandomPress([600, 338, 30, 5]); //药水滚动条，购买量为50% ~ 60%负重
+        if (FindBlueBtn([648, 566, 175, 56]))
+        {
+            RandomPress([667, 578, 133, 29]);
+            Sleep();
+            console.log("购买药水成功！");
+            isBuyPotion = true;
+        }
+        RandomPress([168, 336, 126, 32]);
+        WaitUntil(() => HasPopupClose([791, 114, 46, 46]), 200, 30);
+        if (FindBlueBtn([644, 543, 180, 62]))
+        {
+            console.log("购买速度增加咒文书");
+            RandomPress([669, 556, 134, 32]);
+            Sleep();
+            isBuySpeedBook = true;
+        }
+        if (HasPopupClose([789, 86, 54, 58]))
+        {
+            RandomPress([806, 106, 18, 20]);
+        }
+        RandomPress([159, 489, 148, 40]);
+        WaitUntil(() => HasPopupClose([791, 114, 46, 46]), 200, 30);
+        if (FindBlueBtn([644, 543, 180, 62]))
+        {
+            RandomPress([669, 556, 134, 32]);
+            console.log("购买恢复增加咒文书");
+            isBuyHealBook = true;
+        }
+        if (isBuyPotion && isBuySpeedBook && isBuyHealBook)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    };
+    if (WaitUntilPageBack())
+    {
+        const isBuySuccess = BuySomeItem();
+        Sleep();
+        PageBack();
+        console.log("购买药水是否成功：" + isBuySuccess);
+        return isBuySuccess;
+    }
+    else
+    {
+        console.log("购买失败");
+        return false;
+    }
 
+};
 
 module.exports = {
     OpenAllBox,
     OpenSkillBook, AutoReleaseSkill, CheckSkillAutoRelease,
     WearEquipments, StrengthenEquipment, DecomposeEquipment,
     UseHolyGrail, WearBestSuit,
-    AutoPotion, UnAutoPotion,
+    AutoPotion, UnAutoPotion, BuyPotion,
 };
+// BuyPotion();
 // DecomposeEquipment();
-// WearEquipment();
+// WearEquipments();
 // const magicWandImgList = LoadImgList("backpack/magicWand");
 // console.log(FindImgInList(magicWandImgList, [296, 141, 73, 49]));
-// console.log(IsEmpty([990, 345, 70, 64]));
+// console.log(IsEmpty([282, 199, 39, 50]));
+// console.log(IsEquiped([283, 205, 31, 40]));
 
 // UnAutoPotion();
 // OpenEquipmentBox("armor");
