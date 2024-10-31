@@ -181,6 +181,18 @@ body {
     background-color: #66f29a;
 }
 
+#countdown {
+    position: absolute;
+    width: 140px;
+    height: 0;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: darkcyan;
+    color: #ffffff;
+    font-size: 14px;
+}
 
 .footer {
     position: fixed;

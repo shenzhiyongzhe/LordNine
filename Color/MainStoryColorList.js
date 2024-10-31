@@ -324,10 +324,7 @@ const BlankColorList = [
     ["#f5f7c1", [[17, -3, "#fcffc6"], [35, -3, "#f9fcc3"], [53, 0, "#fbfdc6"], [70, -2, "#f1f3be"]]]
 ];
 
-const QuestionMarkColorList = [
-    ["#d5b0ff", [[7, -1, "#d4affd"], [3, 3, "#d0acfa"], [9, 6, "#b595d8"], [1, 7, "#cca8f4"]]],
-    ["#d5b0ff", [[7, -3, "#d5b0ff"], [0, 5, "#c6a3ed"], [11, 4, "#b192d4"], [3, 2, "#d5b0ff"]]]
-];
+
 const NextColorList = [
     ["#ffd074", [[3, 0, "#ffd074"], [8, -5, "#ffd074"], [12, -1, "#ffd074"], [8, 5, "#ffd074"]]],
     ["#ffd074", [[7, -4, "#fccf73"], [7, 5, "#ffd074"], [12, 0, "#ffd074"], [11, -1, "#ecc16c"]]],
@@ -349,11 +346,11 @@ const Auto_activeColorList = [
 const QuestColorList = [
     ["#fcfaf6", [[11, 0, "#fff2e7"], [20, 0, "#fbe4cb"], [30, 0, "#fdf0e1"], [40, 0, "#fffcfa"]]],
     ["#fef7ef", [[3, -1, "#f4e3cf"], [11, -1, "#fdebd6"], [25, 1, "#f8eadc"], [32, 1, "#fffcfa"]]],
-    ["#fcf2e9", [[3, 0, "#fff2e7"], [12, 0, "#fce7cf"], [25, 1, "#f1e2cf"], [33, 1, "#c3a374"]]]
+    ["#fcf2e9", [[3, 0, "#fff2e7"], [12, 0, "#fce7cf"], [25, 1, "#f1e2cf"], [33, 1, "#c3a374"]]],
+    ["#dccb96", [[0, 2, "#dccb96"], [13, -1, "#dccb96"], [13, 1, "#dbc996"], [10, 7, "#dccb96"]]],
+    ["#d9c692", [[13, -2, "#d9c691"], [13, 1, "#d8c491"], [0, 1, "#d9c692"], [10, 6, "#d9c692"]]]
 ];
-const RidingColorList = [
-    ["#553e55", [[9, 0, "#ffffff"], [9, 8, "#ffffff"], [18, 4, "#ffffff"], [24, 8, "#5a4158"]]]
-];
+
 
 const LeaveColorList = [
     ["#dccb96", [[-2, 5, "#ccba8b"], [-1, 17, "#bdad80"], [7, 8, "#dccb96"], [13, 9, "#cdbc8b"]]]
@@ -375,6 +372,6 @@ const SpeedUpOffColorList = [
 ];
 
 module.exports = {
-    TipColorList, ArrowColorList, BlankColorList, QuestionMarkColorList, NextColorList, Auto_inactiveColorList, Auto_activeColorList, QuestColorList, RidingColorList,
+    TipColorList, ArrowColorList, BlankColorList, NextColorList, Auto_inactiveColorList, Auto_activeColorList, QuestColorList,
     LeaveColorList, TalkBubbleColorList, SpeedUpOffColorList, NPCTalkBubbleColorList
 };

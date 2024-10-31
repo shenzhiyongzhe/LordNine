@@ -1,25 +1,30 @@
 
 const GetCaptureScreenPermission = () =>
 {
-    requestScreenCapture(true);
-    const img = captureScreen();
-    toast(img.getWidth() + " x " + img.getHeight());
-
-};
-threads.start(GetCaptureScreenPermission);
-
-threads.start(function ()
-{
-    let hasOpen = textMatches(/(.*시작하기.*|.*立即开始.*)/).findOne(2000);
-    if (hasOpen)
+    threads.start(() =>    
     {
-        hasOpen.click();
-    }
-});
+        requestScreenCapture(true);
+        const img = captureScreen();
+        toast(img.getWidth() + " x " + img.getHeight());
+    });
+    device.setMusicVolume(0);
+    threads.start(() =>
+    {
+        let hasOpen = textMatches(/(.*시작하기.*|.*立即开始.*)/).findOne(2000);
+        if (hasOpen)
+        {
+            hasOpen.click();
+        }
+    });
+};
+
+GetCaptureScreenPermission();
+
 // engines.stopAllAndToast();
 //com.smilegate.lordnine.stove.google
-//
+// 10.6.130.129
 //adb -s 10.245.81.17:5555  pull /sdcard/脚本/LordNine/build/lordnine_v1.0.0.apk C:/nginx/Rom/LordNine.apk
+//adb -s 10.245.81.17:5555  pull /sdcard/脚本/LordNine/build/lordnine_v1.0.1.apk C:/nginx/Rom/LordNineBeta.apk
 
 //adb -s 10.245.81.17:5555  shell pm enable org.autojs.autoxjs.v6
 

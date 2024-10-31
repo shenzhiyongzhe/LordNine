@@ -1,6 +1,6 @@
 "ui";
 
-const { RewriteConfig, Sleep, specialConfig, LaunchGame, GetCaptureScreenPermission, } = require("./utils");
+const { RewriteConfig, Sleep, specialConfig, LaunchGame, ReadConfig, } = require("./utils");
 const { ExceptionFlow } = require("./Exception");
 const { MainStoryFlow } = require("./MainStory.js");
 
@@ -10,16 +10,34 @@ let isRunning = false;
 
 let mainThread;
 let launch_ui_config = null;
+
+const GetCaptureScreenPermission = () =>
+{
+    threads.start(function ()
+    {
+        auto();
+        images.requestScreenCapture(true);
+    });
+
+    threads.start(function ()
+    {
+        let hasOpen = textMatches(/(.*시작하기.*|.*立即开始.*)/).findOne(10000);
+        if (hasOpen)
+        {
+            hasOpen.click();
+        }
+    });
+};
+const StopScript = () => java.lang.System.exit(0);
+
 function StartScript(uiData)
 {
     console.log("JSBridge，页面数据为: " + uiData);
 
-    // GetCaptureScreenPermission();
-
     if (isRunning == true)
     {
         console.log("结束");
-        java.lang.System.exit(0);
+        StopScript();
         // engines.stopAllAndToast();
         // exit();
     }
@@ -28,24 +46,14 @@ function StartScript(uiData)
         mainThread = threads.start(function ()
         {
             isRunning = true;
-            auto();
-            images.requestScreenCapture(true);
-            // threads.start(function ()
-            // {
-            //     let hasOpen = textMatches(/(.*시작하기.*|.*立即开始.*)/).findOne(2000);
-            //     if (hasOpen)
-            //     {
-            //         hasOpen.click();
-            //     }
-            // });
             uiData = JSON.parse(uiData);
             launch_ui_config = uiData;
-            toast("启动游戏");
             specialConfig.gameMode = uiData.gameMode;
             specialConfig.initGameMode = uiData.gameMode;
             MainFlow(uiData);
         }
         );
+
     }
 }
 
@@ -104,6 +112,7 @@ const AutoInstallApk = (url) =>
     }
 };
 const UpdateScript = () => DownLoadApk("LordNine.apk", "LordNine/LordNine.apk");
+const UpdateToBetaScript = () => DownLoadApk("LordNineBeta.apk", "LordNine/LordNineBeta.apk");
 const DownloadAutoJs = () => DownLoadApk("AutoJs.apk", "AutoJs.apk");
 const ChangeVPNSetting = () =>
 {
@@ -263,7 +272,6 @@ const ChangeVPNSetting = () =>
 
     console.log("设置完毕");
 };
-
 const UI = () =>
 {
     ui.layout(`
@@ -287,6 +295,14 @@ const UI = () =>
         // AutoInstallApk("LordNine/LordNine.apk");
         callBack("successful");
     });
+    ui.web.jsBridge.registerHandler("UpdateToBetaVersion", (data, callBack) =>
+    {
+        toast("开始测试版脚本");
+        UpdateToBetaScript();
+
+        // AutoInstallApk("LordNine/LordNine.apk");
+        callBack("successful");
+    });
     ui.web.jsBridge.registerHandler("DownloadAutoJs", (data, callBack) =>
     {
         DownloadAutoJs();
@@ -297,20 +313,51 @@ const UI = () =>
         ChangeVPNSetting();
         callBack("change vpn successfully");
     });
+    ui.web.jsBridge.registerHandler("GetCaptureScreenPermission", (data, callBack) =>
+    {
+        console.log(data);
+        GetCaptureScreenPermission();
+        callBack("获取屏幕权限成功");
+    });
+    ui.web.jsBridge.registerHandler("StopScript", (data, callBack) =>
+    {
+        console.log(data);
+        callBack("ui点击事件：停止脚本");
+    });
+    setTimeout(() =>
+    {
+        const localJson = ReadConfig();
+        if (!localJson.game.delayTime)
+        {
+            localJson.game.delayTime = random(0, 600);
+            RewriteConfig(localJson);
+        }
+        ui.web.jsBridge.callHandler("GetConfig", JSON.stringify(localJson), (callBack) =>
+        {
+            toastLog("读取配置文件成功");
+            console.log(JSON.stringify(localJson));
+            callBack("set config successfully");
+        }
+        );
+    }, 3000);
+
 };
 
 console.setGlobalLogConfig({
     "file": "/sdcard/LordNine/log.txt",
     "filePattern": "%d{dd日}%m%n"
 });
-
+// const react_icon = "file://img/react.png";
+const cat_icon = "file://img/cat.png";
 const floaty_window = floaty.window(
-    <frame gravity="center" id="switch" w="12" h="20" bg="#79BEDB" alpha="1">
-        <text id="debug" textColor="#7FA1C3"></text>
+    <frame gravity="center" id="switch" alpha="1" w="18" h="18" bg="#ffffff">
+        {/* <text id="income" color="#ff5722" h="12" textSize="12sp">0000</text>
+         */}
+        <img src="{{cat_icon}}"></img>
     </frame>
 );
 
-floaty_window.setPosition(0, 680);
+floaty_window.setPosition(0, 682);
 
 floaty_window.switch.click(function ()
 {
@@ -337,8 +384,9 @@ floaty_window.switch.click(function ()
 const Start = (uidata) =>
 {
     LaunchGame();
-    console.log("Start: ui data:" + uidata.createCharacter);
-    RewriteConfig("ui", uidata);
+    const config = ReadConfig();
+    config.ui = uidata;
+    RewriteConfig(config);
     if (uidata.createCharacter == true)
     {
         console.log("开始导入创建角色模块");
@@ -383,4 +431,5 @@ const MainFlow = (uidata) =>
 };
 
 UI();
-// ChangeVPNSetting();
+
+

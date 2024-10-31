@@ -5,7 +5,7 @@ const {
     ExitHaltMode,
     FindImg, FindMultiColors, FindRedBtn, FindImgInList, FindBlueBtn, FindGoldBtn,
     GetVerificationCode,
-    HasPageback, HasMenu, HasPopupClose,
+    HasPageback, HasMenu, HasPopupClose, HaveMainStoryIcon,
     IsInCity, IsHaltMode, LoadImgList, IsBackpackFull,
     LaunchGame,
     PressBlank, PageBack, RewriteConfig, RecycleImgList,
@@ -21,30 +21,44 @@ const { WearEquipments, StrengthenEquipment, DecomposeEquipment, BuyPotion } = r
 
 const { LoginProps } = require("./CommonFlow.js");
 
-const { HasTip } = require("./MainStory.js");
-
 const { NoPotionColorList, LordNineWordColorList, WhiteAvatarColorList, StartBtnSettingColorList, CrucifixColorList } = require("./Color/ExceptionColorList.js");
+const { TipColorList } = require("./Color/MainStoryColorList.js");
 
 let lastTimeOfBuyingPotion = 1726208812345;
 let lastTimeClearBackpack = 1726208812345;
-let lastDebugModeTime = 0;
+let loginCount = 1;
+
 let lastGetVerificationCodeTime = 0;
 let totalGetVerificationCodeTimes = 0;
 
 let lastGetFullScreen = new Date().getTime(); // 异常判断，每10分钟截屏一次
 let fullScreenClip = null;
 
-let gameConfig = ReadConfig();
-gameConfig = gameConfig.game;
+let lastResetConfigTime = 1726208812345;
 
 
 const ExceptionImgList = {
     disconnection: LoadImgList("special/disconnection"),
     preventAutoLogin: LoadImgList("special/preventAutoLogin"),
     missionFinishPickAward: LoadImgList("special/missionFinishPickAward"),
+    notice_confirm: LoadImgList("special/notice_confirm"),
+    identifySuccessfully: LoadImgList("backpack/identifySuccessfully"),
+    loading: LoadImgList("special/loading"),
+    confirmToGo: LoadImgList("special/confirmToGo"),
+    quickMoving: LoadImgList("icon/font/quickMoving")
+
 };
-
-
+const HasTip = (region, shot) =>
+{
+    region = region || [0, 0, 1280, 720];
+    shot = shot || captureScreen();
+    return FindMultiColors(TipColorList, region, shot);
+};
+const HaveLordNineWord = (shot) =>
+{
+    shot = shot || captureScreen();
+    return FindMultiColors(LordNineWordColorList, [313, 333, 728, 354], shot);
+};
 // flow -----
 const NoPotionFlow = (shot) =>
 {
@@ -53,9 +67,9 @@ const NoPotionFlow = (shot) =>
     {
         console.log("角色当前没有药水了 ");
         const buyPotionInterval = (new Date().getTime() - lastTimeOfBuyingPotion) / 60000;
-        if (buyPotionInterval < 10) 
+        if (buyPotionInterval < 3) 
         {
-            console.log("连续购买药水时间间隔小于10分钟，不重复购买");
+            console.log("连续购买药水时间间隔小于3分钟，不重复购买");
             return true;
         }
         console.log("回家买药水...");
@@ -70,9 +84,8 @@ const BackpackFullFlow = (shot) =>
     if (isBackpackFull)
     {
         console.log("背包已满，开始清理背包");
-        if ((new Date().getTime() - lastTimeClearBackpack) / 6000 > 10)
+        if ((new Date().getTime() - lastTimeClearBackpack) / 60000 > 15)
         {
-            console.log("退出：连续清理背包时间间隔小于10分钟");
             lastTimeClearBackpack = new Date().getTime();
             WearEquipments();
             StrengthenEquipment();
@@ -81,10 +94,8 @@ const BackpackFullFlow = (shot) =>
         }
         else
         {
-            LoginProps();
-            DecomposeEquipment();
+            console.log("退出：连续清理背包时间间隔小于15分钟");
         }
-
     }
 };
 
@@ -107,14 +118,18 @@ const IsTimeout = () =>
 };
 const DisconnectionFlow = (shot) =>
 {
-    let hasDisconnection = FindImgInList(ExceptionImgList.disconnection, [595, 229, 84, 49], shot);
-    if (hasDisconnection)
+    if (FindBlueBtn([556, 430, 167, 55], shot))
     {
-        console.log("game disconnection");
-        let hasBlueBtn = FindBlueBtn([446, 323, 396, 173]);
-        if (hasBlueBtn)
+        let hasDisconnection = FindImgInList(ExceptionImgList.disconnection, [551, 222, 172, 65], shot);
+        if (hasDisconnection)
         {
-            RandomPress([hasBlueBtn.x, hasBlueBtn.y, 15, 5]);
+            console.log("@游戏断开连接");
+            RandomPress([587, 445, 111, 22], 20);
+            if (HaveLordNineWord())
+            {
+                console.log("游戏没有退出，继续游戏");
+                return true;
+            }
             const delayTime = random(300, 600);
             console.log("游戏延迟启动时间: " + delayTime + "s");
             let isTimeout = IsTimeout();
@@ -123,27 +138,59 @@ const DisconnectionFlow = (shot) =>
                 console.log("vpn is time out");
                 alert("time out", "需要更换ip");
             }
+            app.launch("com.lordnine");
 
+            ui.web.jsBridge.callHandler("ShowCountDownPopup", delayTime, (data) => console.log(data));
             Sleep(delayTime);
             LaunchGame();
-            if (typeof gameConfig.reconnectionTime == "number")
+            const config = ReadConfig();
+
+            if (typeof config.game.reconnectionTime == "number")
             {
-                gameConfig.reconnectionTime++;
+                config.game.reconnectionTime++;
             }
             else
             {
-                gameConfig.reconnectionTime = 1;
+                config.game.reconnectionTime = 1;
             }
-            console.log("重连次数: " + gameConfig.reconnectionTime);
-            RewriteConfig("game", gameConfig);
-            if (gameConfig.reconnectionTime >= 100)
+            console.log("今日重连次数: " + config.game.reconnectionTime);
+            RewriteConfig(config);
+            if (config.game.reconnectionTime >= 100)
             {
                 console.log("重连次数超过100次，退出游戏");
                 alert("Disconnection", "重连次数超过100次，退出游戏");
             }
+
         }
     }
 
+    if (FindImgInList(ExceptionImgList.loading, [23, 664, 59, 43]))
+    {
+        console.log("@正在加载地图中...");
+        console.log("开始等待地图加载完成");
+        let needRestartGame = true;
+        for (let i = 0; i < 60; i++)
+        {
+            if (HasMenu())
+            {
+                console.log("地图加载完成");
+                needRestartGame = false;
+                break;
+            }
+            else if (HaveMainStoryIcon())
+            {
+                console.log("地图加载完成");
+                needRestartGame = false;
+                break;
+            }
+            Sleep(3);
+        }
+        if (needRestartGame)
+        {
+            console.log("加载时间过长，开始重启游戏");
+            RestartGame("com.smilegate.lordnine.stove.google", 3);
+        }
+    }
 };
 const InputVerificationFlow = (shot) =>
 {
@@ -185,7 +232,7 @@ const InputVerificationFlow = (shot) =>
 };
 const MainUIFlow = (shot) =>
 {
-    if (FindMultiColors(LordNineWordColorList, [313, 333, 728, 354], shot))
+    if (HaveLordNineWord(shot))
     {
         if (FindMultiColors(WhiteAvatarColorList, [32, 600, 52, 49], shot))
         {
@@ -205,10 +252,8 @@ const PickUpAbilityPoint = () =>
 {
     console.log("开始恢复属性点或装备");
     let hadPickupEquipment = false;
-
-    const LostEquipmentColorList = [
-        ["#b6b6b6", [[1, 0, "#b7b7b6"], [9, 0, "#b6b6b6"], [11, 0, "#b7b7b6"], [5, 4, "#b7b7b6"]]]
-    ];
+    const lostEquipmentImgList = LoadImgList("icon/deathPunishment/lostEquipment");
+    const lostAbilityPointImgList = LoadImgList("icon/deathPunishment/lostAbilityPoint");
     RandomPress([337, 73, 21, 23]);
     if (WaitUntil(() => HasPopupClose([34, 94, 46, 53])))
     {
@@ -219,14 +264,23 @@ const PickUpAbilityPoint = () =>
         else
         {
             console.log("免费次数使用完，使用金币恢复");
-            RandomPress([365, 263, 16, 17]);
+            const abilityPontType = FindImgInList(lostAbilityPointImgList, [170, 167, 65, 353]);
+            if (abilityPontType)
+            {
+                RandomPress([365, abilityPontType.y, 15, 15]);
+            }
+            else
+            {
+                RandomPress([365, 263, 16, 17]);
+                RandomPress([365, 188, 16, 16]);
+            }
             RandomPress([123, 547, 98, 43]);
             if (FindBlueBtn([138, 604, 216, 66]))
             {
                 RandomPress([170, 622, 157, 30]);
             }
         }
-        if (FindMultiColors(LostEquipmentColorList, [272, 103, 58, 41]))
+        if (!FindImgInList(lostEquipmentImgList, [306, 102, 40, 43]))
         {
             console.log("发现死亡次数过多，丢失装备");
             RandomPress([286, 112, 94, 25]); //装备页面
@@ -261,55 +315,34 @@ const PickUpAbilityPoint = () =>
     {
         WearEquipments();
     }
+    RecycleImgList(lostEquipmentImgList);
+    RecycleImgList(lostAbilityPointImgList);
 };
-const AddAttributePoint = () =>
-{
-    const PlusAbilityIcon = [
-        ["#8f7f4f", [[14, 0, "#ab995f"], [6, -7, "#b19d62"], [7, 0, "#af9c62"], [7, 6, "#b7a366"]]],
-        ["#86774a", [[3, 0, "#90804f"], [15, 0, "#b4a165"], [9, -6, "#e8cf84"], [8, 6, "#928251"]]],
-        ["#86774a", [[7, 0, "#978754"], [14, 0, "#b09d62"], [9, -6, "#e8cf84"], [9, 5, "#b4a165"]]],
-        ["#8e7e4e", [[6, 0, "#837448"], [13, 0, "#b7a366"], [7, -7, "#f0d789"], [7, 6, "#b6a266"]]]
-    ];
-    if (!FindMultiColors(PlusAbilityIcon, [615, 461, 57, 58]))
-    {
-        return false;
-    }
-    else
-    {
-        console.log("开始点击属性点");
-        RandomPress([632, 479, 19, 20]);
-        console.log("等到属性点窗口出现...");
-        WaitUntil(() => HasPopupClose([32, 96, 47, 54]));
-        for (let i = 0; i < 10; i++)
-        {
-            RandomPress([522, 171, 98, 22]); // dex 
-            RandomPress([695, 349, 25, 21]); //max dex
-            if (FindGoldBtn([580, 657, 167, 29]))
-            {
-                RandomPress([587, 659, 161, 28]);
-            }
-            if (HasPopupClose([37, 107, 33, 33]))
-            {
-                RandomPress([45, 112, 21, 21]);
-                break;
-            }
-            Sleep(1);
-        }
 
-    }
-
-
-};
 const ResetConfig = () =>
 {
-    if (gameConfig.today != new Date().getDate())
+    if ((new Date().getTime() - lastResetConfigTime) / 3600000 > 12)
     {
-        console.log("reset config");
-        gameConfig.today = new Date().getDate();
-        gameConfig.deathTime = 0;
-        gameConfig.reconnectionTime = 0;
-        gameConfig.dailyInstance = false;
-        RewriteConfig("game", gameConfig);
+        lastResetConfigTime = new Date().getTime();
+        const config = ReadConfig();
+        const newDay = new Date().getDate();
+        if (config.game.today != newDay)
+        {
+            console.log("新的一天，重置配置");
+            config.game.today = newDay;
+            config.game.deathTime = 0;
+            config.game.reconnectionTime = 0;
+
+            config.game.dailyInstance = false;
+            config.game.dailyMission = false;
+
+            config.game.dailyShop = false;
+            config.game.guildDonation = false;
+            config.game.friendshipDonation = false;
+            config.game.accepteDailyMission = false;
+            
+            RewriteConfig(config);
+        }
     }
 };
 
@@ -320,7 +353,7 @@ const ReLoginFlow = () =>
     {
         hasGoogleLogin.parent().click();
     }
-    const hasSelectAccount = textMatches(/(.*选择账号.*|.*계정 선택.*|.*Choose an account.*)/).findOne(20);
+    const hasSelectAccount = textMatches(/(.*选择账号.*|.*계정 선택.*|.*Choose an account.*|.*选择帐号.*)/).findOne(20);
     if (hasSelectAccount)
     {
         const hasAccount = textMatches(/(.*@gmail.com.*)/).findOne(20).parent().parent();
@@ -334,33 +367,63 @@ const ReLoginFlow = () =>
 
 
 
-const ExceptionFlow = () =>
-{
-    const shot = captureScreen();
-    // let curMinute = new Date().getMinutes();
-    // if (curMinute != lastDebugModeTime)
-    // {
-    //     console.log("debug mode: " + gameMode);
-    //     lastDebugModeTime = curMinute;
-    // }
-
-    BackpackFullFlow(shot);
-    NoPotionFlow(shot);
-    DisconnectionFlow(shot);
-
-    ResetConfig();
-    MakeSureInGame(shot);
-};
-
 // *******************************************************************  确保在游戏中 *********************************************************************
 
-const ClickRate = () =>
+const StovePopup = () =>
 {
     let hasRate = text("나중에").findOne(20);
     if (hasRate)
     {
         console.log("发现游戏评分窗口，点击返回");
         click(hasRate.bounds().centerX(), hasRate.bounds().centerY());
+    }
+    let hasRate_ch = text("以后再说").findOne(20);
+    if (hasRate_ch)
+    {
+        console.log("发现游戏评分窗口，以后再说");
+        click(hasRate_ch.bounds().centerX(), hasRate_ch.bounds().centerY());
+    }
+    const hasUpdateNotice = textMatches(/.*詳細維護資訊請參考官方公告。.*/).findOne(20);
+    if (hasUpdateNotice)
+    {
+        console.log("发现游戏公告弹窗，关闭脚本");
+        engines.stopAllAndToast();
+    }
+    const hasLimitAccount = textMatches(/(.*服務使用限制介紹.*)/).findOne(20);
+    if (hasLimitAccount)
+    {
+        console.log("检测到账号被封，关闭脚本");
+        engines.stopAllAndToast();
+    }
+    const agreeAllToContinue = text("全部同意後繼續（包含可選項目）").findOne(20);
+    if (agreeAllToContinue)
+    {
+        console.log("发现游戏协议弹窗，点击同意");
+        agreeAllToContinue.click();
+    }
+};
+const PressSomeTip = (shot) =>
+{
+    shot = shot || captureScreen();
+    if (HasTip([446, 494, 70, 44], shot))
+    {
+        console.log("公会tip");
+        RandomPress([536, 659, 213, 35]);
+    }
+    if (HasTip([277, 481, 35, 25], shot))
+    {
+        console.log("第一个技能，tip");
+        RandomPress([408, 651, 29, 30]);
+    }
+    if (HasTip([768, 431, 43, 29], shot))
+    {
+        console.log("第一个装备穿戴的tip");
+        RandomPress([851, 596, 47, 23]);
+    }
+    if (HasTip([572, 112, 74, 50]))
+    {
+        console.log("第一个装备栏tip");
+        RandomPress([947, 171, 38, 34]);
     }
 };
 const LongTimeSamePage = (shot) =>
@@ -402,24 +465,15 @@ const PressCommonBtn = () =>
             RandomPress([1030, 659, 95, 34]);
         }
     }
-    else if (FindBlueBtn([657, 382, 203, 68], shot))
+    if (FindBlueBtn([657, 382, 203, 68], shot))
     {
-        if (FindRedBtn([419, 381, 207, 69], shot))
+        if (FindImgInList(ExceptionImgList.quickMoving, [657, 443, 198, 65], shot))
         {
-            console.log("发现地图传送弹窗，点击传送");
-            RandomPress([684, 400, 152, 30]);
+            console.log("快速移动按钮...");
+            RandomPress([677, 458, 155, 30], 5);
         }
     }
-    else if (FindBlueBtn([654, 444, 202, 66], shot))
-    {
-        if (FindRedBtn([423, 438, 219, 77]))
-        {
-            console.log("主线传送按钮...");
-            RandomPress([684, 460, 152, 31]);
-        }
-
-    }
-    else if (FindBlueBtn([655, 380, 207, 68], shot))
+    if (FindBlueBtn([655, 380, 207, 68], shot))
     {
         if (FindRedBtn([423, 380, 204, 69], shot))
         {
@@ -428,7 +482,7 @@ const PressCommonBtn = () =>
 
         }
     }
-    else if (FindBlueBtn([645, 563, 185, 61], shot))
+    if (FindBlueBtn([645, 563, 185, 61], shot))
     {
         if (FindRedBtn([456, 566, 181, 55], shot))
         {
@@ -436,7 +490,7 @@ const PressCommonBtn = () =>
             RandomPress([485, 559, 131, 26]);
         }
     }
-    else if (FindBlueBtn([1055, 637, 219, 71], shot))
+    if (FindBlueBtn([1055, 637, 219, 71], shot))
     {
         if (HasPageback())
         {
@@ -445,7 +499,7 @@ const PressCommonBtn = () =>
         }
 
     }
-    else if (FindBlueBtn([655, 443, 197, 65], shot))
+    if (FindBlueBtn([655, 443, 197, 65], shot))
     {
         if (FindRedBtn([429, 445, 200, 63], shot))
         {
@@ -453,13 +507,17 @@ const PressCommonBtn = () =>
             RandomPress([678, 460, 156, 30]);
         }
     }
-    else if (FindBlueBtn([487, 621, 307, 76], shot))
+    if (FindBlueBtn([487, 621, 307, 76], shot))
     {
         const joinGuildPageImgList = LoadImgList("icon/beginner/growthMission/joinGuild");
         const hasGuildPage = FindImgInList(joinGuildPageImgList, [561, 644, 72, 69], shot);
         if (hasGuildPage)
         {
             console.log("成长任务 6: 加入公会");
+            if (HasTip([446, 494, 70, 44], shot))
+            {
+                RandomPress([536, 659, 213, 35]);
+            }
             const RightOnJoinGuildImg = ReadImg('icon/font/rightNow');
             const FindStraightAwayBtn = (region) => FindImg(RightOnJoinGuildImg, region);
             let hasStrBtn = false;
@@ -492,6 +550,15 @@ const PressCommonBtn = () =>
         RecycleImgList(blueBtnImgList);
         RecycleImgList(joinGuildPageImgList);
     }
+    if (FindBlueBtn([655, 445, 196, 66], shot))
+    {
+        if (FindImgInList(ExceptionImgList.confirmToGo, [492, 330, 298, 63], shot))
+        {
+            console.log("确定要前往新地图吗？");
+            console.log("点击确认");
+            RandomPress([680, 459, 149, 32]);
+        }
+    }
 };
 const PickMissionFinishAward = () =>
 {
@@ -508,26 +575,63 @@ const MakeSureInGame = (shot) =>
         MainUIFlow(shot);
         ReLoginFlow();
         PressCommonBtn();
+        PressSomeTip(shot);
         ClickSkip();
         InputVerificationFlow(shot);
         PickMissionFinishAward();
+        if (FindImgInList(ExceptionImgList.identifySuccessfully, [586, 61, 109, 51], shot))
+        {
+            console.log("发现鉴定成功，点击确定");
+            if (FindBlueBtn([505, 592, 271, 69]))
+            {
+                RandomPress([544, 609, 202, 34]);
+            }
+        }
+        //一些不容易识别或点击错误的tip
+
+        // if (text("更新脚本").findOne(20))
+        // {
+        //     Sleep(3);
+        //     if (text("更新脚本").findOne(20))
+        //     {
+        //         console.log("游戏退出到脚本页，自动拉起游戏");
+        //         LaunchGame();
+        //     }
+        // }
     }
     else
     {
-        AddAttributePoint();
         HasCrucifixIcon() && PickUpAbilityPoint();
 
     }
-    ClickRate();
+    StovePopup();
     ClearPage();
 };
 
+const ExceptionFlow = () =>
+{
+    const shot = captureScreen();
+    // let curMinute = new Date().getMinutes();
+    // if (curMinute != lastDebugModeTime)
+    // {
+    //     console.log("debug mode: " + gameMode);
+    //     lastDebugModeTime = curMinute;
+    // }
 
-module.exports = {
-    ExceptionFlow
+    BackpackFullFlow(shot);
+    NoPotionFlow(shot);
+    DisconnectionFlow(shot);
+
+    ResetConfig();
+    MakeSureInGame(shot);
 };
 
-// console.log(FindImgInList(ExceptionImgList.disconnection, [595, 229, 84, 49]));
+module.exports = { ExceptionFlow };
+
+
+
+// console.log(HasTip([277, 481, 35, 25], ReadImg("ocrTest/tip")));
+
 
 // console.log(FindBlueBtn([645, 562, 179, 61]));
 
@@ -548,4 +652,4 @@ module.exports = {
 // MakeSureInGame();
 // console.log(MainUICheck());
 // console.log(FindMultiColors(NoPotionColorList, [331, 633, 46, 70]));
-// console.log(FindMultiColors(LordNineWordColorList, [313, 333, 728, 354]));
+

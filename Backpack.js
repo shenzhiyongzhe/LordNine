@@ -13,7 +13,6 @@ const {
     RecycleImgList, RandomPress, ReadImg, ReturnHome,
     SwipeSlowly, Sleep,
 
-
 } = require("./utils.js");
 
 const EquipColorList = [
@@ -405,6 +404,10 @@ const IsBetterQuality = () =>
 
     }
     console.log(left_color, right_color);
+    if (left_color == right_color)
+    {
+        return false;
+    }
     if (left_color == null)
     {
         return true;
@@ -507,7 +510,11 @@ const WearEquipment = () =>
                 console.log("不在背包页面，退出");
                 break out;
             }
-
+            if (IsEmpty([935 + j * 62, 155 + i * 62, 70, 70]))
+            {
+                console.log("已经遍历完所有装备,结束");
+                break out;
+            }
             RandomPress([955 + j * 62, 179 + i * 62, 24, 26]);
             Sleep();
             if (FindImgInList(magicWandImgList, [618, 152, 56, 36]))
@@ -530,7 +537,7 @@ const WearEquipment = () =>
                             Sleep();
                         }
                         hasWornEquipment = true;
-                        return hasWornEquipment;
+                        break out;
                         // SortEquipment();
                     }
                     continue;
@@ -550,7 +557,7 @@ const WearEquipment = () =>
                         Sleep();
                     }
                     hasWornEquipment = true;
-                    return hasWornEquipment;
+                    break out;
 
                 }
 
@@ -577,14 +584,10 @@ const WearEquipment = () =>
                     shot = captureScreen();
                 }
                 hasWornEquipment = true;
-                return hasWornEquipment;
+                break out;
                 // SortEquipment();
             }
-            if (IsEmpty([935 + j * 62, 155 + i * 62, 70, 70]))
-            {
-                console.log("已经遍历完所有装备,结束");
-                break out;
-            }
+
         }
     }
     console.log("穿戴完成");
@@ -599,6 +602,7 @@ const WearEquipment = () =>
 const WearEquipments = () =>
 {
     console.log("//开始连续穿戴装备//");
+
     for (let i = 0; i < 6; i++)
     {
         let hasWornNewEquipment = WearEquipment();
@@ -805,19 +809,34 @@ const StrengthenEquipment = () =>
 
     const hadStrengthenedWeapon = LoopStrengthen("weapon");
     const hadStrengthenArmor = LoopStrengthen("armor");
-    const hadStrengthenOrnament = LoopStrengthen("ornement");
+    // const hadStrengthenOrnament = LoopStrengthen("ornement");
     console.log("强化装备结束，是否强化武器：" + hadStrengthenedWeapon);
-    console.log("是否强化武器：" + hadStrengthenArmor);
-    console.log("是否强化武器：" + hadStrengthenOrnament);
+    console.log("是否强化防具：" + hadStrengthenArmor);
+    CloseBackpack();
+    ClearPage();
+    // console.log("是否强化武器：" + hadStrengthenOrnament);
 };
 const DropSomeItem = () =>
 {
     console.log("丢弃一些物品");
 
 };
-const DecomposeEquipment = () =>
+/**
+ * 
+ * @param {*} type "total" or “partial"
+ * @returns 
+ */
+const DecomposeEquipment = (type) =>
 {
-    console.log("开始分解装备");
+    type = type || "total";
+    if (type == "total")
+    {
+        console.log("开始分解全部装备");
+    }
+    else
+    {
+        console.log("开始分解除去武器的所有装备");
+    }
     let hasOpen = OpenBackpack();
     if (hasOpen)
     {
@@ -833,93 +852,173 @@ const DecomposeEquipment = () =>
             return false;
         }
     }
+
     const isDetailOnColorList = [
         ["#1d5d55", [[4, 0, "#ffffff"], [8, 0, "#ffffff"], [15, 0, "#1d5d55"], [36, 0, "#1d5d55"]]]
     ];
-    if (!FindMultiColors(isDetailOnColorList, [1015, 570, 64, 31]))
+    if (FindMultiColors(isDetailOnColorList, [1015, 570, 64, 31]))
     {
         RandomPress([962, 575, 102, 16]);
-        console.log("展开详细资讯");
+        console.log("关闭详细资讯");
     }
+    //修改自动登录设置
 
-    if (FindGoldBtn([960, 599, 123, 52]))
+    if (FindGoldBtn([961, 604, 118, 47]))
     {
-        RandomPress([975, 615, 92, 23], 2);
-        console.log("自动登录");
-        RandomPress([575, 123, 40, 40]);
-        // change setting
-        if (!HasPopupClose([1088, 69, 41, 36]))
+        console.log("修改自动登录设置");
+        RandomPress([1099, 616, 30, 26]); //设置图标
+        WaitUntil(() => HasPopupClose([865, 125, 35, 34]));
+        if (type == "total")
         {
-            console.log("分解数量较少，检查自动分解选项");
-            RandomPress([1105, 619, 16, 18]);
-            for (let i = 0; i < 10; i++)
+            console.log("全部分解");
+            if (!FindCheckMark([651, 234, 64, 38]))
             {
-                if (FindCheckMark([407, 397, 37, 44])) //取消可记录装备
+                console.log("分解蓝色装备");
+                RandomPress([664, 245, 55, 15]);
+            }
+            if (!FindCheckMark([779, 236, 31, 33]))
+            {
+                console.log("分解紫色装备");
+                RandomPress([786, 243, 55, 17]);
+            }
+        }
+        else if (type == "partial")
+        {
+            console.log("部分分解");
+            if (FindCheckMark([651, 234, 64, 38]))
+            {
+                console.log("取消蓝色装备");
+                RandomPress([664, 245, 55, 15]);
+            }
+            if (FindCheckMark([779, 236, 31, 33]))
+            {
+                console.log("取消紫色装备");
+                RandomPress([786, 243, 55, 17]);
+            }
+        }
+        if (FindCheckMark([404, 396, 44, 46]))
+        {
+            console.log("不取消可记录装备");
+            RandomPress([442, 409, 67, 18]);
+        }
+        if (FindCheckMark([529, 396, 38, 44]))
+        {
+            console.log("不取消可强化装备");
+            RandomPress([569, 408, 76, 19]);
+        }
+        if (FindGoldBtn([553, 544, 177, 50]))
+        {
+            console.log("自动登录设置完毕");
+            RandomPress([575, 556, 134, 25]);
+        }
+
+    }
+    const selectedMarkImgList = LoadImgList("backpack/selectedMark");
+
+    if (type == "total")
+    {
+        console.log("手动勾选已强化装备");
+        const strengthenedShot = captureScreen();
+        out: for (let i = 0; i < 3; i++)
+        {
+            for (let j = 0; j < 4; j++)
+            {
+                if (IsEmpty([845 + j * 57, 80 + i * 57, 55, 55]))
                 {
-                    RandomPress([420, 408, 96, 17]);
+                    break out;
                 }
-                if (FindCheckMark([397, 394, 54, 50])) //包含强化装备
+                if (!FindImgInList(selectedMarkImgList, [873 + j * 57, 75 + i * 57, 39, 30], strengthenedShot))
                 {
-                    RandomPress([540, 408, 105, 17]);
+                    RandomPress([857 + j * 57, 92 + i * 57, 34, 31]);
                 }
-                if (FindGoldBtn([552, 542, 181, 55]))
+            }
+        }
+        if (FindBlueBtn([379, 562, 230, 79]))
+        {
+            RandomPress([415, 582, 137, 36], 3);
+
+            for (let i = 0; i < 5; i++)
+            {
+                PressBlank();
+                if (HasBackpackMenuClose())
                 {
-                    RandomPress([572, 557, 141, 25]);
                     break;
                 }
                 Sleep();
             }
+            CloseBackpack();
+            console.log("分解装备结束");
 
         }
+
     }
+    else if (type == "partial")
+    {
+        const weaponPageImgList = LoadImgList("backpack/equipmentPage/weapon");
+        console.log("取消武器分解");
+        for (let i = 0; i < 5; i++)
+        {
+            RandomPress([1091, 154, 39, 44]); // 武器页
+            if (FindImgInList(weaponPageImgList, [891, 34, 58, 42]))
+            {
+                break;
+            }
+        }
+        // 网格横纵间隔为57像素
+        const weaponPageShot = captureScreen();
+        out: for (let i = 0; i < 3; i++)
+        {
+            for (let j = 0; j < 4; j++)
+            {
+                if (IsEmpty([845 + j * 57, 80 + i * 57, 55, 55]))
+                {
+                    break out;
+                }
+                if (FindImgInList(selectedMarkImgList, [873 + j * 57, 75 + i * 57, 39, 30], weaponPageShot))
+                {
+                    RandomPress([857 + j * 57, 92 + i * 57, 34, 31]);
+                }
+            }
+        }
+        if (FindBlueBtn([376, 560, 233, 77]))
+        {
+            RandomPress([408, 581, 172, 37], 3);
+            for (let i = 0; i < 5; i++)
+            {
+                PressBlank();
+                if (HasBackpackMenuClose())
+                {
+                    break;
+                }
+                Sleep();
+            }
+            CloseBackpack();
+            console.log("分解部分装备结束");
+        }
+        RecycleImgList(weaponPageImgList);
+    }
+    RecycleImgList(selectedMarkImgList);
 
     for (let i = 0; i < 10; i++)
     {
-        if (FindBlueBtn([379, 562, 230, 79]))
-        {
-            RandomPress([415, 582, 137, 36], 3);
-            if (FindBlueBtn([379, 562, 230, 79]))
-            {
-                console.log("背包空间不足，先不分解");
-                for (let i = 0; i < 8; i++)
-                {
-                    RandomPress([240, 127, 37, 36], 2);
-                }
-                if (FindBlueBtn([379, 562, 230, 79]))
-                {
-                    RandomPress([415, 582, 137, 36], 3);
-                    PressBlank();
-                    CloseBackpack();
-
-                    console.log("分解装备结束");
-                    if (HasMenu())
-                    {
-                        return true;
-                    }
-                }
-
-            }
-            else
-            {
-                PressBlank();
-                CloseBackpack();
-                console.log("分解装备结束");
-                if (HasMenu())
-                {
-                    return true;
-                }
-            }
-
-
-        }
         if (HasMenu())
         {
-            return true;
+            break;
         }
-        else
+        let shot = captureScreen();
+        if (HasPopupClose([868, 121, 32, 40], shot))
         {
-            ClearPage();
+            RandomPress([874, 131, 22, 23]);
         }
+        if (HasPopupClose([1089, 66, 39, 36], shot))
+        {
+            RandomPress([1100, 41, 27, 28], shot);
+        }
+        if (HasPopupClose([870, 48, 39, 37], shot))
+        {
+            RandomPress([877, 57, 23, 20]);
+        }
+        RandomPress([1102, 40, 21, 22]);
         Sleep();
     }
 
@@ -1110,30 +1209,13 @@ const BuyPotion = () =>
 };
 
 module.exports = {
+    IsEmpty,
     OpenAllBox,
     OpenSkillBook, AutoReleaseSkill, CheckSkillAutoRelease,
     WearEquipments, StrengthenEquipment, DecomposeEquipment,
     UseHolyGrail, WearBestSuit,
     AutoPotion, UnAutoPotion, BuyPotion,
 };
-// BuyPotion();
-// DecomposeEquipment();
-// WearEquipments();
-// const magicWandImgList = LoadImgList("backpack/magicWand");
-// console.log(FindImgInList(magicWandImgList, [296, 141, 73, 49]));
-// console.log(IsEmpty([282, 199, 39, 50]));
-// console.log(IsEquiped([283, 205, 31, 40]));
 
-// UnAutoPotion();
-// OpenEquipmentBox("armor");
-// WearBestSuit();
-// OpenSkillBook();
-// OpenAllBox();
-// WearEquipments();
-// console.log(FindImgInList(magicWandImgList, [616, 147, 58, 40]));
-// AutoReleaseSkill();
-// OpenBackpack();
-// AutoPotion();
-// UnAutoPotion();
-// StrengthenEquipment();
+// DecomposeEquipment("total")
 

@@ -1,3 +1,4 @@
+const axios = require('axios');
 
 // "ui";
 // ui.layout(
@@ -57,6 +58,11 @@ const {
     ReadConfig,
     RewriteConfig,
     IsMoving,
+    FindFloatNumber,
+    EnterMenuItemPage,
+    ChangeGameSetting,
+    HaveDailyMissionIcon,
+    HaveFinished,
 } = require("./utils.js");
 
 
@@ -203,288 +209,86 @@ function 关闭应用(packageName)
     sleep(10000);
     app.launch(packageName);
 }
-// if (files.exists("/sdcard/AutoJs.apk"))
+
+
+
+// try
 // {
-//     app.viewFile("/sdcard/AutoJs.apk");
-//     let is_sure = textMatches(/(.*설.*|.*정.*|.*强.*|.*止.*|.*结.*|.*行.*)/).findOne();
-//     if (is_sure.enabled())
+//     // 解析JSON字符串
+//     const parsedData = JSON.parse(jsonData);
+
+//     // 检查是否为空对象或空数组
+//     if (Object.keys(parsedData).length === 0)
 //     {
-//         textMatches(/(.*설.*|.*정.*|.*强.*|.*止.*|.*结.*|.*行.*)/).findOne().click();
+//         console.log('JSON文件是空的');
+//     } else
+//     {
+//         c;
+//         console.log('JSON文件不是空的');
 //     }
+// } catch (error)
+// {
+//     console.error('解析JSON文件时发生错误:', error);
 // }
 
-// console.log(new Date().getMinutes());
-// console.log(HasPopupClose([1216, 111, 25, 25]));
-// console.log(HasPageback());
-
-// toast("hello");
-
-const GetAccountFile = () =>
+const GetData = () =>
 {
-    if (files.exists("/sdcard/disposition.txt"))
+    axios({
+        url: "http://10.6.130.129:8000/devices/",
+        method: "get",
+        responseType: 'json'
+    }).then(res => console.log(res));
+    // axios.get('http://localhost:8000/devices/', {}).then(res => console.log(res));
+};
+
+const PostData = (data) =>
+{
+    console.log("上传的数据为: " + JSON.stringify(data));
+    // const res = http.post("http://10.6.130.129:8000/devices/", data);
+    // if (res.statusCode == 200)
+    // {
+    //     console.log("数据上传成功");
+    //     return true;
+    // }
+    // else
+    // {
+    //     console.log("数据上传失败");
+    //     return false;
+    // }
+    axios.post("http://10.6.130.129:8000/devices/", data).then(res => console.log(res));
+};
+const UpdateData = (data) =>
+{
+    console.log("更新数据" + JSON.stringify(data));
+    axios.put(`http://10.6.130.129:8000/devices/01`, data).then(res =>
     {
-        const accountString = files.read("/sdcard/disposition.txt");
-        const accountArray = accountString.split("---");
-        if (accountArray.length == 4)
+        if (res.status == 200)
         {
-            return accountArray;
+            console.log("更新数据成功");
         }
         else
         {
-            alert("账号信息有误，读取文件失败");
+            console.log("更新数据失败");
         }
-    }
+    });
+
 };
 
-// console.log(id("line_2").findOne(2000));
-// KeyCode("KEYCODE_A"); className("android.widget.Button").text("이메일을 잊으셨나요?").findOne();
-// setText("https://mail.google.com");
-// console.log(id("home_button").findOne(200));
-// className("android.widget.TextView").text("업무용").depth(13).findOne();
-// className("android.widget.Button").text("동의함").findOne();
-// console.log(id("home_button").findOne(200));
-// console.log(FindTipPoint([1164, 183, 38, 29]));
-// console.log(FindTipPoint([288, 193, 28, 34]));
-// console.log(HasPopupClose([1137, 60, 52, 47]));
-// console.log(FindCheckMark([487, 354, 55, 50]));
-// console.log(id("account_picker_continue_as_button").findOne(200));
-// log(id("account_picker_continue_as_button").findOne(100));
-// log(textMatches(/(.*身份继续.*)/).findOne(20));
-// console.log(textMatches(/(.*选择账号.*)/).findOne(20));
-// console.log(text("选择账号").findOne(20));    
-// console.log(ReadImg("icon/login/input_placeholder_recoveryEmail"));   
-// const hasStoveEmail = textMatches(/(.*STOVE.*)/).findOne(100);
-// if (hasStoveEmail)
-// {
-//     console.log("recevie email");
-//     hasStoveEmail.click();
-// }
-const GetRecoveryCode = () =>
+const DeleteData = (data) =>
 {
-    // let code = null;
-    // className("android.widget.GridView").findOne().children().forEach(child =>
-    // {
-    //     let target = child.findOne(className("android.widget.TextView").textMatches(/\d{6}/));
-    //     if (target != null)
-    //     {
-    //         console.log("find code");
-    //         code = target.text();
-    //     }
-    // });
-    // return code;
-    const hasRecoveryCode = textMatches(/\d{6}/).findOne(100);
-    if (hasRecoveryCode)
-    {
-        return hasRecoveryCode.text();
-    }
-    return null;
+    axios({
+        url: "http://10.6.130.129:8000/devices/",
+        method: "delete",
+        responseType: 'json'
+    }).then(res => console.log(res));
 };
+// GetData();
 
-const SetApplicationProxy = () =>
-{
-    console.log("set application proxy");
-    app.launch("fun.kitsunebi.kitsunebi4android");
-    id("add_btn").findOne(15000).click();
-};
-// console.log(FindGoldBtn([836, 459, 146, 68]));
-// console.log(NeedPressBlank([580, 645, 121, 43]));
-// console.log(text("시작하기").findOne(2000));
-// console.log(new Date());
-// console.log(new Date().getDate());
-// console.log(HasPopupClose([1184, 55, 42, 39]));
-// console.log(device.getAndroidId());
-// console.log(text("Refresh").findOne(20));
-// splitScreen();
-// console.log(GetRecoveryCode());
-// menu();
-// recents();
-// home();
-// log(text("이메일을 잊으셨나요?").findOne(10));
-// console.log(text("忘记了电子邮件地址？").findOne(1000));
-// console.log(textMatches(/(.*계속.*)/).findOne(20));
-// console.log(text("Use the web version").findOne(20));
-// className("android.widget.Button").text("동의").findOne();
-// console.log(text("동의").findOne(100));
-// console.log(id("fre_bottom_group").findOne(100));
-// desc("복구 이메일 확인").findOne(100).click();
+// const data = { vm: "01", serverName: 99, lv: 11, diamond: 1000, gold: 10123 };
+// PostData(data);
 
-// text("Use the web version").findOne(20).click();
-// var date1 = new Date(); //开始时间
-// Sleep();
-// var date2 = new Date();  //结束时间
-// var date3 = date2.getTime() - date1.getTime(); //时间差的毫秒数
-// var hours = Math.floor(date3 / (3600 * 1000));
-// console.log(hours);
-// console.log(text("열기").findOne(200));
-// console.log(FindBlueBtn([532, 590, 217, 67]));
-// console.log(FindBlueBtn([536, 415, 204, 77]));
-// toast("hello");
-// console.log(HasPageback());
+// const data = { serverName: 199, lv: 11, diamond: 1000, gold: 10123 };
+// UpdateData(data);
+// serverName
 
-// console.log(new Date());
-// console.log(HasPopupClose([823, 211, 35, 38]));
-// const account = textMatches(/(.*@gmail.com.*)/).findOne(100).parent().parent();
-// console.log(account);
-// console.log(IsHaltMode());
-// toast("hello");
-// console.log(textMatches(/(.*시작하기.*|.*立即开始.*)/).findOne(2000));
-
-// let hadNeedSelectCountry = text("국가 선택").findOne(20);
-// if (hadNeedSelectCountry)
-// {
-//     hadNeedSelectCountry.click();
-//     Sleep();
-//     setText("Canada");
-//     let hasCanada = text("Canada").findOne(2000);
-//     if (hasCanada)
-//     {
-//         Sleep(3);
-//         RandomPress([298, 401, 219, 44]);
-//     }
-// }
-
-// let hadNeedInputBirthday = text("생년월일 MM.DD.YYYY").findOne(20);
-// if (hadNeedInputBirthday)
-// {
-
-//     RandomPress([258, 317, 236, 28]);
-//     const month = random(1, 12).toString().padStart("0", 2);
-//     setText(0, month);
-//     const day = random(1, 28).toString().padStart("0", 2);
-//     setText(1, day);
-//     const year = random(1960, 2004).toString().padStart("0", 2);
-//     setText(2, year);
-//     console.log(`${month}-${day} -${year}`);
-// }
-
-// console.log(textMatches(/(.*다음.*|.*下一步.*)/).findOne(15000));
-// toast("hello");
-// console.log(textMatches(/\d{6}/).findOne(100));
-// console.log(text("동의하고 계속").findOne(20).click());
-// let googleIcon = textMatches(/(.*Google.*)/).findOne(20);
-// if (googleIcon)
-// {
-//     click(googleIcon.bounds().centerX(), googleIcon.bounds().centerY());
-// }
-// let hasUseTheWebVersion = text("Use the web version").findOne(20);
-// if (hasUseTheWebVersion)
-// {
-//     console.log("发现使用网页版图标");
-//     console.log(textMatches(/\d{6}/).findOne(100));
-// }
-// console.log(text("Refresh").findOne(100));
-// console.log(hasUseTheWebVersion);
-// console.log(text("국가 선택").findOne(20).click());
-// setText("Korea");
-// console.log(text("Korea, Republic of").findOne(10));
-// text("국가 선택").findOne().parent().parent();
-// 인증 메일 안내;
-// toast("hello");
-// console.log(HasPopupClose([1166, 61, 50, 56]));
-// console.log(text("Menu").findOne(20));
-// console.log(text("Refresh").findOne(20));
-// console.log(textMatches(/(.*인증 메일 안내.*)/).findOne(100));
-
-// console.log(text("동의하고 계속").findOne(20));
-
-// let time = textMatches(/(.*days ago.*)/).findOne(20).text();
-// console.log(time.replace(/[^0-9]/ig, ''));
-// console.log(FindNumber("lv", [416, 382, 215, 120]));
-// console.log(FindRedBtn([423, 380, 204, 69]));
-
-
-// console.log(WaitUntil(HasPopupClose));
-// ChangeVPNSetting();
-// const comprehensiveTime = [[random(0, 11), random(0, 59)], [random(12, 23), random(0, 59)]];
-// console.log("副本模式挂机随机提升战力时刻为：" + comprehensiveTime[0][0] + "时" + comprehensiveTime[0][1] + "分；" + comprehensiveTime[1][0] + "时" + comprehensiveTime[1][1] + "分");
-
-// const a = [1, 2, 4];
-// console.log(a.indexOf(3));
-// RandomPress([440, 457, 10, 5]);
-// console.log(HasPopupClose([515, 314, 56, 53]));
-// swipe(370, 460, 370 + random(0, 20), 470, 200);
-// console.log(LoadImgList("icon/font/swipeToConfirm"));
-// console.log(IsBackpackFull());
-// const hasSkillBookPage = FindImg(GrowthImgList.skillBookMerchantPage, [1035, 3, 203, 56], shot);
-
-// console.log(HasPopupClose([1202, 96, 47, 48]));
-// engines.stopAllAndToast();
-const CheckSkillAutoRelease = () =>
-{
-    console.log("检查技能是否装备与自动是否");
-    const checkPos = [
-        [390, 620, 90, 90],
-        [450, 620, 90, 90],
-        [510, 620, 90, 90]
-    ];
-    const quickItem_skillImgList = [
-        LoadImgList("icon/quickItem_skill/firstSkill"),
-        LoadImgList("icon/quickItem_skill/secondSkill"),
-        LoadImgList("icon/quickItem_skill/thirdSkill")
-    ];
-    const isReleaseSkill = [];
-
-    let shot = captureScreen();
-    for (let i = 0; i < checkPos.length; i++)
-    {
-        let isAuto = FindImgInList(quickItem_skillImgList[i], checkPos[i], shot);
-        if (isAuto)
-        {
-            console.log("第" + (i + 1) + "个技能已开启自动释放");
-            isReleaseSkill.push(true);
-        } else
-        {
-            console.log("第" + (i + 1) + "个技能未开启自动释放");
-        }
-    }
-
-    quickItem_skillImgList.forEach(imgList => RecycleImgList(imgList));
-    if (isReleaseSkill.length == 3)
-    {
-        console.log("技能已全部开启自动释放");
-    }
-    else
-    {
-        console.log("技能未全部开启自动释放");
-        console.log("开始使用技能书与装备技能");
-
-    }
-    console.log("检查完毕");
-};
-// console.log(FindNumber("lv", [46, 158, 63, 52]));
-// const AimAtBossColorList = [
-//     ["#d80802", [[0, -3, "#ea0700"], [17, -2, "#e70700"], [30, -2, "#d90904"], [38, -3, "#eb0700"]]],
-//     ["#d80701", [[17, -1, "#df0700"], [34, -2, "#e30700"], [49, -2, "#de0701"], [57, 4, "#cb0600"]]],
-//     ["#cc0b06", [[1, 0, "#e40700"], [1, 3, "#d80701"], [18, -3, "#f00700"], [18, 0, "#e60700"]]]
-// ];
-// const IsAimAtBoss = () => FindMultiColors(AimAtBossColorList, [540, 11, 205, 31]);
-// console.log(IsAimAtBoss());
-// device.setMusicVolume(0);
-// console.log(FindNumber("combatPower", [411, 342, 43, 49]));
-// SwipeSlowly([243, 549, 423, 35], [255, 157, 374, 29], 3);
-// console.log(FindBlueBtn([6, 657, 161, 55]));
-// ClearPage();
-// console.log(FindNumber("combatPower", [1161, 536, 80, 43]));
-// FindNumber("lv", [54, 472, 47, 44]);
-// console.log(HasPopupClose([869, 41, 43, 48]));
-// ClearPage();
-// toast("hee");
-// OpenBackpack();
-// const arrow_right = LoadImgList("icon/arrow/right");
-// console.log(FindImgInList(arrow_right, [817, 143, 44, 64]));
-
-// let a = "abcd";
-// console.log(random(0, 4));
-
-// console.log(a.includes("a"));
-// console.log(FindBlueBtn());
-// toast("he");
-// console.log(FindRedBtn([417, 642, 224, 74]));
-// console.log(HasPopupClose([990, 59, 50, 43]));
-// console.log(FindBlueBtn([72, 642, 158, 64]));
-// console.log(FindTipPoint([1227, 93, 29, 29]));
-
-
-// console.log(HasMenu());
-// console.log(ClearPage());
-ClearPage();
+console.log(HasPopupClose([668, 559, 136, 29]));

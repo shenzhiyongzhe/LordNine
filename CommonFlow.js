@@ -1,30 +1,44 @@
 
 const {
-    ReadImg, FindImg, RandomPress, Sleep, FindMultiColors, OpenMenu, CloseMenu, EnterMenuItemPage, CloseBackpack,
-    HasMenu, HasPageback, IsBackpackFull,
+    ReadImg, FindImg, RandomPress, Sleep, FindMultiColors, OpenMenu, CloseMenu, EnterMenuItemPage, CloseBackpack, ClearPage,
+    HasMenu, HasPageback, IsBackpackFull, HasTip,
     WaitUntilPageBack,
     SwipeSlowly,
-    FindBlueBtn, FindTipPoint, FindCheckMark, FindRedBtn, FindGoldBtn, FindGreenBtn, FindNumber,
+    FindBlueBtn, FindTipPoint, FindCheckMark, FindRedBtn, FindGoldBtn, FindGreenBtn, FindNumber, FindImgInList, FindFloatNumber,
     HasPopupClose,
     PressBlank, WaitUntil,
     TapBlankToContinue, PullDownSkill, ReadConfig, RewriteConfig, PageBack,
-    ClearPage,
+
+    OpenBackpack,
+    LoadImgList,
+
+
+    RecycleImgList,
+    IsHaltMode,
+    ExitHaltMode,
+    HasSkip,
+    ClickSkip,
+    GetDateTime,
 
 } = require("./utils.js");
 
-const { WearEquipments, StrengthenEquipment, OpenAllBox, UseHolyGrail, DecomposeEquipment, WearBestSuit, CheckSkillAutoRelease } = require("./Backpack.js");
+const { IsEmpty, WearEquipments, StrengthenEquipment, OpenAllBox, UseHolyGrail, DecomposeEquipment, WearBestSuit, CheckSkillAutoRelease } = require("./Backpack.js");
 
 let lastComprehensiveImproveTime = 1726208812345;
 let character_lv = 0;
 const GetEmail = () =>
 {
     console.log("开始领取邮件");
-    const hasOpenMenu = OpenMenu();
+    let hasOpenMenu = OpenMenu();
     const hasEmailPoint = FindTipPoint([1054, 520, 25, 27]);
     if (!hasOpenMenu)
     {
-        console.log("没有发现菜单按钮，退出");
-        return false;
+        ClearPage();
+        hasOpenMenu = OpenMenu();
+        if (!hasOpenMenu)
+        {
+            return false;
+        }
     }
     if (!hasEmailPoint)
     {
@@ -189,59 +203,42 @@ const GetPassAward = () =>
 const GetActivitiesAward = () =>
 {
     console.log("开始领取活动奖励");
-    const CanPickUpAwardHighGoldenColorList = [
-        ["#cdb646", [[2, 0, "#d0ba47"], [3, 0, "#d1ba47"], [5, 0, "#cfb946"], [8, 0, "#c6af43"]]],
-        ["#c4af47", [[1, 0, "#cbb54a"], [3, 0, "#d6be4a"], [8, 0, "#e0c74f"], [11, 0, "#dcc34e"]]],
-        ["#b5a03f", [[3, 0, "#bfab43"], [5, 0, "#c3af45"], [7, 0, "#c3ae44"], [12, 0, "#b4a03e"]]]
-    ];
+    let hadPickAward = false;
     if (!FindTipPoint([942, 3, 17, 19]))
     {
         console.log("没有可以领取的活动奖励");
         return false;
     }
+
     RandomPress([917, 18, 27, 28]);
     if (!WaitUntil(() => HasPopupClose([1145, 63, 36, 36])))
     {
         console.log("enter failed");
         return false;
     }
-    Sleep(5);
-    const shot = captureScreen();
-    let hasTip = false;
-    let hasGoldenLight = false;
-    for (let i = 0; i < 9; i++)
+    Sleep(3);
+    let hasAvaluableItem;
+    for (let i = 0; i < 4; i++)
     {
-        hasTip = FindTipPoint([284, 157 + 47 * i, 27, 20], shot);
-        if (hasTip)
+        let hasTipPoint = FindTipPoint([284, 110, 37, 265]);
+        if (hasTipPoint)
         {
-            RandomPress([hasTip.x - 180, hasTip.y, 180, 30]);
-            Sleep();
-            for (let j = 0; j < 3; j++)
+            RandomPress([hasTipPoint.x - 150, hasTipPoint.y, 150, 20]);
+            let pageShot = captureScreen();
+            for (let i = 0; i < 7; i++)
             {
-                hasTip = FindTipPoint([345, 265, 820, 378]);
-                if (hasTip)
+                hasAvaluableItem = FindTipPoint([427 + i * 116, 265, 23, 338], pageShot);
+                if (hasAvaluableItem)
                 {
-                    console.log("hasTip: " + hasTip);
-                    hasGoldenLight = FindMultiColors(CanPickUpAwardHighGoldenColorList, [hasTip.x - 70, hasTip.y + 50, 70, 30]);
-                    console.log("hasGoldenLight: " + hasGoldenLight);
-                    if (hasGoldenLight)
-                    {
-                        console.log("pick award...");
-                        RandomPress([hasGoldenLight.x - 10, hasGoldenLight.y - 30, 20, 30], 4);
-                        PressBlank();
-                    }
-                    else
-                    {
-                        RandomPress([hasTip.x - 40, hasTip.y + 10, 20, 30], 4);
-                        PressBlank();
-                    }
-                    if (HasPopupClose([745, 97, 46, 47]))
-                    {
-                        RandomPress([760, 108, 19, 20]);
-                    }
+                    console.log("发现可领取物品，点击领取");
+                    RandomPress([hasAvaluableItem.x - 50, hasAvaluableItem.y, 50, 50], 3);
+                    PressBlank();
+                    hadPickAward = true;
+                    break;
                 }
             }
         }
+        Sleep();
     }
 
     for (let i = 0; i < 30; i++)
@@ -258,10 +255,9 @@ const GetActivitiesAward = () =>
         {
             break;
         }
-        PageBack();
         Sleep();
     }
-    console.log("结束：已领取活动奖励");
+    console.log("结束：是否领取活动奖励：" + hadPickAward);
     return true;
 };
 const GetTravelLogAward = () =>
@@ -330,73 +326,130 @@ const GetTravelLogAward = () =>
 const LoginProps = () =>
 {
     console.log("开始道具记录");
-    const hasOpenMenu = OpenMenu();
-    if (!hasOpenMenu)
-    {
-        console.log("退出：没有找到菜单按钮");
-        return false;
-    }
+    EnterMenuItemPage("propsLogin");
 
-    const hasLoginPropsPoint = FindTipPoint([1232, 96, 22, 23]);
-    if (!hasLoginPropsPoint)
-    {
-        console.log("退出：没有可以记录的装备");
-        return false;
-    }
     const CanPressLoginBtn = () => FindGreenBtn([1089, 508, 171, 47]);
 
-    RandomPress([1209, 116, 21, 26]); // login props icon
-    const hasEnterLoginPropsPage = WaitUntilPageBack();
-    if (!hasEnterLoginPropsPage)
+    for (let i = 0; i < 2; i++)
     {
-        console.log("退出：进入登录页面失败!");
+        if (HasSkip())
+        {
+            ClickSkip();
+        }
+        else if (HasPageback())
+        {
+            break;
+        }
+        Sleep();
+    }
+    if (!HasPageback())
+    {
+        console.log("未进入图鉴页面，退出");
         return false;
     }
     console.log("进入到道具记录页面");
     let hasTipPoint;
     let loginCount = null;
     let hasItemToLogin = 0;
-    for (let i = 0; i < 10; i++)
+    hasItemToLogin = FindNumber("combatPower", [209, 73, 62, 38]);
+    if (!hasItemToLogin)
     {
-        RandomPress([176, 76, 74, 24]);
-        for (let j = 0; j < 6; j++)
+        console.log("没有可登录道具，退出");
+        PageBack();
+        return true;
+    }
+    else
+    {
+        console.log("可记录道具数量：" + hasItemToLogin);
+    }
+    if (FindGoldBtn([62, 656, 134, 44]))
+    {
+        console.log("只登录白色装备和绿色装备");
+        RandomPress([82, 665, 100, 23]);
+        WaitUntil(() => HasPopupClose([1044, 160, 43, 43]));
+
+        if (!FindCheckMark([401, 269, 35, 38]))
         {
-            hasTipPoint = FindTipPoint([511, 122, 421, 494]);
-            if (hasTipPoint)
+            RandomPress([451, 279, 62, 16]);
+        }
+        if (!FindCheckMark([564, 271, 38, 38]))
+        {
+            RandomPress([610, 279, 71, 19]);
+        }
+        if (FindBlueBtn([657, 491, 198, 65]))
+        {
+            RandomPress([681, 503, 154, 37]);
+            console.log("确定搜索记录设置");
+        }
+        for (let i = 0; i < 10; i++)
+        {
+            if (HasPopupClose([1045, 157, 39, 43]))
             {
-                RandomPress([hasTipPoint.x - 40, hasTipPoint.y, 40, 40]);
-                if (CanPressLoginBtn())
+                if (!FindCheckMark([401, 269, 35, 38]))
                 {
-                    RandomPress([1103, 521, 144, 23]);
-                    Sleep(4);
-                    loginCount++;
+                    RandomPress([451, 279, 62, 16]);
+                }
+                if (!FindCheckMark([564, 271, 38, 38]))
+                {
+                    RandomPress([610, 279, 71, 19]);
+                }
+                if (FindBlueBtn([657, 491, 198, 65]))
+                {
+                    RandomPress([681, 503, 154, 37]);
                 }
             }
-            else
+            if (HasPageback())
             {
-                SwipeSlowly([243, 549, 423, 35], [255, 157, 374, 29], 3);
+                break;
             }
         }
-        RandomPress([43, 75, 80, 23]);
-        hasItemToLogin = FindNumber("combatPower", [209, 73, 62, 38]);
-        if (!hasItemToLogin)
+    }
+
+    out: for (let i = 0; i < 20; i++)
+    {
+        hasTipPoint = FindTipPoint([511, 122, 421, 494]);
+        if (hasTipPoint)
         {
-            break;
+            RandomPress([hasTipPoint.x - 40, hasTipPoint.y, 40, 40]);
+            if (CanPressLoginBtn())
+            {
+                RandomPress([1103, 521, 144, 23]);
+                Sleep(4);
+                loginCount++;
+            }
+        }
+        else
+        {
+            hasItemToLogin = FindNumber("combatPower", [209, 73, 62, 38]);
+            console.log("剩余可记录道具数量：" + hasItemToLogin);
+            if (!hasItemToLogin)
+            {
+                break out;
+            }
+            SwipeSlowly([243, 549, 423, 35], [255, 157, 374, 29], 3);
         }
     }
     PageBack();
     console.log("道具记录完毕，记录数量为: " + loginCount);
+    return loginCount;
 };
 
 const ShopBuy = () =>
 {
     //buy strengthening stone 
     console.log("开始商城购买");
+    let hadDailyShop = false;
     const hasOpenMenu = HasMenu();
     if (!hasOpenMenu)
     {
         console.log("no menu button");
         return false;
+    }
+    const config = ReadConfig();
+    if (config.game.today == new Date().getDate() && config.game.dailyShop == true) 
+    {
+        console.log("今日已购买，退出");
+        return true;
     }
     RandomPress([975, 20, 27, 27]);
     Sleep();
@@ -408,7 +461,7 @@ const ShopBuy = () =>
         return false;
     }
     console.log("已进入商城页面");
-    Sleep(10);
+    Sleep(3);
     const NotCheckedColorList = [
         ["#303030", [[5, 0, "#303030"], [11, 1, "#303030"], [-2, 7, "#303030"], [7, 7, "#303030"]]]
     ];
@@ -416,8 +469,20 @@ const ShopBuy = () =>
 
     if (FindBlueBtn([44, 641, 192, 69]))
     {
-        RandomPress([87, 658, 119, 31]);
-
+        RandomPress([87, 658, 119, 31], 3);
+        for (let i = 0; i < 20; i++)
+        {
+            if (FindBlueBtn([540, 445, 201, 63]))
+            {
+                console.log("发现服务器异常弹窗，稍后再试");
+                RandomPress([568, 457, 150, 35]);
+            }
+            if (FindBlueBtn([651, 556, 242, 81]))
+            {
+                break;
+            }
+            Sleep();
+        }
         for (let i = 0; i < 5; i++)
         {
             if (IsNotCheck([234, 144 + i * 85, 56, 62]))
@@ -429,15 +494,35 @@ const ShopBuy = () =>
         {
             RandomPress([679, 574, 191, 41], 3);
             PressBlank();
+            hadDailyShop = true;
         }
         else if (FindRedBtn([383, 560, 240, 65]))
         {
             RandomPress([414, 574, 184, 33]); //cancel button
         }
     }
-    PageBack();
-    console.log("商城购买完毕，是否成功购买 ");
-    return true;
+
+    for (let i = 0; i < 5; i++)
+    {
+        if (FindBlueBtn([540, 445, 201, 63]))
+        {
+            console.log("发现服务器异常弹窗，稍后再试");
+            RandomPress([568, 457, 150, 35]);
+        }
+        PageBack();
+        if (HasMenu())
+        {
+            break;
+        }
+        Sleep();
+    }
+    console.log("商城购买完毕，是否成功购买: " + hadDailyShop);
+    if (hadDailyShop)
+    {
+        config.game.dailyShop = true;
+        RewriteConfig(config);
+    }
+    return hadDailyShop;
 };
 const IncreaseWeaponFeatures = () =>
 {
@@ -471,7 +556,7 @@ const IncreaseWeaponFeatures = () =>
     const config = ReadConfig();
     config.game.lv = lv;
     character_lv = lv;
-    RewriteConfig("game", config.game);
+    RewriteConfig(config);
     out: for (let i = 0; i < 3; i++)
     {
         RandomPress([197, 300 + i * 82, 146, 46]);
@@ -519,6 +604,7 @@ const IncreaseWeaponFeatures = () =>
 const StrengthenHorseEquipment = () =>
 {
     console.log("开始强化坐骑装备");
+    let isStrengthened = false;
     const hasEnter = EnterMenuItemPage("horse");
     if (!hasEnter)
     {
@@ -530,9 +616,14 @@ const StrengthenHorseEquipment = () =>
         RandomPress([888, 669, 135, 31]);
         if (FindBlueBtn([870, 654, 353, 62]))
         {
+            console.log("点击启用");
             RandomPress([919, 672, 272, 28]);
         }
-
+        if (FindBlueBtn([655, 445, 199, 63]))
+        {
+            console.log("确认启用");
+            RandomPress([683, 462, 150, 28], 3);
+        }
     }
     else
     {
@@ -547,23 +638,23 @@ const StrengthenHorseEquipment = () =>
     Sleep();
     for (let i = 0; i < 3; i++)
     {
-        RandomPress(horseEquipmentRegion[i]);
-        Sleep();
+        console.log("强化第 " + (i + 1) + " 号坐骑装备");
+        RandomPress(horseEquipmentRegion[i], 3);
         if (FindBlueBtn([869, 652, 354, 64]))
         {
-            console.log("可以强化此装备：" + i);
-            RandomPress([926, 671, 249, 26]);
+            console.log("可以强化此装备：" + (i + 1));
+            RandomPress([926, 671, 249, 26], 3);
             if (FindBlueBtn([655, 445, 199, 63]))
             {
-                console.log("启用坐骑装备");
-                RandomPress([683, 462, 150, 28]);
-                Sleep(3);
+                console.log("确认启用");
+                RandomPress([683, 462, 150, 28], 3);
             }
-            Sleep(4);
+            isStrengthened = true;
         }
     }
-    console.log("finish horse equipment");
+    console.log("强化坐骑流程结束，是否强化：" + isStrengthened);
     PageBack();
+    return isStrengthened;
 };
 
 const UpgradeAbilityLevel = () =>
@@ -689,9 +780,10 @@ const ChangeAbility = (changeList) =>
         console.log("tap select");
         if (FindGoldBtn([18, 646, 139, 60]))
         {
-            RandomPress([39, 662, 96, 27]);
+            RandomPress([64, 658, 75, 33]);
         }
     };
+
     const MatchingAbility = () =>
     {
         for (let i = 0; i < changeList.length; i++)
@@ -855,18 +947,140 @@ const UpgradeHolyRelics = () =>
     }
     PageBack();
 };
+const AddAttributePoint = () =>
+{
+    const abilityPointPlus = LoadImgList("backpack/abilityPointPlus");
 
-const ComprehensiveImprovement = (retry) =>
+    if (!FindImgInList(abilityPointPlus, [620, 467, 40, 40]))
+    {
+        console.log("未发现属性点加号，退出");
+    }
+    else
+    {
+        console.log("开始点击属性点");
+        RandomPress([632, 479, 19, 20]);
+        console.log("等到属性点窗口出现...");
+        WaitUntil(() => HasPopupClose([717, 96, 57, 56]));
+        for (let i = 0; i < 10; i++)
+        {
+            RandomPress([523, 170, 91, 22]); // dex 
+            RandomPress([695, 349, 25, 21]); //max dex
+            if (FindGoldBtn([564, 644, 200, 56]))
+            {
+                RandomPress([589, 659, 155, 26]);
+                console.log("确认提升该属性");
+                if (HasPopupClose([37, 107, 33, 33]))
+                {
+                    RandomPress([45, 112, 21, 21]);
+                    console.log("__提升属性结束");
+                    break;
+                }
+            }
+            Sleep(1);
+        }
+    }
+    RecycleImgList(abilityPointPlus);
+};
+const IsExchangeUnLock = () =>
+{
+    console.log("检查交易所是否解开");
+    const hasEnterTrade = EnterMenuItemPage("trade");
+    if (!hasEnterTrade)
+    {
+        console.log("进入交易所失败");
+        return false;
+    }
+    const lockImgList = LoadImgList("icon/lock");
+    let hadUnlocked = FindImgInList(lockImgList, [402, 72, 86, 52]);
+    if (!hadUnlocked)
+    {
+        console.log("交易所已解开");
+        alert("成号", "交易所已解开");
+        engines.stopAllAndToast();
+    }
+    else
+    {
+        console.log("交易所未解开");
+        PageBack();
+        return false;
+    }
+};
+const GuildDonation = () =>
+{
+    console.log("公会捐献");
+
+    const config = ReadConfig();
+
+    if (config.game.guildDonation == true && config.game.today == new Date().getDate())
+    {
+        console.log("今日已捐献，退出");
+        return true;
+    }
+
+    const hasEnterGuild = EnterMenuItemPage("guild");
+    if (!hasEnterGuild)
+    {
+        console.log("进入公会失败");
+        return false;
+    }
+
+    if (FindBlueBtn([182, 650, 165, 57]))
+    {
+        console.log("开始捐献");
+        RandomPress([221, 666, 96, 25]); //公会捐献按钮
+        WaitUntil(() => HasPopupClose([918, 80, 52, 45]));
+        const donationAwardImgList = LoadImgList("icon/font/guild/donationAward");
+        const donationTimesOverImgList = LoadImgList("icon/font/guild/donationTimesOver");
+        for (let i = 0; i < 10; i++)
+        {
+            if (FindBlueBtn([363, 496, 243, 85]))
+            {
+                RandomPress([409, 518, 157, 38], 1); //确认捐献
+                WaitUntil(() => FindImgInList(donationAwardImgList, [538, 158, 205, 75]), 500, 10);
+                PressBlank();
+                console.log("捐献成功:" + (i + 1) + "次");
+            }
+            else
+            {
+                if (FindImgInList(donationTimesOverImgList, [686, 595, 75, 57]))
+                {
+                    console.log("今日捐献已完成。");
+                    RandomPress([932, 90, 23, 24]);
+                    config.game.guildDonation = true;
+                    RewriteConfig(config);
+                    break;
+                }
+            }
+            Sleep();
+        }
+
+        RecycleImgList(donationAwardImgList);
+        RecycleImgList(donationTimesOverImgList);
+    }
+
+    for (let i = 0; i < 10; i++)
+    {
+        PageBack();
+        if (HasMenu())
+        {
+            console.log("公会捐献流程结束");
+            break;
+        }
+        if (HasPopupClose([917, 76, 50, 51]))
+        {
+            RandomPress([934, 92, 20, 21]);
+        }
+    }
+
+};
+const ComprehensiveImprovement = () =>
 {
     console.log("开始综合提升");
-    retry = retry || false;
-    if (retry == false)
+
+    if ((new Date().getTime() - lastComprehensiveImproveTime) / 3600000 < 1)
     {
-        if ((new Date().getTime() - lastComprehensiveImproveTime) / 3600000 < 1)
-        {
-            console.log("提升结束: 两次提升间隔较短，暂不操作");
-            return true;
-        }
+        console.log("提升结束: 两次提升间隔较短，暂不操作");
+        return true;
     }
 
     const isBackpackFull = IsBackpackFull(captureScreen());
@@ -876,16 +1090,15 @@ const ComprehensiveImprovement = (retry) =>
         WearEquipments();
         StrengthenEquipment();
         LoginProps();
-        DecomposeEquipment();
+        DecomposeEquipment("total");
     }
 
-    GetPassAward() && ClearPage();
-    GetActivitiesAward() && ClearPage();
-    GetMonsterKnowledgeAward() && ClearPage();
-    GetTravelLogAward() && ClearPage();
-    GetAchievement() && ClearPage();
+    GetPassAward();
+    GetActivitiesAward();
+    GetMonsterKnowledgeAward();
+    GetTravelLogAward();
+    GetAchievement();
     GetEmail();
-    ClearPage();
     // first open all box
     OpenAllBox();
 
@@ -895,7 +1108,7 @@ const ComprehensiveImprovement = (retry) =>
         WearEquipments();
         StrengthenEquipment();
         LoginProps();
-        DecomposeEquipment();
+        DecomposeEquipment("total");
     }
     ClearPage();
     IncreaseWeaponFeatures();
@@ -914,36 +1127,488 @@ const ComprehensiveImprovement = (retry) =>
 
     WearBestSuit();
     CheckSkillAutoRelease();
+    AddAttributePoint();
     console.log("综合提升结束");
+    IsExchangeUnLock();
+    GuildDonation();
+    lastComprehensiveImproveTime = new Date().getTime();
 
-    if (isExcuted)
-    {
-
-        lastComprehensiveImproveTime = new Date().getTime();
-    }
     return isExcuted;
 };
+const ComprehensiveImprovement_Instance = () =>
+{
+    PutOnSale();
+    console.log("副本模式下综合提升");
+    if (IsHaltMode())
+    {
+        ExitHaltMode();
+    }
+    const isBackpackFull = IsBackpackFull(captureScreen());
+    if (isBackpackFull)
+    {
+        console.log("副本提升：背包是满的，需要先清理背包");
+        WearEquipments();
+        StrengthenEquipment();
+    }
+    GetPassAward();
+    GetActivitiesAward();
+    GetMonsterKnowledgeAward();
+    GetTravelLogAward();
+    GetAchievement();
+    GetEmail();
+    ClearPage();
 
+    // first open all box
+    OpenAllBox();
+    if (!isBackpackFull)
+    {
+        console.log("背包不是满的，领取奖励后开始整理背包");
+        WearEquipments();
+        StrengthenEquipment();
+
+    }
+    ClearPage();
+
+    IncreaseWeaponFeatures();
+    UpgradeHolyRelics();
+    StrengthenHorseEquipment();
+
+    let isExcuted = ShopBuy();
+    WearBestSuit();
+    AddAttributePoint();
+    GuildDonation();
+    console.log("副本：综合提升结束");
+
+    lastComprehensiveImproveTime = new Date().getTime();
+
+    return isExcuted;
+};
+const GetSettlement = () =>
+{
+    console.log("开始结算");
+    const hasEnter = EnterMenuItemPage("trade");
+    if (!hasEnter)
+    {
+        console.log("进入交易所失败");
+        return false;
+    }
+    RandomPress([338, 77, 73, 21]); //贩售明细
+    if (FindBlueBtn([1076, 644, 196, 64]))
+    {
+        RandomPress([1103, 661, 148, 31]);
+        console.log("点击全部结算");
+    }
+    //是否有需要重新登录的
+    const hasReloginItem = FindBlueBtn([912, 654, 175, 57]);
+    if (hasReloginItem)
+    {
+        console.log("有上架过期的商品，取消上架");
+        let hadRelogin;
+        //取消贩售失败的商品
+        for (let i = 0; i < 3; i++)
+        {
+            let shot = captureScreen();
+            for (let j = 0; j < 10; j++)
+            {
+                hadRelogin = FindGoldBtn([886, 162, 177, 475], shot);
+                if (hadRelogin)
+                {
+                    RandomPress([hadRelogin.x + 200, hadRelogin.y, 130, 30]);
+                    console.log("下架此过期商品");
+                    shot = captureScreen();
+                }
+            }
+            SwipeSlowly([450, 600, 10, 10], [450, 300, 10, 10], 1);
+        }
+        RecycleImgList(sellingFailedImgList);
+    }
+    PageBack();
+};
+const SortBackpackItem = () =>
+{
+    console.log("整理背包");
+    OpenBackpack();
+    RandomPress([1092, 662, 26, 30]);
+    RandomPress([1211, 370, 30, 45]);
+    //查看总钻石并保存数据至脚本
+    const config = ReadConfig();
+    if (!config.deal)
+    {
+        config.deal = [];
+    }
+    const currentIncome = FindNumber("backpackPropety", [1111, 243, 74, 45]);
+    config.deal.push([GetDateTime(), currentIncome]);
+
+    const date = new Date();
+    const month = date.getMonth() + 1;
+    const year = date.getFullYear();
+    const lastMonthIncomeArr = config.deal.filter(dailyIncome =>
+    {
+        let time = dailyIncome[0].split("_");
+        if (year == time[0] && Math.abs(month - time[1]) == 1 && time[2] == 29)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    });
+
+    let lastMonthIncome = 0;
+    if (lastMonthIncomeArr.length > 0)
+    {
+        lastMonthIncome = lastMonthIncomeArr[lastMonthIncomeArr.length - 1];
+    }
+    let income = currentIncome - lastMonthIncome;
+
+    config.game.monthlyIncome = income;
+    RewriteConfig(config);
+    CloseBackpack();
+    // ui.run(function ()
+    // {
+    //     floaty_window.income.setText(`${income}`);
+    // });
+};
+const TradeGoods = () =>
+{
+    console.log("开始流程：物品上架");
+    const hasEnter = EnterMenuItemPage("trade");
+    if (!hasEnter)
+    {
+        console.log("进入交易所失败");
+        return false;
+    }
+    const sellText = LoadImgList("icon/font/trade/sell");
+    const shelfMaxImgList = LoadImgList("icon/font/trade/shelfMax");
+
+    let isShelfMax = false;
+    Sleep();
+    //网格的横纵间隔均为66像素 格子大小为57x57
+
+    const calculateNumber = [
+        [590, 511, 30, 27],//0
+        [518, 346, 28, 26],//1
+        [592, 345, 27, 27],//2
+        [661, 341, 35, 32],//3
+        [518, 397, 30, 29],//4
+        [589, 399, 34, 28],//5
+        [666, 397, 29, 32],//6
+        [666, 397, 29, 32],//7
+        [592, 453, 30, 30],//8
+        [665, 454, 29, 28]//9
+    ];
+    const splitToDigit = num => (num + "").split('').map(Number);
+    const CloseSellPopup = () => 
+    {
+        if (HasPopupClose([956, 186, 50, 57]))
+        {
+            RandomPress([970, 203, 21, 22]);
+        }
+    };
+    const MeetTheListingRequirement = (type) =>
+    {
+        let currentLowestLoginPrice = 0;
+        let maxItemNumber = 1;
+        let totalSellPrice = 0;
+
+        currentLowestLoginPrice = FindFloatNumber("sellPrice", [538, 366, 78, 36]);
+
+        console.log("当前最低价格：" + currentLowestLoginPrice);
+        if (currentLowestLoginPrice == null || currentLowestLoginPrice == 0)
+        {
+            if (type == "material")
+            {
+                console.log("未识别到价格，材料不上架");
+                return false;
+            }
+            else if (type == "weapon")
+            {
+                console.log("未识别到价格，装备默认上架");
+                return true;
+            }
+        }
+        if (type == "material")
+        {
+            RandomPress([874, 301, 93, 18]); //数量输入框
+            if (FindBlueBtn([643, 550, 162, 57]))
+            {
+                RandomPress([733, 517, 37, 12]); //max
+                RandomPress([665, 562, 122, 33]); //confirm
+                maxItemNumber = FindFloatNumber("sellPrice", [906, 291, 86, 35]);
+                console.log("材料数量为：" + maxItemNumber);
+            }
+        }
+        totalSellPrice = Math.floor(currentLowestLoginPrice * maxItemNumber);
+
+        if (totalSellPrice < 10)
+        {
+            console.log("低于10钻石，不上架");
+            return false;
+        }
+        else if (totalSellPrice > 1000)
+        {
+            console.log("上架价格异常，暂不上架");
+            return false;
+        }
+
+        else if (totalSellPrice >= 10)
+        {
+            let totalSellPrice_current = FindFloatNumber("sellPrice", [887, 249, 81, 45]);
+            console.log("默认出售格：" + totalSellPrice_current);
+
+            if (totalSellPrice != totalSellPrice_current)
+            {
+                console.log("手动设置总价：" + totalSellPrice);
+                let totalPriceNumberArr = splitToDigit(totalSellPrice);
+                RandomPress([851, 265, 127, 13]); //设置总价
+                if (FindBlueBtn([645, 548, 161, 62]))
+                {
+                    for (let i = 0; i < totalPriceNumberArr.length; i++)
+                    {
+                        RandomPress(calculateNumber[totalPriceNumberArr[i]]);
+                    }
+                    RandomPress([642, 550, 165, 58]); //confirm total price
+                }
+            }
+            return true;
+        }
+    };
+    const ConfirmToLogin = () =>
+    {
+        if (FindBlueBtn([551, 465, 182, 62]))
+        {
+            console.log("确定登录价格");
+            RandomPress([575, 482, 131, 25]);
+            WaitUntil(() => FindBlueBtn([549, 522, 185, 66]));
+            if (FindBlueBtn([549, 522, 185, 66]))
+            {
+                RandomPress([570, 539, 144, 31], 1);
+                console.log("确定登录");
+                for (let i = 0; i < 6; i++)
+                {
+                    if (FindImgInList(shelfMaxImgList, [536, 96, 188, 55]))
+                    {
+                        console.log("上架数量已满");
+                        isShelfMax = true;
+                        return false;
+                    }
+                    sleep(500);
+                }
+                console.log("上架物品成功！");
+                return true;
+            }
+        }
+        return false;
+    };
+    const LoginItem = (itemPos, type) =>
+    {
+        console.log("上架物品: " + itemPos + " type: " + type);
+
+        let hasSellText = false;
+        let loginSuccess = false;
+        for (let i = 0; i < 10; i++)
+        {
+            if (IsEmpty([itemPos[0] - 10, itemPos[1] - 10, 57, 57]))
+            {
+                break;
+            }
+            RandomPress(itemPos);
+            hasSellText = FindImgInList(sellText, [930, 584, 80, 61]);
+            if (hasSellText)
+            {
+                break;
+            }
+            CloseSellPopup();
+            if (FindRedBtn([477, 548, 160, 59]))
+            {
+                console.log("关闭价格键盘");
+                RandomPress([494, 561, 123, 33]);
+            }
+            Sleep(1);
+        }
+        if (hasSellText)
+        {
+            RandomPress([915, 599, 115, 28]); //贩售按钮
+            WaitUntil(() => FindBlueBtn([549, 467, 182, 57]));
+            let isMeetRequirement = MeetTheListingRequirement(type);
+            if (isMeetRequirement)
+            {
+                loginSuccess = ConfirmToLogin();
+
+            }
+        }
+        CloseSellPopup();
+        return loginSuccess;
+    };
+    const IteratingLoginIteem = (type) =>
+    {
+        let loginItemSuccessfully = false;
+
+        out: for (let i = 0; i < 7; i++)
+        {
+            for (let j = 0; j < 4; j++)
+            {
+                for (let n = 0; n < 24; n++)
+                {
+                    loginItemSuccessfully = LoginItem([1016 + j * 66, 175 + i * 66, 38, 36], type);
+                    if (isShelfMax == true)
+                    {
+                        console.log("上架数量已满，退出上架");
+                        return true;
+                    }
+                    if (IsEmpty([1006 + j * 66, 164 + i * 66, 57, 57]))
+                    {
+                        console.log("遍历完毕，退出上架");
+                        return true;
+                    }
+                    if (loginItemSuccessfully)
+                    {
+                        console.log("上架成功，继续上架");
+                        loginItemSuccessfully = LoginItem([1016 + j * 66, 175 + i * 66, 38, 36], type);
+                    }
+                    if (!loginItemSuccessfully)
+                    {
+                        console.log("下一格");
+                        break;
+                    }
+                }
+
+            }
+        }
+        return loginItemSuccessfully;
+    };
+    //先上架材料
+    RandomPress([1192, 121, 55, 27]);
+    let loginRes = IteratingLoginIteem("material");
+
+    //然后上架武器
+    if (!isShelfMax)
+    {
+        RandomPress([1106, 120, 51, 28]);
+        loginRes = IteratingLoginIteem("weapon");
+    }
+
+    PageBack();
+    return loginRes;
+};
+const PutOnSale = () =>
+{
+    console.log("开始进行物品上架");
+    GetSettlement();//结算过期上架物品
+    LoginProps();
+    DecomposeEquipment("partial");
+    SortBackpackItem();
+    TradeGoods();
+    console.log("__物品上架结束");
+};
+
+const FriendshipDonation = () =>
+{
+    const CanDonate = () => FindBlueBtn([1063, 208, 200, 71]);
+    const PressDonationBtn = () => RandomPress([1090, 227, 151, 32]);
+    const PressConfirmBtn = () => RandomPress([668, 559, 136, 29]);
+
+    let haveDonated = false;
+    const config = ReadConfig();
+    if (!config.game.friendshipDonation)
+    {
+        if (!EnterMenuItemPage('friendlinessLevel'))
+        {
+            console.log("进入友好度失败");
+            return false;
+        }
+        else
+        {
+            const stage_0 = LoadImgList("icon/font/friendshipStage/0");
+            const stage_1 = LoadImgList("icon/font/friendshipStage/1");
+            if (FindImgInList(stage_0, [117, 485, 44, 52]))
+            {
+                RandomPress([67, 465, 227, 56]); // 四号位置
+                for (let i = 0; i < 2; i++)
+                {
+                    if (CanDonate())
+                    {
+                        PressDonationBtn();
+                        if (WaitUntil(() => FindBlueBtn([648, 546, 175, 57])))
+                        {
+                            RandomPress([613, 408, 60, 24]); //+100
+                            PressConfirmBtn();
+                            haveDonated = true;
+                        }
+
+                    }
+                    if (FindImgInList(stage_1, [117, 485, 44, 52]))
+                    {
+                        console.log("一阶段友好度已捐满，退出");
+                        break;
+                    }
+                }
+            }
+            if (FindImgInList(stage_1, [117, 485, 44, 52]))
+            {
+                console.log("友好度一级完成，捐献第二个友好度商人");
+                RandomPress([57, 142, 238, 59]);
+                if (CanDonate())
+                {
+                    PressDonationBtn();
+                    if (WaitUntil(() => FindBlueBtn([647, 545, 174, 59])))
+                    {
+                        RandomPress([708, 409, 57, 24]);
+                        PressConfirmBtn();
+                        haveDonated = true;
+                    }
+                }
+            }
+        }
+
+        if (haveDonated)
+        {
+            config.game.friendshipDonation = true;
+            console.log("友好度捐献完成");
+            RewriteConfig(config);
+        }
+    }
+    else
+    {
+        console.log("今日已捐献友好证书");
+    }
+    for (let i = 0; i < 10; i++)
+    {
+        PageBack();
+        if (HasMenu())
+        {
+            break;
+        }
+        if (FindBlueBtn([646, 546, 178, 58]))
+        {
+            RandomPress([804, 118, 23, 24]);
+        }
+        else if (FindRedBtn([459, 542, 176, 64]))
+        {
+            RandomPress([804, 118, 23, 24]);
+        }
+        Sleep();
+    }
+};
 
 module.exports = {
     ChangeAbility, GetEmail, GetAchievement, GetMonsterKnowledgeAward, LoginProps,
-    ShopBuy, ComprehensiveImprovement, StrengthenHorseEquipment, IncreaseWeaponFeatures
+    ShopBuy, ComprehensiveImprovement, ComprehensiveImprovement_Instance, StrengthenHorseEquipment, IncreaseWeaponFeatures
 };
 
-
-// IncreaseWeaponFeatures();
-// WearEquipments();
-// UpgradeHolyRelics();
+// FriendshipDonation();
+// GuildDonation();
 // GetActivitiesAward();
-// ComprehensiveImprovement();
-// OpenAllBox();
-// GetActivitiesAward();
-// StrengthenHorseEquipment();
-// WearEquipments();
-// StrengthenEquipment();
+// console.log(IsExchangeUnLock());
+// PutOnSale();
+// GetSettlement();
 // LoginProps();
-// WearBestSuit();
-// DecomposeEquipment();
+// TradeGoods();
 
-// console.log(FindTipPoint([416, 370, 42, 45]));
-// GetEmail();
+// ComprehensiveImprovement_Instance();
+// GuildDonation();
+// RandomPress([874, 301, 93, 18]); //数量输入框
+// SortBackpackItem();
+
+// console.log(FindFloatNumber("sellPrice", [898, 249, 68, 42]));

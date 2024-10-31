@@ -32,6 +32,7 @@ const CrucifixColorList = [
     ["#f0dc69", [[-11, 11, "#baa850"], [8, 11, "#b8a64f"], [-1, 28, "#bdab53"], [0, 28, "#bdab53"]]]
 ];
 
+
 module.exports = {
     NoPotionColorList, LordNineWordColorList, WhiteAvatarColorList, StartBtnSettingColorList, CrucifixColorList
 };

@@ -1,6 +1,6 @@
 
 const baseUrl = "http://10.6.130.129:82/LordNine/";
-const ignoreList = [".gitignore", "test.js", "tool.js", "z_fileSync.js", "project.json", "../", "frame"];
+const ignoreList = [".gitignore", "z_test.js", "z0_tool.js", "z1_syncFile.js", "../", "frame", ".git"];
 
 const getUrl = (path) =>
 {
@@ -71,6 +71,7 @@ const SyncFile = function ()
     }
     toastLog("同步完成");
 };
+
 SyncFile();
 
 // console.log(getUrl());

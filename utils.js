@@ -4,14 +4,17 @@ const { PagebackColorList, MenuColorList, MenuCloseColorList, BlueBtnColorList, 
     PleaseTapBlankColorList,
     GreenBtnColorList,
 } = require("./Color/Color.js");
+const { TipColorList, QuestColorList } = require("./Color/MainStoryColorList.js");
+
+const tradingHours = [[random(0, 11), random(0, 59)], [random(12, 23), random(0, 59)]];
 
 const defaultConfig = {
     ui: {
         createCharacter: "false",
         serverName: "00",
         gameMode: "mainStory",
-        manualInstance: "false",
-
+        monsterMapList: [],
+        hangupMap: "03"
     },
     game: {
         deathTime: 0,
@@ -19,7 +22,17 @@ const defaultConfig = {
         reconnectionTime: 0,
         lv: 0,
         autoPotion: false,
-        dailyInstance: false
+        dailyInstance: false,
+        dailyShop: false,
+        guildDonation: false,
+        dailyTradingHours: tradingHours,
+        delayTime: random(0, 600)
+    },
+    dailyThings: {
+        dailyInstance: false,
+        dailyMission: false,
+        dailyShop: false,
+        dailyTradingHours: tradingHours
     }
 };
 
@@ -31,53 +44,13 @@ let specialConfig = {
 
 const configFile = "/sdcard/LordNine/config.json";
 
-const MenuItemRegionList = {
-    "master": [857, 121, 20, 25],
-    "weaponFeatures": [913, 114, 28, 29],
-    "ability": [973, 118, 24, 31],
-    "suit": [1030, 118, 31, 28],
-    "horse": [1089, 119, 25, 24],
-    "animal": [1147, 120, 31, 27],
-    "propsLogin": [1205, 116, 30, 26],
 
-    "trade": [852, 204, 33, 30],
-    "equipment": [913, 207, 27, 28],
-    "manufacture": [972, 206, 27, 27],
-    "episode": [1032, 204, 24, 28],
-    "mission": [1088, 205, 30, 30],
-    "achievement": [1150, 206, 28, 26],
-    "log": [1205, 202, 30, 37],
 
-    "instance": [855, 294, 30, 31],
-    "trialOfTower": [912, 295, 29, 28],
-    "holyRelics": [972, 290, 30, 27],
-    "mark": [1029, 296, 35, 27],
-    "monsterKnowledge": [1092, 291, 24, 30],
-    "friendship": [1146, 289, 31, 36],
-    "boss": [1204, 289, 31, 35],
-
-    "guild": [854, 376, 31, 37],
-    "email": [1035, 552, 22, 22],
-    "setting": [1149, 545, 28, 29]
-};
-const GroceryColorList = [
-    ["#111112", [[12, 2, "#a9a892"], [20, 2, "#aba892"], [84, 6, "#a4a694"], [159, 3, "#a9a892"]]],
-    ["#a9a892", [[11, 0, "#aca992"], [72, -4, "#a6a592"], [86, 6, "#a5a28b"], [144, 0, "#aca992"]]]
-];
 const HaltModeColorList = [
     ["#dccb96", [[1, 0, "#dccb96"], [5, 0, "#dbc996"], [8, 4, "#0e1116"], [5, 13, "#0d1015"]]],
     ["#dccb96", [[3, -2, "#dccb96"], [7, 2, "#0d1015"], [5, 12, "#0d1014"], [9, 16, "#a2946d"]]]
 ];
 
-const HomeColorList = [
-    ["#c9b989", [[1, 0, "#c9ba89"], [1, 3, "#c8b888"], [8, -1, "#d4c28f"], [11, 2, "#dccb96"]]],
-    ["#c4b586", [[0, 8, "#b6a67b"], [3, -5, "#dccb96"], [11, 5, "#dccb96"], [14, 5, "#dac894"]]],
-    ["#d7c692", [[-1, 0, "#d3c18f"], [-1, 2, "#c8b888"], [5, -3, "#d7c692"], [10, 2, "#d9c794"]]],
-    ["#cbba89", [[2, 1, "#c7b788"], [4, 0, "#dccb96"], [8, 0, "#d7c692"], [12, 3, "#c9b989"]]]
-];
-const QIconColorList = [
-    ["#dccb96", [[0, 3, "#dccb96"], [13, 1, "#dccb96"], [13, 4, "#dcc996"], [13, 5, "#dccb96"]]]
-];
 const BackpackPageColorList = [
     ["#fbfbfa", [[0, 4, "#fbfbfa"], [3, 6, "#ffffff"], [0, 7, "#fbfbfa"], [0, 10, "#fcfcfc"]]]
 ];
@@ -101,6 +74,7 @@ const tapBlankRegionColorList = [
     [570, 630, 150, 50], //获得新能力，点击空白弹窗
     [570, 520, 134, 50], //分解装备，点击空白
     [570, 640, 136, 50],//制作完成，点击空白
+    [568, 514, 147, 62],
 ];
 const ReadImg = (name) => images.read(`./img/${name}.png`);
 const LoadImgList = (url) =>
@@ -128,14 +102,22 @@ const backpackTrashIcon = LoadImgList("backpack/trash");
 const inCityIconImgList = LoadImgList("icon/inCity");
 const menuCloseImgList = LoadImgList("icon/menuClose");
 const popupCloseImgList = LoadImgList("icon/popupClose");
-const mainstoryIconImgList = LoadImgList("icon/mainStoryIcon");
+
+const mainStoryIconImgList = LoadImgList("icon/mainStoryIcon");
+const transformIconImgList = LoadImgList("icon/transform");
+const dailyMissionIconImgList = LoadImgList("icon/dailyMissionIcon");
+
 const mapPlusIconImgList = LoadImgList("icon/mapPlus");
+const haltModeBtnImgList = LoadImgList("icon/haltModeBtn");
+const lockImgList = LoadImgList("icon/lock");
+
 const CloseMenu = (shot) =>
 {
 
     const hasMenuClose = HasMenuClose(shot);
     if (hasMenuClose)
     {
+        console.log("关闭菜单");
         RandomPress([1213, 25, 23, 24]);
     }
 };
@@ -145,10 +127,12 @@ const CloseBackpack = () =>
     if (hasBackpackClose)
     {
         RandomPress([1216, 110, 18, 19]);
+        console.log("关闭背包");
     }
     const hasBackpackMenuClose = HasBackpackMenuClose();
     if (hasBackpackMenuClose)
     {
+        console.log("关闭背包菜单");
         RandomPress([1103, 46, 19, 16]);
     }
 };
@@ -231,14 +215,14 @@ const ChangeRecoverPotionPercentToNormal = () =>
     }
     return false;
 };
-
 const ClearPage = () =>
 {
     let shot = captureScreen();
-    if (HasMenu(shot) && HasMainStoryIcon(shot) && HasHome(shot))
+    if (HasMenu(shot) && HaveMainStoryIcon(shot) && HasHaltModeBtn(shot))
     {
         if (!HasMap(shot))
         {
+            console.log("展开地图");
             RandomPress([45, 129, 24, 30]);
         }
         return true;
@@ -249,21 +233,119 @@ const ClearPage = () =>
     TapBlankToContinue(shot);
     return false;
 };
+const ChangeGameSetting = () =>
+{
+    console.log("开始修改游戏画面设置");
+    let isChangeSuccess = false;
+    let hasOpenedMenu = false;
+    for (let i = 0; i < 10; i++)
+    {
+        if (HasMenu())
+        {
+            let hasOpened = OpenMenu();
+            if (hasOpened)
+            {
+                hasOpenedMenu = true;
+                break;
+            }
+        }
+        else if (HasMenuClose())
+        {
+            hasOpenedMenu = true;
+            break;
+        }
+        else
+        {
+            ClearPage();
+            Sleep();
+        }
+    }
+    if (!hasOpenedMenu)
+    {
+        console.log("打开菜单失败.退出");
+        return false;
+    }
+    RandomPress([1150, 546, 27, 34]);
+    WaitUntilPageBack();
+    if (!HasPageback())
+    {
+        console.log("进入设置页面失败，退出");
+        return false;
+    }
+    //改变省电模式为不进入省电模式
+    RandomPress([182, 77, 92, 26]); //游戏设置页
+    RandomPress([631, 324, 115, 23]); //关闭省电
+    RandomPress([1131, 205, 102, 24]); //取消接受队伍消息
 
+    RandomPress([339, 75, 66, 24], 3); //环境设置页
+    RandomPress([1133, 265, 102, 24]); //解析度低
+    RandomPress([1127, 499, 103, 23]); //算绘低
+    RandomPress([1128, 558, 106, 24]); //影格帧率30
+    RandomPress([1136, 618, 99, 22]); //即使绘影
+
+    for (let i = 0; i < 6; i++)
+    {
+        SwipeSlowly([640, 600, 10, 10], [640, 300, 10, 10], 1);
+        if (FindNumber("combatPower", [1161, 614, 38, 33]) == 10)
+        {
+            console.log("滑到底了");
+            RandomPress([1127, 149, 103, 25]); //灯光品质 低
+            RandomPress([1129, 210, 103, 21]); //关闭后期处理
+            RandomPress([1126, 266, 107, 23]); //状态异常效果
+            RandomPress([1139, 385, 89, 22]); //插件效果
+            RandomPress([1135, 442, 90, 22]); //效果 低
+            RandomPress([1126, 502, 111, 21]); //环境效果 关闭
+            RandomPress([1131, 561, 103, 23]); //镜头晃动 关闭
+            RandomPress([1125, 618, 110, 25]); //人物显示上限
+            if (FindNumber("combatPower", [1161, 614, 38, 33]) == 10)
+            {
+                isChangeSuccess = true;
+                console.log("更改设置成功");
+                break;
+            }
+        }
+    }
+    PageBack();
+    return isChangeSuccess;
+};
+
+const DeathImgList = LoadImgList("special/death");
+const DeathCheck = () =>
+{
+    const shot = captureScreen();
+    if (FindBlueBtn([539, 420, 205, 67], shot) || FindBlueBtn([539, 590, 207, 70], shot))
+    {
+        for (let i = 0; i < DeathImgList.length; i++)
+        {
+            if (FindImg(DeathImgList[i], [596, 423, 84, 59], shot))
+            {
+                console.log("角色死亡");
+                return true;
+            }
+            else if (FindImg(DeathImgList[i], [527, 584, 217, 85], shot)) 
+            {
+                console.log("角色死亡! 失去能力点");
+                return true;
+            }
+        }
+    }
+    return false;
+};
 /**
  * @param {Array} colorArr
  * @param {Array} region
  * @param {Image} shot
  * @returns {Boolean}
  */
-const FindMultiColors = (colorArr, region, shot) =>
+const FindMultiColors = (colorArr, region, shot, threshold) =>
 {
     let hasColor = false;
     shot = shot || captureScreen();
+    threshold = threshold || 4;
     for (let i = 0; i < colorArr.length; i++)
     {
         let [color, position] = colorArr[i];
-        hasColor = images.findMultiColors(shot, color, position, { region });
+        hasColor = images.findMultiColors(shot, color, position, { region, threshold });
         if (hasColor)
         {
             // console.log("find multicolors: " + hasColor + "index: " + i);
@@ -280,7 +362,11 @@ const FindImg = (img, region, shot) =>
 const FindBlueBtn = (region, shot) => { shot = shot || captureScreen(); return FindMultiColors(BlueBtnColorList, region, shot); };
 
 const FindRedBtn = (region, shot) => { shot = shot || captureScreen(); return FindMultiColors(RedBtnColorList, region, shot); };
-const FindTipPoint = (region, shot) => { shot = shot || captureScreen(); return FindMultiColors(TipPointColorList, region, shot); };
+const FindTipPoint = (region, shot) =>
+{
+    shot = shot || captureScreen();
+    return FindMultiColors(TipPointColorList, region, shot, 10);
+};
 const FindGoldBtn = (region, shot) => { shot = shot || captureScreen(); return FindMultiColors(GoldBtnColorList, region, shot); };
 const FindGreenBtn = (region, shot) => { shot = shot || captureScreen(); return FindMultiColors(GreenBtnColorList, region, shot); };
 const FindCheckMark = (region) => FindMultiColors(CheckMarkColorList, region);
@@ -299,12 +385,11 @@ const FindImgInList = (imgList, region, shot) =>
     }
     return false;
 };
-const FindNumber = function (directory, region, shot)
+const FindNumber = (directory, region, shot) =>
 {
-    console.log("find number in directory: " + directory + " region: " + region);
     shot = shot || captureScreen();
-    const numberArr = [];
-    for (let i = 0; i < 10; i++)
+    const numberImgList = [];
+    for (let i = 0; i < 11; i++)
     {
         let arr = [];
         for (let j = 0; j < 20; j++)
@@ -313,73 +398,280 @@ const FindNumber = function (directory, region, shot)
             if (img == null) break;
             arr.push(img);
         }
-        numberArr.push(arr);
+        numberImgList.push(arr);
     }
-    let settleAccount = []; //settle account
+    let recogNumberList = []; //识别数字的集合
     for (let i = 0; i < 10; i++)
     {
-        let n = numberArr[i].length;
+        let n = numberImgList[i].length;
         for (let j = 0; j < n; j++)
         {
-            let num = images.matchTemplate(shot, numberArr[i][j], { region: region });
+            let num = images.matchTemplate(shot, numberImgList[i][j], { region: region, threshold: 0.92 });
             if (num.points.length > 0)
             {
-                settleAccount.push({ num: i, points: num.points });
+                // recogNumberList.push({ num: i, points: num.points, threshold: num.matches[0].similarity });
+                for (let k = 0; k < num.points.length; k++)
+                {
+                    recogNumberList.push({ number: i, point: num.points[k], similarty: num.matches[k].similarity });
+                }
+                // console.log("num:" + JSON.stringify(num));
             }
         }
-
     }
-    // //recycle
-    numberArr.forEach(arr => arr.forEach(img => img.recycle()));
-    // check if it is not a number
-    if (settleAccount.length === 0) return null;
-    //sort
-    const sequence = [];
-    settleAccount.forEach(item =>
-    {
-        item.points.forEach(point => sequence.push({ number: item.num, x: point.x }));
-    });
-    sequence.sort((a, b) => a.x - b.x);
+    numberImgList.forEach(arr => arr.forEach(img => img.recycle()));
 
-    const filteredArr = sequence.filter((element, index) =>
+    if (recogNumberList.length === 0) return null;
+
+    // console.log("识别所有数字集合:" + JSON.stringify(recogNumberList));
+
+    //数据初步处理：去掉相同x坐标
+    const sameXValues = {};
+    let sequence = recogNumberList.filter(item => 
     {
-        if (index > 0 && Math.abs(element.x - sequence[index - 1].x) < 3)
+        if (!sameXValues[item.point.x])
         {
-            return false; // 删除相邻元素x值小于3的情况
+            sameXValues[item.point.x] = true;
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+        // item.points.forEach(point => sequence.push({ number: item.num, x: point.x, threshold: item.threshold }));
+    });
+
+    //数据初步处理：数字排序
+    sequence.sort((a, b) => a.point.x - b.point.x);
+
+
+
+    // 过滤相邻数字,去相似度高的
+    const filter_adjacent = sequence.filter((element, index) =>
+    {
+        if (index > 0 && (element.point.x - sequence[index - 1].point.x) < 3)
+        {
+            // console.log("element" + JSON.stringify(element));
+            return false;
         }
         return true;
     });
+    //校验是否识别错误
+    for (let i = 1; i < filter_adjacent.length; i++)
+    {
+        let distance = filter_adjacent[i].point.x - filter_adjacent[i - 1].point.x;
+        if (distance > 15)
+        {
+            console.log(JSON.stringify(filter_adjacent, null, 2));
+            console.log("识别数字错误，返回0");
+            return 0;
+        }
+    }
 
-    filteredArr.forEach((point, index, arr) => arr[index] = point.number);
+    //过滤坐标信息 将10数字改为小数点
+    for (let i = 0; i < filter_adjacent.length; i++)
+    {
+        filter_adjacent[i] = filter_adjacent[i].number;
+    }
+    if (filter_adjacent.length == 0)
+    {
+        console.log("未识别到数字，返回null");
+        return null;
+    }
+    const finalNumber = filter_adjacent.join("");
+    // console.log("识别数字为: " + finalNumber);
 
-    // log(sequence);
-    const finalNumber = filteredArr.join("");
-    console.log("find number: " + finalNumber);
-    return parseInt(finalNumber);
+    return parseFloat(finalNumber);
 };
-const GetFormatedTimeString = function (sign)
+const FindFloatNumber = (directory, region, shot) =>
 {
-    let s = sign || ":";
-    const time = new Date();
+    shot = shot || captureScreen();
+    const numberImgList = [];
+    for (let i = 0; i < 11; i++)
+    {
+        let arr = [];
+        for (let j = 0; j < 20; j++)
+        {
+            let img = ReadImg(`number/${directory}/${i}/${j}`);
+            if (img == null) break;
+            arr.push(img);
+        }
+        numberImgList.push(arr);
+    }
+    let recogNumberList = []; //识别数字的集合
+    for (let i = 0; i < 11; i++)
+    {
+        let n = numberImgList[i].length;
+        for (let j = 0; j < n; j++)
+        {
+            let num = images.matchTemplate(shot, numberImgList[i][j], { region: region, threshold: 0.92 });
+            if (num.points.length > 0)
+            {
+                // recogNumberList.push({ num: i, points: num.points, threshold: num.matches[0].similarity });
+                for (let k = 0; k < num.points.length; k++)
+                {
+                    recogNumberList.push({ number: i, point: num.points[k], similarty: num.matches[k].similarity });
+                }
+                // console.log("num:" + JSON.stringify(num));
+            }
+        }
+    }
+    numberImgList.forEach(arr => arr.forEach(img => img.recycle()));
 
-    const year = time.getFullYear();
-    const month = time.getMonth() + 1;
-    const day = time.getDate();
-    const hour = time.getHours();
-    const minute = time.getMinutes();
-    const second = time.getSeconds();
-    return `${year}-${month}-${day} ${hour}${s}${minute}${s}${second}`;
+    if (recogNumberList.length === 0) return null;
+
+    // console.log("识别所有数字集合:" + JSON.stringify(recogNumberList));
+
+    //数据初步处理：去掉相同x坐标
+    const sameXValues = {};
+    let sequence = recogNumberList.filter(item => 
+    {
+        if (!sameXValues[item.point.x])
+        {
+            sameXValues[item.point.x] = true;
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+        // item.points.forEach(point => sequence.push({ number: item.num, x: point.x, threshold: item.threshold }));
+    });
+
+    //数据初步处理：数字排序
+    sequence.sort((a, b) => a.point.x - b.point.x);
+
+    // console.log("去除相同数字及排序后结果: " + JSON.stringify(sequence));
+
+    //剔除相邻小数点
+    let filter_decimal_adjacent = sequence.filter((element, index, arr) =>
+    {
+        if (element.number == 10)
+        {
+            let prevElement = arr[index - 1];
+            if (prevElement && prevElement.number == 10)
+            {
+                if (element.point.x - prevElement.point.x < 3)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+        return true;
+    });
+    // console.log("筛选相邻小数点后的结果: " + JSON.stringify(filter_decimal_adjacent));
+
+    //剔除多余小数点
+    let hasDecimal = false;
+    for (let i = 0; i < filter_decimal_adjacent.length; i++)
+    {
+        if (filter_decimal_adjacent[i].number == 10)
+        {
+            hasDecimal = true;
+        }
+    }
+    // console.log("@是否有小数：" + hasDecimal);
+    if (hasDecimal)
+    {
+        filter_decimal_adjacent = filter_decimal_adjacent.filter((item, index, arr) =>
+        {
+            if (item.number == 10)
+            {
+                let prev = arr[index - 1];
+                let next = arr[index + 1];
+                if (prev && next)
+                {
+                    let prevDiff = item.point.x - prev.point.x;
+                    let nextDiff = next.point.x - item.point.x;
+                    if (prevDiff > 2 && nextDiff > 2)
+                    {
+                        return true;
+                    }
+                    return false;
+                }
+                return false;
+            }
+            return true;
+        });
+
+        //过滤相似度低的小数点
+        const decimals = filter_decimal_adjacent.filter(item => item.number === 10);
+
+        // 如果存在多个num为0的元素，则找到similarity最大的一个
+        let maxSimilarityDecimals;
+        if (decimals.length > 1)
+        {
+            maxSimilarityDecimals = decimals.reduce((max, current) =>
+                (current.similarity > max.similarity ? current : max), decimals[0]);
+        } else if (decimals.length === 1)
+        {
+            // 只有一个num为0的元素时直接取它
+            maxSimilarityDecimals = decimals[0];
+        }
+        filter_decimal_adjacent = filter_decimal_adjacent.filter(item =>
+            item.number !== 10 || (item.number === 10 && item === maxSimilarityDecimals));
+        // console.log("删除多余的不相邻的小数点：" + JSON.stringify(filter_decimal_adjacent));
+    }
+
+    // 进一步过滤相邻数字,去相似度高的
+    const filter_adjacent = filter_decimal_adjacent.filter((element, index) =>
+    {
+        if (index > 0 && (element.point.x - filter_decimal_adjacent[index - 1].point.x) < 2)
+        {
+            // console.log("element" + JSON.stringify(element));
+            return false;
+        }
+        return true;
+    });
+    // console.log("进一步过滤相邻数字：" + JSON.stringify(filter_adjacent));
+
+    //校验是否识别错误
+    for (let i = 1; i < filter_adjacent.length; i++)
+    {
+        let distance = filter_adjacent[i].point.x - filter_adjacent[i - 1].point.x;
+        if (distance > 10)
+        {
+            console.log(JSON.stringify(filter_adjacent, null, 2));
+            console.log("识别数字错误，返回0");
+            return 0;
+        }
+    }
+
+    //过滤坐标信息 将10数字改为小数点
+    for (let i = 0; i < filter_adjacent.length; i++)
+    {
+        if (filter_adjacent[i].number == 10)
+        {
+            filter_adjacent[i] = ".";
+        }
+        else
+        {
+            filter_adjacent[i] = filter_adjacent[i].number;
+        }
+    }
+    if (filter_adjacent.length == 0)
+    {
+        console.log("未识别到数字，返回null");
+        return null;
+    }
+    const finalNumber = filter_adjacent.join("");
+    // console.log("识别数字为: " + finalNumber);
+
+    return parseFloat(finalNumber);
 };
+const FormatDateTime = (date, format) =>
+{
+    format = format || "_";
+    const year = date.getFullYear(); // 年份，例如 2023
+    const month = date.getMonth() + 1; // 月份，0-11，0 表示一月，11 表示十二月
+    const day = date.getDate(); // 日期，1-31
+    return `${year}${format}${month}${format}${day}`;
+};
+const GetDateTime = () => FormatDateTime(new Date());
 const GetVerificationCode = () =>
 {
     const url = "https://upload.chaojiying.net/Upload/Processing.php";
     const clip = images.clip(images.captureScreen(), 470, 297, 278, 86);
-
-    // files.create("/sdcard/clip/");
-    // const fileName = `${GetFormatedTimeString("_")}.png`;
-    // images.save(clip, `/sdcard/clip/${fileName}`);
-    // const img = files.read(`/sdcard/clip/${fileName}`);
-    // const img = clip;
     const img = images.toBase64(clip);
     const data =
     {
@@ -391,33 +683,11 @@ const GetVerificationCode = () =>
         file_base64: img
     };
     const result = http.post(url, data);
-    // const result = http.request(url, {
-    //     headers: {
-    //         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.8; rv:24.0) Gecko/20100101 Firefox/24.0',
-    //         'Content-Type': 'application/x-www-form-urlencoded'
-    //     },
-    //     method: 'POST',
-    //     contentType: "text/ html; charset=utf-8",
-    //     body: data
-    // });
+
     return result.body.json().pic_str;
 };
-const GetCaptureScreenPermission = () =>
-{
-    auto();
-    threads.start(function () { images.requestScreenCapture(true); });
-    threads.start(function ()
-    {
-        const hasOpen = textMatches(/(.*시작하기.*|.*立即开始.*)/).findOne(2000);
-        if (hasOpen)
-        {
-            sleep(1000);
-            hasOpen.click();
-        }
-    });
-};
-const HasPageback = (shot) => { shot = shot || captureScreen(); return FindMultiColors(PagebackColorList, [1216, 9, 41, 43], shot); };
 
+const HasPageback = (shot) => { shot = shot || captureScreen(); return FindMultiColors(PagebackColorList, [1216, 9, 41, 43], shot); };
 
 const HasBackpack = () => FindMultiColors(BackpackColorList, [1143, 12, 40, 50]);
 const HasBackpackClose = () => FindMultiColors(PopupCloseColorList, [1210, 101, 33, 35]);
@@ -459,27 +729,62 @@ const HasPopupClose = (region, shot) =>
 };
 
 const HasMenu = (shot) => { shot = shot || captureScreen(); return FindMultiColors(MenuColorList, [1198, 13, 55, 47], shot); };
-const HasHome = (shot) => { shot = shot || captureScreen(); return FindMultiColors(HomeColorList, [37, 240, 36, 45], shot); };
-const HasMainStoryIcon = (shot) =>
+const HasHaltModeBtn = (shot) => { shot = shot || captureScreen(); return FindImgInList(haltModeBtnImgList, [45, 402, 25, 32], shot); };
+const FinishedMissionColorList = [
+    ["#e8e8e7", [[10, -1, "#f0f0ef"], [3, 3, "#dbdbda"], [16, 2, "#eaeae9"], [23, 9, "#fcfcfc"]]],
+    ["#3e3d3d", [[3, 7, "#eaeae9"], [13, 4, "#f0f0f0"], [20, 6, "#fdfdfd"], [24, 10, "#f6f6f6"]]],
+    ["#fbfbfa", [[3, 0, "#fbfbfa"], [14, 1, "#fefefd"], [21, 5, "#fcfcfc"], [24, 8, "#fafafa"]]],
+    ["#fdfdfd", [[2, 0, "#fdfdfd"], [13, 4, "#fdfdfd"], [20, 8, "#fcfcfc"], [21, 9, "#fafafa"]]],
+    ["#fcfcfc", [[2, 0, "#fcfcfc"], [0, 6, "#ffffff"], [3, 6, "#ffffff"], [14, 1, "#f5f5f4"]]]
+];
+const accompletImgList = LoadImgList("icon/font/accomplete");
+const HaveFinished = (region, shot) =>
 {
     shot = shot || captureScreen();
-    if (FindMultiColors(QIconColorList, [1200, 125, 54, 46], shot))
+    let haveFinish = FindMultiColors(FinishedMissionColorList, region, shot);
+    if (haveFinish)
     {
-        return true;
+        return haveFinish;
     }
-    if (FindImgInList(mainstoryIconImgList, [1198, 118, 55, 53], shot))
+    haveFinish = FindImgInList(accompletImgList, region, shot);
+    if (haveFinish)
+    {
+        return haveFinish;
+    }
+    return false;
+};
+const HaveMainStoryIcon = (shot) =>
+{
+    shot = shot || captureScreen();
+
+    if (FindImgInList(mainStoryIconImgList, [1197, 117, 55, 55], shot))
     {
         return true;
     }
     return false;
 };
+const HasTransformIcon = (shot, region) =>
+{
+    shot = shot || captureScreen();
+    region = region || [1138, 113, 41, 48];
+    return FindImgInList(transformIconImgList, region, shot);
+};
+const HaveDailyMissionIcon = (shot) =>
+{
+    shot = shot || captureScreen();
+
+    return FindImgInList(dailyMissionIconImgList, [856, 181, 47, 232], shot);
+
+};
+
 const HasMap = (shot) =>
 {
     shot = shot || captureScreen();
     return FindImgInList(mapPlusIconImgList, [91, 243, 33, 38], shot);
 };
 const HasOpenTheBackPage = (region) => FindMultiColors(BackpackPageColorList, region);
-const HasBackpackMenuClose = () => FindMultiColors(PopupCloseColorList, [1094, 31, 39, 45]);
+const HasBackpackMenuClose = () => HasPopupClose([1090, 31, 45, 45]);
+
 const HasSkip = () =>
 {
     const shot = captureScreen();
@@ -495,7 +800,7 @@ const HasSkip = () =>
     }
     return false;
 };
-
+const HasTip = () => FindMultiColors(TipColorList, [19, 17, 1238, 688]);
 const HollowPress = (hollowRegion) =>
 {
     const [x, y, w, h] = hollowRegion;
@@ -550,6 +855,17 @@ const IsBackpackFull = (shot) => FindMultiColors(BackpackFullColorList, [1144, 3
 const IsInCity = () => FindImgInList(inCityIconImgList, [979, 416, 71, 72]);
 const IsHaltMode = () => FindMultiColors(HaltModeColorList, [606, 643, 76, 62]);
 
+const auto_questImgList = LoadImgList("icon/auto/quest");
+const IsAuto_quest_Img = (shot) => { shot = shot || captureScreen(); return FindImgInList(auto_questImgList, [1127, 423, 61, 45]); };
+const IsAuto_quest = (shot) => { shot = shot || captureScreen(); return FindMultiColors(QuestColorList, [1127, 423, 61, 45]); };
+const IsInQuest = () =>
+{
+    if (IsAuto_quest() || IsAuto_quest_Img())
+    {
+        return true;
+    }
+    return false;
+};
 const LaunchGame = () => app.launch("com.smilegate.lordnine.stove.google");
 
 
@@ -598,6 +914,7 @@ const PageBack = (shot) =>
     const hasPageBack = HasPageback(shot);
     if (hasPageBack)
     {
+        console.log("返回");
         RandomPress([1226, 19, 18, 23]);
     }
 };
@@ -763,10 +1080,17 @@ const RecycleImgList = (list) =>
     }
 };
 
+/**
+ * 
+ * @param {*} func 执行函数
+ * @param {*} frequence 执行频率，单位毫秒
+ * @param {*} loopTime  循环次数
+ * @returns 
+ */
 const WaitUntil = (func, frequence, loopTime) =>
 {
-    frequence = frequence || 1500;
-    loopTime = loopTime || 30;
+    frequence = frequence || 1000;
+    loopTime = loopTime || 15;
     for (let i = 0; i < loopTime; i++)
     {
         if (func())
@@ -808,7 +1132,7 @@ const ReturnHome = () =>
             console.log("已经在主城，回主城成功。");
             return true;
         }
-        else if (HasHome())
+        else if (HasHaltModeBtn())
         {
             RandomPress([45, 252, 22, 23]);
             if (FindBlueBtn([657, 443, 197, 66]))
@@ -853,37 +1177,64 @@ const ReadConfig = () =>
     const isCreate = files.createWithDirs(configFile);
     if (isCreate)
     {
-        files.write(configFile, JSON.stringify(defaultConfig));
+        files.write(configFile, JSON.stringify(defaultConfig, null, 2));
         return defaultConfig;
     }
-    return JSON.parse(files.read(configFile));
+    else
+    {
+        try
+        {
+            const config = files.read(configFile);
+            if (Object.keys(config).length === 0)
+            {
+                console.log('JSON文件为空，重新生成默认配置文件');
+                files.write(configFile, JSON.stringify(defaultConfig, null, 2));
+                return defaultConfig;
+            } else
+            {
+                return JSON.parse(config);
+            }
+        } catch (error)
+        {
+            console.log("读取文件失败：" + error);
+            files.write(configFile, JSON.stringify(defaultConfig, null, 2));
+            return defaultConfig;
+        }
+
+
+    }
 };
-const RewriteConfig = (attr, value) =>
+
+// 自定义的格式化函数
+function customReplacer(key, value)
 {
-    let config = ReadConfig();
-    if (config[attr])
+    if (Array.isArray(value))
     {
-        config[attr] = value;
-        files.write(configFile, JSON.stringify(config));
-        console.log("更新配置: " + JSON.stringify(config));
+        // 数组内的元素不换行
+        return JSON.stringify(value);
     }
-    else if (config[attr] == null)
-    {
-        alert("配置文件参数错误", "请检查配置文件参数");
-    }
+    return value;
+}
+
+const RewriteConfig = (config) =>
+{
+    config = JSON.stringify(config, null, 2);
+    files.write(configFile, config);
+    console.log("更新配置: " + config);
+
 };
 const RestartGame = (packageName, time) =>
 {
     log("强制停止:" + packageName);
-
+    const appName = app.getAppName(packageName);
     app.openAppSetting(packageName);
-    text(app.getAppName(packageName)).waitFor();
-    let is_sure = textMatches(/(.*강.*|.*종.*|.*료.*|.*FORCE.*|.*STOP.*|.*强.*|.*止.*|.*结.*|.*行.*)/).findOne();
+    text(appName).waitFor();
+    let is_sure = textMatches(/.*강.*|.*종.*|.*료.*|.*FORCE.*|.*STOP.*|.*强.*|.*止.*|.*结.*|.*行.*/).findOne();
     if (is_sure.enabled())
     {
-        textMatches(/(.*강.*|.*종.*|.*료.*|.*FORCE.*|.*STOP.*|.*强.*|.*止.*|.*结.*|.*行.*)/).findOne().click();
-        textMatches(/(.*확.*|.*인.*|.*OK.*|.*确.*|.*定.*)/).findOne().click();
-        log(app.getAppName(packageName) + "应用已被关闭");
+        textMatches(/.*강.*|.*종.*|.*료.*|.*FORCE.*|.*STOP.*|.*强.*|.*止.*|.*结.*|.*行.*/).findOne().click();
+        textMatches(/.*확.*|.*인.*|.*OK.*|.*确.*|.*定.*/).findOne().click();
+        log(appName + "应用已被关闭");
         sleep(1000);
         back();
     }
@@ -979,8 +1330,9 @@ const GoToTheNPC = (type) =>
     console.log("已到达npc：" + type);
     return true;
 };
-const BuySkillBook = () =>
+const BuySkillBook = (totalBuy) =>
 {
+    totalBuy = totalBuy || false;
     const skillBookImgList = LoadImgList("backpack/skillBook");
 
     const config = ReadConfig();
@@ -990,6 +1342,10 @@ const BuySkillBook = () =>
         maxSkillBook = 2;
     }
     else if (config.game["lv"] > 33)
+    {
+        maxSkillBook = 3;
+    }
+    if (totalBuy == true)
     {
         maxSkillBook = 3;
     }
@@ -1013,35 +1369,121 @@ const BuySkillBook = () =>
 };
 const PressBlank = () => RandomPress([434, 55, 467, 155]);
 
+const IsLocked = (region, shot) =>
+{
+    shot = shot || captureScreen();
+    return FindImgInList(lockImgList, region, shot);
+};
+const MenuItemRegionList = {
+    "master": [0, 0],
+    "weaponFeatures": [0, 1],
+    "ability": [0, 2],
+    "suit": [0, 3],
+    "horse": [0, 4],
+    "animal": [0, 5],
+    "propsLogin": [0, 6],
+
+    "trade": [1, 0],
+    "equipment": [1, 1],
+    "manufacture": [1, 2],
+    "episode": [1, 3],
+    "mission": [1, 4],
+    "achievement": [1, 5],
+    "log": [1, 6],
+
+    "instance": [2, 0],
+    "trialOfTower": [2, 1],
+    "holyRelics": [2, 2],
+    "mark": [2, 3],
+    "monsterKnowledge": [2, 4],
+    "friendlinessLevel": [2, 5],
+    "boss": [2, 6],
+
+    "guild": [3, 0],
+    "rank": [3, 1],
+    "pvp": [3, 2],
+    "relationship": [3, 3],
+    "transferZone": [3, 4],
+};
 /**
  * 
  * @param {*} item  "master""weaponFeatures""ability""suit""horse"
     
-     "animal" "propsLogin" "trade" "equipment" "manufacture""episode""mission" "achievement" "log"
+     "animal" "propsLogin" "trade" "equipment" "manufacture" "episode" "mission" "achievement" "log"
+     
      "instance" "trialOfTower" "holyRelics" "mark" "monsterKnowledge" "friendship" "boss"
-    "guild" "email" "setting"
+     
+    "guild" "rank" "relationship"
+    
+    "email" "setting"
    
- * @returns 
+ * @returns true or false
  */
 const EnterMenuItemPage = (item) =>
 {
+    let hasOpenedMenu = false;
     for (let i = 0; i < 10; i++)
     {
         if (HasMenu())
         {
+            if (OpenMenu())
+            {
+                hasOpenedMenu = true;
+                break;
+            }
+        }
+        else if (HasMenuClose())
+        {
+            hasOpenedMenu = true;
             break;
         }
-        ClearPage();
-        Sleep();
+        else
+        {
+            ClearPage();
+            Sleep();
+        }
+
     }
-    if (!HasMenu())
+    if (!hasOpenedMenu)
     {
-        console.log("打开菜单失败.");
+        console.log("打开菜单失败.退出");
         return false;
     }
-    OpenMenu();
-    RandomPress(MenuItemRegionList[item]);
-    const hasEnterItemPage = WaitUntilPageBack();
+    //检查是否解锁该功能
+    const lockRegion = [MenuItemRegionList[item][1] * 58 + 870, MenuItemRegionList[item][0] * 88 + 130, 30, 30];
+    const hasLocked = IsLocked(lockRegion);
+    if (hasLocked)
+    {
+        console.log("未解锁：" + item);
+        return false;
+    }
+
+    const clickRegion = [MenuItemRegionList[item][1] * 58 + 850, MenuItemRegionList[item][0] * 88 + 115, 30, 30];
+    RandomPress(clickRegion);
+
+    let hasEnterItemPage;
+    if (item == "equipment")
+    {
+        hasEnterItemPage = WaitUntil(HasBackpackMenuClose);
+    }
+    else if (item == "guild")
+    {
+        for (let i = 0; i < 10; i++)
+        {
+            if (HasPageback())
+            {
+                hasEnterItemPage = true;
+                break;
+            }
+            TapBlankToContinue();
+            RandomPress([442, 399, 452, 205]);
+            Sleep();
+        }
+    }
+    else
+    {
+        hasEnterItemPage = WaitUntilPageBack();
+    }
     if (!hasEnterItemPage)
     {
         console.log("进入页面失败，退出");
@@ -1071,18 +1513,25 @@ const GetCharacterLv = () =>
     return lv;
 };
 
-let DeathImgList = [];
-DeathImgList = LoadImgList("special/death");
+const UploadData = (data) =>
+{
+    console.log("上传数据: " + JSON.stringify(data));
+    http.post("http:10.6.130.129:5173/devices/", data);
+};
+
+
 
 module.exports = {
-    specialConfig, DeathImgList,
+    specialConfig,
     BuySkillBook,
-    CloseBackpack, CloseMenu, ClickSkip, ChangeHaltModeTime, ChangeRecoverPotionPercentToMax, ChangeRecoverPotionPercentToNormal, ClearPage,
+    CloseBackpack, CloseMenu, ClickSkip, ChangeHaltModeTime, ChangeRecoverPotionPercentToMax, ChangeRecoverPotionPercentToNormal, ClearPage, ChangeGameSetting,
+    DeathCheck,
     EnterMenuItemPage, ExitHaltMode,
-    FindBlueBtn, FindTipPoint, FindImg, FindMultiColors, FindCheckMark, FindRedBtn, FindGoldBtn, FindGreenBtn, FindImgInList, FindNumber,
-    GetFormatedTimeString, GoToTheNPC, GetVerificationCode, GetCaptureScreenPermission, GetCharacterLv,
-    HasPageback, HasMenu, HollowPress, HasSkip, HasBackpackClose, HasBackpackMenuClose, HasPopupClose,
-    IsMoving, IsBackpackFull, IsInCity, IsHaltMode,
+    FindBlueBtn, FindTipPoint, FindImg, FindMultiColors, FindCheckMark, FindRedBtn, FindGoldBtn, FindGreenBtn, FindImgInList, FindNumber, FindFloatNumber,
+    GoToTheNPC, GetVerificationCode, GetCharacterLv, GetDateTime,
+    HasPageback, HasMenu, HasMenuClose, HollowPress, HasSkip, HasBackpackClose, HasBackpackMenuClose, HasPopupClose, HasTip, HaveMainStoryIcon, HasTransformIcon, HaveDailyMissionIcon,
+    HaveFinished,
+    IsMoving, IsBackpackFull, IsInCity, IsHaltMode, IsLocked, IsInQuest,
     LoadImgList, LaunchGame,
     TapBlankToContinue,
     OpenMenu, OpenBackpack, OpenBackpackMenu,
@@ -1093,8 +1542,5 @@ module.exports = {
     SwipeSlowly,
 };
 
-// console.log(ClearPage());
-// console.log(FindMultiColors(PleaseTapBlankColorList, [568, 520, 154, 55]));
-// ClearPage()
-// ReturnHome()
+
 
