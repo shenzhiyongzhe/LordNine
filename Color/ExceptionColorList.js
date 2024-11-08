@@ -1,15 +1,5 @@
 
 
-const NoPotionColorList = [
-    ["#070101", [[18, 0, "#363635"], [39, 2, "#040000"], [16, 14, "#fefefd"], [21, 14, "#fbfbfa"]]],
-    ["#555555", [[3, 0, "#474747"], [1, 6, "#494949"], [0, 19, "#ffffff"], [5, 20, "#fcfcfc"]]],
-    ["#70706f", [[3, 8, "#4d4d4d"], [3, 9, "#474747"], [2, 21, "#ffffff"], [7, 23, "#fefefd"]]],
-    ["#555555", [[0, 8, "#414140"], [-2, 18, "#fbfbfa"], [4, 18, "#fefefd"], [1, 14, "#f8f8f8"]]],
-    ["#626262", [[2, 0, "#555555"], [5, 0, "#535353"], [1, 19, "#ffffff"], [6, 19, "#fbfbfa"]]],
-    ["#585858", [[2, 6, "#454545"], [4, 2, "#4c4c4b"], [1, 22, "#fefefd"], [6, 22, "#fbfbfa"]]],
-    ["#2f2f2f", [[-3, 8, "#5d5d5d"], [-2, 22, "#ffffff"], [-2, 24, "#fefefd"], [3, 23, "#fcfcfc"]]]
-
-];
 
 const LordNineWordColorList = [
     ["#cca967", [[75, 4, "#deb371"], [138, -6, "#d8b77e"], [195, 3, "#c8a266"], [205, 16, "#a77a40"]]],
@@ -34,5 +24,5 @@ const CrucifixColorList = [
 
 
 module.exports = {
-    NoPotionColorList, LordNineWordColorList, WhiteAvatarColorList, StartBtnSettingColorList, CrucifixColorList
+    LordNineWordColorList, WhiteAvatarColorList, StartBtnSettingColorList, CrucifixColorList
 };

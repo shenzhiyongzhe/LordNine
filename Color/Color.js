@@ -189,8 +189,38 @@ const PleaseTapBlankColorList = [
     ["#f4e29d", [[8, 0, "#fceaa3"], [18, 0, "#fceaa3"], [26, 0, "#ffeca5"], [57, 5, "#ffeca5"]]],
     ["#baa661", [[8, 0, "#bca962"], [25, 3, "#bea963"], [40, 5, "#beaa63"], [74, -4, "#beaa63"]]]
 ];
+const QuestColorList = [
+    ["#fcfaf6", [[11, 0, "#fff2e7"], [20, 0, "#fbe4cb"], [30, 0, "#fdf0e1"], [40, 0, "#fffcfa"]]],
+    ["#fef7ef", [[3, -1, "#f4e3cf"], [11, -1, "#fdebd6"], [25, 1, "#f8eadc"], [32, 1, "#fffcfa"]]],
+    ["#fcf2e9", [[3, 0, "#fff2e7"], [12, 0, "#fce7cf"], [25, 1, "#f1e2cf"], [33, 1, "#c3a374"]]],
+    ["#dccb96", [[0, 2, "#dccb96"], [13, -1, "#dccb96"], [13, 1, "#dbc996"], [10, 7, "#dccb96"]]],
+    ["#d9c692", [[13, -2, "#d9c691"], [13, 1, "#d8c491"], [0, 1, "#d9c692"], [10, 6, "#d9c692"]]]
+];
+const Auto_inactiveColorList = [
+    ["#b3a9a0", [[6, 1, "#b3aaa2"], [17, 1, "#b4aba2"], [23, 1, "#b4aba2"], [30, 1, "#b4aba2"]]],
+    ["#b0a69e", [[6, 0, "#b3aaa2"], [17, 0, "#b4aba2"], [23, 1, "#b4aba2"], [30, 1, "#a29991"]]],
+    ["#afa69d", [[5, 0, "#afa69e"], [12, -4, "#aca39b"], [18, -1, "#b2a9a0"], [24, -4, "#aea59b"]]],
+    ["#a79e96", [[5, 0, "#a69d94"], [10, 0, "#a9a098"], [17, -2, "#9f978f"], [23, -2, "#b3aaa2"]]]
+];
+const Auto_activeColorList = [
+    ["#f9f1e9", [[7, 1, "#fdefdf"], [18, 0, "#feedda"], [24, 2, "#fef3e7"], [31, 2, "#fffbf8"]]],
+    ["#f5eadf", [[8, 0, "#f5e1cb"], [18, 2, "#feecda"], [24, 4, "#fef2e7"], [31, 2, "#f4ece1"]]],
+    ["#f2e8dc", [[6, 1, "#fef0e3"], [19, 1, "#fcebd8"], [25, 1, "#fdf2e7"], [34, 1, "#f9f5f0"]]],
+    ["#fdf6ef", [[5, 0, "#f4e3d1"], [19, 1, "#feedda"], [34, -1, "#fefcf8"], [25, -1, "#fcf1e5"]]]
+];
+const NoPotionColorList = [
+    ["#070101", [[18, 0, "#363635"], [39, 2, "#040000"], [16, 14, "#fefefd"], [21, 14, "#fbfbfa"]]],
+    ["#555555", [[3, 0, "#474747"], [1, 6, "#494949"], [0, 19, "#ffffff"], [5, 20, "#fcfcfc"]]],
+    ["#70706f", [[3, 8, "#4d4d4d"], [3, 9, "#474747"], [2, 21, "#ffffff"], [7, 23, "#fefefd"]]],
+    ["#555555", [[0, 8, "#414140"], [-2, 18, "#fbfbfa"], [4, 18, "#fefefd"], [1, 14, "#f8f8f8"]]],
+    ["#626262", [[2, 0, "#555555"], [5, 0, "#535353"], [1, 19, "#ffffff"], [6, 19, "#fbfbfa"]]],
+    ["#585858", [[2, 6, "#454545"], [4, 2, "#4c4c4b"], [1, 22, "#fefefd"], [6, 22, "#fbfbfa"]]],
+    ["#2f2f2f", [[-3, 8, "#5d5d5d"], [-2, 22, "#ffffff"], [-2, 24, "#fefefd"], [3, 23, "#fcfcfc"]]]
+
+];
 
 module.exports = {
     PagebackColorList, MenuColorList, MenuCloseColorList, BlueBtnColorList, RedBtnColorList, TipPointColorList, BackpackColorList, BackpackFullColorList,
-    SkipColorList, CheckMarkColorList, GoldBtnColorList, GreenBtnColorList, PopupCloseColorList, PleaseTapBlankColorList
+    SkipColorList, CheckMarkColorList, GoldBtnColorList, GreenBtnColorList, PopupCloseColorList, PleaseTapBlankColorList, QuestColorList, Auto_inactiveColorList,
+    Auto_activeColorList, NoPotionColorList
 };

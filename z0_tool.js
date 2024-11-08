@@ -1,11 +1,11 @@
 
+
 const GetCaptureScreenPermission = () =>
 {
     threads.start(() =>    
     {
         requestScreenCapture(true);
-        const img = captureScreen();
-        toast(img.getWidth() + " x " + img.getHeight());
+
     });
     device.setMusicVolume(0);
     threads.start(() =>
@@ -14,6 +14,9 @@ const GetCaptureScreenPermission = () =>
         if (hasOpen)
         {
             hasOpen.click();
+            sleep(500);
+            const img = captureScreen();
+            toast(img.getWidth() + " x " + img.getHeight());
         }
     });
 };

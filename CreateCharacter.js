@@ -2,7 +2,7 @@ const {
     ClickSkip,
     FindMultiColors, FindBlueBtn, FindCheckMark, PressBlank, FindRedBtn, FindImgInList, FindImg,
     HasSkip, HasPopupClose, LoadImgList, GetVerificationCode,
-    ReadConfig, RewriteConfig, ReadImg, RandomPress, RestartGame,
+    ReadConfig, RewriteConfig, ReadImg, RandomPress, RestartGame, ReadAccountFile,
     WaitUntil, WaitUntilFindColor,
     Sleep, SwipeSlowly,
     RecycleImgList,
@@ -31,9 +31,7 @@ const BlackBtnColorList = [
     ["#000000", [[118, -8, "#000000"], [305, -1, "#000000"], [308, 45, "#000000"], [56, 37, "#000000"]]],
     ["#000000", [[100, 0, "#000000"], [237, 19, "#000000"], [210, 41, "#000000"], [32, 33, "#000000"]]]
 ];
-const OrangeColorList = [
-    ["#fc4420", [[38, 0, "#fc4420"], [95, 3, "#fc4420"], [358, 11, "#fc4420"], [-52, 41, "#fc4420"]]]
-];
+
 const verificationCodeImgList = LoadImgList("icon/login/verificationCodePopup");
 let checkBox_0 = ReadImg("icon/login/checkBox_0");
 const verificationCoeInput_zh = LoadImgList("icon/beginner/verificationCodeInput_zh");
@@ -66,26 +64,7 @@ const LoadServerImgList = () =>
 };
 LoadServerImgList();
 const HasMainUI = () => FindMultiColors(LordNineWordColorList, [313, 333, 728, 354]);
-const GetAccountFile = () =>
-{
-    if (files.exists("/sdcard/disposition.txt"))
-    {
-        const accountString = files.read("/sdcard/disposition.txt");
-        const accountArray = accountString.split("---");
-        if (accountArray.length == 4)
-        {
-            return accountArray;
-        }
-        else
-        {
-            alert("账号信息有误，读取文件失败");
-        }
-    }
-    else
-    {
-        alert("读取文件失败", "没有导入账号文件");
-    }
-};
+
 const ClickNextBtn = (findTime) =>
 {
     findTime = findTime || 20;
@@ -325,7 +304,7 @@ const CheckLogin = () =>
     console.log("检测登录流程结束，当前是否登录：" + isLogin);
     return isLogin;
 };
-const accountArray = GetAccountFile();
+const accountArray = ReadAccountFile();
 const SetCountryAndBirth = () =>
 {
     let hadNeedSelectCountry = textMatches(/(.*국가 선택.*|.*選擇國家.*)/).findOne(20);
@@ -1195,7 +1174,11 @@ const EnterSelectedServer = (serverName) =>
 
     const bigServer = parseInt(serverName.slice(0, 1));
     const littleServer = parseInt(serverName.slice(1, 2));
-    console.log("server name : " + (bigServer + 1) + "区 " + (littleServer + 1));
+    const server_name = `${bigServer + 1}区${littleServer + 1}`;
+    console.log("server name : " + server_name);
+    const config = ReadConfig();
+    config.game.serverName = server_name;
+    RewriteConfig(config);
     let shiftX = littleServer <= 4 ? littleServer : littleServer - 5;
     let shiftY = littleServer <= 4 ? 0 : 1;
 
@@ -1355,14 +1338,10 @@ const EnterRandomServer = () =>
     {
         const randomIndex = random(0, serverAvailableList.length - 1);
         const serverIndex = serverAvailableList[randomIndex];
-        let config = ReadConfig();
-        config.ui.serverName = `${serverIndex[0]}${serverIndex[1] * 5 + serverIndex[2]}`;
-        console.log("随机服务器为: " + config.ui.serverName);
-        RewriteConfig(config);
 
-        Sleep();
+        const randomServerName = `${serverIndex[0]}${serverIndex[1] * 5 + serverIndex[2]}`;
 
-        EnterSelectedServer(config.ui.serverName);
+        EnterSelectedServer(randomServerName);
     }
 
 };
@@ -1509,13 +1488,13 @@ const CreateCharacterFlow = (serverName) =>
         LoginFlow();
     }
     WaitUntilEnterServerSelectPage();
-    if (serverName == "00")
+    if (serverName == "999")
     {
         EnterRandomServer();
     }
     else
     {
-        EnterSelectedServer();
+        EnterSelectedServer(serverName);
     }
     SetName();
 

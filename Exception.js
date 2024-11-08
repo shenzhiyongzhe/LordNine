@@ -6,13 +6,15 @@ const {
     FindImg, FindMultiColors, FindRedBtn, FindImgInList, FindBlueBtn, FindGoldBtn,
     GetVerificationCode,
     HasPageback, HasMenu, HasPopupClose, HaveMainStoryIcon,
-    IsInCity, IsHaltMode, LoadImgList, IsBackpackFull,
+    IsInCity, IsHaltMode, LoadImgList, IsBackpackFull, IsNoPotion,
     LaunchGame,
     PressBlank, PageBack, RewriteConfig, RecycleImgList,
     ReadConfig, RestartGame, ReadImg, RandomPress,
     Sleep, SwipeSlowly,
     WaitUntil, WaitUntilMenu, WaitUntilPageBack,
     ReturnHome,
+    ChangeGameSetting,
+    DeathCheck,
 
 
 } = require("./utils.js");
@@ -21,11 +23,13 @@ const { WearEquipments, StrengthenEquipment, DecomposeEquipment, BuyPotion } = r
 
 const { LoginProps } = require("./CommonFlow.js");
 
-const { NoPotionColorList, LordNineWordColorList, WhiteAvatarColorList, StartBtnSettingColorList, CrucifixColorList } = require("./Color/ExceptionColorList.js");
+const { LordNineWordColorList, WhiteAvatarColorList, StartBtnSettingColorList, CrucifixColorList } = require("./Color/ExceptionColorList.js");
 const { TipColorList } = require("./Color/MainStoryColorList.js");
 
 let lastTimeOfBuyingPotion = 1726208812345;
 let lastTimeClearBackpack = 1726208812345;
+let lastTimeClearBackpack_haltMode = new Date().getTime();
+let randomTimeToClearBackpack = random(120, 180);
 let loginCount = 1;
 
 let lastGetVerificationCodeTime = 0;
@@ -45,8 +49,8 @@ const ExceptionImgList = {
     identifySuccessfully: LoadImgList("backpack/identifySuccessfully"),
     loading: LoadImgList("special/loading"),
     confirmToGo: LoadImgList("special/confirmToGo"),
-    quickMoving: LoadImgList("icon/font/quickMoving")
-
+    quickMoving: LoadImgList("icon/font/quickMoving"),
+    death_haltMode: LoadImgList("special/death_haltmode")
 };
 const HasTip = (region, shot) =>
 {
@@ -62,19 +66,73 @@ const HaveLordNineWord = (shot) =>
 // flow -----
 const NoPotionFlow = (shot) =>
 {
-    const hasNoPotion = FindMultiColors(NoPotionColorList, [325, 636, 55, 60], shot);
-    if (hasNoPotion)
+    if (IsNoPotion(shot))
     {
-        console.log("角色当前没有药水了 ");
+        const delayTime = random(0, 32);
+
+        console.log("角色当前没有药水了 延迟" + delayTime + "s");
+        Sleep(delayTime);
         const buyPotionInterval = (new Date().getTime() - lastTimeOfBuyingPotion) / 60000;
-        if (buyPotionInterval < 3) 
+        if (buyPotionInterval < 2) 
         {
-            console.log("连续购买药水时间间隔小于3分钟，不重复购买");
-            return true;
+            console.log("连续购买药水时间间隔小于2分钟，不重复购买");
+            return false;
         }
-        console.log("回家买药水...");
-        lastTimeOfBuyingPotion = new Date().getTime();
+        else
+        {
+            console.log("回家买药水...");
+            BuyPotion();
+            lastTimeOfBuyingPotion = new Date().getTime();
+        }
+
+    }
+};
+const NoPotionFlow_HaltMode = (shot) =>
+{
+    if (IsNoPotion(shot, [1145, 633, 51, 78]))
+    {
+        console.log("省电模式：没有药水");
+        ExitHaltMode();
         BuyPotion();
+    }
+};
+const DeathFlow_HaltMode = (shot) =>
+{
+    if (FindImgInList(ExceptionImgList, [582, 526, 119, 60], shot))
+    {
+        console.log("halt mode: death");
+        ExitHaltMode();
+    }
+    const deathBtn = DeathCheck(shot);
+    if (deathBtn)
+    {
+        RandomPress([deathBtn.x - 10, deathBtn.y, 50, 10], 15);
+        NoPotionFlow();
+    }
+};
+
+const BackpackFlow_HaltMode = () =>
+{
+
+    if ((new Date().getTime() - lastTimeClearBackpack_haltMode) / 60000 > randomTimeToClearBackpack)
+    {
+        console.log("time to clear backpack");
+        if (IsHaltMode())
+        {
+            ExitHaltMode();
+        }
+        if (IsBackpackFull())
+        {
+            if (new Date().getDate() % 2 == 0)
+            {
+                console.log("2的整数倍，穿戴装备");
+                WearEquipments();
+                StrengthenEquipment();
+            }
+            lastTimeClearBackpack_haltMode = new Date().getTime();
+            LoginProps();
+            DecomposeEquipment("partial");
+        }
     }
 };
 
@@ -84,18 +142,24 @@ const BackpackFullFlow = (shot) =>
     if (isBackpackFull)
     {
         console.log("背包已满，开始清理背包");
-        if ((new Date().getTime() - lastTimeClearBackpack) / 60000 > 15)
+        if ((new Date().getTime() - lastTimeClearBackpack) / 60000 > 10)
         {
+            if (new Date().getHours % 4 == 0)
+            {
+                console.log("8的整数倍，穿戴装备");
+                WearEquipments();
+                StrengthenEquipment();
+            }
             lastTimeClearBackpack = new Date().getTime();
-            WearEquipments();
-            StrengthenEquipment();
             LoginProps();
-            DecomposeEquipment();
+            DecomposeEquipment("partial");
         }
-        else
-        {
-            console.log("退出：连续清理背包时间间隔小于15分钟");
-        }
+        // else
+        // {
+        //     console.log("退出：连续清理背包时间间隔小于10分钟");
+        //     LoginProps();
+        //     DecomposeEquipment("partial");
+        // }
     }
 };
 
@@ -118,7 +182,7 @@ const IsTimeout = () =>
 };
 const DisconnectionFlow = (shot) =>
 {
-    if (FindBlueBtn([556, 430, 167, 55], shot))
+    if (FindBlueBtn([556, 430, 167, 55], shot) || FindBlueBtn([530, 436, 215, 77], shot))
     {
         let hasDisconnection = FindImgInList(ExceptionImgList.disconnection, [551, 222, 172, 65], shot);
         if (hasDisconnection)
@@ -130,7 +194,7 @@ const DisconnectionFlow = (shot) =>
                 console.log("游戏没有退出，继续游戏");
                 return true;
             }
-            const delayTime = random(300, 600);
+            const delayTime = random(600, 900);
             console.log("游戏延迟启动时间: " + delayTime + "s");
             let isTimeout = IsTimeout();
             if (isTimeout)
@@ -257,29 +321,18 @@ const PickUpAbilityPoint = () =>
     RandomPress([337, 73, 21, 23]);
     if (WaitUntil(() => HasPopupClose([34, 94, 46, 53])))
     {
-        if (FindBlueBtn([142, 602, 214, 70]))
+        const abilityPontType = FindImgInList(lostAbilityPointImgList, [170, 167, 60, 358]);
+        if (abilityPontType)
         {
-            RandomPress([167, 619, 162, 37]);
+            console.log("发现红色属性点");
+            RandomPress([365, abilityPontType.y - 2, 10, 10]);
         }
-        else
+        RandomPress([122, 546, 95, 45]);
+        if (FindBlueBtn([145, 607, 203, 62]))
         {
-            console.log("免费次数使用完，使用金币恢复");
-            const abilityPontType = FindImgInList(lostAbilityPointImgList, [170, 167, 65, 353]);
-            if (abilityPontType)
-            {
-                RandomPress([365, abilityPontType.y, 15, 15]);
-            }
-            else
-            {
-                RandomPress([365, 263, 16, 17]);
-                RandomPress([365, 188, 16, 16]);
-            }
-            RandomPress([123, 547, 98, 43]);
-            if (FindBlueBtn([138, 604, 216, 66]))
-            {
-                RandomPress([170, 622, 157, 30]);
-            }
+            RandomPress([177, 620, 143, 31]);
         }
+
         if (!FindImgInList(lostEquipmentImgList, [306, 102, 40, 43]))
         {
             console.log("发现死亡次数过多，丢失装备");
@@ -321,12 +374,12 @@ const PickUpAbilityPoint = () =>
 
 const ResetConfig = () =>
 {
-    if ((new Date().getTime() - lastResetConfigTime) / 3600000 > 12)
+    if ((new Date().getTime() - lastResetConfigTime) / 3600000 > 3)
     {
         lastResetConfigTime = new Date().getTime();
         const config = ReadConfig();
         const newDay = new Date().getDate();
-        if (config.game.today != newDay)
+        if (config.game.today != newDay && new Date().getHours() > 4)
         {
             console.log("新的一天，重置配置");
             config.game.today = newDay;
@@ -336,11 +389,12 @@ const ResetConfig = () =>
             config.game.dailyInstance = false;
             config.game.dailyMission = false;
 
-            config.game.dailyShop = false;
             config.game.guildDonation = false;
             config.game.friendshipDonation = false;
+            config.game.dailyShop = false;
+            config.game.friendshipShop = false;
             config.game.accepteDailyMission = false;
-            
+
             RewriteConfig(config);
         }
     }
@@ -364,8 +418,6 @@ const ReLoginFlow = () =>
     }
 
 };
-
-
 
 // *******************************************************************  确保在游戏中 *********************************************************************
 
@@ -587,17 +639,11 @@ const MakeSureInGame = (shot) =>
                 RandomPress([544, 609, 202, 34]);
             }
         }
-        //一些不容易识别或点击错误的tip
-
-        // if (text("更新脚本").findOne(20))
-        // {
-        //     Sleep(3);
-        //     if (text("更新脚本").findOne(20))
-        //     {
-        //         console.log("游戏退出到脚本页，自动拉起游戏");
-        //         LaunchGame();
-        //     }
-        // }
+        if (IsHaltMode())
+        {
+            ExitHaltMode();
+            ChangeGameSetting();
+        }
     }
     else
     {
@@ -607,49 +653,38 @@ const MakeSureInGame = (shot) =>
     StovePopup();
     ClearPage();
 };
-
+const NoExpCheck = () =>
+{
+};
+const Exception_HaltMode = () =>
+{
+    NoExpCheck();
+};
 const ExceptionFlow = () =>
 {
     const shot = captureScreen();
-    // let curMinute = new Date().getMinutes();
-    // if (curMinute != lastDebugModeTime)
-    // {
-    //     console.log("debug mode: " + gameMode);
-    //     lastDebugModeTime = curMinute;
-    // }
 
-    BackpackFullFlow(shot);
-    NoPotionFlow(shot);
+    if (IsHaltMode())
+    {
+        NoPotionFlow_HaltMode();
+        DeathFlow_HaltMode();
+        BackpackFlow_HaltMode();
+        Exception_HaltMode();
+    }
+    else
+    {
+        BackpackFullFlow(shot);
+        NoPotionFlow(shot);
+        MakeSureInGame(shot);
+    }
+
     DisconnectionFlow(shot);
-
     ResetConfig();
-    MakeSureInGame(shot);
 };
 
 module.exports = { ExceptionFlow };
 
+// ExceptionFlow()
+// DeathFlow_HaltMode(captureScreen())
 
-
-// console.log(HasTip([277, 481, 35, 25], ReadImg("ocrTest/tip")));
-
-
-// console.log(FindBlueBtn([645, 562, 179, 61]));
-
-// console.log(CloseBackpack());
-// console.time("exception");
-// ExceptionFlow("mainStory");
-// console.timeEnd("exception");
-// console.log(HasTouchToStart());
-// MakeSureInGame();
-// DeathFlow();
-// while (true)
-// {
-//     ExceptionFlow("mainStory");
-//     Sleep();
-// }
-// GameModeFlow("mainStory");
-// ExceptionFlow();
-// MakeSureInGame();
-// console.log(MainUICheck());
-// console.log(FindMultiColors(NoPotionColorList, [331, 633, 46, 70]));
 

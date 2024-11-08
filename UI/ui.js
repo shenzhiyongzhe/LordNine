@@ -10,7 +10,7 @@ const gameModeNode = document.querySelectorAll("input[name=gameMode]");
 let countdownEnds = false;
 const UIData = {
     createCharacter: false,
-    serverName: "00",
+    serverName: "999",
     gameMode: "mainStory",
     monsterMapList: [],
     hangUpMap: "03",
@@ -55,7 +55,7 @@ $autox.registerHandler("GetConfig", (data, callBack) =>
     const config = JSON.parse(data);
 
     UIData.gameMode = config.ui.gameMode;
-    UIData.serverName = config.ui.serverName;
+
     UIData.hangUpMap = config.ui.hangUpMap;
     delayTime = config.game.delayTime || random(0, 600);
     if (UIData.gameMode == "mainStory")

@@ -1,10 +1,10 @@
 
 const { PagebackColorList, MenuColorList, MenuCloseColorList, BlueBtnColorList, BackpackColorList,
     SkipColorList, CheckMarkColorList, TipPointColorList, GoldBtnColorList, RedBtnColorList, PopupCloseColorList, BackpackFullColorList,
-    PleaseTapBlankColorList,
-    GreenBtnColorList,
+    PleaseTapBlankColorList, QuestColorList, Auto_activeColorList, Auto_inactiveColorList,
+    GreenBtnColorList, NoPotionColorList,
 } = require("./Color/Color.js");
-const { TipColorList, QuestColorList } = require("./Color/MainStoryColorList.js");
+const { TipColorList, } = require("./Color/MainStoryColorList.js");
 
 const tradingHours = [[random(0, 11), random(0, 59)], [random(12, 23), random(0, 59)]];
 
@@ -17,22 +17,26 @@ const defaultConfig = {
         hangupMap: "03"
     },
     game: {
-        deathTime: 0,
-        today: 0,
-        reconnectionTime: 0,
-        lv: 0,
-        autoPotion: false,
-        dailyInstance: false,
-        dailyShop: false,
-        guildDonation: false,
-        dailyTradingHours: tradingHours,
-        delayTime: random(0, 600)
-    },
-    dailyThings: {
-        dailyInstance: false,
-        dailyMission: false,
-        dailyShop: false,
-        dailyTradingHours: tradingHours
+        "deathTime": 0,
+        "today": 0,
+        "reconnectionTime": 0,
+        "lv": 0,
+        "autoPotion": false,
+
+        "dailyTradingHours": tradingHours,
+        "gulidDonation": false,
+
+        "monthlyIncome": 0,
+        "combatPower": 1000,
+
+        "delayTime": random(0, 600),
+
+        "dailyInstance": false,
+        "dailyMission": false,
+        "dailyShop": false,
+        "guildDonation": false,
+        "friendshipDonation": false,
+        "accepteDailyMission": false,
     }
 };
 
@@ -45,11 +49,6 @@ let specialConfig = {
 const configFile = "/sdcard/LordNine/config.json";
 
 
-
-const HaltModeColorList = [
-    ["#dccb96", [[1, 0, "#dccb96"], [5, 0, "#dbc996"], [8, 4, "#0e1116"], [5, 13, "#0d1015"]]],
-    ["#dccb96", [[3, -2, "#dccb96"], [7, 2, "#0d1015"], [5, 12, "#0d1014"], [9, 16, "#a2946d"]]]
-];
 
 const BackpackPageColorList = [
     ["#fbfbfa", [[0, 4, "#fbfbfa"], [3, 6, "#ffffff"], [0, 7, "#fbfbfa"], [0, 10, "#fcfcfc"]]]
@@ -186,10 +185,11 @@ const ChangeRecoverPotionPercentToMax = () =>
         console.log("没有发现菜单按钮，退出");
         return false;
     }
+    Sleep();
     RandomPress([341, 615, 29, 19]);
-    if (HasPopupClose([517, 310, 45, 57]))
+    if (WaitUntil(() => HasPopupClose([517, 310, 45, 57])))
     {
-        swipe(360, 460, 470 + random(0, 30), 460, 200);
+        swipe(360, 455, 470 + random(0, 30), 455, 200);
         Sleep();
         RandomPress([537, 327, 19, 24]);
         return true;
@@ -206,10 +206,9 @@ const ChangeRecoverPotionPercentToNormal = () =>
         return false;
     }
     RandomPress([341, 615, 29, 19]);
-    if (HasPopupClose([517, 310, 45, 57]))
+    if (WaitUntil(() => HasPopupClose([517, 310, 45, 57])))
     {
-        swipe(370, 460, 370 + random(0, 20), 470, 200);
-        Sleep();
+        RandomPress([390, 450, 20, 10]);
         RandomPress([537, 327, 19, 24]);
         return true;
     }
@@ -233,17 +232,14 @@ const ClearPage = () =>
     TapBlankToContinue(shot);
     return false;
 };
-const ChangeGameSetting = () =>
+const OpenSetting = () =>
 {
-    console.log("开始修改游戏画面设置");
-    let isChangeSuccess = false;
     let hasOpenedMenu = false;
     for (let i = 0; i < 10; i++)
     {
         if (HasMenu())
         {
-            let hasOpened = OpenMenu();
-            if (hasOpened)
+            if (OpenMenu())
             {
                 hasOpenedMenu = true;
                 break;
@@ -266,8 +262,21 @@ const ChangeGameSetting = () =>
         return false;
     }
     RandomPress([1150, 546, 27, 34]);
-    WaitUntilPageBack();
-    if (!HasPageback())
+    if (WaitUntilPageBack())
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+};
+const ChangeGameSetting = () =>
+{
+    console.log("开始修改游戏画面设置");
+    let isChangeSuccess = false;
+
+    if (!OpenSetting())
     {
         console.log("进入设置页面失败，退出");
         return false;
@@ -308,24 +317,62 @@ const ChangeGameSetting = () =>
     PageBack();
     return isChangeSuccess;
 };
-
-const DeathImgList = LoadImgList("special/death");
-const DeathCheck = () =>
+const GetServerName = () =>
 {
+    if (!OpenSetting())
+    {
+        console.log("打开菜单失败");
+        return false;
+    }
+    RandomPress([611, 77, 105, 25]);
+    const serverNameList = [];
+    for (let i = 0; i < 7; i++)
+    {
+        let img = LoadImgList(`icon/font/serverList/${i}`);
+        serverNameList.push(img);
+    }
+    let serverName = null;
     const shot = captureScreen();
+    for (let i = 0; i < 7; i++)
+    {
+        if (FindImgInList(serverNameList[i], [789, 199, 136, 55], shot))
+        {
+            serverName = i;
+        }
+    }
+    if (serverName != null)
+    {
+        serverName = serverName + 1;
+    }
+    else
+    {
+        serverName = -1;
+    }
+    serverNameList.forEach(list => list.forEach(img => img.recycle()));
+    const serverNumber = FindNumber("combatPower", [873, 203, 43, 45]);
+    PageBack();
+    return `${serverName}区${serverNumber}`;
+};
+const DeathImgList = LoadImgList("special/death");
+const DeathCheck = (shot) =>
+{
+    shot = shot || captureScreen();
+    let deathBtn = null;
     if (FindBlueBtn([539, 420, 205, 67], shot) || FindBlueBtn([539, 590, 207, 70], shot))
     {
         for (let i = 0; i < DeathImgList.length; i++)
         {
-            if (FindImg(DeathImgList[i], [596, 423, 84, 59], shot))
+            deathBtn = FindImg(DeathImgList[i], [596, 423, 84, 59], shot);
+            if (deathBtn)
             {
                 console.log("角色死亡");
-                return true;
+                return deathBtn;
             }
-            else if (FindImg(DeathImgList[i], [527, 584, 217, 85], shot)) 
+            deathBtn = FindImg(DeathImgList[i], [527, 584, 217, 85], shot);
+            if (deathBtn) 
             {
                 console.log("角色死亡! 失去能力点");
-                return true;
+                return deathBtn;
             }
         }
     }
@@ -459,7 +506,7 @@ const FindNumber = (directory, region, shot) =>
     for (let i = 1; i < filter_adjacent.length; i++)
     {
         let distance = filter_adjacent[i].point.x - filter_adjacent[i - 1].point.x;
-        if (distance > 15)
+        if (distance > 16)
         {
             console.log(JSON.stringify(filter_adjacent, null, 2));
             console.log("识别数字错误，返回0");
@@ -467,7 +514,7 @@ const FindNumber = (directory, region, shot) =>
         }
     }
 
-    //过滤坐标信息 将10数字改为小数点
+    //过滤坐标信息 
     for (let i = 0; i < filter_adjacent.length; i++)
     {
         filter_adjacent[i] = filter_adjacent[i].number;
@@ -659,6 +706,42 @@ const FindFloatNumber = (directory, region, shot) =>
 
     return parseFloat(finalNumber);
 };
+const MatchTemplateList = (imgList, region, shot) =>
+{
+    shot = shot || captureScreen();
+    const pointsArr = [];
+    for (let i = 0; i < imgList.length; i++)
+    {
+        let mathes = images.matchTemplate(shot, imgList[i], { region, max: 9 });
+        if (mathes)
+        {
+            if (mathes.points.length > 0)
+            {
+                pointsArr.push(mathes.points);
+            }
+        }
+    }
+    //过滤重复项
+    let filterArr = [];
+    pointsArr.map(points => points.map(point => filterArr.push(point)));
+    filterArr.sort((a, b) => a.y - b.y);
+    filterArr = filterArr.filter((point, index, arr) =>
+    {
+        if (index >= 1)
+        {
+            if (point.y - arr[index - 1].y < 50)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+        else return true;
+    });
+    return filterArr;
+};
 const FormatDateTime = (date, format) =>
 {
     format = format || "_";
@@ -772,7 +855,6 @@ const HasTransformIcon = (shot, region) =>
 const HaveDailyMissionIcon = (shot) =>
 {
     shot = shot || captureScreen();
-
     return FindImgInList(dailyMissionIconImgList, [856, 181, 47, 232], shot);
 
 };
@@ -819,11 +901,66 @@ const HollowPress = (hollowRegion) =>
     press(x1, y1, random(16, 256));
     Sleep();
 };
+const auto_activeImgList = LoadImgList("icon/auto/auto_active");
+const auto_inactiveImgList = LoadImgList("icon/auto/auto_inactive");
+const auto_questImgList = LoadImgList("icon/auto/quest");
+const autoRecogRegion = [1127, 423, 61, 45];
+const IsAuto_active = (shot) =>
+{
+    shot = shot || captureScreen();
+    if (FindMultiColors(Auto_activeColorList, autoRecogRegion))
+    {
+        return true;
+    }
+    else if (FindImgInList(auto_activeImgList, autoRecogRegion))
+    {
+        return true;
+    }
+    return false;
+};
+
+const IsAuto_inactive = (shot) =>
+{
+    shot = shot || captureScreen();
+    if (FindMultiColors(Auto_inactiveColorList, autoRecogRegion))
+    {
+        return true;
+    }
+    else if (FindImgInList(auto_inactiveImgList, autoRecogRegion))
+    {
+        return true;
+    }
+    return false;
+};
+const IsInQuest = (shot) =>
+{
+    shot = shot || captureScreen();
+    if (FindMultiColors(QuestColorList, autoRecogRegion) || FindImgInList(auto_questImgList, autoRecogRegion))
+    {
+        return true;
+    }
+    return false;
+};
+const ClickAuto = () => RandomPress([1135, 434, 31, 26]);
+const PressToAuto = () =>
+{
+    if (IsAuto_inactive())
+    {
+        const delayTime = random(0, 5);
+        console.log("延迟" + delayTime + "s点击auto");
+        Sleep(delayTime);
+        ClickAuto();
+        return true;
+    }
+    if (IsAuto_active())
+    {
+        return true;
+    }
+};
 let moveObj = {
     clipCount: 0,
     movingClip: null
 };
-
 const IsMoving = () =>
 {
     let isMoving = true;
@@ -852,23 +989,45 @@ const IsMoving = () =>
 
 };
 const IsBackpackFull = (shot) => FindMultiColors(BackpackFullColorList, [1144, 35, 39, 27], shot);
-const IsInCity = () => FindImgInList(inCityIconImgList, [979, 416, 71, 72]);
-const IsHaltMode = () => FindMultiColors(HaltModeColorList, [606, 643, 76, 62]);
 
-const auto_questImgList = LoadImgList("icon/auto/quest");
-const IsAuto_quest_Img = (shot) => { shot = shot || captureScreen(); return FindImgInList(auto_questImgList, [1127, 423, 61, 45]); };
-const IsAuto_quest = (shot) => { shot = shot || captureScreen(); return FindMultiColors(QuestColorList, [1127, 423, 61, 45]); };
-const IsInQuest = () =>
+const noPotionImgList = LoadImgList("special/noPotion");
+const IsNoPotion = (shot, region) =>
 {
-    if (IsAuto_quest() || IsAuto_quest_Img())
+    shot = shot || captureScreen();
+    region = region || [325, 636, 55, 60];
+    if (FindMultiColors(NoPotionColorList, region, shot) || FindImgInList(noPotionImgList, region, shot))
     {
         return true;
     }
     return false;
 };
+const IsInCity = () => FindImgInList(inCityIconImgList, [979, 416, 71, 72]);
+const haltModeImgList = LoadImgList("icon/haltMode");
+const IsHaltMode = (shot) =>
+{
+    shot = shot || captureScreen();
+    return FindImgInList(haltModeImgList, [680, 112, 65, 48], shot) && !HasMenu(shot) && !HasHaltModeBtn();
+};
+const EnterHaltMode = () =>
+{
+    for (let i = 0; i < 10; i++)
+    {
+        if (HasHaltModeBtn())
+        {
+            let randomTime = random(3, 10);
+            console.log("延迟进入省电模式：" + randomTime);
+            Sleep(randomTime);
+            RandomPress([49, 405, 14, 24], 5);
+            if (IsHaltMode())
+            {
+                return true;
+            }
+        }
+        Sleep();
+    }
+    return false;
+};
 const LaunchGame = () => app.launch("com.smilegate.lordnine.stove.google");
-
-
 
 const TapBlankToContinue = (shot) =>
 {
@@ -919,13 +1078,48 @@ const PageBack = (shot) =>
     }
 };
 
+const BackpackExceptionCheck = () =>
+{
+    const potionOffImgList = LoadImgList("backpack/backpackException/potionOff");
+    if (FindImgInList(potionOffImgList, [338, 643, 40, 50]))
+    {
+        console.log("发现药水被设置关闭，点击打开");
+        RandomPress([346, 619, 20, 20]);
+        if (WaitUntil(() => HasPopupClose([519, 315, 55, 47])))
+        {
+            RandomPress([185, 382, 14, 13]);
+            RandomPress([379, 450, 33, 23]);
+            RandomPress([534, 326, 22, 24]); //close
+            RandomPress([1215, 607, 21, 24]); //unfold
+        }
+    }
+    const foldImgList = LoadImgList("backpack/backpackException/fold");
+    if (FindImgInList(foldImgList, [1225, 609, 31, 43]))
+    {
+        console.log("点击展开装备页");
+        RandomPress([1213, 606, 23, 24], 2);
+    }
+    const secondColorList = [
+        ["#dfc78b", [[0, 5, "#cbb57e"], [10, 0, "#cbb57e"], [10, 3, "#d6bf85"], [10, 7, "#e6ce8f"]]],
+        ["#c7b27a", [[0, 3, "#ccb67e"], [0, 9, "#cbb57e"], [10, 1, "#d4bd83"], [10, 9, "#ccb67e"]]]
+    ];
+
+    if (FindMultiColors(secondColorList, [658, 522, 35, 36], captureScreen(), 12))
+    {
+        console.log("点错到第二预选装备，切换第一套");
+        RandomPress([594, 525, 26, 33]);
+    }
+    RecycleImgList(potionOffImgList);
+    RecycleImgList(foldImgList);
+
+};
 /**
  *
  *
  * @param {*} type "default all" "equipment" "props" "gold" "auto"
  * @return {*} 
  */
-const OpenBackpack = (type) =>
+const OpenBackpack = (type, sort) =>
 {
     for (let i = 0; i < 30; i++)
     {
@@ -934,8 +1128,7 @@ const OpenBackpack = (type) =>
             console.log("背包已打开");
             break;
         }
-        let hasBackpack = HasBackpack();
-        if (hasBackpack)
+        else if (HasBackpack())
         {
             RandomPress([1154, 23, 20, 26]);
         }
@@ -944,9 +1137,15 @@ const OpenBackpack = (type) =>
             ClearPage();
         }
 
-        sleep(256);
+        sleep(648);
     }
-
+    if (!HasPopupClose([1203, 96, 41, 45]))
+    {
+        console.log("打开背包失败");
+        return false;
+    }
+    BackpackExceptionCheck();
+    sort = sort || false;
     if (FindMultiColors(BackpackDetailOnColorList, [1121, 98, 76, 41]))
     {
         console.log("背包整理打开了，点击关闭");
@@ -993,15 +1192,12 @@ const OpenBackpack = (type) =>
             RandomPress([1217, 450, 19, 19]);
         }
     }
-    if (HasPopupClose([1203, 96, 41, 45]))
+    if (sort)
     {
-        return true;
+        console.log("点击整理");
+        RandomPress([1097, 667, 16, 19]);
     }
-    else
-    {
-        console.log("打开背包失败");
-        return false;
-    }
+    return true;
 };
 const OpenBackpackMenu = (type) =>
 {
@@ -1090,7 +1286,7 @@ const RecycleImgList = (list) =>
 const WaitUntil = (func, frequence, loopTime) =>
 {
     frequence = frequence || 1000;
-    loopTime = loopTime || 15;
+    loopTime = loopTime || 20;
     for (let i = 0; i < loopTime; i++)
     {
         if (func())
@@ -1139,11 +1335,9 @@ const ReturnHome = () =>
             {
                 console.log("离开副本，回家");
                 RandomPress([678, 458, 157, 33]);
-                Sleep(12);
-                WaitUntilMenu();
-                RandomPress([45, 252, 22, 23]);
             }
-            Sleep(10);
+            Sleep(12);
+            WaitUntilMenu();
             for (let i = 0; i < 10; i++)
             {
                 if (IsInCity())
@@ -1158,7 +1352,7 @@ const ReturnHome = () =>
         {
             ClearPage();
         }
-        sleep(256);
+        sleep(1000);
     }
 };
 const SwipeSlowly = (startRegion, endRegion, sec) =>
@@ -1204,7 +1398,63 @@ const ReadConfig = () =>
 
     }
 };
-
+const dealFile = "/sdcard/LordNine/dailyDeal.json";
+const defaultDeal = { deal: [] };
+const ReadDealRecord = () =>
+{
+    const isCreate = files.createWithDirs(dealFile);
+    if (isCreate)
+    {
+        files.write(dealFile, JSON.stringify(defaultDeal, null, 2));
+        return defaultDeal;
+    }
+    else
+    {
+        try
+        {
+            const deal = files.read(dealFile);
+            if (Object.keys(deal).length === 0)
+            {
+                console.log('JSON文件为空，重新生成默认配置文件');
+                files.write(dealFile, JSON.stringify(defaultDeal, null, 2));
+                return defaultDeal;
+            } else
+            {
+                return JSON.parse(deal);
+            }
+        } catch (error)
+        {
+            console.log("读取文件失败：" + error);
+            files.write(dealFile, JSON.stringify(defaultDeal, null, 2));
+            return defaultDeal;
+        }
+    }
+};
+const ReadAccountFile = () =>
+{
+    if (files.exists("/sdcard/disposition.txt"))
+    {
+        const accountString = files.read("/sdcard/disposition.txt");
+        const accountArray = accountString.split("---");
+        if (accountArray.length == 4)
+        {
+            return accountArray;
+        }
+        else
+        {
+            alert("账号信息有误，读取文件失败");
+        }
+    }
+    else
+    {
+        alert("读取账号信息失败", "无账号信息");
+    }
+};
+const UpdateDealRecord = (dealRecord) =>
+{
+    dealRecord = JSON.stringify(dealRecord, null, 2);
+    files.write(dealFile, dealRecord);
+};
 // 自定义的格式化函数
 function customReplacer(key, value)
 {
@@ -1248,10 +1498,19 @@ const RestartGame = (packageName, time) =>
 const ExitHaltMode = () =>
 {
     console.log("退出节电模式");
-    RandomPress([628, 661, 29, 27]);
-    Sleep();
-    PageBack();
-    Sleep();
+    for (let i = 0; i < 3; i++)
+    {
+        // swipe(640, 230, 640, 530, 1000);
+        swipe(556, 366, 1050, 366, 2000);
+        // SwipeSlowly([536, 281, 35, 169], [733, 274, 25, 179], 1);
+        Sleep(6);
+        if (HasMenu())
+        {
+            return true;
+        }
+    }
+    console.log("退出节电模式失败");
+    return false;
 };
 
 const ChangeHaltModeTime = () =>
@@ -1374,6 +1633,7 @@ const IsLocked = (region, shot) =>
     shot = shot || captureScreen();
     return FindImgInList(lockImgList, region, shot);
 };
+
 const MenuItemRegionList = {
     "master": [0, 0],
     "weaponFeatures": [0, 1],
@@ -1407,15 +1667,14 @@ const MenuItemRegionList = {
 };
 /**
  * 
- * @param {*} item  "master""weaponFeatures""ability""suit""horse"
+ * @param {*} item  "master" "weaponFeatures" "ability" "suit" "horse" "animal" "propsLogin"
     
-     "animal" "propsLogin" "trade" "equipment" "manufacture" "episode" "mission" "achievement" "log"
+      "trade" "equipment" "manufacture" "episode" "mission" "achievement" "log"
      
-     "instance" "trialOfTower" "holyRelics" "mark" "monsterKnowledge" "friendship" "boss"
+     "instance" "trialOfTower" "holyRelics" "mark" "monsterKnowledge" "friendlinessLevel" "boss"
      
-    "guild" "rank" "relationship"
+     "guild" "rank" "relationship" "transferZone"
     
-    "email" "setting"
    
  * @returns true or false
  */
@@ -1524,22 +1783,23 @@ const UploadData = (data) =>
 module.exports = {
     specialConfig,
     BuySkillBook,
-    CloseBackpack, CloseMenu, ClickSkip, ChangeHaltModeTime, ChangeRecoverPotionPercentToMax, ChangeRecoverPotionPercentToNormal, ClearPage, ChangeGameSetting,
+    CloseBackpack, CloseMenu, ClickSkip, ChangeHaltModeTime, ChangeRecoverPotionPercentToMax, ChangeRecoverPotionPercentToNormal, ClearPage, ChangeGameSetting, ClickAuto,
     DeathCheck,
-    EnterMenuItemPage, ExitHaltMode,
+    EnterMenuItemPage, ExitHaltMode, EnterHaltMode,
     FindBlueBtn, FindTipPoint, FindImg, FindMultiColors, FindCheckMark, FindRedBtn, FindGoldBtn, FindGreenBtn, FindImgInList, FindNumber, FindFloatNumber,
-    GoToTheNPC, GetVerificationCode, GetCharacterLv, GetDateTime,
+    GoToTheNPC, GetVerificationCode, GetCharacterLv, GetDateTime, GetServerName,
     HasPageback, HasMenu, HasMenuClose, HollowPress, HasSkip, HasBackpackClose, HasBackpackMenuClose, HasPopupClose, HasTip, HaveMainStoryIcon, HasTransformIcon, HaveDailyMissionIcon,
-    HaveFinished,
-    IsMoving, IsBackpackFull, IsInCity, IsHaltMode, IsLocked, IsInQuest,
+    HaveFinished, HasMap,
+    IsMoving, IsBackpackFull, IsInCity, IsHaltMode, IsLocked, IsInQuest, IsAuto_active, IsAuto_inactive, IsNoPotion,
     LoadImgList, LaunchGame,
+    MatchTemplateList,
     TapBlankToContinue,
     OpenMenu, OpenBackpack, OpenBackpackMenu,
-    PageBack, PressBlank, PullDownSkill,
-    RandomPress, ReadImg, ReturnHome, RestartGame, RecycleImgList, ReadConfig, RewriteConfig,
-    Sleep,
+    PageBack, PressBlank, PullDownSkill, PressToAuto,
+    RandomPress, ReadImg, ReturnHome, RestartGame, RecycleImgList, ReadConfig, RewriteConfig, ReadDealRecord, ReadAccountFile,
+    Sleep, SwipeSlowly,
+    UpdateDealRecord,
     WaitUntil, WaitUntilMenu, WaitUntilPageBack, WaitUntilFindColor,
-    SwipeSlowly,
 };
 
 

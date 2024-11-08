@@ -9,7 +9,7 @@ const {
     FindBlueBtn, FindNumber, FindRedBtn, FindGoldBtn, FindImgInList, FindImg,
     GetCharacterLv,
     HasMenu, HasPageback, HasBackpackMenuClose, HasSkip, HasPopupClose, HaveMainStoryIcon, HasTransformIcon, HaveDailyMissionIcon,
-    IsHaltMode, IsInCity, IsMoving, IsInQuest,
+    IsHaltMode, IsInCity, IsMoving, IsInQuest, IsAuto_active, IsAuto_inactive,
     LoadImgList,
     OpenBackpack, OpenBackpackMenu, OpenMenu,
     PullDownSkill, PageBack, PressBlank,
@@ -17,17 +17,15 @@ const {
     WaitUntil, WaitUntilPageBack, WaitUntilMenu,
     ReadConfig, RewriteConfig, RecycleImgList, ReturnHome, ReadImg, RandomPress,
     SwipeSlowly, Sleep,
+    HaveFinished,
 
 } = require("./utils.js");
 
-const { TipColorList, NextColorList, Auto_inactiveColorList,
-    Auto_activeColorList, TalkBubbleColorList,
-    SpeedUpOffColorList,
-} = require("./Color/MainStoryColorList.js");
+const { TipColorList, NextColorList, TalkBubbleColorList, SpeedUpOffColorList, } = require("./Color/MainStoryColorList.js");
 
 const { WearEquipments, StrengthenEquipment, OpenAllBox, DecomposeEquipment, AutoReleaseSkill, AutoPotion, BuyPotion } = require("./Backpack.js");
 
-const { ComprehensiveImprovement } = require("./CommonFlow.js");
+const { ComprehensiveImprovement, GuildDonation } = require("./CommonFlow.js");
 
 
 let storyMode = "mainMission";
@@ -69,8 +67,7 @@ const GrowthMissionColorList = [
     ["#ceaaf4", [[0, 1, "#d4affc"], [0, 2, "#c19fe5"], [0, 3, "#d5affc"], [0, 5, "#c2a0e7"]]]
 ];
 
-const auto_activeImgList = LoadImgList("icon/auto/auto_active");
-const auto_inactiveImgList = LoadImgList("icon/auto/auto_inactive");
+
 
 const growthMissionIconImgList = LoadImgList("icon/growthMissionIcon");
 const secretLabImgList = LoadImgList("special/notMoving/secretLab");
@@ -78,10 +75,7 @@ const talkBubbleImgList = LoadImgList("icon/talkBubble");
 const npcTalk_leaveImgList = LoadImgList("icon/npcTalk_leave");
 const backpackTrashIcon = LoadImgList("backpack/trash");
 
-const IsAuto_active_Img = (shot) => { shot = shot || captureScreen(); return FindImgInList(auto_activeImgList, [1127, 423, 61, 45]); };
-const IsAuto_inactive_Img = (shot) => { shot = shot || captureScreen(); return FindImgInList(auto_inactiveImgList, [1127, 423, 61, 45]); };
-const IsAuto_active = (shot) => { shot = shot || captureScreen(); return FindMultiColors(Auto_activeColorList, [1127, 423, 61, 45]); };
-const IsAuto_inactive = (shot) => { shot = shot || captureScreen(); return FindMultiColors(Auto_inactiveColorList, [1127, 423, 61, 45]); };
+
 
 
 const HaveGrowthMissionIcon = (shot) =>
@@ -249,7 +243,7 @@ const ClickMainStory = () =>
     {
         return true;
     }
-    if (IsAuto_active() || IsInCity() || IsAuto_inactive() || IsAuto_inactive_Img() || IsAuto_active_Img())
+    if (IsAuto_active() || IsInCity() || IsAuto_inactive())
     {
         if ((new Date().getTime() - lastTransformationTime) / 60000 < 4)
         {
@@ -683,7 +677,7 @@ const AttackingBossFlow = (number) =>
 
     while (isDead == false && isBossDead == false)
     {
-        if (FindMultiColors(Auto_inactiveColorList, [1127, 431, 51, 33]))
+        if (IsAuto_inactive())
         {
             console.log("没有自动攻击，点击自动攻击");
             RandomPress([1140, 437, 24, 18], 0.05);
@@ -1158,7 +1152,7 @@ const GrowthMissionFlow = () =>
     {
         ClickGrowthMission();
     }
-    else if (FindMultiColors(FinishedMissionColorList, [1126, 210, 57, 33]))
+    else if (HaveFinished([1112, 118, 85, 243]))
     {
         console.log("完成成长任务");
         RandomPress([907, 197, 218, 34]);
@@ -1175,7 +1169,7 @@ const GrowthMissionFlow = () =>
     }
     Sleep(5);
     const shot = captureScreen();
-    let hadMissionFinished = FindMultiColors(FinishedMissionColorList, [1112, 185, 82, 184], shot);
+    let hadMissionFinished = HaveFinished([1126, 108, 69, 268], shot);
     if (hadMissionFinished)
     {
         console.log("发现有任务完成，点击完成");
@@ -1207,29 +1201,8 @@ const GrowthMissionFlow = () =>
     if (hasGuildPage)
     {
         console.log("成长任务 6: 加入公会");
-        const RightOnJoinGuildImg = ReadImg('icon/font/rightNow');
-        const FindStraightAwayBtn = (region) => FindImg(RightOnJoinGuildImg, region);
-        let hasStrBtn = false;
-        for (let i = 0; i < 15; i++)
-        {
-            hasStrBtn = FindStraightAwayBtn([1136, 199, 54, 353]);
-            if (!hasStrBtn)
-            {
-                SwipeSlowly([492, 516, 76, 27], [496, 210, 70, 25], 4);
-            }
-            else
-            {
-                console.log("发现立即加入的按钮" + hasStrBtn);
-                RandomPress([hasStrBtn.x - 20, hasStrBtn.y, 100, 20]);
-                Sleep(3);
-                RandomPress([1228, 19, 21, 21]);
-                break;
-            }
-        }
-        RightOnJoinGuildImg.recycle();
-        Sleep();
-        // RandomPress([1189, 19, 52, 25]);
-        RandomPress([1228, 20, 36, 25]);
+        RandomPress([1227, 19, 28, 28]);//page back
+        GuildDonation();
         storyMode = "mainMission";
         lostGrowthMissionTitle = 0;
         clickGrowthMissionTimes = 0;
@@ -1277,7 +1250,7 @@ const GrowthMissionFlow = () =>
     {
         console.log("成长任务14: 分解装备");
         DecomposeEquipment();
-        if (FindMultiColors(FinishedMissionColorList, [1126, 210, 57, 33]))
+        if (HaveFinished([1126, 210, 57, 33]))
         {
             RandomPress([900, 195, 268, 42]);
             Sleep(4);
@@ -1371,7 +1344,7 @@ const DailyMissionFlow = () =>
         return false;
     }
     console.log("正在进行成长任务...");
-    const isFinished = FindMultiColors(FinishedMissionColorList, [1080, 118, 114, 251], shot);
+    const isFinished = HaveFinished([1080, 118, 114, 251], shot);
     if (isFinished)
     {
         console.log("每日任务完成 !");

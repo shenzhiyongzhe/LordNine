@@ -12,6 +12,7 @@ const {
     PageBack, PressBlank, PullDownSkill,
     RecycleImgList, RandomPress, ReadImg, ReturnHome,
     SwipeSlowly, Sleep,
+    ReadConfig,
 
 } = require("./utils.js");
 
@@ -454,14 +455,20 @@ const WearEquipment = () =>
     if (!hasOpenBackpack)
     {
         console.log("打开背包失败，清理页面尝试重新打开");
-        ClearPage();
-        hasOpenBackpack = OpenBackpack("equipment");
-        if (!hasOpenBackpack)
-        {
-            return false;
-        }
+        return false;
     }
 
+    const config = ReadConfig();
+    if (!config.game.equipment)
+    {
+        config.game.equipment = {};
+        // config.game.equipment.weapon = {material:""};
+        config.game.equipment.helmet = { material: "", color: "gray" };
+        config.game.equipment.top = { material: "", color: "gray" };
+        config.game.equipment.bottom = { material: "", color: "gray" };
+        config.game.equipment.gloves = { material: "", color: "gray" };
+        config.game.equipment.shoes = { material: "", color: "gray" };
+    }
     SortEquipment();
     const magicWandImgList = LoadImgList("backpack/magicWand");
     const identifyTapScreenImgList = LoadImgList("backpack/identifyTapScreen");
@@ -828,7 +835,7 @@ const DropSomeItem = () =>
  */
 const DecomposeEquipment = (type) =>
 {
-    type = type || "total";
+    type = type || "partial";
     if (type == "total")
     {
         console.log("开始分解全部装备");
@@ -840,12 +847,14 @@ const DecomposeEquipment = (type) =>
     let hasOpen = OpenBackpack();
     if (hasOpen)
     {
+        ExpandBackpackCapacity();
         RandomPress([1043, 665, 23, 26]);
     }
     if (!WaitUntilEnterBackpackMenu())
     {
         ClearPage();
         hasOpen = OpenBackpack();
+        RandomPress([1043, 665, 23, 26]);
         if (!hasOpen)
         {
             console.log("进入分解页面失败，退出");
@@ -876,11 +885,6 @@ const DecomposeEquipment = (type) =>
                 console.log("分解蓝色装备");
                 RandomPress([664, 245, 55, 15]);
             }
-            if (!FindCheckMark([779, 236, 31, 33]))
-            {
-                console.log("分解紫色装备");
-                RandomPress([786, 243, 55, 17]);
-            }
         }
         else if (type == "partial")
         {
@@ -890,10 +894,9 @@ const DecomposeEquipment = (type) =>
                 console.log("取消蓝色装备");
                 RandomPress([664, 245, 55, 15]);
             }
-            if (FindCheckMark([779, 236, 31, 33]))
+            if (FindCheckMark([774, 214, 39, 47]))
             {
-                console.log("取消紫色装备");
-                RandomPress([786, 243, 55, 17]);
+                RandomPress([787, 231, 48, 15]);
             }
         }
         if (FindCheckMark([404, 396, 44, 46]))
@@ -1024,6 +1027,82 @@ const DecomposeEquipment = (type) =>
 
 };
 
+const ExpandBackpackCapacity = () =>
+{
+    console.log("expand backpack capacity");
+    if (!OpenBackpack())
+    {
+        return console.log("open backpack failed");
+    }
+    const GetCapacity = () =>
+    {
+        const c_100 = LoadImgList("backpack/capacity/c100");
+        const c_200 = LoadImgList("backpack/capacity/c200");
+        const full = LoadImgList("backpack/capacity/full");
+        let capacity = null;
+        const region = [1130, 654, 93, 45];
+        if (FindImgInList(c_100, region))
+        {
+            console.log("当前背包容量是100，扩充至200");
+        }
+        else if (FindImgInList(c_200, region))
+        {
+            console.log("背包容量是200，不需要再扩充");
+            capacity = 200;
+        }
+        else if (FindImgInList(full, region))
+        {
+            console.log("背包容量已满，需要扩充");
+            capacity = "full";
+        }
+        RecycleImgList(c_100);
+        RecycleImgList(c_200);
+        RecycleImgList(full);
+        return capacity;
+    };
+    const HasConfirmBtn = () => FindBlueBtn([644, 544, 163, 59]);
+
+    const ExpandCapacity = () =>
+    {
+        console.log("开始扩充操作");
+        let isSuccess = false;
+        RandomPress([1145, 668, 96, 15]);
+        if (WaitUntil(HasConfirmBtn))
+        {
+            console.log("点击+100");
+            RandomPress([610, 415, 65, 27]);
+            if (HasConfirmBtn())
+            {
+                RandomPress([665, 560, 123, 28]);
+                console.log("点击确定");
+                if (!HasConfirmBtn())
+                {
+                    console.log("扩充成功");
+                    isSuccess = true;
+                }
+                else
+                {
+                    console.log("扩充失败");
+                }
+            }
+        }
+        return isSuccess;
+    };
+
+    const currentCapacity = GetCapacity();
+    if (currentCapacity == "full")
+    {
+        ExpandCapacity();
+    }
+    else
+    {
+        console.log("不满足扩充条件： currentCapacity:" + currentCapacity);
+    }
+    if (HasConfirmBtn())
+    {
+        RandomPress([497, 559, 117, 28]);
+    }
+};
 const UseHolyGrail = () =>
 {
     console.log("开始使用圣杯");
@@ -1137,24 +1216,19 @@ const BuyPotion = () =>
                 break;
             }
         }
-        console.log("未发现菜单按钮,退出");
+        console.log("购买药水失败：未发现菜单按钮,退出");
         return false;
     }
-    ClearPage();
     if (!IsInCity())
     {
-        console.log("不在主城，先传送回家");
         ReturnHome();
     }
-    RandomPress([995, 433, 42, 41]); //grocery store
-    Sleep(5);
+    GoToTheNPC("grocery");
     const BuySomeItem = () =>
     {
         let isBuyPotion = false;
-        let isBuySpeedBook = false;
-        let isBuyHealBook = false;
-        RandomPress([154, 93, 164, 39]); //小药的图标位置
-        RandomPress([600, 338, 30, 5]); //药水滚动条，购买量为50% ~ 60%负重
+        RandomPress([158, 97, 146, 37]); //小药的图标位置
+        RandomPress([630, 338, 30, 5]); //药水滚动条，购买量为50% ~ 60%负重
         if (FindBlueBtn([648, 566, 175, 56]))
         {
             RandomPress([667, 578, 133, 29]);
@@ -1162,34 +1236,28 @@ const BuyPotion = () =>
             console.log("购买药水成功！");
             isBuyPotion = true;
         }
-        RandomPress([168, 336, 126, 32]);
-        WaitUntil(() => HasPopupClose([791, 114, 46, 46]), 200, 30);
-        if (FindBlueBtn([644, 543, 180, 62]))
+        const config = ReadConfig();
+        if (config.game.gameMode == "mainStory")
         {
-            console.log("购买速度增加咒文书");
-            RandomPress([669, 556, 134, 32]);
-            Sleep();
-            isBuySpeedBook = true;
-        }
-        if (HasPopupClose([789, 86, 54, 58]))
-        {
-            RandomPress([806, 106, 18, 20]);
-        }
-        RandomPress([159, 489, 148, 40]);
-        WaitUntil(() => HasPopupClose([791, 114, 46, 46]), 200, 30);
-        if (FindBlueBtn([644, 543, 180, 62]))
-        {
-            RandomPress([669, 556, 134, 32]);
-            console.log("购买恢复增加咒文书");
-            isBuyHealBook = true;
-        }
-        if (isBuyPotion && isBuySpeedBook && isBuyHealBook)
-        {
-            return true;
-        }
-        else
-        {
-            return false;
+            RandomPress([168, 336, 126, 32]);
+            WaitUntil(() => HasPopupClose([791, 114, 46, 46]), 200, 30);
+            if (FindBlueBtn([644, 543, 180, 62]))
+            {
+                console.log("购买速度增加咒文书");
+                RandomPress([669, 556, 134, 32]);
+                Sleep();
+            }
+            if (HasPopupClose([789, 86, 54, 58]))
+            {
+                RandomPress([806, 106, 18, 20]);
+            }
+            RandomPress([159, 489, 148, 40]);
+            WaitUntil(() => HasPopupClose([791, 114, 46, 46]), 200, 30);
+            if (FindBlueBtn([644, 543, 180, 62]))
+            {
+                RandomPress([669, 556, 134, 32]);
+                console.log("购买恢复增加咒文书");
+            }
         }
     };
     if (WaitUntilPageBack())
@@ -1217,5 +1285,5 @@ module.exports = {
     AutoPotion, UnAutoPotion, BuyPotion,
 };
 
-// DecomposeEquipment("total")
+
 

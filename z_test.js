@@ -32,37 +32,8 @@ const axios = require('axios');
 //     }
 // }, 4000);
 
-const {
-    Sleep, RandomPress, ReadImg, FindImg, FindMultiColors,
-    HasPageback, HasMenu, FindTipPoint,
-    FindBlueBtn,
-
-    SwipeSlowly, PullDownSkill, PressBlank, PageBack,
-    HasPopupClose,
-    LoadImgList,
-    FindCheckMark,
-    FindGoldBtn,
-    IsHaltMode,
-    HasSkip,
-    GetFormatedTimeString,
-    FindNumber,
-    FindRedBtn,
-    IsBackpackFull,
-    WaitUntil,
-    FindImgInList,
-    RecycleImgList,
-    ClearPage,
-    CloseBackpack,
-    OpenBackpack,
-    GetCharacterLv,
-    ReadConfig,
-    RewriteConfig,
-    IsMoving,
-    FindFloatNumber,
-    EnterMenuItemPage,
-    ChangeGameSetting,
-    HaveDailyMissionIcon,
-    HaveFinished,
+const { LoadImgList, HaveDailyMissionIcon, IsHaltMode, FindImgInList, FindNumber, ReadConfig, RewriteConfig, ReadDealRecord, ExitHaltMode,
+    SwipeSlowly, Sleep, HasMenu,
 } = require("./utils.js");
 
 
@@ -211,84 +182,56 @@ function 关闭应用(packageName)
 }
 
 
+// console.log(IsHaltMode());
+
+// console.log(FindNumber("combatPower", [668, 253, 40, 34]));
+// const data = { "vm": "VM010245081018", "serverName": "3区9", "lv": 0, "combatPower": 25001, "diamond": 920, "monthlyIncome": 920, historyDealRecord: { deal: ["2024_1_1", 10] } };
+// const res = http.post("http://10.6.130.129:8001/devices", data);
+// console.log(res);
+
+// let filename = `any_name_${(new Date().toJSON().slice(0, 10))}.zip`;
+// const config = ReadConfig();
+// const dealRecord = ReadDealRecord();
+// // console.log(`Add here ${filename}`);
+// const postData = {
+//     vm: config.game.vm,
+//     serverName: config.game.serverName,
+//     lv: config.game.lv,
+//     combatPower: config.game.combatPower,
+//     diamond: 0,
+//     monthlyIncome: 0,
+//     historyDealRecord: JSON.stringify(dealRecord)
+// };
+// console.log("postData: " + JSON.stringify(postData));
+// RewriteConfig(config);
+
+// UpdateDealRecord(dealRecord);
 
 // try
 // {
-//     // 解析JSON字符串
-//     const parsedData = JSON.parse(jsonData);
-
-//     // 检查是否为空对象或空数组
-//     if (Object.keys(parsedData).length === 0)
-//     {
-//         console.log('JSON文件是空的');
-//     } else
-//     {
-//         c;
-//         console.log('JSON文件不是空的');
-//     }
+//     console.log("发送数据给后台");
+//     const res = http.post("http://47.76.112.107:8001/devices", postData);
+//     console.log(res);
 // } catch (error)
 // {
-//     console.error('解析JSON文件时发生错误:', error);
+//     console.log(error);
 // }
 
-const GetData = () =>
+const ExitHaltMode_1 = () =>
 {
-    axios({
-        url: "http://10.6.130.129:8000/devices/",
-        method: "get",
-        responseType: 'json'
-    }).then(res => console.log(res));
-    // axios.get('http://localhost:8000/devices/', {}).then(res => console.log(res));
-};
-
-const PostData = (data) =>
-{
-    console.log("上传的数据为: " + JSON.stringify(data));
-    // const res = http.post("http://10.6.130.129:8000/devices/", data);
-    // if (res.statusCode == 200)
-    // {
-    //     console.log("数据上传成功");
-    //     return true;
-    // }
-    // else
-    // {
-    //     console.log("数据上传失败");
-    //     return false;
-    // }
-    axios.post("http://10.6.130.129:8000/devices/", data).then(res => console.log(res));
-};
-const UpdateData = (data) =>
-{
-    console.log("更新数据" + JSON.stringify(data));
-    axios.put(`http://10.6.130.129:8000/devices/01`, data).then(res =>
+    console.log("退出节电模式");
+    for (let i = 0; i < 3; i++)
     {
-        if (res.status == 200)
+        // swipe(640, 230, 640, 530, 1000);
+        swipe(556, 366, 1050, 366, 2000);
+        // SwipeSlowly([536, 281, 35, 169], [733, 274, 25, 179], 1);
+        Sleep(6);
+        if (HasMenu())
         {
-            console.log("更新数据成功");
+            return true;
         }
-        else
-        {
-            console.log("更新数据失败");
-        }
-    });
-
+    }
+    console.log("退出节电模式失败");
+    return false;
 };
-
-const DeleteData = (data) =>
-{
-    axios({
-        url: "http://10.6.130.129:8000/devices/",
-        method: "delete",
-        responseType: 'json'
-    }).then(res => console.log(res));
-};
-// GetData();
-
-// const data = { vm: "01", serverName: 99, lv: 11, diamond: 1000, gold: 10123 };
-// PostData(data);
-
-// const data = { serverName: 199, lv: 11, diamond: 1000, gold: 10123 };
-// UpdateData(data);
-// serverName
-
-console.log(HasPopupClose([668, 559, 136, 29]));
+// ExitHaltMode_1();

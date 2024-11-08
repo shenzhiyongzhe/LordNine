@@ -322,6 +322,7 @@ const UI = () =>
     ui.web.jsBridge.registerHandler("StopScript", (data, callBack) =>
     {
         console.log(data);
+        StopScript();
         callBack("ui点击事件：停止脚本");
     });
     setTimeout(() =>
