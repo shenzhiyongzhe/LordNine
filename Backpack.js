@@ -13,6 +13,8 @@ const {
     RecycleImgList, RandomPress, ReadImg, ReturnHome,
     SwipeSlowly, Sleep,
     ReadConfig,
+    FindNumber,
+    EnterMenuItemPage,
 
 } = require("./utils.js");
 
@@ -327,54 +329,58 @@ const OpenAllBox = () =>
 
 const WearBestSuit = () =>
 {
-    console.log("start to wear best suit");
-    const hasOpenMenu = OpenMenu();
-    if (!hasOpenMenu)
+    console.log("开始穿戴时装");
+
+    if (!EnterMenuItemPage("suit"))
     {
-        console.log("open menu failed");
+        console.log("进入时装页面失败，退出");
         return false;
     }
-    RandomPress([1028, 112, 32, 35]);
-    if (!WaitUntilPageBack())
-    {
-        console.log("enter suit page failed");
-        return false;
-    }
-    Sleep();
-    RandomPress([1241, 675, 20, 22]);
-    const GreenSuitColorList = [
-        ["#384836", [[-2, 8, "#384837"], [-5, 20, "#3e4f3d"], [34, 5, "#3a4a38"], [43, 21, "#303e2e"]]],
-        ["#384736", [[0, 12, "#425340"], [-11, 22, "#384836"], [35, 5, "#374735"], [43, 13, "#2d3b2c"]]],
-        ["#354434", [[2, 12, "#3c4c3a"], [-9, 19, "#394937"], [37, 3, "#374635"], [47, 16, "#2d3a2b"]]],
-        ["#394938", [[-2, 11, "#495d47"], [-8, 21, "#41523e"], [40, -1, "#374635"], [47, 20, "#2c392b"]]]
-    ];
     const BlueSuitColorList = [
-        ["#293a51", [[-3, 7, "#384f6c"], [-8, 17, "#324661"], [40, -9, "#223246"], [54, 15, "#1b2838"]]],
-        ["#27374d", [[-5, 9, "#354a66"], [-8, 17, "#2e405a"], [39, 1, "#2d4059"], [48, 16, "#202e42"]]],
-        ["#293b52", [[-2, 5, "#354a66"], [-5, 14, "#2e415a"], [38, -7, "#25354a"], [46, 13, "#223246"]]]
+        ["#30435e", [[0, 5, "#394e6d"], [-1, 19, "#324660"], [62, -9, "#202e42"], [74, 17, "#405779"]]],
+        ["#31435f", [[-3, 17, "#384e6c"], [-6, 27, "#334662"], [73, 6, "#2a3b53"], [72, 23, "#3d5273"]]],
+        ["#2f425b", [[-2, 17, "#3d5273"], [-4, 29, "#334662"], [71, -2, "#243348"], [77, 18, "#344763"]]],
+        ["#2f405b", [[-2, 11, "#31455f"], [-4, 21, "#364a69"], [64, -7, "#1f2c40"], [75, 17, "#394f6e"]]]
     ];
 
-    const region = [882, 158, 319, 497];
-    const hasBlueSuit = FindMultiColors(BlueSuitColorList, region);
-    const hasGreenSuit = FindMultiColors(GreenSuitColorList, region);
+    const HasBlueSuit = (region, shot) => FindMultiColors(BlueSuitColorList, region, shot);
+    const shot = captureScreen();
+    let currentDefense = FindNumber("combatPower", [67, 236, 54, 37]);
 
-    if (hasBlueSuit)
+    for (let i = 0; i < 3; i++)
     {
-        RandomPress([hasBlueSuit.x, hasBlueSuit.y, 30, 30]);
-        if (FindBlueBtn([1034, 656, 190, 61]))
+        for (let j = 0; j < 3; j++)
         {
-            RandomPress([1053, 667, 152, 35]);
+            let hasBlueSuit = HasBlueSuit([875 + j * 107, 160 + i * 178, 110, 100], shot);
+            if (hasBlueSuit)
+            {
+                RandomPress([hasBlueSuit.x, hasBlueSuit.y, 60, 60]);
+                let defense = FindNumber("combatPower", [67, 236, 54, 37]);
+                console.log("防御力加成为：" + defense);
+                if (currentDefense >= 0 && defense > currentDefense)
+                {
+                    console.log("此时装品质更好，点击穿戴");
+                    RandomPress([1064, 670, 133, 30]);
+                }
+
+            }
         }
     }
-    else if (hasGreenSuit)
-    {
-        RandomPress([hasGreenSuit.x, hasGreenSuit.y, 30, 30]);
-        if (FindBlueBtn([1034, 656, 190, 61]))
-        {
-            RandomPress([1053, 667, 152, 35]);
-        }
-    }
+
     PageBack();
+    for (let i = 0; i < 10; i++)
+    {
+        if (HasMenu())
+        {
+            console.log("穿戴时装流程结束");
+            break;
+        }
+        else
+        {
+            ClearPage();
+        }
+        Sleep();
+    }
 };
 // --------------------------- wear equipment ---------------------------------
 
@@ -1284,6 +1290,5 @@ module.exports = {
     UseHolyGrail, WearBestSuit,
     AutoPotion, UnAutoPotion, BuyPotion,
 };
-
 
 

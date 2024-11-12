@@ -28,6 +28,7 @@ const GetCaptureScreenPermission = () =>
         }
     });
 };
+
 const StopScript = () => java.lang.System.exit(0);
 
 function StartScript(uiData)
@@ -352,8 +353,8 @@ console.setGlobalLogConfig({
 const cat_icon = "file://img/cat.png";
 const floaty_window = floaty.window(
     <frame gravity="center" id="switch" alpha="1" w="18" h="18" bg="#ffffff">
-        {/* <text id="income" color="#ff5722" h="12" textSize="12sp">0000</text>
-         */}
+        {/* <text id="delay" color="#ff5722" h="12" textSize="12sp">999</text> */}
+
         <img src="{{cat_icon}}"></img>
     </frame>
 );

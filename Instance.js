@@ -1,8 +1,8 @@
 
-const { DeathCheck, FindMultiColors, RandomPress, HasMenu, HasMenuClose, WaitUntilPageBack, FindBlueBtn, Sleep, IsMoving, PageBack, WaitUntil, IsHaltMode, ExitHaltMode,
+const { FindMultiColors, RandomPress, HasMenu, HasMenuClose, WaitUntilPageBack, FindBlueBtn, Sleep, IsMoving, PageBack, WaitUntil, IsHaltMode, ExitHaltMode,
     FindImg, IsInCity, WaitUntilMenu, EnterMenuItemPage, FindNumber,
     ChangeHaltModeTime, ChangeRecoverPotionPercentToNormal, ClickAuto,
-
+    DeathCheck,
     IsLocked, IsInQuest, IsAuto_active, IsAuto_inactive, IsNoPotion,
     LoadImgList,
     FindImgInList, FindRedBtn, FindGoldBtn,
@@ -78,52 +78,25 @@ let monsterMapList = null;
 // console.log("初始化副本模式挂机随机提升战力时刻，为：" + comprehensiveTime[0][0] + "时" + comprehensiveTime[0][1] + "分；" + comprehensiveTime[1][0] + "时" + comprehensiveTime[1][1] + "分");
 
 
+const death_haltMode = LoadImgList("special/death_haltmode");
 
 
-
-const IsExpIncrease = () =>
+const DeathFlow_HaltMode = (shot) =>
 {
-    const clip = images.clip(captureScreen(), 55, 572, 118, 25);
-    Sleep(10);
-    if (FindImg(clip, [38, 555, 179, 57]))
+    if (FindImgInList(death_haltMode, [582, 526, 119, 60], shot))
     {
-        return false;
-    }
-    else
-    {
-        return true;
+        console.log("省电模式：死亡");
+        ExitHaltMode();
     }
 };
 
-const DeathFlow = () =>
+
+const HangUpInstance = () =>
 {
-    console.log("开始死亡提升");
     if (IsHaltMode())
     {
         ExitHaltMode();
     }
-    Sleep(3);
-    for (let i = 0; i < 30; i++)
-    {
-        if (FindBlueBtn([524, 581, 245, 94])) 
-        {
-            Sleep(5);
-            RandomPress([572, 611, 141, 29]);
-            break;
-        }
-        if (FindBlueBtn([536, 415, 204, 77]))
-        {
-            Sleep(3);
-            RandomPress([568, 437, 151, 30]);
-            break;
-        }
-        Sleep();
-    }
-
-};
-
-const HangUpInstance = () =>
-{
     if (!HasMenu() && !HasMenuClose())
     {
         console.log("没有菜单，无法进入副本");
@@ -141,9 +114,10 @@ const HangUpInstance = () =>
             config.game.changeGameSetting = true;
         }
     }
-    if (IsHaltMode())
+    if (IsNoPotion())
     {
-        ExitHaltMode();
+        console.log("进副本前检查，没有药水");
+        return false;
     }
     const hasEnterInstancePage = EnterMenuItemPage("instance");
     if (!hasEnterInstancePage)
@@ -205,25 +179,32 @@ const HangUpInstance = () =>
         config.game.dailyInstance = true;
         instance_mode = "dailyMission";
         console.log("没有副本可以进入，开始每日任务");
+        PageBack();
+        for (let i = 0; i < 10; i++)
+        {
+            if (HasMenu())
+            {
+                break;
+            }
+            else if (HasPopupClose([1031, 84, 51, 54]))
+            {
+                RandomPress([1031, 84, 51, 54]);
+            }
+            ClearPage();
+            Sleep();
+        }
     }
+    else
+    {
+        if (!IsInCity())
+        {
+            EnterHaltMode();
+        }
 
+    }
     config.game.combatPower = curCombatPower;
     RewriteConfig(config);
-    for (let i = 0; i < 10; i++)
-    {
-        PageBack();
-        if (HasMenu())
-        {
-            break;
-        }
-        else if (HasPopupClose([1031, 84, 51, 54]))
-        {
-            RandomPress([1031, 84, 51, 54]);
-        }
-        ClearPage();
-        Sleep();
-    }
-    EnterHaltMode();
+
     // ComprehensiveImprovement_Instance();
 
     return false;
@@ -240,6 +221,8 @@ const AcceptDailyMission = () =>
 
     const missionAwardImgList = LoadImgList("icon/font/dailyMission/missionCompleteAward");
     const weeklyMissionGoalImgList = LoadImgList("icon/font/dailyMission/weeklyMissionGoal");
+
+    const weeklyMissionIconImgList = LoadImgList("icon/font/dailyMission/weeklyMissionIcon");
     let dailyMissionItemPoints;
 
     let haveAccepteMax = false;
@@ -302,7 +285,14 @@ const AcceptDailyMission = () =>
     }
 
     console.log("接受周任务");
-    RandomPress([189, 73, 77, 25]);
+
+    for (let i = 0; i < 5; i++)
+    {
+        if (!FindImgInList(weeklyMissionIconImgList, [243, 119, 47, 187]))
+        {
+            RandomPress([194, 78, 63, 16], 3);
+        }
+    }
     let isCorrectNum = 0;
     for (let i = 0; i < 3; i++)
     {
@@ -350,6 +340,7 @@ const AcceptDailyMission = () =>
                 if (FindImgInList(weeklyMissionGoalImgList, [781, 249, 248, 62]))
                 {
                     console.log("是周任务，不需要放弃");
+                    isCorrectNum++;
                 }
                 else if (FindRedBtn([1072, 647, 202, 59]))
                 {
@@ -393,6 +384,10 @@ const AcceptDailyMission = () =>
 };
 const ClickDailyMission = () =>
 {
+    if (IsHaltMode())
+    {
+        ExitHaltMode();
+    }
     if (!HasMenu())
     {
         return false;
@@ -428,6 +423,10 @@ const DailyMission = () =>
     else
     {
         console.log("开始每日任务");
+        if (IsHaltMode())
+        {
+            ExitHaltMode();
+        }
         const hasEnter = EnterMenuItemPage("mission");
         if (!hasEnter)
         {
@@ -454,6 +453,10 @@ const HasTransformScroll_secretLab = () =>
     if (hasScroll)
     {
         console.log("发现秘密实验室传送卷轴");
+    }
+    else
+    {
+        console.log("没有发现秘密实验室传送卷轴");
     }
     RecycleImgList(transformScroll_secretLab);
     return hasScroll;
@@ -520,7 +523,7 @@ const BuyPotion = () =>
 };
 const HangUpSecretLab = () =>
 {
-    console.log("secret lab flow");
+    console.log("秘密实验室流程");
     const hasScroll = HasTransformScroll_secretLab();
     if (hasScroll)
     {
@@ -529,7 +532,9 @@ const HangUpSecretLab = () =>
         BuyPotion();
 
         UseScroll();
+        return true;
     }
+    return false;
 };
 
 const CollectMonsterCollection = () =>
@@ -620,9 +625,50 @@ const EnterMap = (mapName) =>
     }
     return hasMoved;
 };
-
+/**
+ * 
+ * @param {*} position  "secretLab" 
+ * @returns bool
+ */
+const IsTheHangUpPosition_HaltMode = (position) =>
+{
+    const positionImg = LoadImgList(`icon/haltMode_position/${position}`);
+    if (FindImgInList(positionImg, [33, 489, 157, 54]))
+    {
+        console.log("在此位置挂机：" + position);
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+};
 const HangUpWild = () =>
 {
+    // if (IsHaltMode())
+    // {
+    //     if (IsTheHangUpPosition_HaltMode("secretLab"))
+    //     {
+    //         lastHangUpWildTime = new Date().getTime();
+    //         return true;
+    //     }
+    // }
+    // else
+    // {
+    //     ExitHaltMode();
+    // }
+
+    // if (HangUpSecretLab())
+    // {
+    //     console.log("优先去实验室挂机。");
+    //     lastHangUpWildTime = new Date().getTime();
+    //     return true;
+    // }
+    if (IsNoPotion())
+    {
+        console.log("野外挂机前检查，没有药水");
+        return false;
+    }
     const config = ReadConfig();
 
     if (mapName == null)
@@ -663,6 +709,7 @@ const HangUpWild = () =>
 
     console.log("等待传送到目的地...");
     WaitUntilMenu();
+    Sleep(random(1, 5));
     lastHangUpWildTime = new Date().getTime();
 
     if (IsAuto_inactive())
@@ -702,17 +749,28 @@ const InstanceExceptionCheck = () =>
         {
             return true;
         }
+        else
+        {
+            ExitHaltMode();
+        }
         if (instance_mode == "dailyMission")
         {
             ExitHaltMode();
         }
+        DeathFlow_HaltMode();
+
     }
     else
     {
+        const deathBtn = DeathCheck();
+        if (deathBtn)
+        {
+            RandomPress([deathBtn.x - 50, deathBtn.y, 150, 20], 15);
+        }
+        const config = ReadConfig();
         if (IsInCity() && !IsMoving())
         {
             console.log("在主城, 未移动，挂机模式为" + instance_mode);
-            const config = ReadConfig();
             if (instance_mode == "hangUpInstance")
             {
 
@@ -746,14 +804,12 @@ const InstanceExceptionCheck = () =>
         }
         if (HasMenu())
         {
-            Sleep();
             if (instance_mode == "hangUpInstance" || instance_mode == "hangUpWild")
             {
                 if (!IsAuto_active() && IsAuto_inactive())
                 {
                     console.log("instance check: 没有自动攻击，点击自动攻击");
-                    Sleep(random(3, 10));
-                    RandomPress([1136, 437, 30, 19]);
+                    PressToAuto();
                 }
             }
             else if (instance_mode == "dailyMission")
@@ -777,10 +833,26 @@ const InstanceExceptionCheck = () =>
                         Sleep();
                     }
                 }
+                let haveAccomplete = HaveFinished([1119, 99, 73, 274]);
+                if (haveAccomplete)
+                {
+                    const delayClick = random(30, 180);
+                    console.log("finish mission; delay random time:" + delayClick);
+                    Sleep(delayClick);
+                    RandomPress([haveAccomplete.x - 100, haveAccomplete.y, 100, 20], 2);
+                    RandomPress([449, 437, 384, 45]);
+                    clickDailyMissionAwardsTimes++;
+                    if (clickDailyMissionAwardsTimes > 20)
+                    {
+                        console.log("点击完成次数过多！！！");
+                        LoginProps();
+                        DecomposeEquipment();
+                        clickDailyMissionAwardsTimes = 0;
+                    }
+                }
                 if (!HaveDailyMissionIcon())
                 {
-                    const config_2 = ReadConfig();
-                    if (config_2.game.accepteDailyMission && new Date().getDate() == config_2.game.today)
+                    if (config.game.accepteDailyMission && new Date().getDate() == config.game.today)
                     {
                         instance_mode == "hangUpWild";
                         console.log("今日每日任务已做完，切换模式为：野外挂机");
@@ -792,21 +864,22 @@ const InstanceExceptionCheck = () =>
                     }
                 }
             }
-            let haveAccomplete = HaveFinished([1119, 99, 73, 274]);
-            if (haveAccomplete)
+
+            if ((instance_mode == "hangUpInstance" || instance_mode == "hangUpWild") && !IsInCity())
             {
-                const delayClick = random(30, 180);
-                console.log("finish mission; delay random time:" + delayClick);
-                Sleep(delayClick);
-                RandomPress([haveAccomplete.x - 100, haveAccomplete.y, 100, 20], 2);
-                RandomPress([449, 437, 384, 45]);
-                clickDailyMissionAwardsTimes++;
-                if (clickDailyMissionAwardsTimes > 20)
+                console.log("挂机异常检测：不在省电模式");
+                if (!config.game.dailyInstance)
                 {
-                    console.log("点击完成次数过多！！！");
-                    LoginProps();
-                    DecomposeEquipment();
-                    clickDailyMissionAwardsTimes = 0;
+                    HangUpInstance();
+                }
+                else
+                {
+                    DailyMission();
+                }
+                if (instance_mode == "hangUpInstance" || instance_mode == "hangUpWild")
+                {
+                    PressToAuto();
+                    EnterHaltMode();
                 }
             }
         }
@@ -879,7 +952,7 @@ const InstanceFlow = () =>
         }
         else if (!config.game.dailyMission)
         {
-            console.log("daily mission not finished. go on daily mission");
+            console.log("每日任务未完成. 优先进行每日任务");
             DailyMission();
             lastTimeEnterInstance = curTime;
         }
@@ -898,6 +971,10 @@ const InstanceFlow = () =>
         if ((curTime - lastTimeClickDailyMission) / 60000 > 30)
         {
             console.log("30min 点击每日任务");
+            if (IsHaltMode())
+            {
+                ExitHaltMode();
+            }
             if (!HaveDailyMissionIcon())
             {
                 console.log("30分钟检查：未发现每日任务图标，默认今日任务完成");
@@ -916,7 +993,10 @@ const InstanceFlow = () =>
 
 module.exports = { InstanceFlow };
 
+// HangUpInstance()
 
+
+// console.log(HasTransformScroll_secretLab())
 
 
 

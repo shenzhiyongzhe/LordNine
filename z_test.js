@@ -33,7 +33,8 @@ const axios = require('axios');
 // }, 4000);
 
 const { LoadImgList, HaveDailyMissionIcon, IsHaltMode, FindImgInList, FindNumber, ReadConfig, RewriteConfig, ReadDealRecord, ExitHaltMode,
-    SwipeSlowly, Sleep, HasMenu,
+    SwipeSlowly, Sleep, HasMenu, UpdateDealRecord,
+    DeathCheck,
 } = require("./utils.js");
 
 
@@ -185,7 +186,7 @@ function 关闭应用(packageName)
 // console.log(IsHaltMode());
 
 // console.log(FindNumber("combatPower", [668, 253, 40, 34]));
-// const data = { "vm": "VM010245081018", "serverName": "3区9", "lv": 0, "combatPower": 25001, "diamond": 920, "monthlyIncome": 920, historyDealRecord: { deal: ["2024_1_1", 10] } };
+// const data = { "vm": "VM010245081019", "serverName": "3区9", "lv": 0, "combatPower": 25001, "diamond": 920, "monthlyIncome": 920, historyDealRecord: JSON.stringify({ deal: ["2024_1_1", 10] }) };
 // const res = http.post("http://10.6.130.129:8001/devices", data);
 // console.log(res);
 
@@ -194,7 +195,7 @@ function 关闭应用(packageName)
 // const dealRecord = ReadDealRecord();
 // // console.log(`Add here ${filename}`);
 // const postData = {
-//     vm: config.game.vm,
+//     vm: "VM010240030023",
 //     serverName: config.game.serverName,
 //     lv: config.game.lv,
 //     combatPower: config.game.combatPower,
@@ -222,9 +223,7 @@ const ExitHaltMode_1 = () =>
     console.log("退出节电模式");
     for (let i = 0; i < 3; i++)
     {
-        // swipe(640, 230, 640, 530, 1000);
-        swipe(556, 366, 1050, 366, 2000);
-        // SwipeSlowly([536, 281, 35, 169], [733, 274, 25, 179], 1);
+        SwipeSlowly([556, 366, 5, 10], [1050, 366, 5, 10], 2);
         Sleep(6);
         if (HasMenu())
         {
@@ -235,3 +234,8 @@ const ExitHaltMode_1 = () =>
     return false;
 };
 // ExitHaltMode_1();
+
+// console.log(JSON.stringify({ "deal": [["2024_10_8", 10], ["2024_10_8", 10], ["2024_11_8", 10]] }));
+
+// console.log(FindNumber("combatPower", [65, 239, 53, 30]));
+console.log(DeathCheck());

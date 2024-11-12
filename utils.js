@@ -946,7 +946,7 @@ const PressToAuto = () =>
 {
     if (IsAuto_inactive())
     {
-        const delayTime = random(0, 5);
+        const delayTime = random(1, 15);
         console.log("延迟" + delayTime + "s点击auto");
         Sleep(delayTime);
         ClickAuto();
@@ -988,7 +988,7 @@ const IsMoving = () =>
     return isMoving;
 
 };
-const IsBackpackFull = (shot) => FindMultiColors(BackpackFullColorList, [1144, 35, 39, 27], shot);
+const IsBackpackFull = (shot) => { shot = shot || captureScreen(); return FindMultiColors(BackpackFullColorList, [1144, 35, 39, 27], shot); };
 
 const noPotionImgList = LoadImgList("special/noPotion");
 const IsNoPotion = (shot, region) =>
@@ -1025,6 +1025,21 @@ const EnterHaltMode = () =>
         }
         Sleep();
     }
+    return false;
+};
+const ExitHaltMode = () =>
+{
+    console.log("退出节电模式");
+    for (let i = 0; i < 3; i++)
+    {
+        SwipeSlowly([556, 366, 5, 10], [1050, 366, 5, 10], 2);
+        Sleep(6);
+        if (HasMenu())
+        {
+            return true;
+        }
+    }
+    console.log("退出节电模式失败");
     return false;
 };
 const LaunchGame = () => app.launch("com.smilegate.lordnine.stove.google");
@@ -1131,6 +1146,10 @@ const OpenBackpack = (type, sort) =>
         else if (HasBackpack())
         {
             RandomPress([1154, 23, 20, 26]);
+        }
+        else if (IsHaltMode())
+        {
+            ExitHaltMode();
         }
         else
         {
@@ -1495,23 +1514,7 @@ const RestartGame = (packageName, time) =>
     app.launch(packageName);
 };
 
-const ExitHaltMode = () =>
-{
-    console.log("退出节电模式");
-    for (let i = 0; i < 3; i++)
-    {
-        // swipe(640, 230, 640, 530, 1000);
-        swipe(556, 366, 1050, 366, 2000);
-        // SwipeSlowly([536, 281, 35, 169], [733, 274, 25, 179], 1);
-        Sleep(6);
-        if (HasMenu())
-        {
-            return true;
-        }
-    }
-    console.log("退出节电模式失败");
-    return false;
-};
+
 
 const ChangeHaltModeTime = () =>
 {
@@ -1754,21 +1757,13 @@ const GetCharacterLv = () =>
 {
     console.log("获取玩家等级，默认为法杖等级");
     EnterMenuItemPage("weaponFeatures");
-    let lv = FindNumber("lv", [46, 468, 61, 51]);
-    if (!lv)
-    {
-        for (let i = 0; i < 10; i++)
-        {
-            lv = FindNumber("lv", [46, 468, 61, 51]);
-            if (lv)
-            {
-                break;
-            }
-            Sleep();
-        }
-    }
+    let lv = FindNumber("lv", [208, 166, 50, 52]);
     console.log("玩家等级为：" + lv);
     PageBack();
+    if (!HasMenu())
+    {
+        ClearPage();
+    }
     return lv;
 };
 

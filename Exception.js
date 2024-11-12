@@ -30,7 +30,6 @@ let lastTimeOfBuyingPotion = 1726208812345;
 let lastTimeClearBackpack = 1726208812345;
 let lastTimeClearBackpack_haltMode = new Date().getTime();
 let randomTimeToClearBackpack = random(120, 180);
-let loginCount = 1;
 
 let lastGetVerificationCodeTime = 0;
 let totalGetVerificationCodeTimes = 0;
@@ -50,7 +49,6 @@ const ExceptionImgList = {
     loading: LoadImgList("special/loading"),
     confirmToGo: LoadImgList("special/confirmToGo"),
     quickMoving: LoadImgList("icon/font/quickMoving"),
-    death_haltMode: LoadImgList("special/death_haltmode")
 };
 const HasTip = (region, shot) =>
 {
@@ -72,6 +70,12 @@ const NoPotionFlow = (shot) =>
 
         console.log("角色当前没有药水了 延迟" + delayTime + "s");
         Sleep(delayTime);
+        if (IsBackpackFull())
+        {
+            lastTimeClearBackpack = new Date().getTime();
+            LoginProps();
+            DecomposeEquipment("partial");
+        }
         const buyPotionInterval = (new Date().getTime() - lastTimeOfBuyingPotion) / 60000;
         if (buyPotionInterval < 2) 
         {
@@ -96,43 +100,27 @@ const NoPotionFlow_HaltMode = (shot) =>
         BuyPotion();
     }
 };
-const DeathFlow_HaltMode = (shot) =>
-{
-    if (FindImgInList(ExceptionImgList, [582, 526, 119, 60], shot))
-    {
-        console.log("halt mode: death");
-        ExitHaltMode();
-    }
-    const deathBtn = DeathCheck(shot);
-    if (deathBtn)
-    {
-        RandomPress([deathBtn.x - 10, deathBtn.y, 50, 10], 15);
-        NoPotionFlow();
-    }
-};
+
 
 const BackpackFlow_HaltMode = () =>
 {
 
     if ((new Date().getTime() - lastTimeClearBackpack_haltMode) / 60000 > randomTimeToClearBackpack)
     {
-        console.log("time to clear backpack");
+        console.log("到达随机清理背包时间。");
         if (IsHaltMode())
         {
             ExitHaltMode();
         }
-        if (IsBackpackFull())
+        if (new Date().getDate() % 2 == 0)
         {
-            if (new Date().getDate() % 2 == 0)
-            {
-                console.log("2的整数倍，穿戴装备");
-                WearEquipments();
-                StrengthenEquipment();
-            }
-            lastTimeClearBackpack_haltMode = new Date().getTime();
-            LoginProps();
-            DecomposeEquipment("partial");
+            console.log("2的整数倍，穿戴装备");
+            WearEquipments();
+            StrengthenEquipment();
         }
+        lastTimeClearBackpack_haltMode = new Date().getTime();
+        LoginProps();
+        DecomposeEquipment("partial");
     }
 };
 
@@ -400,24 +388,6 @@ const ResetConfig = () =>
     }
 };
 
-const ReLoginFlow = () =>
-{
-    const hasGoogleLogin = textMatches(/(.*Google.*)/).findOne(20);
-    if (hasGoogleLogin)
-    {
-        hasGoogleLogin.parent().click();
-    }
-    const hasSelectAccount = textMatches(/(.*选择账号.*|.*계정 선택.*|.*Choose an account.*|.*选择帐号.*)/).findOne(20);
-    if (hasSelectAccount)
-    {
-        const hasAccount = textMatches(/(.*@gmail.com.*)/).findOne(20).parent().parent();
-        if (hasAccount)
-        {
-            hasAccount.click();
-        }
-    }
-
-};
 
 // *******************************************************************  确保在游戏中 *********************************************************************
 
@@ -452,6 +422,20 @@ const StovePopup = () =>
     {
         console.log("发现游戏协议弹窗，点击同意");
         agreeAllToContinue.click();
+    }
+    const hasGoogleLogin = textMatches(/(.*Google.*)/).findOne(20);
+    if (hasGoogleLogin)
+    {
+        hasGoogleLogin.parent().click();
+    }
+    const hasSelectAccount = textMatches(/(.*选择账号.*|.*계정 선택.*|.*Choose an account.*|.*选择帐号.*)/).findOne(20);
+    if (hasSelectAccount)
+    {
+        const hasAccount = textMatches(/(.*@gmail.com.*)/).findOne(20).parent().parent();
+        if (hasAccount)
+        {
+            hasAccount.click();
+        }
     }
 };
 const PressSomeTip = (shot) =>
@@ -625,7 +609,6 @@ const MakeSureInGame = (shot) =>
     if (!HasMenu())
     {
         MainUIFlow(shot);
-        ReLoginFlow();
         PressCommonBtn();
         PressSomeTip(shot);
         ClickSkip();
@@ -653,23 +636,15 @@ const MakeSureInGame = (shot) =>
     StovePopup();
     ClearPage();
 };
-const NoExpCheck = () =>
-{
-};
-const Exception_HaltMode = () =>
-{
-    NoExpCheck();
-};
+
 const ExceptionFlow = () =>
 {
     const shot = captureScreen();
 
     if (IsHaltMode())
     {
-        NoPotionFlow_HaltMode();
-        DeathFlow_HaltMode();
-        BackpackFlow_HaltMode();
-        Exception_HaltMode();
+        NoPotionFlow_HaltMode(shot);
+        BackpackFlow_HaltMode(shot);
     }
     else
     {

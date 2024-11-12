@@ -26,6 +26,7 @@ const {
     GoToTheNPC,
     HasMenuClose,
     GetServerName,
+    GetCharacterLv,
 
 } = require("./utils.js");
 
@@ -1337,6 +1338,7 @@ const GetCurrentDiamond = () =>
 {
     if (!OpenBackpack("gold"))
     {
+        console.log("打开背包失败，返回0");
         return 0;
     }
     const diamond = FindNumber("backpackProperty", [1122, 242, 65, 45]);
@@ -1362,9 +1364,11 @@ const GetSettlement = () =>
             if (!EnterMenuItemPage("trade"))
             {
                 console.log("进入交易所失败");
-                return false;
             }
-            RandomPress([338, 77, 73, 21]); //贩售明细
+            else
+            {
+                RandomPress([338, 77, 73, 21]); //贩售明细
+            }
             if (FindBlueBtn([1076, 644, 196, 64]))
             {
                 RandomPress([1103, 661, 148, 31]);
@@ -1397,7 +1401,7 @@ const GetSettlement = () =>
             PageBack();
         }
     }
-    let afterSettleDiamond = 0;
+    let afterSettleDiamond = beforeSettleDiamond;
     if (hadSettled)
     {
         afterSettleDiamond = GetCurrentDiamond();
@@ -1455,10 +1459,18 @@ const GetSettlement = () =>
     {
         config.game.serverName = GetServerName();
     }
-    if (!config.game.lv)
+    if (!config.game.lv || config.game.lv < 30)
     {
         console.log("等级信息错误");
-        config.game.lv = 0;
+        const lv = GetCharacterLv();
+        if (lv != null)
+        {
+            config.game.lv = lv;
+        }
+        else
+        {
+            config.game.lv = 0;
+        }
     }
 
     if (!config.game.combatPower)
@@ -1842,16 +1854,18 @@ const ComprehensiveImprovement_Instance = () =>
     {
         ExitHaltMode();
     }
-    PutOnSale();
-    console.log("副本模式下综合提升");
-
     const isBackpackFull = IsBackpackFull(captureScreen());
     if (isBackpackFull)
     {
         console.log("副本提升：背包是满的，需要先清理背包");
         WearEquipments();
         StrengthenEquipment();
+        LoginProps();
+        DecomposeEquipment();
     }
+    PutOnSale();
+    console.log("副本模式下综合提升");
+
     // first open all box
     OpenAllBox();
     if (!isBackpackFull && new Date().getHours() > 14)
@@ -1890,5 +1904,4 @@ module.exports = {
 // GetCommonAward();
 // GetEmail();
 // PutOnSale()
-// SortBackpackItem()
-
+// console.log(GetCharacterLv());
