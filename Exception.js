@@ -67,7 +67,11 @@ const NoPotionFlow = (shot) =>
     if (IsNoPotion(shot))
     {
         const delayTime = random(0, 32);
-
+        const deathBtn = DeathCheck();
+        if (deathBtn)
+        {
+            RandomPress([deathBtn.x - 50, deathBtn.y, 150, 20], 15);
+        }
         console.log("角色当前没有药水了 延迟" + delayTime + "s");
         Sleep(delayTime);
         if (IsBackpackFull())
@@ -97,6 +101,11 @@ const NoPotionFlow_HaltMode = (shot) =>
     {
         console.log("省电模式：没有药水");
         ExitHaltMode();
+        const deathBtn = DeathCheck();
+        if (deathBtn)
+        {
+            RandomPress([deathBtn.x - 50, deathBtn.y, 150, 20], 15);
+        }
         BuyPotion();
     }
 };
@@ -190,9 +199,6 @@ const DisconnectionFlow = (shot) =>
                 console.log("vpn is time out");
                 alert("time out", "需要更换ip");
             }
-            app.launch("com.lordnine");
-
-            ui.web.jsBridge.callHandler("ShowCountDownPopup", delayTime, (data) => console.log(data));
             Sleep(delayTime);
             LaunchGame();
             const config = ReadConfig();
@@ -373,6 +379,7 @@ const ResetConfig = () =>
             config.game.today = newDay;
             config.game.deathTime = 0;
             config.game.reconnectionTime = 0;
+            config.game.tradingTimes = 0;
 
             config.game.dailyInstance = false;
             config.game.dailyMission = false;
@@ -382,7 +389,7 @@ const ResetConfig = () =>
             config.game.dailyShop = false;
             config.game.friendshipShop = false;
             config.game.accepteDailyMission = false;
-
+            config.game.hangUpSecretLab = false;
             RewriteConfig(config);
         }
     }
@@ -658,6 +665,7 @@ const ExceptionFlow = () =>
 };
 
 module.exports = { ExceptionFlow };
+
 
 // ExceptionFlow()
 // DeathFlow_HaltMode(captureScreen())

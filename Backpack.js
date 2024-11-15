@@ -357,7 +357,7 @@ const WearBestSuit = () =>
                 RandomPress([hasBlueSuit.x, hasBlueSuit.y, 60, 60]);
                 let defense = FindNumber("combatPower", [67, 236, 54, 37]);
                 console.log("防御力加成为：" + defense);
-                if (currentDefense >= 0 && defense > currentDefense)
+                if (currentDefense >= 0 && defense >= currentDefense)
                 {
                     console.log("此时装品质更好，点击穿戴");
                     RandomPress([1064, 670, 133, 30]);
@@ -631,36 +631,63 @@ const WearEquipments = () =>
 
 const AutoReleaseSkill = () =>
 {
-    console.log("开始自动释放技能");
+    console.log("fn:开始自动释放技能");
+    let hadOpen = false;
     const skillBookPageImgList = LoadImgList("backpack/skillBookPage");
-    for (let i = 0; i < 30; i++)
+    for (let i = 0; i < 10; i++)
     {
         if (FindImgInList(skillBookPageImgList, [1010, 99, 93, 47]))
         {
             console.log("已打开技能书页面");
+            hadOpen = true;
             break;
         }
-        if (HasMenu())
+        else if (HasMenu())
         {
-            RandomPress([1096, 23, 18, 26]);
+            RandomPress([1096, 23, 18, 26], 3);
+        }
+        else
+        {
+            ClearPage();
         }
         Sleep();
     }
+    RecycleImgList(skillBookPageImgList);
 
+    if (!hadOpen)
+    {
+        console.log("打开技能书页面失败，退出");
+        return false;
+    }
+    //
     RandomPress([944, 309, 37, 34]);
     RandomPress([407, 650, 36, 32]);
     PullDownSkill([420, 650]);
     RandomPress([407, 650, 36, 32]);
-
+    //
     RandomPress([1011, 312, 30, 31]);
     RandomPress([470, 652, 33, 36]);
     PullDownSkill([480, 650]);
     RandomPress([470, 652, 33, 36]);
-
+    //
     RandomPress([1072, 305, 35, 35]);
     RandomPress([529, 653, 40, 32]);
     PullDownSkill([540, 650]);
     RandomPress([532, 653, 33, 35]);
+    //
+    const config = ReadConfig();
+    if (config.game.lv >= 45)
+    {
+        RandomPress([1133, 302, 32, 38]);
+        RandomPress([594, 650, 32, 36]);
+        PullDownSkill([610, 650]);
+        RandomPress([594, 650, 32, 36]);
+        //
+        RandomPress([946, 365, 32, 35]);
+        RandomPress([657, 651, 33, 37]);
+        PullDownSkill([670, 650]);
+        RandomPress([657, 651, 33, 37]);
+    }
 
     if (HasPopupClose([1208, 102, 38, 42]))
     {
@@ -670,22 +697,33 @@ const AutoReleaseSkill = () =>
 const CheckSkillAutoRelease = () =>
 {
     console.log("检查技能是否装备与自动是否");
-    const HaveThreeSkill = () =>
+    const HaveAllSkill = () =>
     {
+        let number = 3;
+        const config = ReadConfig();
+        if (config.game.lv >= 45)
+        {
+            number = 5;
+        }
+        console.log("检查技能个数为：" + number);
         const checkPos = [
             [390, 620, 90, 90],
             [450, 620, 90, 90],
-            [510, 620, 90, 90]
+            [510, 620, 90, 90],
+            [570, 620, 90, 90],
+            [630, 620, 90, 90],
         ];
-        const quickItem_skillImgList = [
-            LoadImgList("icon/quickItem_skill/firstSkill"),
-            LoadImgList("icon/quickItem_skill/secondSkill"),
-            LoadImgList("icon/quickItem_skill/thirdSkill")
-        ];
+
+        const quickItem_skillImgList = [];
+
+        for (let i = 0; i < 5; i++)
+        {
+            quickItem_skillImgList.push(LoadImgList(`icon/quickItem_skill/${i}`));
+        }
         const isReleaseSkill = [];
 
         let shot = captureScreen();
-        for (let i = 0; i < checkPos.length; i++)
+        for (let i = 0; i < number; i++)
         {
             let isAuto = FindImgInList(quickItem_skillImgList[i], checkPos[i], shot);
             if (isAuto)
@@ -699,7 +737,7 @@ const CheckSkillAutoRelease = () =>
         }
 
         quickItem_skillImgList.forEach(imgList => RecycleImgList(imgList));
-        if (isReleaseSkill.length == 3)
+        if (isReleaseSkill.length == number)
         {
             console.log("技能已全部开启自动释放");
             return true;
@@ -709,9 +747,10 @@ const CheckSkillAutoRelease = () =>
             return false;
         }
     };
-    let haveThreeSkill = HaveThreeSkill();
+    let haveThreeSkill = HaveAllSkill();
     if (haveThreeSkill)
     {
+        console.log("已学完所有技能，退出");
         return true;
     }
     else
@@ -720,7 +759,7 @@ const CheckSkillAutoRelease = () =>
         console.log("开始使用技能书与装备技能");
         OpenSkillBook();
         AutoReleaseSkill();
-        haveThreeSkill = HaveThreeSkill();
+        haveThreeSkill = HaveAllSkill();
         if (!haveThreeSkill)
         {
             console.log("需要去技能书商人那里购买技能书");

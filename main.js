@@ -1,15 +1,15 @@
-"ui";
 
-const { RewriteConfig, Sleep, specialConfig, LaunchGame, ReadConfig, } = require("./utils");
+const { RewriteConfig, Sleep, specialConfig, LaunchGame, ReadConfig,  } = require("./utils.js");
 const { ExceptionFlow } = require("./Exception");
 const { MainStoryFlow } = require("./MainStory.js");
 
 const { InstanceFlow } = require("./Instance.js");
 
-let isRunning = false;
-
-let mainThread;
-let launch_ui_config = null;
+const version = "2024/11/14 16:49";
+const versionColor = "#fce38a";
+let localConfig = null;
+let mainThread = null;
+let serverName = null;
 
 const GetCaptureScreenPermission = () =>
 {
@@ -29,34 +29,9 @@ const GetCaptureScreenPermission = () =>
     });
 };
 
-const StopScript = () => java.lang.System.exit(0);
+// const StopScript = () => java.lang.System.exit(0);
+const StopScript = () => engines.stopAllAndToast();
 
-function StartScript(uiData)
-{
-    console.log("JSBridge，页面数据为: " + uiData);
-
-    if (isRunning == true)
-    {
-        console.log("结束");
-        StopScript();
-        // engines.stopAllAndToast();
-        // exit();
-    }
-    else if (isRunning == false)
-    {
-        mainThread = threads.start(function ()
-        {
-            isRunning = true;
-            uiData = JSON.parse(uiData);
-            launch_ui_config = uiData;
-            specialConfig.gameMode = uiData.gameMode;
-            specialConfig.initGameMode = uiData.gameMode;
-            MainFlow(uiData);
-        }
-        );
-
-    }
-}
 
 const DownLoadApk = (downloadUrl, savePath) =>
 {
@@ -344,59 +319,123 @@ const UI = () =>
     }, 3000);
 
 };
+const uiFloaty = () =>
+{
+    const floatyWindow = floaty.window(
+        <card gravity="center" alpha="1" cardBackgroundColor="#71c9ce" cardCornerRadius="10">
+            <linear orientation="vertical" gravity="center">
+                <button id="start" h="40" w="120" color="#ffffff" bg="#a6e3e9" margin="15 10" >开始</button>
+                <text id="delayTime" h='0' gravity="center" color="#ffffff" textSize="40sp"></text>
+                <button id="update" color="#ffffff" w="120" h="40" margin="5 10" bg="#a6e3e9">更新</button>
+                <button id="stop" color="#ffffff" w="120" h="40" margin="5 10" bg="#a6e3e9">停止</button>
+                <linear orientation="horizontal" gravity="center">
+                    <text id="createCharacter" w="60" textSize="8" color="#ffffff" >创建角色</text>
+                    <text textSize="10" textStyle="italic" color={versionColor}>版本：{version}</text>
+                </linear>
+                <linear orientation="horizontal" gravity="center" >
+                    <text id="downloadAutoJs" textSize="10">下载autojs</text>
 
+                </linear>
+
+            </linear>
+
+
+        </card>
+    );
+
+    floatyWindow.setSize(400, 600);
+    floatyWindow.setPosition(185, 300);
+
+    const uiInterval = setInterval(() => { }, 1000);
+
+    if (localConfig == null)
+    {
+        localConfig = ReadConfig();
+        if (!localConfig.gameMode)
+        {
+            if (localConfig.game.vm || localConfig.game.diamond || localConfig.game.gameMode == "instance" || localConfig.ui.gameMode == "instance")
+            {
+                localConfig.gameMode = "instance";
+            }
+            else
+            {
+                localConfig.gameMode = "mainStory";
+            }
+        }
+        if (!localConfig.game.delayTime)
+        {
+            localConfig.game.delayTime = random(3, 1000);
+            RewriteConfig(localConfig);
+        }
+    }
+
+    specialConfig.gameMode = localConfig.gameMode;
+    specialConfig.initGameMode = localConfig.gameMode;
+
+    floatyWindow.createCharacter.click(() =>
+    {
+        dialogs.input("请输入区服编号", "999", (name) =>
+        {
+            console.log("serverName:" + name);
+            serverName = name;
+        });
+    });
+
+    floatyWindow.start.click(() =>
+    {
+        delayTime = localConfig.game.delayTime;
+        let count = delayTime;
+        floatyWindow.delayTime.attr("h", 100);
+        floatyWindow.start.attr("h", 0);
+        floatyWindow.delayTime.setText(`${count}s`);
+        const delayInterval = setInterval(() =>
+        {
+            ui.run(() =>
+            {
+                floatyWindow.delayTime.setText(`${count}s`);
+            });
+            console.log("delayTime:" + count);
+            count--;
+            if (count <= 0)
+            {
+                clearInterval(delayInterval);
+            }
+        }, 1000);
+
+        GetCaptureScreenPermission();
+
+        setTimeout(() =>
+        {
+            console.log("《《《 游戏开始 》》》");
+
+            mainThread = threads.start(MainFlow);
+
+            clearInterval(uiInterval);
+
+            floatyWindow.close();
+        }, (delayTime + 1) * 1000);
+    });
+    floatyWindow.update.click(UpdateScript);
+    floatyWindow.stop.click(StopScript);
+    floatyWindow.downloadAutoJs.click(DownloadAutoJs);
+};
 console.setGlobalLogConfig({
     "file": "/sdcard/LordNine/log.txt",
     "filePattern": "%d{dd日}%m%n"
 });
-// const react_icon = "file://img/react.png";
-const cat_icon = "file://img/cat.png";
-const floaty_window = floaty.window(
-    <frame gravity="center" id="switch" alpha="1" w="18" h="18" bg="#ffffff">
-        {/* <text id="delay" color="#ff5722" h="12" textSize="12sp">999</text> */}
 
-        <img src="{{cat_icon}}"></img>
-    </frame>
-);
-
-floaty_window.setPosition(0, 682);
-
-floaty_window.switch.click(function ()
+const stateFloaty = () =>
 {
-    console.log("floaty window is clicked!!!");
-    let alpha = floaty_window.switch.attr("alpha");
-    if (alpha == "1")
-    {
-        floaty_window.switch.attr("alpha", "0.3");
-        threads.shutDownAll();
-        console.log("main thread is stoped ");
-    }
-    else
-    {
-        floaty_window.switch.attr("alpha", "1");
-        mainThread = threads.start(function ()
-        {
-            isRunning = true;
-            MainFlow(launch_ui_config);
-        }
-        );
-    }
-});
-
-const Start = (uidata) =>
-{
-    LaunchGame();
-    const config = ReadConfig();
-    config.ui = uidata;
-    RewriteConfig(config);
-    if (uidata.createCharacter == true)
-    {
-        console.log("开始导入创建角色模块");
-        const { CreateCharacterFlow } = require("./CreateCharacter.js");
-        CreateCharacterFlow(uidata.serverName);
-    }
-    Sleep(3);
+    const floaty_window = floaty.window(
+        <frame gravity="center" id="switch" w="18" h="18" >
+            <text color="#ffffff">🎯</text>
+        </frame>
+    );
+    floaty_window.setPosition(0, 682);
+    floaty_window.switch.click(() => threads.shutDownAll());
 };
+
+
 
 const Update = () =>
 {
@@ -410,7 +449,7 @@ const Update = () =>
         }
         else if (specialConfig.gameMode == "instance")
         {
-            InstanceFlow(launch_ui_config);
+            InstanceFlow();
         }
         if (specialConfig.gameMode != specialConfig.initGameMode)
         {
@@ -426,12 +465,19 @@ const Update = () =>
     }
 };
 
-const MainFlow = (uidata) =>
+const MainFlow = () =>
 {
-    Start(uidata);
+    stateFloaty();
+
+    LaunchGame();
+    if (serverName != null)
+    {
+        console.log("开始导入创建角色模块");
+        const { CreateCharacterFlow } = require("./CreateCharacter.js");
+        CreateCharacterFlow(serverName);
+    }
     Update();
 };
 
-UI();
-
+uiFloaty()
 

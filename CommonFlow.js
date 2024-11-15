@@ -1,32 +1,29 @@
 
 const {
-    ReadImg, FindImg, RandomPress, Sleep, FindMultiColors, OpenMenu, CloseMenu, EnterMenuItemPage, CloseBackpack, ClearPage,
-    HasMenu, HasPageback, IsBackpackFull, HasTip,
+    ClickSkip, CloseMenu, CloseBackpack, ClearPage,
+    EnterMenuItemPage, ExitHaltMode,
+    FindBlueBtn, FindTipPoint, FindCheckMark, FindRedBtn, FindGoldBtn, FindGreenBtn, FindNumber, FindImgInList, FindFloatNumber, FindImg,
+    GetDateTime, GoToTheNPC, GetServerName, GetCharacterLv,
+    HasMenu, HasPageback, HasPopupClose, HasSkip, HasMenuClose, HasTip,
+    IsBackpackFull, IsHaltMode, IsInCity,
+    ReadImg, RandomPress, Sleep, FindMultiColors, OpenMenu,
+
     WaitUntilPageBack,
     SwipeSlowly,
-    FindBlueBtn, FindTipPoint, FindCheckMark, FindRedBtn, FindGoldBtn, FindGreenBtn, FindNumber, FindImgInList, FindFloatNumber,
-    HasPopupClose,
+
     PressBlank, WaitUntil,
     TapBlankToContinue, PullDownSkill, ReadConfig, RewriteConfig, PageBack,
 
     OpenBackpack,
     LoadImgList,
 
-
     RecycleImgList,
-    IsHaltMode,
-    ExitHaltMode,
-    HasSkip,
-    ClickSkip,
-    GetDateTime,
+
     ReadDealRecord, ReadAccountFile,
     UpdateDealRecord,
-    IsInCity,
+
     ReturnHome,
-    GoToTheNPC,
-    HasMenuClose,
-    GetServerName,
-    GetCharacterLv,
+
 
 } = require("./utils.js");
 
@@ -1090,6 +1087,7 @@ const IsExchangeUnLock = () =>
     if (!hadUnlocked)
     {
         console.log("交易所已解开");
+        GetSettlement();
         alert("成号", "交易所已解开");
         engines.stopAllAndToast();
     }
@@ -1348,7 +1346,7 @@ const GetCurrentDiamond = () =>
 
 const GetSettlement = () =>
 {
-    console.log("开始结算");
+    console.log("fn: 开始结算");
     const beforeSettleDiamond = GetCurrentDiamond();
     console.log("结算前钻石数量：" + beforeSettleDiamond);
     let hadSettled = false;
@@ -1401,11 +1399,13 @@ const GetSettlement = () =>
             PageBack();
         }
     }
+
     let afterSettleDiamond = beforeSettleDiamond;
     if (hadSettled)
     {
         afterSettleDiamond = GetCurrentDiamond();
     }
+
     console.log("结算后钻石：" + afterSettleDiamond);
 
     if (!beforeSettleDiamond)
@@ -1423,18 +1423,20 @@ const GetSettlement = () =>
     console.log("此次结算钻石为：" + settlement);
 
     //查看总钻石并保存数据至脚本
-    const dealRecord = ReadDealRecord();
-    const config = ReadConfig();
 
-    dealRecord.deal.push([GetDateTime(), settlement]);
+    const dealRecord = ReadDealRecord();
+    dealRecord[GetDateTime()] = settlement;
+    UpdateDealRecord(dealRecord);
 
     const date = new Date();
     const month = date.getMonth() + 1;
     const year = date.getFullYear();
 
-    const currentMonthData = dealRecord.deal.filter(dailyIncome =>
+    let monthlyIncome = 0;
+
+    const currentMonthData = Object.keys(dealRecord).filter(key =>
     {
-        let time = dailyIncome[0].split("_");
+        let time = key.split("_");
         if (year == time[0] && month == time[1])
         {
             return true;
@@ -1445,8 +1447,9 @@ const GetSettlement = () =>
         }
     });
 
-    let monthlyIncome = 0;
-    currentMonthData.map(item => monthlyIncome += item[1]);
+    currentMonthData.map(key => monthlyIncome += dealRecord[key]);
+
+    const config = ReadConfig();
 
     if (!config.game.vm)
     {
@@ -1481,8 +1484,10 @@ const GetSettlement = () =>
 
     if (!monthlyIncome)
     {
-        monthlyIncome = "null";
+        monthlyIncome = "0";
     }
+    config.game.monthlyIncome = monthlyIncome;
+
     const postData = {
         vm: config.game.vm,
         serverName: config.game.serverName,
@@ -1493,19 +1498,29 @@ const GetSettlement = () =>
         historyDealRecord: JSON.stringify(dealRecord)
     };
     console.log("postData: " + JSON.stringify(postData));
-    RewriteConfig(config);
-
-    UpdateDealRecord(dealRecord);
 
     try
     {
         console.log("发送数据给后台");
         const res = http.post("http://47.76.112.107:8001/devices", postData);
-        console.log(res);
+        if (res.statusCode == 200)
+        {
+            console.log("发送数据成功");
+            if (config.game.tradingTimes)
+            {
+                config.game.tradingTimes++;
+            }
+            else
+            {
+                config.game.tradingTimes = 1;
+            }
+        }
     } catch (error)
     {
         console.log(error);
     }
+    RewriteConfig(config);
+
 };
 
 const TradeGoods = () =>
@@ -1754,35 +1769,25 @@ const GetCommonAward = () =>
 };
 const DailyQuest = () =>
 {
+    console.log("fn:" + "每日固定操作：领取奖励与捐献购买");
     GetCommonAward();
     const config = ReadConfig();
-    const today = new Date().getDate();
-    if (config.game.today != today)
-    {
 
-        GuildDonation();
-        FriendshipDonation();
-        ShopBuy();
-        FriendShipShop();
-    }
-    else if (config.game.today == today)
+    if (!config.game.guildDonation)
     {
-        if (!config.game.guildDonation)
-        {
-            GuildDonation();
-        }
-        if (!config.game.friendshipDonation)
-        {
-            FriendshipDonation();
-        }
-        if (!config.game.dailyShop)
-        {
-            ShopBuy();
-        }
-        if (!config.game.friendshipShop)
-        {
-            FriendShipShop();
-        }
+        GuildDonation();
+    }
+    if (!config.game.friendshipDonation)
+    {
+        FriendshipDonation();
+    }
+    if (!config.game.dailyShop)
+    {
+        ShopBuy();
+    }
+    if (!config.game.friendshipShop)
+    {
+        FriendShipShop();
     }
 
 };
@@ -1790,7 +1795,7 @@ const ComprehensiveImprovement = () =>
 {
     console.log("开始综合提升");
 
-    if ((new Date().getTime() - lastComprehensiveImproveTime) / 3600000 < 1)
+    if ((new Date().getTime() - lastComprehensiveImproveTime) / 3600000 < 3)
     {
         console.log("提升结束: 两次提升间隔较短，暂不操作");
         return true;
@@ -1806,12 +1811,7 @@ const ComprehensiveImprovement = () =>
         DecomposeEquipment("total");
     }
 
-    GetPassAward();
-    GetActivitiesAward();
-    GetMonsterKnowledgeAward();
-    GetTravelLogAward();
-    GetAchievement();
-    GetEmail();
+    DailyQuest();
     // first open all box
     OpenAllBox();
 
@@ -1823,7 +1823,6 @@ const ComprehensiveImprovement = () =>
         LoginProps();
         DecomposeEquipment("total");
     }
-    ClearPage();
     IncreaseWeaponFeatures();
     UpgradeHolyRelics();
     StrengthenHorseEquipment();
@@ -1836,24 +1835,30 @@ const ComprehensiveImprovement = () =>
 
     UpgradeAbilityLevel();
 
-    let isExcuted = ShopBuy();
 
     WearBestSuit();
     CheckSkillAutoRelease();
     AddAttributePoint();
     console.log("综合提升结束");
     IsExchangeUnLock();
-    GuildDonation();
     lastComprehensiveImproveTime = new Date().getTime();
 
-    return isExcuted;
+    return true;
 };
 const ComprehensiveImprovement_Instance = () =>
 {
+    const config = ReadConfig();
+
+    if (config.game.tradingTimes >= 2)
+    {
+        console.log("今日已经提升两次，暂不提升");
+        return true;
+    }
     if (IsHaltMode())
     {
         ExitHaltMode();
     }
+
     const isBackpackFull = IsBackpackFull(captureScreen());
     if (isBackpackFull)
     {
@@ -1887,21 +1892,18 @@ const ComprehensiveImprovement_Instance = () =>
     WearBestSuit();
     AddAttributePoint();
 
+    if (config.game.lv > 45)
+    {
+        CheckSkillAutoRelease();
+    }
     console.log("副本：综合提升结束");
 
     return true;
 };
-
-
 
 module.exports = {
     ChangeAbility, GetEmail, GetAchievement, GetMonsterKnowledgeAward, LoginProps, DailyQuest,
     ShopBuy, ComprehensiveImprovement, ComprehensiveImprovement_Instance, StrengthenHorseEquipment, IncreaseWeaponFeatures, GuildDonation,
 };
 
-// GetSettlement();
-// DecomposeEquipment();
-// GetCommonAward();
-// GetEmail();
-// PutOnSale()
-// console.log(GetCharacterLv());
+// CheckSkillAutoRelease();

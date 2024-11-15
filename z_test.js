@@ -1,4 +1,3 @@
-const axios = require('axios');
 
 // "ui";
 // ui.layout(
@@ -35,6 +34,10 @@ const axios = require('axios');
 const { LoadImgList, HaveDailyMissionIcon, IsHaltMode, FindImgInList, FindNumber, ReadConfig, RewriteConfig, ReadDealRecord, ExitHaltMode,
     SwipeSlowly, Sleep, HasMenu, UpdateDealRecord,
     DeathCheck,
+    GetDateTime,
+    OpenBackpack,
+    ChangeGameSetting,
+    ClearPage,
 } = require("./utils.js");
 
 
@@ -235,7 +238,54 @@ const ExitHaltMode_1 = () =>
 };
 // ExitHaltMode_1();
 
-// console.log(JSON.stringify({ "deal": [["2024_10_8", 10], ["2024_10_8", 10], ["2024_11_8", 10]] }));
+const dealRecord = ReadDealRecord();
+dealRecord[GetDateTime()] = 12;
+UpdateDealRecord(dealRecord);
 
-// console.log(FindNumber("combatPower", [65, 239, 53, 30]));
-console.log(DeathCheck());
+const date = new Date();
+const month = date.getMonth() + 1;
+const year = date.getFullYear();
+
+let monthlyIncome = 0;
+
+const currentMonthData = Object.keys(dealRecord).filter(key =>
+{
+    let time = key.split("_");
+    if (year == time[0] && month == time[1])
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+});
+
+currentMonthData.map(key => monthlyIncome += dealRecord[key]);
+
+const config = ReadConfig();
+const postData = {
+    vm: "VM010245081080",
+    serverName: config.game.serverName,
+    lv: config.game.lv,
+    combatPower: config.game.combatPower,
+    diamond: 100,
+    monthlyIncome: monthlyIncome,
+    historyDealRecord: JSON.stringify(dealRecord)
+};
+// console.log("postData: " + JSON.stringify(postData));
+
+
+// try
+// {
+//     console.log("发送数据给后台");
+//     const res = http.post("http://10.6.130.129:8001/devices", postData);
+//     console.log(res.statusCode);
+// } catch (error)
+// {
+//     console.log(error);
+// }
+// const skillBookImgList = LoadImgList("backpack/skillBook");
+// console.log(FindImgInList(skillBookImgList, [76, 310, 79, 87]));
+// const unableToUse = LoadImgList("backpack/unableToUse");
+// console.log(FindImgInList(unableToUse, [71, 386, 45, 43]));

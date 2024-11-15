@@ -291,11 +291,11 @@ const ChangeGameSetting = () =>
     RandomPress([1127, 499, 103, 23]); //算绘低
     RandomPress([1128, 558, 106, 24]); //影格帧率30
     RandomPress([1136, 618, 99, 22]); //即使绘影
-
+    const characterNumber = LoadImgList("icon/oneTimeCheck/characterNumber");
     for (let i = 0; i < 6; i++)
     {
         SwipeSlowly([640, 600, 10, 10], [640, 300, 10, 10], 1);
-        if (FindNumber("combatPower", [1161, 614, 38, 33]) == 10)
+        if (FindImgInList(characterNumber, [241, 596, 194, 68]))
         {
             console.log("滑到底了");
             RandomPress([1127, 149, 103, 25]); //灯光品质 低
@@ -748,8 +748,11 @@ const FormatDateTime = (date, format) =>
     const year = date.getFullYear(); // 年份，例如 2023
     const month = date.getMonth() + 1; // 月份，0-11，0 表示一月，11 表示十二月
     const day = date.getDate(); // 日期，1-31
-    return `${year}${format}${month}${format}${day}`;
+    const hour = date.getHours();
+    const minute = date.getMinutes();
+    return `${year}${format}${month}${format}${day}${format}${hour}${format}${minute}`;
 };
+
 const GetDateTime = () => FormatDateTime(new Date());
 const GetVerificationCode = () =>
 {
@@ -1373,6 +1376,7 @@ const ReturnHome = () =>
         }
         sleep(1000);
     }
+    return false;
 };
 const SwipeSlowly = (startRegion, endRegion, sec) =>
 {
@@ -1417,8 +1421,8 @@ const ReadConfig = () =>
 
     }
 };
-const dealFile = "/sdcard/LordNine/dailyDeal.json";
-const defaultDeal = { deal: [] };
+const dealFile = "/sdcard/LordNine/dealRecord.json";
+const defaultDeal = {};
 const ReadDealRecord = () =>
 {
     const isCreate = files.createWithDirs(dealFile);
@@ -1544,7 +1548,7 @@ const ChangeHaltModeTime = () =>
  * @param {*} pos [x, y]
  */
 
-const PullDownSkill = (pos) => { gesture(500, pos, [pos[0], pos[1] + 30]); Sleep(); };
+const PullDownSkill = (pos) => { gesture(500, pos, [pos[0] + random(0, 5), pos[1] + 30 + random(0, 5)]); Sleep(); };
 
 /** 
 * @param {*} type "grocery" "skill" "equipment" "friend" "exchange" "mount" "stockroom"
@@ -1596,32 +1600,46 @@ const BuySkillBook = (totalBuy) =>
 {
     totalBuy = totalBuy || false;
     const skillBookImgList = LoadImgList("backpack/skillBook");
-
+    const unableToUseImgList = LoadImgList("backpack/unableToUse");
     const config = ReadConfig();
     let maxSkillBook = 2;
     if (!config.game["lv"])
     {
         maxSkillBook = 2;
     }
-    else if (config.game["lv"] > 33)
+    else if (config.game["lv"] > 33 && config.game["lv"] < 45)
     {
         maxSkillBook = 3;
+    }
+    else if (config.game["lv"] >= 45)
+    {
+        maxSkillBook = 7;
     }
     if (totalBuy == true)
     {
         maxSkillBook = 3;
     }
+    console.log("最大购买技能书种类：" + maxSkillBook);
     for (let i = 0; i < maxSkillBook; i++)
     {
         let hasSkillBook = FindImgInList(skillBookImgList, [72, 69 + i * 79, 82, 92]);
+        let isUnable = FindImgInList(unableToUseImgList, [66, 65 + i * 79, 48, 51]);
         if (hasSkillBook)
         {
-            RandomPress([hasSkillBook.x + 50, hasSkillBook.y, 100, 30]);
-            if (FindBlueBtn([645, 544, 179, 58]))
+            if (isUnable)
             {
-                RandomPress([664, 558, 142, 30]);
-                console.log("购买技能书成功");
+                console.log("无法使用此技能书");
             }
+            else
+            {
+                RandomPress([165, 89 + i * 79, 139, 47]);
+                if (FindBlueBtn([645, 544, 179, 58]))
+                {
+                    RandomPress([664, 558, 142, 30]);
+                    console.log("购买技能书成功");
+                }
+            }
+
         }
         Sleep();
     }
@@ -1796,6 +1814,4 @@ module.exports = {
     UpdateDealRecord,
     WaitUntil, WaitUntilMenu, WaitUntilPageBack, WaitUntilFindColor,
 };
-
-
 

@@ -1,9 +1,6 @@
 {
   "abis": [
-    "arm64-v8a",
-    "armeabi-v7a",
-    "x86",
-    "x86_64"
+    "arm64-v8a"
   ],
   "assets": [
     {
@@ -17,24 +14,25 @@
     "build_number": 0,
     "build_time": 0
   },
-  "useFeatures": [ ],
+  "useFeatures": [],
   "icon": null,
   "ignoredDirs": [
     "build"
   ],
   "encrypt-code": false,
   "launchConfig": {
-    "displaySplash": true,
+    "displaySplash": false,
     "hideAccessibilityServices": false,
     "hideLauncher": false,
-    "hideLogs": false,
-    "stableMode": false,
+    "hideLogs": true,
+    "stableMode": true,
     "volumeUpcontrol": false,
     "permissions": [
-      "accessibility_services"
+      "accessibility_services",
+      "draw_overlay"
     ],
     "serviceDesc": "使脚本自动操作(点击、长按、滑动等)所需，若关闭则只能执行不涉及自动操作的脚本。",
-    "splashIcon": null,
+    "splashIcon": "res/splashIcon.png",
     "splashText": "Powered by Autoxjs.com"
   },
   "libs": [
@@ -48,12 +46,17 @@
   "outputPath": "/storage/emulated/0/脚本/LordNine/build",
   "packageName": "com.lordnine",
   "projectDirectory": "/storage/emulated/0/脚本/LordNine",
-  "scripts": { },
+  "scripts": {},
   "signingConfig": {
-    "alias": "123456",
-    "keystore": "/storage/emulated/0/脚本/.keyStore/AutoX.keystore"
+    "alias": "lordnine",
+    "keystore": "/storage/emulated/0/脚本/.keyStore/lordnine.bks",
+    "v1Sign": true,
+    "v2Sign": true,
+    "v3Sign": true,
+    "v4Sign": false
   },
   "sourcePath": "/storage/emulated/0/脚本/LordNine/main.js",
+  "useNodejs": false,
   "versionCode": 1,
   "versionName": "1.0.0"
 }
