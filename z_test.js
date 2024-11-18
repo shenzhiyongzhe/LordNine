@@ -38,6 +38,10 @@ const { LoadImgList, HaveDailyMissionIcon, IsHaltMode, FindImgInList, FindNumber
     OpenBackpack,
     ChangeGameSetting,
     ClearPage,
+    FindFloatNumber,
+    HasPopupClose,
+    IsLocked,
+    FindBlueBtn,
 } = require("./utils.js");
 
 
@@ -221,58 +225,40 @@ function 关闭应用(packageName)
 //     console.log(error);
 // }
 
-const ExitHaltMode_1 = () =>
-{
-    console.log("退出节电模式");
-    for (let i = 0; i < 3; i++)
-    {
-        SwipeSlowly([556, 366, 5, 10], [1050, 366, 5, 10], 2);
-        Sleep(6);
-        if (HasMenu())
-        {
-            return true;
-        }
-    }
-    console.log("退出节电模式失败");
-    return false;
-};
-// ExitHaltMode_1();
 
-const dealRecord = ReadDealRecord();
-dealRecord[GetDateTime()] = 12;
-UpdateDealRecord(dealRecord);
 
-const date = new Date();
-const month = date.getMonth() + 1;
-const year = date.getFullYear();
 
-let monthlyIncome = 0;
+// const date = new Date();
+// const month = date.getMonth() + 1;
+// const year = date.getFullYear();
 
-const currentMonthData = Object.keys(dealRecord).filter(key =>
-{
-    let time = key.split("_");
-    if (year == time[0] && month == time[1])
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-});
+// let monthlyIncome = 0;
 
-currentMonthData.map(key => monthlyIncome += dealRecord[key]);
+// const currentMonthData = Object.keys(dealRecord).filter(key =>
+// {
+//     let time = key.split("_");
+//     if (year == time[0] && month == time[1])
+//     {
+//         return true;
+//     }
+//     else
+//     {
+//         return false;
+//     }
+// });
 
-const config = ReadConfig();
-const postData = {
-    vm: "VM010245081080",
-    serverName: config.game.serverName,
-    lv: config.game.lv,
-    combatPower: config.game.combatPower,
-    diamond: 100,
-    monthlyIncome: monthlyIncome,
-    historyDealRecord: JSON.stringify(dealRecord)
-};
+// currentMonthData.map(key => monthlyIncome += dealRecord[key]);
+
+// const config = ReadConfig();
+// const postData = {
+//     vm: "VM010245081080",
+//     serverName: config.game.serverName,
+//     lv: config.game.lv,
+//     combatPower: config.game.combatPower,
+//     diamond: 100,
+//     monthlyIncome: monthlyIncome,
+//     historyDealRecord: JSON.stringify(dealRecord)
+// };
 // console.log("postData: " + JSON.stringify(postData));
 
 
@@ -288,4 +274,13 @@ const postData = {
 // const skillBookImgList = LoadImgList("backpack/skillBook");
 // console.log(FindImgInList(skillBookImgList, [76, 310, 79, 87]));
 // const unableToUse = LoadImgList("backpack/unableToUse");
-// console.log(FindImgInList(unableToUse, [71, 386, 45, 43]));
+// console.log(FindImgInList(unableToUse, [922, 268, 46, 53]));
+// const type = "propsBox";
+// const PropsImgList = LoadImgList(`backpack/box/${type}`);
+// console.log(FindImgInList(PropsImgList, [990, 156, 68, 68]));
+// let curCombatPower = FindNumber("combatPower", [1141, 535, 115, 47]);
+// console.log("当前战力为：" + curCombatPower);
+// SwipeSlowly([670, 680, 5, 2], [670, 640, 5, 3], 1); let requireCombatPower = FindNumber("combatPower", [1143, 494, 108, 45]);
+// console.log(curCombatPower + "  >>>  " + requireCombatPower);
+
+console.log(FindBlueBtn([539, 647, 204, 66]));

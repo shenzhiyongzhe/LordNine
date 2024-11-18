@@ -1,13 +1,12 @@
 
-const { RewriteConfig, Sleep, specialConfig, LaunchGame, ReadConfig,  } = require("./utils.js");
+const { RewriteConfig, Sleep, specialConfig, LaunchGame, ReadConfig, } = require("./utils.js");
 const { ExceptionFlow } = require("./Exception");
 const { MainStoryFlow } = require("./MainStory.js");
 
 const { InstanceFlow } = require("./Instance.js");
 
-const version = "2024/11/14 16:49";
+const version = "2024/11/18 15:59";
 const versionColor = "#fce38a";
-let localConfig = null;
 let mainThread = null;
 let serverName = null;
 
@@ -348,29 +347,28 @@ const uiFloaty = () =>
 
     const uiInterval = setInterval(() => { }, 1000);
 
-    if (localConfig == null)
-    {
-        localConfig = ReadConfig();
-        if (!localConfig.gameMode)
-        {
-            if (localConfig.game.vm || localConfig.game.diamond || localConfig.game.gameMode == "instance" || localConfig.ui.gameMode == "instance")
-            {
-                localConfig.gameMode = "instance";
-            }
-            else
-            {
-                localConfig.gameMode = "mainStory";
-            }
-        }
-        if (!localConfig.game.delayTime)
-        {
-            localConfig.game.delayTime = random(3, 1000);
-            RewriteConfig(localConfig);
-        }
-    }
+    const config = ReadConfig();
 
-    specialConfig.gameMode = localConfig.gameMode;
-    specialConfig.initGameMode = localConfig.gameMode;
+    if (!config.gameMode)
+    {
+        if (config.game.vm)
+        {
+            config.gameMode = "instance";
+        }
+        else
+        {
+            config.gameMode = "mainStory";
+        }
+        RewriteConfig(config);
+    }
+    if (!config.delayTime)
+    {
+        config.delayTime = random(3, 1000);
+        RewriteConfig(config);
+
+    }
+    specialConfig.gameMode = config.gameMode;
+    specialConfig.initGameMode = config.gameMode;
 
     floatyWindow.createCharacter.click(() =>
     {
@@ -383,7 +381,7 @@ const uiFloaty = () =>
 
     floatyWindow.start.click(() =>
     {
-        delayTime = localConfig.game.delayTime;
+        delayTime = config.delayTime;
         let count = delayTime;
         floatyWindow.delayTime.attr("h", 100);
         floatyWindow.start.attr("h", 0);
@@ -407,7 +405,7 @@ const uiFloaty = () =>
         setTimeout(() =>
         {
             console.log("《《《 游戏开始 》》》");
-
+            console.log("游戏模式为：" + specialConfig.gameMode);
             mainThread = threads.start(MainFlow);
 
             clearInterval(uiInterval);

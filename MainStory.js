@@ -4,24 +4,25 @@ const {
     BuySkillBook,
     ClearPage, ClickSkip, CloseMenu, CloseBackpack, ChangeRecoverPotionPercentToMax, ChangeGameSetting,
     DeathCheck,
-    FindMultiColors,
+
     ExitHaltMode, EnterMenuItemPage,
-    FindBlueBtn, FindNumber, FindRedBtn, FindGoldBtn, FindImgInList, FindImg,
+    FindBlueBtn, FindNumber, FindRedBtn, FindGoldBtn, FindImgInList, FindImg, FindMultiColors,
     GetCharacterLv,
-    HasMenu, HasPageback, HasBackpackMenuClose, HasSkip, HasPopupClose, HaveMainStoryIcon, HasTransformIcon, HaveDailyMissionIcon,
+    HasMenu, HasPageback, HasBackpackMenuClose, HasSkip, HasPopupClose, HaveMainStoryIcon, HasTransformIcon, HaveDailyMissionIcon, HaveFinished,
     IsHaltMode, IsInCity, IsMoving, IsInQuest, IsAuto_active, IsAuto_inactive,
     LoadImgList,
     OpenBackpack, OpenBackpackMenu, OpenMenu,
     PullDownSkill, PageBack, PressBlank,
 
-    WaitUntil, WaitUntilPageBack, WaitUntilMenu,
     ReadConfig, RewriteConfig, RecycleImgList, ReturnHome, ReadImg, RandomPress,
     SwipeSlowly, Sleep,
-    HaveFinished,
+    TapTip,
+    WaitUntil, WaitUntilPageBack, WaitUntilMenu,
+
 
 } = require("./utils.js");
 
-const { TipColorList, NextColorList, TalkBubbleColorList, SpeedUpOffColorList, } = require("./Color/MainStoryColorList.js");
+const { NextColorList, TalkBubbleColorList, SpeedUpOffColorList, } = require("./Color/MainStoryColorList.js");
 
 const { WearEquipments, StrengthenEquipment, OpenAllBox, DecomposeEquipment, AutoReleaseSkill, AutoPotion, BuyPotion } = require("./Backpack.js");
 
@@ -34,16 +35,7 @@ let storyMode = "mainMission";
 
 let lastTransformationTime = 1726208812345;
 
-let tapTipIndex = 0;
 
-const CommonTipList = [
-    [720, 387, 96, 22], //药水 100
-    [705, 578, 58, 26], //药水 确认
-    [907, 132, 35, 34],//游戏开始的第一个tip
-    [807, 142, 21, 29],//游戏开始的第一个紫色问好
-    [1212, 23, 26, 28], //菜单
-    [1149, 116, 26, 29], //核萌
-];
 
 let challengeBossTimeArray = [];
 
@@ -99,12 +91,7 @@ const IsMissionComplete = (shot, region) =>
 
 };
 const TapMainStory = () => RandomPress([905, 131, 224, 36], 3);
-const ArrowImgList = {
-    "up": LoadImgList("icon/arrow/up"),
-    "right": LoadImgList("icon/arrow/right"),
-    "down": LoadImgList("icon/arrow/down"),
-    "left": LoadImgList("icon/arrow/left"),
-};
+
 
 const MainStoryBranchImgList = {
     manufacturePage: LoadImgList("icon/beginner/growthMission/manufacturePage"),
@@ -142,66 +129,11 @@ const IsContinuouslyChallengeBoss = () =>
         return false;
     }
 };
-// 点击提示
-const HasTip = () => FindMultiColors(TipColorList, [19, 17, 1238, 688]);
-const TapArrow = () =>
-{
-    const region = [0, 0, 1280, 720];
-    const shot = captureScreen();
-    let hadFindArrow = false;
-    for (let key in ArrowImgList)
-    {
-        let hasArrow = FindImgInList(ArrowImgList[key], region, shot);
-        if (hasArrow)
-        {
-            hadFindArrow = true;
-            console.log("箭头方向: " + key + " " + "位置：" + hasArrow);
-            const position = hasArrow;
-            if (key == "up")
-            {
-                RandomPress([position.x - 5, position.y - 48, 10, 30]);
-            }
-            else if (key == "down")
-            {
-                RandomPress([position.x, position.y + 20, 10, 10]);
-            }
-            else if (key == "left")
-            {
-                RandomPress([position.x - 20, position.y, 10, 10]);
-            }
-            else if (key == "right")
-            {
-                RandomPress([position.x + 10, position.y, 30, 10]);
-            }
-        }
-    }
-    if (!hadFindArrow)
-    {
-        console.log("未发现箭头。");
-        if (tapTipIndex < CommonTipList.length)
-        {
-            RandomPress(CommonTipList[tapTipIndex]);
-            tapTipIndex++;
-        }
-        else
-        {
-            RandomPress([720, 387, 96, 22]);
-            tapTipIndex = 0;
-        }
-        console.log("按顺序点击常见卡点提示,当前索引为：" + tapTipIndex);
-    }
-    return hadFindArrow;
-};
 
-const TapTip = () =>
-{
-    const hasTip = HasTip();
-    if (hasTip)
-    {
-        console.log("提示: " + hasTip);
-        TapArrow();
-    }
-};
+
+
+
+
 
 const HasNext = (shot) => { shot = shot || captureScreen(); return FindMultiColors(NextColorList, [1219, 670, 31, 31], shot); };
 const ClickNext = (shot) => RandomPress([1152, 678, 53, 14], shot);
@@ -424,14 +356,14 @@ const DeathFlow = (message) =>
         if (FindBlueBtn([524, 581, 245, 94])) 
         {
             Sleep(3);
-            RandomPress([572, 611, 141, 29]);
+            RandomPress([572, 611, 141, 29], 10);
             console.log("死亡流程: 确认死亡");
             break;
         }
         if (FindBlueBtn([536, 415, 204, 77]))
         {
             Sleep(3);
-            RandomPress([568, 437, 151, 30]);
+            RandomPress([568, 437, 151, 30], 10);
             console.log("死亡流程: 确认死亡");
             break;
         }

@@ -20,6 +20,7 @@ const { FindMultiColors, RandomPress, HasMenu, HasMenuClose, WaitUntilPageBack, 
     HasPageback,
     EnterHaltMode,
     ReturnHome,
+    specialConfig,
 } = require("./utils");
 const { ComprehensiveImprovement_Instance, DailyQuest, LoginProps } = require("./CommonFlow");
 const { UnAutoPotion, DecomposeEquipment } = require("./Backpack");
@@ -154,12 +155,28 @@ const HangUpInstance = () =>
         }
         RandomPress(instancePos[i]);
         let canEnterInstance = CanEnterInstance();
+        let hadPressSecondLevel = false;
         if (canEnterInstance)
         {
+            if (curCombatPower > 23500)
+            {
+                console.log("战力大于23500，点击第二层");
+                RandomPress([990, 361, 55, 49]);
+                hadPressSecondLevel = true;
+            }
             let requireCombatPower = FindNumber("combatPower", [1143, 494, 108, 45]);
-            console.log(curCombatPower + "  >>>  " + requireCombatPower);
+            if (hadPressSecondLevel)
+            {
+                if (curCombatPower < requireCombatPower)
+                {
+                    RandomPress([700, 361, 49, 51]); //first level
+                    requireCombatPower = FindNumber("combatPower", [1143, 494, 108, 45]);
+                }
+            }
+
             if (curCombatPower > requireCombatPower)
             {
+                console.log(curCombatPower + "  >>>  " + requireCombatPower);
                 PressEnterInstanceBtn();
                 lastTimeEnterInstance = new Date().getTime();
                 instance_mode = "hangUpInstance";
@@ -198,8 +215,6 @@ const HangUpInstance = () =>
     }
     config.game.combatPower = curCombatPower;
     RewriteConfig(config);
-
-    // ComprehensiveImprovement_Instance();
 
     return false;
 };
@@ -427,12 +442,40 @@ const DailyMission = () =>
         const hasEnter = EnterMenuItemPage("mission");
         if (!hasEnter)
         {
-            console.log("进入每日任务页面失败");
+            console.log("进入每日任务页面 失败");
+            if (IsLocked([1100, 199, 52, 66]))
+            {
+                console.log("每日任务暂未解锁，跳过daily mission");
+
+                config.game.accepteDailyMission = true;
+
+                config.gameMode = "mainStory";
+                specialConfig.gameMode = "instance";
+                specialConfig.initGameMode = "mainStory";
+                RewriteConfig(config);
+                instance_mode = "hangUpWild";
+            }
             return false;
         }
-        const missionMap = [25, 181, 188, 27];
-        RandomPress(missionMap);
-        AcceptDailyMission();
+        else
+        {
+            const missionMap = [25, 181, 188, 27];
+            RandomPress(missionMap);
+            if (!FindBlueBtn([1071, 647, 208, 61]))
+            {
+                console.log("地图未解锁，主线错误");
+                config.game.accepteDailyMission = true;
+
+                config.gameMode = "mainStory";
+                specialConfig.gameMode = "instance";
+                specialConfig.initGameMode = "mainStory";
+                RewriteConfig(config);
+                return false;
+            }
+            AcceptDailyMission();
+
+        }
+
     }
 
     ClickDailyMission();
@@ -664,36 +707,41 @@ const HangUpWild = () =>
         HangUpSecretLab();
         return true;
     }
+    else
+    {
+        if ((new Date().getTime() - config.game.hangUpSecretLabTime) / 3600000 < 4)
+        {
+            console.log("实验室挂机时间小于4小时，重新回到实验室挂机。");
+            HangUpSecretLab();
+            return true;
+        }
+    }
     if (mapName == null)
     {
-        if (config.game.vm)
+        const combatPower = config.game.combatPower;
+        if (combatPower < 18000)
         {
-            if (config.game.combatPower >= 18000 && config.game.combatPower < 22000)
-            {
-                mapName = "11";
-            }
-            else if (config.game.combatPower > 22000)
-            {
-                mapName = "11";
-            }
+            mapName = [0, 3, random(0, 2)];
+            console.log("去被污染的盆地挂机");
+        }
+        else if (combatPower >= 18000 && combatPower < 26000)
+        {
+            mapName = [1, 1, random(0, 2)];
+            console.log("去新月湖挂机");
+        }
+        else if (config.game.combatPower >= 26000)
+        {
+            mapName = [1, 2, random(0, 2)];
+            console.log("去暮光之丘挂机");
         }
         else
         {
-            mapName = "03";
+            console.log("@异常情况，默认去被污染的土地挂机");
+            mapName = [0, 3, random(0, 2)];
         }
+
     }
 
-    console.log("进入的地图名称为，mapname：" + mapName);
-    if (mapName == undefined || mapName == "03")
-    {
-        mapName = [0, 3, random(0, 2)];
-        console.log("去被污染的盆地挂机");
-    }
-    else if (mapName == "11")
-    {
-        mapName = [1, 1, random(0, 2)];
-        console.log("去新月湖挂机");
-    }
     const hasOpenMap = OpenMap();
     if (!hasOpenMap)
     {
@@ -892,7 +940,7 @@ const IsTimeToComprehensive = () =>
     {
         const config = ReadConfig();
 
-        console.log("配置文件没有交易时间，随机生成交易时间");
+        console.log("随机生成交易时间");
         tradingHours = [
             [random(0, 3), random(0, 59)],
             [random(4, 7), random(0, 59)],
@@ -901,7 +949,7 @@ const IsTimeToComprehensive = () =>
             [random(16, 19), random(0, 59)],
             [random(20, 23), random(0, 59)],
         ];
-        config.game.dailyTradingHours = tradingHours;
+        config.dailyTradingHours = tradingHours;
 
         RewriteConfig(config);
     }
@@ -987,12 +1035,8 @@ const InstanceFlow = () =>
 
 module.exports = { InstanceFlow };
 
-// HangUpSecretLab();
-
-// HangUpInstance()
 
 
-// console.log(HasTransformScroll_secretLab())
 
 
 

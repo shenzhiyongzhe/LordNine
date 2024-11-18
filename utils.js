@@ -6,31 +6,21 @@ const { PagebackColorList, MenuColorList, MenuCloseColorList, BlueBtnColorList, 
 } = require("./Color/Color.js");
 const { TipColorList, } = require("./Color/MainStoryColorList.js");
 
-const tradingHours = [[random(0, 11), random(0, 59)], [random(12, 23), random(0, 59)]];
 
 const defaultConfig = {
-    ui: {
-        createCharacter: "false",
-        serverName: "00",
-        gameMode: "mainStory",
-        monsterMapList: [],
-        hangupMap: "03"
-    },
+    gameMode: "mainStory",
+    delayTime: random(0, 600),
     game: {
-        "deathTime": 0,
         "today": 0,
+        "deathTime": 0,
         "reconnectionTime": 0,
         "lv": 0,
         "autoPotion": false,
-
-        "dailyTradingHours": tradingHours,
         "gulidDonation": false,
-
         "monthlyIncome": 0,
         "combatPower": 1000,
-
-        "delayTime": random(0, 600),
-
+    },
+    daily: {
         "dailyInstance": false,
         "dailyMission": false,
         "dailyShop": false,
@@ -40,6 +30,7 @@ const defaultConfig = {
     }
 };
 
+let mirrorConfig = null;
 let specialConfig = {
     gameMode: null,
     initGameMode: null,
@@ -885,7 +876,6 @@ const HasSkip = () =>
     }
     return false;
 };
-const HasTip = () => FindMultiColors(TipColorList, [19, 17, 1238, 688]);
 const HollowPress = (hollowRegion) =>
 {
     const [x, y, w, h] = hollowRegion;
@@ -1391,35 +1381,41 @@ const SwipeSlowly = (startRegion, endRegion, sec) =>
 };
 const ReadConfig = () =>
 {
-    const isCreate = files.createWithDirs(configFile);
-    if (isCreate)
+    if (!mirrorConfig)
     {
-        files.write(configFile, JSON.stringify(defaultConfig, null, 2));
-        return defaultConfig;
-    }
-    else
-    {
-        try
+        console.log("fn: 读取配置");
+        let config = null;
+        const isCreate = files.createWithDirs(configFile);
+        if (isCreate)
         {
-            const config = files.read(configFile);
-            if (Object.keys(config).length === 0)
-            {
-                console.log('JSON文件为空，重新生成默认配置文件');
-                files.write(configFile, JSON.stringify(defaultConfig, null, 2));
-                return defaultConfig;
-            } else
-            {
-                return JSON.parse(config);
-            }
-        } catch (error)
-        {
-            console.log("读取文件失败：" + error);
             files.write(configFile, JSON.stringify(defaultConfig, null, 2));
-            return defaultConfig;
+            config = defaultConfig;
         }
-
-
+        else
+        {
+            try
+            {
+                config = files.read(configFile);
+                if (Object.keys(config).length === 0)
+                {
+                    console.log('JSON文件为空，重新生成默认配置文件');
+                    files.write(configFile, JSON.stringify(defaultConfig, null, 2));
+                    config = defaultConfig;
+                } else
+                {
+                    config = JSON.parse(config);
+                }
+            } catch (error)
+            {
+                console.log("读取文件失败：" + error);
+                files.write(configFile, JSON.stringify(defaultConfig, null, 2));
+                config = defaultConfig;
+            }
+        }
+        mirrorConfig = config;
     }
+    return mirrorConfig;
+
 };
 const dealFile = "/sdcard/LordNine/dealRecord.json";
 const defaultDeal = {};
@@ -1478,23 +1474,13 @@ const UpdateDealRecord = (dealRecord) =>
     dealRecord = JSON.stringify(dealRecord, null, 2);
     files.write(dealFile, dealRecord);
 };
-// 自定义的格式化函数
-function customReplacer(key, value)
-{
-    if (Array.isArray(value))
-    {
-        // 数组内的元素不换行
-        return JSON.stringify(value);
-    }
-    return value;
-}
+
 
 const RewriteConfig = (config) =>
 {
-    config = JSON.stringify(config, null, 2);
-    files.write(configFile, config);
-    console.log("更新配置: " + config);
-
+    console.log("fn: 更新配置");
+    mirrorConfig = config;
+    files.write(configFile, JSON.stringify(config, null, 2));
 };
 const RestartGame = (packageName, time) =>
 {
@@ -1769,6 +1755,7 @@ const EnterMenuItemPage = (item) =>
         console.log("进入页面失败，退出");
         return false;
     }
+    Sleep(1);
     return true;
 };
 const GetCharacterLv = () =>
@@ -1785,13 +1772,82 @@ const GetCharacterLv = () =>
     return lv;
 };
 
-const UploadData = (data) =>
+const ArrowImgList = {
+    "up": LoadImgList("icon/arrow/up"),
+    "right": LoadImgList("icon/arrow/right"),
+    "down": LoadImgList("icon/arrow/down"),
+    "left": LoadImgList("icon/arrow/left"),
+};
+const HasTip = () => FindMultiColors(TipColorList, [19, 17, 1238, 688]);
+const TapTip = () =>
 {
-    console.log("上传数据: " + JSON.stringify(data));
-    http.post("http:10.6.130.129:5173/devices/", data);
+    const hasTip = HasTip();
+    if (hasTip)
+    {
+        console.log("提示: " + hasTip);
+        TapArrow();
+    }
+};
+let tapTipIndex = 0;
+
+const CommonTipList = [
+    [720, 387, 96, 22], //药水 100
+    [705, 578, 58, 26], //药水 确认
+    [907, 132, 35, 34],//游戏开始的第一个tip
+    [807, 142, 21, 29],//游戏开始的第一个紫色问好
+    [1212, 23, 26, 28], //菜单
+    [1149, 116, 26, 29], //核萌
+];
+const TapArrow = () =>
+{
+    const region = [0, 0, 1280, 720];
+    const shot = captureScreen();
+    let hadFindArrow = false;
+    for (let key in ArrowImgList)
+    {
+        let hasArrow = FindImgInList(ArrowImgList[key], region, shot);
+        if (hasArrow)
+        {
+            hadFindArrow = true;
+            console.log("箭头方向: " + key + " " + "位置：" + hasArrow);
+            const position = hasArrow;
+            if (key == "up")
+            {
+                RandomPress([position.x - 5, position.y - 48, 10, 30]);
+            }
+            else if (key == "down")
+            {
+                RandomPress([position.x, position.y + 20, 10, 10]);
+            }
+            else if (key == "left")
+            {
+                RandomPress([position.x - 20, position.y, 10, 10]);
+            }
+            else if (key == "right")
+            {
+                RandomPress([position.x + 10, position.y, 30, 10]);
+            }
+        }
+    }
+    if (!hadFindArrow)
+    {
+        console.log("未发现箭头。");
+        if (tapTipIndex < CommonTipList.length)
+        {
+            RandomPress(CommonTipList[tapTipIndex]);
+            tapTipIndex++;
+        }
+        else
+        {
+            RandomPress([720, 387, 96, 22]);
+            tapTipIndex = 0;
+        }
+        console.log("按顺序点击常见卡点提示,当前索引为：" + tapTipIndex);
+    }
+    return hadFindArrow;
 };
 
-
+const StopScript = () => java.lang.System.exit(0);
 
 module.exports = {
     specialConfig,
@@ -1806,11 +1862,11 @@ module.exports = {
     IsMoving, IsBackpackFull, IsInCity, IsHaltMode, IsLocked, IsInQuest, IsAuto_active, IsAuto_inactive, IsNoPotion,
     LoadImgList, LaunchGame,
     MatchTemplateList,
-    TapBlankToContinue,
+    TapBlankToContinue, TapTip,
     OpenMenu, OpenBackpack, OpenBackpackMenu,
     PageBack, PressBlank, PullDownSkill, PressToAuto,
     RandomPress, ReadImg, ReturnHome, RestartGame, RecycleImgList, ReadConfig, RewriteConfig, ReadDealRecord, ReadAccountFile,
-    Sleep, SwipeSlowly,
+    Sleep, SwipeSlowly, StopScript,
     UpdateDealRecord,
     WaitUntil, WaitUntilMenu, WaitUntilPageBack, WaitUntilFindColor,
 };

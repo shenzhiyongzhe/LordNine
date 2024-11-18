@@ -46,6 +46,9 @@ const BackpackItemDetailColorList = {
         ["#202c43", [[22, 1, "#202c43"], [44, 1, "#202c43"], [74, 7, "#202c43"], [29, 20, "#202c43"]]],
         ["#202c43", [[31, -1, "#202c43"], [80, 5, "#202c43"], [2, 16, "#202c43"], [51, 17, "#202c43"]]],
         ["#202c43", [[26, -6, "#202c43"], [76, 3, "#202c43"], [8, 14, "#202c43"], [51, 15, "#202c43"]]]
+    ],
+    "purple": [
+        ["#2d2438", [[12, 2, "#2d2438"], [35, 2, "#2d2438"], [34, 16, "#2d2438"], [-6, 20, "#2d2438"]]]
     ]
 
 };
@@ -125,7 +128,6 @@ const OpenEquipmentBox = (type) =>
 
     let hasEquipment = null;
     const shot = captureScreen();
-    console.log("装备素材数量：" + equipmentImgList.length);
     for (let i = 0; i < equipmentImgList.length; i++)
     {
         hasEquipment = FindImg(equipmentImgList[i], [933, 158, 258, 438], shot);
@@ -152,20 +154,20 @@ const OpenEquipmentBox = (type) =>
         }
     }
     RecycleImgList(equipmentImgList);
-    console.log("是否打开箱子:  " + hasOpenedBox);
     return hasOpenedBox;
 };
 
-const OpenPropsBox = () =>
+const OpenPropsBox = (type) =>
 {
-    console.log("打开道具箱子");
-    const PropsImgList = LoadImgList("backpack/box/propsBox");
+    console.log("fn：打开箱子：" + type);
+    type = type || "propsBox";
+    const PropsImgList = LoadImgList(`backpack/box/${type}`);
     let hasOpenPropsBox = false;
     let hasPropsBox = null;
-
-    for (let i = 0; i < PropsImgList.length; i++)
+    let shot = captureScreen();
+    for (let i = 0; i < 5; i++)
     {
-        hasPropsBox = FindImg(PropsImgList[i], [933, 158, 258, 438]);
+        hasPropsBox = FindImgInList(PropsImgList, [925, 147, 269, 269], shot);
         if (hasPropsBox)
         {
             RandomPress([hasPropsBox.x, hasPropsBox.y, 30, 30]);
@@ -174,20 +176,29 @@ const OpenPropsBox = () =>
             {
                 RandomPress([666, 520, 138, 30]);
             }
-            Sleep();
-            PressBlank();
+            Sleep(2);
+            RandomPress([423, 143, 374, 190], 2);//press blank
             hasOpenPropsBox = true;
+            shot = captureScreen();
         }
+        else
+        {
+            hasOpenPropsBox = false;
+        }
+        if (!hasOpenPropsBox)
+        {
+            break;
+        }
+        Sleep();
     }
 
     RecycleImgList(PropsImgList);
-    console.log("结束，是否打开道具箱子 " + hasOpenPropsBox);
     return hasOpenPropsBox;
 };
 
 const OpenSkillBook = () =>
 {
-    console.log("开始打开技能书");
+    console.log("fn:打开技能书");
     const hadOpenBackpack = OpenBackpack("props");
     if (!hadOpenBackpack)
     {
@@ -198,11 +209,17 @@ const OpenSkillBook = () =>
     let hasSkillBook = false;
     let hasOpened = false;
     const skillBookImgList = LoadImgList("backpack/skillBook");
+    const unableToUse = LoadImgList("backpack/unableToUse");
     for (let i = 0; i < skillBookImgList.length; i++)
     {
         hasSkillBook = FindImg(skillBookImgList[i], [931, 160, 260, 445]);
         if (hasSkillBook)
         {
+            if (FindImgInList(unableToUse, [hasSkillBook.x - 30, hasSkillBook.y - 20, 40, 40]))
+            {
+                console.log("无法使用，跳过");
+                continue;
+            }
             RandomPress([hasSkillBook.x, hasSkillBook.y, 30, 30]);
             RandomPress([hasSkillBook.x, hasSkillBook.y, 30, 30]);
             hasOpened = true;
@@ -217,14 +234,13 @@ const OpenSkillBook = () =>
 
 const OpenSuit = () =>
 {
-    console.log("开始打开时装");
+    console.log("fn: 开始打开时装");
     const hasOpenBackpack = OpenBackpack("props");
     if (!hasOpenBackpack)
     {
         console.log("open backpack failed");
         return false;
     }
-    SortEquipment();
     let hadOpenSuit = false;
 
     const JumpAnimationColorList = [
@@ -239,7 +255,6 @@ const OpenSuit = () =>
     for (let i = 0; i < suitImgList.length; i++)
     {
         let hasOpenedSuit = FindImg(suitImgList[i], [932, 155, 256, 447]);
-        console.log(hasOpenedSuit);
         if (hasOpenedSuit)
         {
             RandomPress([hasOpenedSuit.x, hasOpenedSuit.y, 30, 30]);
@@ -288,41 +303,70 @@ const OpenSelectedPropsBox = () =>
 
     }
 };
+const UseHolyGrail = () =>
+{
+    console.log("开始使用圣杯");
+    let hasUsedHolyGrail = false;
+    OpenBackpack("props");
+    const holyGrailImgList = LoadImgList("backpack/props/holyGrail");
+    const hasHolyGrail = FindImgInList(holyGrailImgList, [926, 151, 263, 138]);
+    if (hasHolyGrail)
+    {
+        RandomPress([hasHolyGrail.x, hasHolyGrail.y, 15, 25]);
+        RandomPress([hasHolyGrail.x, hasHolyGrail.y, 15, 25]);
+        for (let i = 0; i < 5; i++)
+        {
+            if (FindBlueBtn([646, 506, 175, 57]))
+            {
+                RandomPress([668, 520, 138, 30]);
+                hasUsedHolyGrail = true;
+                Sleep();
+                break;
+            }
+            Sleep();
+        }
+    }
+    RecycleImgList(holyGrailImgList);
+    return hasUsedHolyGrail;
+};
+
 const OpenAllBox = () =>
 {
-    const hasOpenBackpack = OpenBackpack("props");
-    if (!hasOpenBackpack)
+    if (!OpenBackpack("props", true))
     {
-        console.log("open backpack failed");
+        console.log("打开背包失败，退出。");
         return false;
     }
+    Sleep();
     let hasOpenedWeaponBox = OpenEquipmentBox("weapon");
     let hasOpenedArmorBox = OpenEquipmentBox("armor");
-    OpenPropsBox();
 
+    OpenPropsBox("propsBox");
+    OpenPropsBox("activities");
+    OpenPropsBox("specialProps");
+
+    const hasOpenSkill = OpenSkillBook();
+
+    const hasOpenSuit = OpenSuit();
+
+    UseHolyGrail();
+    Sleep();
+    console.log("结束：已打开所有箱子");
     if (hasOpenedWeaponBox || hasOpenedArmorBox)
     {
         console.log("有装备箱子被打开，优先穿装备");
         WearEquipments();
-        OpenBackpack("props");
     }
-    const hasOpenSkill = OpenSkillBook();
     if (hasOpenSkill)
     {
         console.log("使用了技能书，开始自动释放");
         AutoReleaseSkill();
-        OpenMenu();
-        OpenBackpack("props");
     }
-    const hasOpenSuit = OpenSuit();
     if (hasOpenSuit)
     {
         console.log("had open suit card, start to wear suit");
         WearBestSuit();
     }
-    UseHolyGrail();
-    Sleep();
-    console.log("结束：已打开所有箱子");
     return true;
 };
 
@@ -342,12 +386,17 @@ const WearBestSuit = () =>
         ["#2f425b", [[-2, 17, "#3d5273"], [-4, 29, "#334662"], [71, -2, "#243348"], [77, 18, "#344763"]]],
         ["#2f405b", [[-2, 11, "#31455f"], [-4, 21, "#364a69"], [64, -7, "#1f2c40"], [75, 17, "#394f6e"]]]
     ];
-
+    Sleep();
+    if (FindBlueBtn([1037, 656, 185, 61]))
+    {
+        console.log("点击穿戴");
+        RandomPress([1063, 671, 134, 29]);
+    }
     const HasBlueSuit = (region, shot) => FindMultiColors(BlueSuitColorList, region, shot);
     const shot = captureScreen();
     let currentDefense = FindNumber("combatPower", [67, 236, 54, 37]);
 
-    for (let i = 0; i < 3; i++)
+    out: for (let i = 0; i < 3; i++)
     {
         for (let j = 0; j < 3; j++)
         {
@@ -359,8 +408,12 @@ const WearBestSuit = () =>
                 console.log("防御力加成为：" + defense);
                 if (currentDefense >= 0 && defense >= currentDefense)
                 {
-                    console.log("此时装品质更好，点击穿戴");
-                    RandomPress([1064, 670, 133, 30]);
+                    if (FindBlueBtn([1037, 656, 185, 61]))
+                    {
+                        console.log("此时装品质更好，点击穿戴");
+                        RandomPress([1063, 671, 134, 29]);
+                        break out;
+                    }
                 }
 
             }
@@ -449,6 +502,10 @@ const IsBetterQuality = () =>
             return true;
         }
     }
+    else if (left_color == "purple")
+    {
+        return false;
+    }
     console.log("is better quality identify failed");
     return false;
 };
@@ -457,25 +514,24 @@ const SortEquipment = () => { RandomPress([1097, 668, 17, 19]); Sleep(3); };
 const WearEquipment = () =>
 {
     console.log("开始穿装备");
-    let hasOpenBackpack = OpenBackpack("equipment");
+    let hasOpenBackpack = OpenBackpack("equipment", true);
     if (!hasOpenBackpack)
     {
         console.log("打开背包失败，清理页面尝试重新打开");
         return false;
     }
 
-    const config = ReadConfig();
-    if (!config.game.equipment)
-    {
-        config.game.equipment = {};
-        // config.game.equipment.weapon = {material:""};
-        config.game.equipment.helmet = { material: "", color: "gray" };
-        config.game.equipment.top = { material: "", color: "gray" };
-        config.game.equipment.bottom = { material: "", color: "gray" };
-        config.game.equipment.gloves = { material: "", color: "gray" };
-        config.game.equipment.shoes = { material: "", color: "gray" };
-    }
-    SortEquipment();
+    // const config = ReadConfig();
+    // if (!config.game.equipment)
+    // {
+    //     config.game.equipment = {};
+    //     // config.game.equipment.weapon = {material:""};
+    //     config.game.equipment.helmet = { material: "", color: "gray" };
+    //     config.game.equipment.top = { material: "", color: "gray" };
+    //     config.game.equipment.bottom = { material: "", color: "gray" };
+    //     config.game.equipment.gloves = { material: "", color: "gray" };
+    //     config.game.equipment.shoes = { material: "", color: "gray" };
+    // }
     const magicWandImgList = LoadImgList("backpack/magicWand");
     const identifyTapScreenImgList = LoadImgList("backpack/identifyTapScreen");
 
@@ -551,7 +607,6 @@ const WearEquipment = () =>
                         }
                         hasWornEquipment = true;
                         break out;
-                        // SortEquipment();
                     }
                     continue;
                 }
@@ -626,8 +681,6 @@ const WearEquipments = () =>
 };
 
 // --------------------------- skill book ---------------------------------
-
-
 
 const AutoReleaseSkill = () =>
 {
@@ -1148,33 +1201,6 @@ const ExpandBackpackCapacity = () =>
         RandomPress([497, 559, 117, 28]);
     }
 };
-const UseHolyGrail = () =>
-{
-    console.log("开始使用圣杯");
-    let hasUsedHolyGrail = false;
-    OpenBackpack("props");
-    SortEquipment();
-    const holyGrailImgList = LoadImgList("backpack/props/holyGrail");
-    const hasHolyGrail = FindImgInList(holyGrailImgList, [926, 151, 263, 138]);
-    if (hasHolyGrail)
-    {
-        RandomPress([hasHolyGrail.x, hasHolyGrail.y, 15, 25]);
-        RandomPress([hasHolyGrail.x, hasHolyGrail.y, 15, 25]);
-        for (let i = 0; i < 5; i++)
-        {
-            if (FindBlueBtn([646, 506, 175, 57]))
-            {
-                RandomPress([668, 520, 138, 30]);
-                hasUsedHolyGrail = true;
-                Sleep();
-                break;
-            }
-            Sleep();
-        }
-    }
-    RecycleImgList(holyGrailImgList);
-    return hasUsedHolyGrail;
-};
 
 const AutoPotion = () =>
 {
@@ -1329,5 +1355,4 @@ module.exports = {
     UseHolyGrail, WearBestSuit,
     AutoPotion, UnAutoPotion, BuyPotion,
 };
-
 

@@ -15,6 +15,7 @@ const {
     ReturnHome,
     ChangeGameSetting,
     DeathCheck,
+    TapTip,
 
 
 } = require("./utils.js");
@@ -66,12 +67,24 @@ const NoPotionFlow = (shot) =>
 {
     if (IsNoPotion(shot))
     {
-        const delayTime = random(0, 32);
         const deathBtn = DeathCheck();
         if (deathBtn)
         {
-            RandomPress([deathBtn.x - 50, deathBtn.y, 150, 20], 15);
+            if (FindBlueBtn([524, 581, 245, 94])) 
+            {
+                Sleep(3);
+                RandomPress([572, 611, 141, 29], 10);
+                console.log("死亡流程: 确认死亡");
+            }
+            if (FindBlueBtn([536, 415, 204, 77]))
+            {
+                Sleep(3);
+                RandomPress([568, 437, 151, 30], 10);
+                console.log("死亡流程: 确认死亡");
+            }
         }
+        const delayTime = random(0, 32);
+
         console.log("角色当前没有药水了 延迟" + delayTime + "s");
         Sleep(delayTime);
         if (IsBackpackFull())
@@ -104,12 +117,22 @@ const NoPotionFlow_HaltMode = (shot) =>
         const deathBtn = DeathCheck();
         if (deathBtn)
         {
-            RandomPress([deathBtn.x - 50, deathBtn.y, 150, 20], 15);
+            if (FindBlueBtn([524, 581, 245, 94])) 
+            {
+                Sleep(3);
+                RandomPress([572, 611, 141, 29], 10);
+                console.log("死亡流程: 确认死亡");
+            }
+            if (FindBlueBtn([536, 415, 204, 77]))
+            {
+                Sleep(3);
+                RandomPress([568, 437, 151, 30], 10);
+                console.log("死亡流程: 确认死亡");
+            }
         }
         BuyPotion();
     }
 };
-
 
 const BackpackFlow_HaltMode = () =>
 {
@@ -640,6 +663,7 @@ const MakeSureInGame = (shot) =>
         HasCrucifixIcon() && PickUpAbilityPoint();
 
     }
+    TapTip();
     StovePopup();
     ClearPage();
 };

@@ -30,7 +30,7 @@ const {
 const { IsEmpty, WearEquipments, StrengthenEquipment, OpenAllBox, UseHolyGrail, DecomposeEquipment, WearBestSuit, CheckSkillAutoRelease } = require("./Backpack.js");
 
 let lastComprehensiveImproveTime = 1726208812345;
-let character_lv = 0;
+
 const GetEmail = () =>
 {
     console.log("开始领取邮件");
@@ -532,14 +532,15 @@ const ShopBuy = () =>
         }
     }
 
-    for (let i = 0; i < 5; i++)
+    for (let i = 0; i < 15; i++)
     {
+        PageBack();
+
         if (FindBlueBtn([540, 445, 201, 63]))
         {
             console.log("发现服务器异常弹窗，稍后再试");
             RandomPress([568, 457, 150, 35]);
         }
-        PageBack();
         if (HasMenu())
         {
             break;
@@ -594,8 +595,8 @@ const FriendShipShop = () =>
     };
     RandomPress([19, 286, 34, 36]);
     PurchaseItem([157, 97, 148, 34]); //黑色奥雷
-    RandomPress([20, 83, 34, 38]);
-    PurchaseItem([156, 177, 150, 38]);//实验室传送卷轴
+    // RandomPress([20, 83, 34, 38]);
+    // PurchaseItem([156, 177, 150, 38]);//实验室传送卷轴
     PageBack();
     for (let i = 0; i < 10; i++)
     {
@@ -618,78 +619,98 @@ const FriendShipShop = () =>
 
 const IncreaseWeaponFeatures = () =>
 {
-    console.log("开始增加武器特性");
-    console.log("顺便获取当前玩家等级。");
-    const hasEntered = EnterMenuItemPage("weaponFeatures");
-    if (!hasEntered)
+    console.log("fn: 开始增加武器特性");
+    if (!EnterMenuItemPage("weaponFeatures"))
     {
         console.log("enter weapon features page failed!");
         return false;
     }
-    const ActivatedColorList = [
-        ["#2c9892", [[-5, 4, "#2f9e99"], [-21, 20, "#25817e"], [-39, 41, "#268481"], [-54, 53, "#268783"]]],
-        ["#2e9b94", [[-13, 13, "#288b88"], [-24, 24, "#268682"], [-42, 41, "#298e89"], [-58, 58, "#1d6c66"]]],
-        ["#24807b", [[-1, 12, "#24807c"], [-1, 23, "#227974"], [0, 32, "#2b928f"], [0, 46, "#298d89"]]]
-    ];
-    const IsActivated = (region) => FindMultiColors(ActivatedColorList, region);
+    const activateImgList = LoadImgList("page/weaponFeature/activate");
+
+    const IsActivated = (region) => FindImgInList(activateImgList, region);
 
     const RecogPos = [
-        [[536, 177, 96, 131], [426, 287, 110, 131], [409, 402, 46, 101]],
-        [[536, 186, 98, 108], [444, 292, 84, 99], [417, 405, 34, 95]],
-        [[550, 201, 81, 89], [516, 302, 41, 92], [519, 411, 37, 81]]
+        [[528, 191, 105, 104], [416, 277, 119, 128], [403, 401, 67, 103]],
+        [[534, 179, 107, 120], [422, 284, 112, 121], [414, 401, 42, 99]],
+        [[535, 190, 98, 112], [513, 296, 42, 93], [520, 407, 35, 97]],
+        [[534, 179, 107, 120], [422, 284, 112, 121], [414, 401, 42, 99]],
+        [[534, 179, 107, 120], [422, 284, 112, 121], [414, 401, 42, 99]],
     ];
     const PressPos = [
         [[527, 285, 21, 21], [421, 387, 24, 22], [422, 493, 22, 21]],
         [[526, 284, 19, 21], [421, 387, 24, 24], [421, 492, 24, 22]],
-        [[525, 282, 21, 22], [525, 388, 24, 21], [526, 493, 21, 20]]
+        [[525, 282, 21, 22], [525, 388, 24, 21], [526, 493, 21, 20]],
+        [[526, 284, 19, 21], [421, 387, 24, 24], [421, 492, 24, 22]],
+        [[526, 284, 19, 21], [421, 387, 24, 24], [421, 492, 24, 22]],
     ];
-    const lv = FindNumber("lv", [46, 468, 61, 51]);
+    const lv = FindNumber("lv", [203, 160, 62, 61]);
     console.log("武器特性，当前玩家等级为：" + lv);
     const config = ReadConfig();
     config.game.lv = lv;
-    character_lv = lv;
     RewriteConfig(config);
-    out: for (let i = 0; i < 3; i++)
+    let skillNumber = lv >= 45 ? 5 : 3;
+    let clickSkillTime = lv >= 45 ? 4 : 3;
+
+    const ActivateSkill = (i, j) =>
     {
-        RandomPress([197, 300 + i * 82, 146, 46]);
+        if (!IsActivated(RecogPos[i][j]))
+        {
+            console.log("not activated! :" + i + " " + j);
+            if (j == 0)
+            {
+                console.log("click first");
+                RandomPress([629, 180, 25, 20]);
+                if (FindBlueBtn([992, 632, 215, 74]))
+                {
+                    RandomPress([1019, 653, 155, 31]);
+                }
+                RandomPress(PressPos[i][j]);
+                if (FindBlueBtn([992, 632, 215, 74]))
+                {
+                    RandomPress([1019, 653, 155, 31]);
+                }
+                if (!FindBlueBtn([530, 643, 222, 67]))
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                RandomPress(PressPos[i][j]);
+                if (FindBlueBtn([992, 632, 215, 74]))
+                {
+                    RandomPress([1019, 653, 155, 31]);
+                }
+            }
+        }
+    };
+    for (let i = 0; i < clickSkillTime; i++)
+    {
+        RandomPress([197, 300 + i * 82, 146, 40]);
 
         for (let j = 0; j < 3; j++)
         {
-
-            if (!IsActivated(RecogPos[i][j]))
-            {
-                console.log("not activated!");
-                if (j == 0)
-                {
-                    RandomPress([629, 180, 25, 20]);
-                    if (FindBlueBtn([992, 632, 215, 74]))
-                    {
-                        RandomPress([1019, 653, 155, 31]);
-                    }
-                    RandomPress(PressPos[i][j]);
-                    if (FindBlueBtn([992, 632, 215, 74]))
-                    {
-                        RandomPress([1019, 653, 155, 31]);
-                    }
-                    if (!FindBlueBtn([530, 643, 222, 67]))
-                    {
-                        continue out;
-                    }
-                }
-                else
-                {
-                    RandomPress(PressPos[i][j]);
-                    if (FindBlueBtn([992, 632, 215, 74]))
-                    {
-                        RandomPress([1019, 653, 155, 31]);
-                    }
-                }
-            }
-            console.log(i + " " + j);
+            ActivateSkill(i, j);
         }
 
     }
+    if (skillNumber >= 5)
+    {
+        SwipeSlowly([280, 580, 40, 10], [280, 310, 40, 10], 1);
+        SwipeSlowly([280, 580, 40, 10], [280, 310, 40, 10], 1);
+        for (let i = 0; i < skillNumber - 4; i++)
+        {
+            RandomPress([197, 300 + i * 82, 146, 40]);
+
+            for (let j = 0; j < 3; j++)
+            {
+                ActivateSkill(i + 4, j);
+            }
+
+        }
+    }
     PageBack();
+    RecycleImgList(activateImgList);
     return true;
 };
 
@@ -1082,19 +1103,26 @@ const IsExchangeUnLock = () =>
         console.log("进入交易所失败");
         return false;
     }
+    Sleep();
+    const config = ReadConfig();
     const lockImgList = LoadImgList("icon/lock");
-    let hadUnlocked = FindImgInList(lockImgList, [402, 72, 86, 52]);
-    if (!hadUnlocked)
+    const shot = captureScreen();
+    let hadUnlocked = FindImgInList(lockImgList, [402, 72, 86, 52], shot);
+    let hadUnlocked_personal = FindImgInList(lockImgList, [259, 76, 47, 48], shot);
+    if (!hadUnlocked && hadUnlocked_personal)
     {
         console.log("交易所已解开");
-        GetSettlement();
+        config.gameMode = "instance";
+        RewriteConfig(config);
         alert("成号", "交易所已解开");
-        engines.stopAllAndToast();
+        java.lang.System.exit(0);
     }
     else
     {
         console.log("交易所未解开");
         PageBack();
+        config.gameMode = "mainStory";
+        RewriteConfig(config);
         return false;
     }
 };
@@ -1487,7 +1515,7 @@ const GetSettlement = () =>
         monthlyIncome = "0";
     }
     config.game.monthlyIncome = monthlyIncome;
-
+    config.game.diamond = afterSettleDiamond;
     const postData = {
         vm: config.game.vm,
         serverName: config.game.serverName,
@@ -1536,22 +1564,10 @@ const TradeGoods = () =>
     const shelfMaxImgList = LoadImgList("icon/font/trade/shelfMax");
 
     let isShelfMax = false;
+    let loginCount = 0;
     Sleep();
     //网格的横纵间隔均为66像素 格子大小为57x57
 
-    const calculateNumber = [
-        [590, 511, 30, 27],//0
-        [518, 346, 28, 26],//1
-        [592, 345, 27, 27],//2
-        [661, 341, 35, 32],//3
-        [518, 397, 30, 29],//4
-        [589, 399, 34, 28],//5
-        [666, 397, 29, 32],//6
-        [666, 397, 29, 32],//7
-        [592, 453, 30, 30],//8
-        [665, 454, 29, 28]//9
-    ];
-    const splitToDigit = num => (num + "").split('').map(Number);
     const CloseSellPopup = () => 
     {
         if (HasPopupClose([956, 186, 50, 57]))
@@ -1559,192 +1575,95 @@ const TradeGoods = () =>
             RandomPress([970, 203, 21, 22]);
         }
     };
-    const MeetTheListingRequirement = (type) =>
+
+    const LoginItems = (directlySell) =>
     {
-        let currentLowestLoginPrice = 0;
-        let maxItemNumber = 1;
-        let totalSellPrice = 0;
-
-        currentLowestLoginPrice = FindFloatNumber("sellPrice", [538, 366, 78, 36]);
-
-        console.log("当前最低价格：" + currentLowestLoginPrice);
-        if (currentLowestLoginPrice == null || currentLowestLoginPrice == 0)
-        {
-            if (type == "material")
-            {
-                console.log("未识别到价格，材料不上架");
-                return false;
-            }
-            else if (type == "weapon")
-            {
-                console.log("未识别到价格，装备默认上架");
-                return true;
-            }
-        }
-        if (type == "material")
-        {
-            RandomPress([874, 301, 93, 18]); //数量输入框
-            if (FindBlueBtn([643, 550, 162, 57]))
-            {
-                RandomPress([733, 517, 37, 12]); //max
-                RandomPress([665, 562, 122, 33]); //confirm
-                maxItemNumber = FindFloatNumber("sellPrice", [906, 291, 86, 35]);
-                console.log("材料数量为：" + maxItemNumber);
-            }
-        }
-        totalSellPrice = Math.floor(currentLowestLoginPrice * maxItemNumber);
-
-        if (totalSellPrice < 10)
-        {
-            console.log("低于10钻石，不上架");
-            return false;
-        }
-        else if (totalSellPrice > 1000)
-        {
-            console.log("上架价格异常，暂不上架");
-            return false;
-        }
-
-        else if (totalSellPrice >= 10)
-        {
-            if (type == "weapon" && FindFloatNumber("sellPrice", [892, 333, 73, 39]) == totalSellPrice)
-            {
-                console.log("不需要设置价格，默认上架");
-            }
-            else
-            {
-                console.log("手动设置总价：" + totalSellPrice);
-                let totalPriceNumberArr = splitToDigit(totalSellPrice);
-                RandomPress([851, 265, 127, 13]); //设置总价
-                if (FindBlueBtn([645, 548, 161, 62]))
-                {
-                    for (let i = 0; i < totalPriceNumberArr.length; i++)
-                    {
-                        RandomPress(calculateNumber[totalPriceNumberArr[i]]);
-                    }
-                    RandomPress([642, 550, 165, 58]); //confirm total price
-                }
-            }
-            return true;
-        }
-    };
-    const ConfirmToLogin = () =>
-    {
-        if (FindBlueBtn([551, 465, 182, 62]))
-        {
-            console.log("确定登录价格");
-            RandomPress([575, 482, 131, 25]);
-            WaitUntil(() => FindBlueBtn([549, 522, 185, 66]));
-            if (FindBlueBtn([549, 522, 185, 66]))
-            {
-                RandomPress([570, 539, 144, 31], 1);
-                console.log("确定登录");
-                for (let i = 0; i < 6; i++)
-                {
-                    if (FindImgInList(shelfMaxImgList, [536, 96, 188, 55]))
-                    {
-                        console.log("上架数量已满");
-                        isShelfMax = true;
-                        return false;
-                    }
-                    sleep(500);
-                }
-                console.log("上架物品成功！");
-                return true;
-            }
-        }
-        return false;
-    };
-    const LoginItem = (itemPos, type) =>
-    {
-        console.log("上架物品: " + itemPos + " type: " + type);
-
-        let hasSellText = false;
-        let loginSuccess = false;
-        for (let i = 0; i < 10; i++)
-        {
-            if (IsEmpty([itemPos[0] - 10, itemPos[1] - 10, 57, 57]))
-            {
-                break;
-            }
-            RandomPress(itemPos);
-            hasSellText = FindImgInList(sellText, [930, 584, 80, 61]);
-            if (hasSellText)
-            {
-                break;
-            }
-            CloseSellPopup();
-            if (FindRedBtn([477, 548, 160, 59]))
-            {
-                console.log("关闭价格键盘");
-                RandomPress([494, 561, 123, 33]);
-            }
-            Sleep(1);
-        }
-        if (hasSellText)
-        {
-            RandomPress([915, 599, 115, 28]); //贩售按钮
-            WaitUntil(() => FindBlueBtn([549, 467, 182, 57]));
-            let isMeetRequirement = MeetTheListingRequirement(type);
-            if (isMeetRequirement)
-            {
-                loginSuccess = ConfirmToLogin();
-
-            }
-        }
-        CloseSellPopup();
-        return loginSuccess;
-    };
-    const IteratingLoginIteem = (type) =>
-    {
-        let loginItemSuccessfully = false;
-
-        out: for (let i = 0; i < 7; i++)
+        directlySell = directlySell || false;
+        let hasSellText;
+        for (let i = 0; i < 3; i++)
         {
             for (let j = 0; j < 4; j++)
             {
-                for (let n = 0; n < 24; n++)
+                for (let n = 0; n < 5; n++)
                 {
-                    loginItemSuccessfully = LoginItem([1016 + j * 66, 175 + i * 66, 38, 36], type);
-                    if (isShelfMax == true)
-                    {
-                        console.log("上架数量已满，退出上架");
-                        return true;
-                    }
                     if (IsEmpty([1006 + j * 66, 164 + i * 66, 57, 57]))
                     {
                         console.log("遍历完毕，退出上架");
                         return true;
                     }
-                    if (loginItemSuccessfully)
+                    CloseSellPopup();
+                    RandomPress([1016 + j * 66, 175 + i * 66, 38, 36]);
+                    hasSellText = FindImgInList(sellText, [930, 584, 80, 61]);
+                    if (hasSellText)
                     {
-                        console.log("上架成功，继续上架");
-                        loginItemSuccessfully = LoginItem([1016 + j * 66, 175 + i * 66, 38, 36], type);
-                    }
-                    if (!loginItemSuccessfully)
-                    {
-                        console.log("下一格");
-                        break;
+                        RandomPress([915, 599, 115, 28]); //贩售按钮
+                        WaitUntil(() => FindBlueBtn([549, 467, 182, 57]));
+                        let canSell = false;
+                        if (!directlySell)
+                        {
+                            if (FindNumber("sellPrice", [916, 254, 50, 35]) <= 10)
+                            {
+                                console.log("<<< 10");
+                                CloseSellPopup();
+                                break;
+                            }
+                            else
+                            {
+                                canSell = true;
+                            }
+                        }
+                        if (directlySell || canSell)
+                        {
+                            RandomPress([577, 481, 126, 29]);
+                            if (WaitUntil(() => FindBlueBtn([547, 525, 186, 62])))
+                            {
+                                RandomPress([573, 542, 132, 27]);
+                                if (FindImgInList(shelfMaxImgList, [536, 96, 188, 55]))
+                                {
+                                    console.log("上架数量已满");
+                                    isShelfMax = true;
+                                    return false;
+                                }
+                                else
+                                {
+                                    console.log("上架物品成功");
+                                    loginCount++;
+                                }
+                            }
+                        }
+
                     }
                 }
-
             }
         }
-        return loginItemSuccessfully;
     };
     //先上架材料
     RandomPress([1192, 121, 55, 27]);
-    let loginRes = IteratingLoginIteem("material");
-
+    LoginItems(false);
     //然后上架武器
     if (!isShelfMax)
     {
         RandomPress([1106, 120, 51, 28]);
-        loginRes = IteratingLoginIteem("weapon");
+        LoginItems(true);
     }
-
     PageBack();
-    return loginRes;
+    for (let i = 0; i < 10; i++)
+    {
+        if (HasMenu())
+        {
+            break;
+        }
+        CloseSellPopup();
+        if (HasPopupClose([791, 124, 41, 49]))
+        {
+            RandomPress([801, 134, 24, 25]);
+        }
+        Sleep();
+    }
+    console.log("上架物品数量为：" + loginCount);
+    RecycleImgList(sellText);
+    RecycleImgList(shelfMaxImgList);
+    return loginCount;
 };
 const PutOnSale = () =>
 {
@@ -1789,7 +1708,42 @@ const DailyQuest = () =>
     {
         FriendShipShop();
     }
-
+};
+const FusionSuit = () =>
+{
+    console.log("fn: 合成时装");
+    if (!EnterMenuItemPage("suit"))
+    {
+        console.log("进入时装页面失败");
+        return false;
+    }
+    RandomPress([177, 77, 97, 24]);
+    if (FindGoldBtn([849, 656, 189, 58]))
+    {
+        console.log("点击自动登录");
+        RandomPress([873, 670, 144, 30]);
+    }
+    if (FindBlueBtn([540, 653, 198, 61]))
+    {
+        console.log("点击合成");
+        RandomPress([563, 666, 151, 34], 2);
+        console.log("点击跳过");
+        RandomPress([1199, 663, 37, 24]);
+    }
+    for (let i = 0; i < 30; i++)
+    {
+        if (FindBlueBtn([539, 647, 204, 66]))
+        {
+            RandomPress([568, 664, 148, 34]);
+        }
+        if (HasPageback())
+        {
+            break;
+        }
+        Sleep(2);
+    }
+    PageBack();
+    console.log("end: 合成时装结束");
 };
 const ComprehensiveImprovement = () =>
 {
@@ -1826,15 +1780,14 @@ const ComprehensiveImprovement = () =>
     IncreaseWeaponFeatures();
     UpgradeHolyRelics();
     StrengthenHorseEquipment();
-
-    if (character_lv <= 40 || character_lv == null)
+    const config = ReadConfig();
+    if (config.game.lv <= 40 || config.game.lv == null)
     {
-        console.log(`角色等级为${character_lv}，改变符文配置`);
+        console.log(`角色等级为${config.game.lv}，改变符文配置`);
         ChangeAbility();
     }
 
     UpgradeAbilityLevel();
-
 
     WearBestSuit();
     CheckSkillAutoRelease();
@@ -1868,33 +1821,41 @@ const ComprehensiveImprovement_Instance = () =>
         LoginProps();
         DecomposeEquipment();
     }
-    PutOnSale();
+    if (config.gameMode == "instance")
+    {
+        PutOnSale();
+    }
     console.log("副本模式下综合提升");
 
     // first open all box
     OpenAllBox();
-    if (!isBackpackFull && new Date().getHours() > 14)
+    const date = new Date();
+    const today = date.getDate();
+    if (!isBackpackFull && today % 3 == 1 && date.getHours() >= 12)
     {
         console.log("背包不是满的，领取奖励后开始整理背包");
         WearEquipments();
         StrengthenEquipment();
 
     }
-    ClearPage();
+
     //降低执行频率
-    if (new Date().getDay() % 3 == 0)
+    if (date.getDay() == 1 && date.getHours() >= 12)
     {
+        console.log("每周一更新");
         IncreaseWeaponFeatures();
         UpgradeHolyRelics();
         StrengthenHorseEquipment();
+        FusionSuit();
     }
-
     WearBestSuit();
     AddAttributePoint();
 
     if (config.game.lv > 45)
     {
-        CheckSkillAutoRelease();
+        // CheckSkillAutoRelease();
+        SwipeSlowly([610, 680, 5, 2], [610, 640, 5, 3], 1);
+        SwipeSlowly([670, 680, 5, 2], [670, 640, 5, 3], 1);
     }
     console.log("副本：综合提升结束");
 
@@ -1906,4 +1867,5 @@ module.exports = {
     ShopBuy, ComprehensiveImprovement, ComprehensiveImprovement_Instance, StrengthenHorseEquipment, IncreaseWeaponFeatures, GuildDonation,
 };
 
-// CheckSkillAutoRelease();
+// GetSettlement();
+
