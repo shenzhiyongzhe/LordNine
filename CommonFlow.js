@@ -23,6 +23,10 @@ const {
     UpdateDealRecord,
 
     ReturnHome,
+    specialConfig,
+    HaveToTapBlank,
+    ReadDailyDiamondRecord,
+    UpdateDailyDiamondRecord,
 
 
 } = require("./utils.js");
@@ -349,7 +353,20 @@ const GetTravelLogAward = () =>
 };
 const LoginProps = (type) =>
 {
-    console.log("开始道具记录");
+    console.log("fn：开始道具记录");
+    if (!OpenMenu())
+    {
+        return false;
+    }
+    else
+    {
+        Sleep();
+        if (!FindTipPoint([1229, 93, 26, 32]))
+        {
+            console.log("没有可记录道具，退出");
+            return false;
+        }
+    }
     EnterMenuItemPage("propsLogin");
 
     type = type || "partial";
@@ -1106,13 +1123,13 @@ const IsExchangeUnLock = () =>
     Sleep();
     const config = ReadConfig();
     const lockImgList = LoadImgList("icon/lock");
-    const shot = captureScreen();
-    let hadUnlocked = FindImgInList(lockImgList, [402, 72, 86, 52], shot);
-    let hadUnlocked_personal = FindImgInList(lockImgList, [259, 76, 47, 48], shot);
-    if (!hadUnlocked && hadUnlocked_personal)
+    let hadUnlocked = FindImgInList(lockImgList, [402, 72, 86, 52]);
+    RecycleImgList(lockImgList);
+    if (!hadUnlocked)
     {
         console.log("交易所已解开");
         config.gameMode = "instance";
+        config.unlockTrade = true;
         RewriteConfig(config);
         alert("成号", "交易所已解开");
         java.lang.System.exit(0);
@@ -1122,6 +1139,7 @@ const IsExchangeUnLock = () =>
         console.log("交易所未解开");
         PageBack();
         config.gameMode = "mainStory";
+        config.unlockTrade = false;
         RewriteConfig(config);
         return false;
     }
@@ -1456,6 +1474,10 @@ const GetSettlement = () =>
     dealRecord[GetDateTime()] = settlement;
     UpdateDealRecord(dealRecord);
 
+    const dailyDiamond = ReadDailyDiamondRecord();
+    dailyDiamond[GetDateTime()] = afterSettleDiamond;
+    UpdateDailyDiamondRecord(dailyDiamond);
+
     const date = new Date();
     const month = date.getMonth() + 1;
     const year = date.getFullYear();
@@ -1560,6 +1582,26 @@ const TradeGoods = () =>
         console.log("进入交易所失败");
         return false;
     }
+    const lockImgList = LoadImgList("icon/lock");
+    const config = ReadConfig();
+    if (FindImgInList(lockImgList, [401, 69, 55, 57]))
+    {
+        console.log("交易所暂未解开，退出");
+        config.unlockTrade = false;
+        specialConfig.gameMode = "instance";
+        specialConfig.initGameMode = "mainStory";
+        config.gameMode = "mainStory";
+        RewriteConfig(config);
+        RecycleImgList(lockImgList);
+        PageBack();
+        return false;
+    }
+    else
+    {
+        config.unlockTrade = true;
+        RewriteConfig(config);
+    }
+
     const sellText = LoadImgList("icon/font/trade/sell");
     const shelfMaxImgList = LoadImgList("icon/font/trade/shelfMax");
 
@@ -1663,6 +1705,7 @@ const TradeGoods = () =>
     console.log("上架物品数量为：" + loginCount);
     RecycleImgList(sellText);
     RecycleImgList(shelfMaxImgList);
+    RecycleImgList(lockImgList);
     return loginCount;
 };
 const PutOnSale = () =>
@@ -1745,6 +1788,215 @@ const FusionSuit = () =>
     PageBack();
     console.log("end: 合成时装结束");
 };
+const MakeMaterial = () =>
+{
+    console.log("fn: 制作材料");
+    const haveEntered = EnterMenuItemPage("manufacture");
+    if (!haveEntered)
+    {
+        console.log("进入制作页面失败，退出");
+        return false;
+    }
+    const PressToManufacture = (region) =>
+    {
+        RandomPress(region);
+        if (FindBlueBtn([1012, 647, 265, 60]))
+        {
+            RandomPress([835, 612, 48, 28]);
+            RandomPress([1041, 659, 215, 33]);
+            if (WaitUntil(() => HaveToTapBlank(558, 636, 160, 64)))
+            {
+                RandomPress([532, 515, 235, 167]);
+                return true;
+            }
+        }
+        return false;
+    };
+    const materialImg = LoadImgList("page/manufacture/material");
+    const manufacture_material = LoadImgList("page/manufacture/manufacture_material");
+    const greenBlackOle = LoadImgList("page/manufacture/greenBlackOle");
+
+    const horseImg = LoadImgList("page/manufacture/horse");
+    const horseStrengtheningMaterial = LoadImgList("page/manufacture/horseStrengtheningMaterial");
+    const horseArmorImg = LoadImgList("page/manufacture/horseArmor");
+
+    let ole = null;
+    let horseArmor = null;
+    for (let i = 0; i < 4; i++)
+    {
+        SwipeSlowly([140, 600, 5, 5], [140, 300, 5, 5], 1);
+        let haveMaterial = FindImgInList(materialImg, [6, 343, 68, 312]);
+        if (haveMaterial)
+        {
+            console.log("点击材料");
+            RandomPress([haveMaterial.x, haveMaterial.y, 100, 20]);
+        }
+        let haveManufacture_material = FindImgInList(manufacture_material, [8, 344, 145, 304]);
+        if (haveManufacture_material)
+        {
+            console.log("点击制作材料");
+            RandomPress([haveManufacture_material.x, haveManufacture_material.y, 150, 10]);
+        }
+        ole = FindImgInList(greenBlackOle, [240, 204, 76, 73]);
+        if (ole)
+        {
+            console.log("发现奥雷");
+            break;
+        }
+        Sleep(2);
+    }
+    if (ole)
+    {
+        PressToManufacture([323, 217, 132, 49]);
+        PressToManufacture([326, 377, 118, 49]);
+        PressToManufacture([321, 459, 136, 42]);
+    }
+    for (let i = 0; i < 4; i++)
+    {
+        let haveHorse = FindImgInList(horseImg, [6, 108, 81, 548]);
+        if (haveHorse)
+        {
+            console.log("点击材料");
+            RandomPress([haveHorse.x, haveHorse.y, 100, 20]);
+        }
+        let haveHorseStrengtheningMaterial = FindImgInList(horseStrengtheningMaterial, [8, 289, 156, 352]);
+        if (haveHorseStrengtheningMaterial)
+        {
+            console.log("点击制作材料");
+            RandomPress([haveHorseStrengtheningMaterial.x, haveHorseStrengtheningMaterial.y, 150, 10]);
+        }
+        horseArmor = FindImgInList(horseArmorImg, [233, 114, 100, 352]);
+        if (horseArmor)
+        {
+            console.log("find horse armor");
+            break;
+        }
+        SwipeSlowly([140, 600, 5, 5], [140, 300, 5, 5], 1);
+        Sleep(2);
+    }
+    if (horseArmor)
+    {
+        PressToManufacture([325, 218, 117, 201]);
+    }
+    RecycleImgList(materialImg);
+    RecycleImgList(manufacture_material);
+    RecycleImgList(greenBlackOle);
+    RecycleImgList(horseImg);
+    RecycleImgList(horseStrengtheningMaterial);
+    RecycleImgList(horseArmorImg);
+    PageBack();
+};
+const UnSealEngraving = () =>
+{
+    console.log("fn: 启用刻印");
+    const config = ReadConfig();
+    if (config.game.lv < 50 && config.game["engraving_0"])
+    {
+        console.log("一级刻印，已启用，退出");
+        return true;
+    }
+    else if (config.game.lv > 50 && config.game["engraving_1"])
+    {
+        console.log("二级刻印已启用。退出");
+        return true;
+    }
+    if (!EnterMenuItemPage("mark"))
+    {
+        console.log("打开页面失败，退出");
+        return false;
+    }
+    const greenColorList = [
+        ["#96f847", [[0, 1, "#99fe48"], [0, 2, "#96f947"]]],
+        ["#97f847", [[0, 1, "#97f847"], [0, 2, "#96f847"]]],
+        ["#96f847", [[0, 1, "#98fc48"], [0, 2, "#93f446"]]],
+        ["#99fe49", [[0, 1, "#99fd48"], [0, 2, "#8ce943"]]],
+        ["#99fd48", [[0, 1, "#99ff49"], [0, 2, "#99ff49"]]]
+    ];
+    const golenColorList = [
+        ["#efcd45", [[0, 1, "#efcd45"], [0, 2, "#efcd45"]]],
+        ["#f1cf46", [[0, 1, "#f7d447"], [0, 2, "#f9d647"]]],
+        ["#fad647", [[0, 1, "#fbd748"], [0, 2, "#fbd748"]]],
+        ["#f6d447", [[0, 1, "#fcd848"], [0, 2, "#f7d447"]]],
+        ["#f8d54a", [[1, 0, "#f8d54b"], [2, 0, "#f8d54b"]]],
+        ["#d7ba45", [[0, 1, "#d7ba45"], [0, 2, "#d8ba46"]]]
+    ];
+
+    const arrow = LoadImgList("page/engraving/arrow");
+    const exclude = LoadImgList("page/engraving/exclude");
+
+    const engravingIndex = [
+        [23, 89, 26, 32],
+        [22, 155, 29, 34]
+    ];
+
+    const unseal = (index) =>
+    {
+        RandomPress(engravingIndex[index]);
+        for (let i = 0; i < 12; i++)
+        {
+            let haveArrow = FindImgInList(arrow, [898, 99, 61, 532]);
+            if (haveArrow)
+            {
+                for (let i = 0; i < 6; i++)
+                {
+                    let shot = captureScreen();
+                    if (FindImgInList(exclude, [995, haveArrow.y - 5, 157, 50], shot))
+                    {
+                        console.log("排除项目");
+                        if (FindBlueBtn([997, 646, 200, 61], shot))
+                        {
+                            console.log("切换");
+                            RandomPress([1031, 662, 142, 29], 3.5);
+                        }
+                    }
+                    else if (FindMultiColors(greenColorList, [1180, haveArrow.y - 5, 70, 50], shot, 12))
+                    {
+                        console.log("稀有，下一格");
+                        break;
+                    }
+                    else if (FindMultiColors(golenColorList, [1180, haveArrow.y - 5, 70, 50], shot, 12))
+                    {
+                        console.log("金色属性，下一格");
+                        break;
+                    }
+                    else
+                    {
+                        if (FindBlueBtn([997, 646, 200, 61], shot))
+                        {
+                            console.log("切换或开放");
+                            RandomPress([1031, 662, 142, 29], 3.5);
+                        }
+                    }
+                }
+                if (haveArrow.y > 580)
+                {
+                    console.log("最后一格，结束");
+                    config.game[`engraving_${index}`] = true;
+                    RewriteConfig(config);
+                    break;
+                }
+                else
+                {
+                    console.log("下一格");
+                    RandomPress([1005, haveArrow.y + 43, 146, 15]);
+                }
+            }
+        }
+    };
+    if (config.game.lv < 50)
+    {
+        unseal(0);
+    }
+    else
+    {
+        unseal(0);
+        unseal(1);
+    }
+    RecycleImgList(arrow);
+    RecycleImgList(exclude);
+    PageBack();
+};
+
 const ComprehensiveImprovement = () =>
 {
     console.log("开始综合提升");
@@ -1807,9 +2059,24 @@ const ComprehensiveImprovement_Instance = () =>
         console.log("今日已经提升两次，暂不提升");
         return true;
     }
+
     if (IsHaltMode())
     {
         ExitHaltMode();
+    }
+
+    if (!config.manufacture)
+    {
+        config.manufacture = [random(1, 15), random(16, 30)];
+        RewriteConfig(config);
+    }
+    const date = new Date();
+    const today = date.getDate();
+
+    if (today == config.manufacture[0] || today == config.manufacture[1])
+    {
+        console.log("半月制作一次");
+        MakeMaterial();
     }
 
     const isBackpackFull = IsBackpackFull(captureScreen());
@@ -1829,8 +2096,7 @@ const ComprehensiveImprovement_Instance = () =>
 
     // first open all box
     OpenAllBox();
-    const date = new Date();
-    const today = date.getDate();
+
     if (!isBackpackFull && today % 3 == 1 && date.getHours() >= 12)
     {
         console.log("背包不是满的，领取奖励后开始整理背包");
@@ -1847,16 +2113,19 @@ const ComprehensiveImprovement_Instance = () =>
         UpgradeHolyRelics();
         StrengthenHorseEquipment();
         FusionSuit();
+        WearBestSuit();
     }
-    WearBestSuit();
     AddAttributePoint();
+    UnSealEngraving();
 
+    // CheckSkillAutoRelease();
     if (config.game.lv > 45)
     {
-        // CheckSkillAutoRelease();
         SwipeSlowly([610, 680, 5, 2], [610, 640, 5, 3], 1);
         SwipeSlowly([670, 680, 5, 2], [670, 640, 5, 3], 1);
     }
+
+
     console.log("副本：综合提升结束");
 
     return true;
@@ -1867,5 +2136,4 @@ module.exports = {
     ShopBuy, ComprehensiveImprovement, ComprehensiveImprovement_Instance, StrengthenHorseEquipment, IncreaseWeaponFeatures, GuildDonation,
 };
 
-// GetSettlement();
 

@@ -1,7 +1,7 @@
 
 const { PagebackColorList, MenuColorList, MenuCloseColorList, BlueBtnColorList, BackpackColorList,
     SkipColorList, CheckMarkColorList, TipPointColorList, GoldBtnColorList, RedBtnColorList, PopupCloseColorList, BackpackFullColorList,
-    PleaseTapBlankColorList, QuestColorList, Auto_activeColorList, Auto_inactiveColorList,
+    QuestColorList, Auto_activeColorList, Auto_inactiveColorList,
     GreenBtnColorList, NoPotionColorList,
 } = require("./Color/Color.js");
 const { TipColorList, } = require("./Color/MainStoryColorList.js");
@@ -10,6 +10,7 @@ const { TipColorList, } = require("./Color/MainStoryColorList.js");
 const defaultConfig = {
     gameMode: "mainStory",
     delayTime: random(0, 600),
+    unlockTrade: false,
     game: {
         "today": 0,
         "deathTime": 0,
@@ -59,7 +60,7 @@ const popupCloseRegionList = [
     [600, 103, 48, 50], //制作装备详细卡片
     [995, 55, 46, 50], //加入公会 弹窗页面
 ];
-const tapBlankRegionColorList = [
+const tapBlankRegion = [
     [565, 596, 135, 50], //鉴定装备后，点击空白继续
     [570, 630, 150, 50], //获得新能力，点击空白弹窗
     [570, 520, 134, 50], //分解装备，点击空白
@@ -67,11 +68,12 @@ const tapBlankRegionColorList = [
     [568, 514, 147, 62],
 ];
 const ReadImg = (name) => images.read(`./img/${name}.png`);
-const LoadImgList = (url) =>
+const LoadImgList = (url, length) =>
 {
+    length = length || 20;
     const list = [];
     let img = null;
-    for (let i = 0; i < 20; i++)
+    for (let i = 0; i < length; i++)
     {
         img = ReadImg(`${url}/${i}`);
         if (img == null)
@@ -1036,22 +1038,19 @@ const ExitHaltMode = () =>
     return false;
 };
 const LaunchGame = () => app.launch("com.smilegate.lordnine.stove.google");
-
+const HaveToTapBlank = (region, shot) => { shot = shot || captureScreen(); return FindImgInList(tapBlankImgList, region); };
 const TapBlankToContinue = (shot) =>
 {
     shot = shot || captureScreen();
     let hadTapBlank;
-    for (let i = 0; i < tapBlankImgList.length; i++)
+    for (let i = 0; i < tapBlankRegion.length; i++)
     {
-        for (let j = 0; j < tapBlankRegionColorList.length; j++)
+        hadTapBlank = HaveToTapBlank(tapBlankRegion[i], shot);
+        if (hadTapBlank)
         {
-            hadTapBlank = FindImg(tapBlankImgList[i], tapBlankRegionColorList[j], shot);
-            if (hadTapBlank)
-            {
-                console.log("发现需要点击空白处。");
-                PressBlank();
-                return true;
-            }
+            console.log("发现需要点击空白处。");
+            PressBlank();
+            return true;
         }
     }
     return false;
@@ -1075,6 +1074,7 @@ const OpenMenu = () =>
     }
     return false;
 };
+
 const PageBack = (shot) => 
 {
     shot = shot || captureScreen();
@@ -1418,37 +1418,43 @@ const ReadConfig = () =>
 
 };
 const dealFile = "/sdcard/LordNine/dealRecord.json";
-const defaultDeal = {};
-const ReadDealRecord = () =>
+const dailyDiamondRecord = "/sdcard/LordNine/dailyDiamondRecord.json";
+const emptyObj = {};
+const ReadJsonFile = (path) =>
 {
-    const isCreate = files.createWithDirs(dealFile);
+    const isCreate = files.createWithDirs(path);
     if (isCreate)
     {
-        files.write(dealFile, JSON.stringify(defaultDeal, null, 2));
-        return defaultDeal;
+        files.write(path, JSON.stringify(emptyObj));
+        return emptyObj;
     }
     else
     {
         try
         {
-            const deal = files.read(dealFile);
-            if (Object.keys(deal).length === 0)
+            const jsonRecord = files.read(path);
+            if (Object.keys(jsonRecord).length === 0)
             {
                 console.log('JSON文件为空，重新生成默认配置文件');
-                files.write(dealFile, JSON.stringify(defaultDeal, null, 2));
-                return defaultDeal;
+                files.write(path, JSON.stringify(emptyObj));
+                return emptyObj;
             } else
             {
-                return JSON.parse(deal);
+                return JSON.parse(jsonRecord);
             }
         } catch (error)
         {
             console.log("读取文件失败：" + error);
-            files.write(dealFile, JSON.stringify(defaultDeal, null, 2));
-            return defaultDeal;
+            files.write(path, JSON.stringify(emptyObj));
+            return emptyObj;
         }
     }
 };
+const RewriteJsonFile = (path, obj) => files.write(path, JSON.stringify(obj, null, 2));
+
+const ReadDealRecord = () => ReadJsonFile(dealFile);
+const ReadDailyDiamondRecord = () => ReadJsonFile(dailyDiamondRecord);
+
 const ReadAccountFile = () =>
 {
     if (files.exists("/sdcard/disposition.txt"))
@@ -1469,12 +1475,9 @@ const ReadAccountFile = () =>
         alert("读取账号信息失败", "无账号信息");
     }
 };
-const UpdateDealRecord = (dealRecord) =>
-{
-    dealRecord = JSON.stringify(dealRecord, null, 2);
-    files.write(dealFile, dealRecord);
-};
 
+const UpdateDealRecord = (obj) => RewriteJsonFile(dealFile, obj);
+const UpdateDailyDiamondRecord = (obj) => RewriteJsonFile(dailyDiamondRecord, obj);
 
 const RewriteConfig = (config) =>
 {
@@ -1858,14 +1861,14 @@ module.exports = {
     FindBlueBtn, FindTipPoint, FindImg, FindMultiColors, FindCheckMark, FindRedBtn, FindGoldBtn, FindGreenBtn, FindImgInList, FindNumber, FindFloatNumber,
     GoToTheNPC, GetVerificationCode, GetCharacterLv, GetDateTime, GetServerName,
     HasPageback, HasMenu, HasMenuClose, HollowPress, HasSkip, HasBackpackClose, HasBackpackMenuClose, HasPopupClose, HasTip, HaveMainStoryIcon, HasTransformIcon, HaveDailyMissionIcon,
-    HaveFinished, HasMap,
+    HaveFinished, HasMap, HaveToTapBlank,
     IsMoving, IsBackpackFull, IsInCity, IsHaltMode, IsLocked, IsInQuest, IsAuto_active, IsAuto_inactive, IsNoPotion,
     LoadImgList, LaunchGame,
     MatchTemplateList,
     TapBlankToContinue, TapTip,
     OpenMenu, OpenBackpack, OpenBackpackMenu,
     PageBack, PressBlank, PullDownSkill, PressToAuto,
-    RandomPress, ReadImg, ReturnHome, RestartGame, RecycleImgList, ReadConfig, RewriteConfig, ReadDealRecord, ReadAccountFile,
+    RandomPress, ReadImg, ReturnHome, RestartGame, RecycleImgList, ReadConfig, RewriteConfig, ReadDealRecord, ReadAccountFile, ReadDailyDiamondRecord, UpdateDailyDiamondRecord,
     Sleep, SwipeSlowly, StopScript,
     UpdateDealRecord,
     WaitUntil, WaitUntilMenu, WaitUntilPageBack, WaitUntilFindColor,

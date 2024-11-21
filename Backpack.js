@@ -48,16 +48,15 @@ const BackpackItemDetailColorList = {
         ["#202c43", [[26, -6, "#202c43"], [76, 3, "#202c43"], [8, 14, "#202c43"], [51, 15, "#202c43"]]]
     ],
     "purple": [
-        ["#2d2438", [[12, 2, "#2d2438"], [35, 2, "#2d2438"], [34, 16, "#2d2438"], [-6, 20, "#2d2438"]]]
+        ["#2d2438", [[12, 2, "#2d2438"], [35, 2, "#2d2438"], [34, 16, "#2d2438"], [-6, 20, "#2d2438"]]],
+        ["#2d2438", [[17, 3, "#2d2438"], [40, 12, "#2d2438"], [28, 24, "#2d2438"], [3, 19, "#2d2438"]]]
     ]
 
 };
 
 const emptyGridImgList = LoadImgList("backpack/emptyGrid");
-const isEquipedImgList = LoadImgList("backpack/isEquiped");
-const EmptyGridColorList = [
-    ["#131415", [[16, 2, "#181618"], [32, 2, "#151618"], [0, 15, "#151518"], [19, 17, "#18181b"], [30, 17, "#181818"], [6, 28, "#161718"], [22, 29, "#181818"], [38, 31, "#151518"]]]
-];
+// const isEquipedImgList = LoadImgList("backpack/isEquiped");
+
 
 const DetailOnColorList = [
     ["#1d5d55", [[5, 0, "#1d5d55"], [10, 3, "#1d5d55"], [0, 4, "#1d5d55"], [6, 8, "#1d5d55"]]]
@@ -105,96 +104,6 @@ const SingleStrengthen = () =>
  */
 const IsMultipleBox = () => FindBlueBtn([646, 506, 177, 59]);
 
-/**
- * 
- * @param {string} type "weapon" "armor" 
- */
-const OpenEquipmentBox = (type) =>
-{
-    let equipmentImgList = LoadImgList(`backpack/box/${type}Box`);
-    let tapRegion = null;
-    let hasOpenedBox = false;
-
-    if (type == "weapon")
-    {
-        tapRegion = [518, 359, 39, 36];
-        console.log("打开武器箱子");
-    }
-    else if (type == "armor")
-    {
-        tapRegion = [660, 294, 33, 31];
-        console.log("打开防具箱子");
-    }
-
-    let hasEquipment = null;
-    const shot = captureScreen();
-    for (let i = 0; i < equipmentImgList.length; i++)
-    {
-        hasEquipment = FindImg(equipmentImgList[i], [933, 158, 258, 438], shot);
-        if (hasEquipment)
-        {
-            RandomPress([hasEquipment.x, hasEquipment.y, 30, 30]);
-            RandomPress([hasEquipment.x, hasEquipment.y, 30, 30]);
-            if (IsMultipleBox())
-            {
-                RandomPress([666, 520, 138, 30]);
-            }
-            console.log("wait until popup close " + tapRegion);
-            if (WaitUntil(() => HasPopupClose([823, 211, 35, 38]), 10, 500))
-            {
-                console.log("has popup");
-                RandomPress(tapRegion);
-            }
-            if (FindBlueBtn([537, 438, 206, 67]))
-            {
-                RandomPress([561, 456, 161, 32]);
-                PressBlank();
-                hasOpenedBox = true;
-            }
-        }
-    }
-    RecycleImgList(equipmentImgList);
-    return hasOpenedBox;
-};
-
-const OpenPropsBox = (type) =>
-{
-    console.log("fn：打开箱子：" + type);
-    type = type || "propsBox";
-    const PropsImgList = LoadImgList(`backpack/box/${type}`);
-    let hasOpenPropsBox = false;
-    let hasPropsBox = null;
-    let shot = captureScreen();
-    for (let i = 0; i < 5; i++)
-    {
-        hasPropsBox = FindImgInList(PropsImgList, [925, 147, 269, 269], shot);
-        if (hasPropsBox)
-        {
-            RandomPress([hasPropsBox.x, hasPropsBox.y, 30, 30]);
-            RandomPress([hasPropsBox.x, hasPropsBox.y, 30, 30]);
-            if (IsMultipleBox())
-            {
-                RandomPress([666, 520, 138, 30]);
-            }
-            Sleep(2);
-            RandomPress([423, 143, 374, 190], 2);//press blank
-            hasOpenPropsBox = true;
-            shot = captureScreen();
-        }
-        else
-        {
-            hasOpenPropsBox = false;
-        }
-        if (!hasOpenPropsBox)
-        {
-            break;
-        }
-        Sleep();
-    }
-
-    RecycleImgList(PropsImgList);
-    return hasOpenPropsBox;
-};
 
 const OpenSkillBook = () =>
 {
@@ -210,6 +119,7 @@ const OpenSkillBook = () =>
     let hasOpened = false;
     const skillBookImgList = LoadImgList("backpack/skillBook");
     const unableToUse = LoadImgList("backpack/unableToUse");
+    const haveLearned = LoadImgList("backpack/haveLearned");
     for (let i = 0; i < skillBookImgList.length; i++)
     {
         hasSkillBook = FindImg(skillBookImgList[i], [931, 160, 260, 445]);
@@ -222,10 +132,34 @@ const OpenSkillBook = () =>
             }
             RandomPress([hasSkillBook.x, hasSkillBook.y, 30, 30]);
             RandomPress([hasSkillBook.x, hasSkillBook.y, 30, 30]);
-            hasOpened = true;
+            if (FindImgInList(haveLearned, [569, 97, 131, 51]))
+            {
+                console.log("已经学会该技能，丢弃该技能书");
+                RandomPress([992, 663, 20, 26]);
+                for (let i = 0; i < 10; i++)
+                {
+                    if (FindBlueBtn([649, 451, 171, 61]))
+                    {
+                        console.log("确认丢弃");
+                        RandomPress([672, 468, 127, 25]);
+                    }
+                    else if (FindBlueBtn([651, 520, 166, 51]))
+                    {
+                        console.log("确认丢弃所有");
+                        RandomPress([667, 530, 133, 27]);
+                    }
+                }
+
+            }
+            else
+            {
+                hasOpened = true;
+            }
         }
     }
     RecycleImgList(skillBookImgList);
+    RecycleImgList(unableToUse);
+    RecycleImgList(haveLearned);
     Sleep();
     console.log("结束，是否使用技能书： " + hasOpened);
 
@@ -330,6 +264,152 @@ const UseHolyGrail = () =>
     return hasUsedHolyGrail;
 };
 
+
+const OpenNoOptionBox = () =>
+{
+    console.log("fn: 打开道具箱子");
+    if (!OpenBackpack("props"))
+    {
+        return false;
+    }
+    const PropsImgList = LoadImgList('backpack/box/propsBox', 30);
+    const openBoxPopupImgList = LoadImgList("backpack/box/font/openBoxPopup");
+
+    let hasOpenPropsBox = false;
+    let hasPropsBox = null;
+    let shot = captureScreen();
+    for (let i = 0; i < 5; i++)
+    {
+        hasPropsBox = FindImgInList(PropsImgList, [925, 147, 269, 269], shot);
+        if (hasPropsBox)
+        {
+            RandomPress([hasPropsBox.x, hasPropsBox.y, 30, 30]);
+            RandomPress([hasPropsBox.x, hasPropsBox.y, 30, 30]);
+            if (IsMultipleBox())
+            {
+                RandomPress([666, 520, 138, 30]);
+            }
+            console.log("等待弹窗出现。");
+            if (WaitUntil(() => FindImgInList(openBoxPopupImgList, [552, 150, 171, 94])))
+            {
+                RandomPress([479, 357, 303, 192], 2);//press blank
+                console.log("open successfully");
+                hasOpenPropsBox = true;
+                shot = captureScreen();
+            }
+
+        }
+        else
+        {
+            hasOpenPropsBox = false;
+        }
+        if (!hasOpenPropsBox)
+        {
+            break;
+        }
+        Sleep();
+    }
+
+    RecycleImgList(PropsImgList);
+    RecycleImgList(openBoxPopupImgList);
+    if (IsMultipleBox())
+    {
+        RandomPress([666, 520, 138, 30]);
+    }
+    return hasOpenPropsBox;
+};
+const OpenOptionalBox = () =>
+{
+    console.log("fn：打开可选择箱子");
+    if (!OpenBackpack("props"))
+    {
+        console.log("open backpack failed");
+        return false;
+    }
+    const optionalBoxItemRegion = [
+        [515, 283, 39, 38],
+        [589, 283, 36, 41],
+        [661, 286, 35, 37],
+        [731, 284, 35, 41],
+        [518, 358, 36, 34],
+    ];
+
+    const type_0 = LoadImgList("backpack/box/optionalBoxType/0");
+    const type_2 = LoadImgList("backpack/box/optionalBoxType/2");
+    const type_4 = LoadImgList("backpack/box/optionalBoxType/4");
+
+    const openBoxPopupImgList = LoadImgList("backpack/box/font/openBoxPopup");
+    const optionalBoxImgList = LoadImgList("backpack/box/optionalBox", 30);
+
+    const backpackRegion = [924, 152, 267, 451];
+    const getOptionalType = () =>
+    {
+
+        const region = [617, 297, 272, 106];
+        const shot = captureScreen();
+        let type = -1;
+        if (FindImgInList(type_0, region, shot))
+        {
+            type = 0;
+        }
+        else if (FindImgInList(type_2, region, shot))
+        {
+            type = 2;
+        }
+        else if (FindImgInList(type_4, region, shot))
+        {
+            type = 4;
+        }
+        return type;
+    };
+    let haveOpened = false;
+    for (let i = 0; i < 5; i++)
+    {
+        let haveBox = FindImgInList(optionalBoxImgList, backpackRegion);
+        if (haveBox)
+        {
+            RandomPress([haveBox.x, haveBox.y, 20, 20]);
+            let type = getOptionalType();
+            if (type != -1)
+            {
+                RandomPress([849, 596, 51, 24]); //use
+                if (IsMultipleBox())
+                {
+                    RandomPress([666, 520, 138, 30]);
+                }
+                if (WaitUntil(() => HasPopupClose([816, 208, 46, 45])))
+                {
+                    console.log("选择:" + (type + 1) + "个");
+                    RandomPress(optionalBoxItemRegion[type]);
+                    if (FindBlueBtn([542, 439, 201, 66]))
+                    {
+                        console.log("确认");
+                        RandomPress([566, 455, 145, 31]);
+                        console.log("等待弹窗出现。");
+                        if (WaitUntil(() => FindImgInList(openBoxPopupImgList, [552, 150, 171, 94])))
+                        {
+                            RandomPress([479, 357, 303, 192], 2);//press blank
+                            console.log("open successfully");
+                            haveOpened = true;
+                        }
+                    }
+                }
+            }
+        }
+        else
+        {
+            break;
+        }
+        Sleep();
+    }
+    RecycleImgList(type_0);
+    RecycleImgList(type_2);
+    RecycleImgList(type_4);
+    RecycleImgList(openBoxPopupImgList);
+    RecycleImgList(optionalBoxImgList);
+    return haveOpened;
+};
+
 const OpenAllBox = () =>
 {
     if (!OpenBackpack("props", true))
@@ -338,13 +418,10 @@ const OpenAllBox = () =>
         return false;
     }
     Sleep();
-    let hasOpenedWeaponBox = OpenEquipmentBox("weapon");
-    let hasOpenedArmorBox = OpenEquipmentBox("armor");
 
-    OpenPropsBox("propsBox");
-    OpenPropsBox("activities");
-    OpenPropsBox("specialProps");
+    const haveNoOptionBox = OpenNoOptionBox();
 
+    const haveOpenOptionalBox = OpenOptionalBox();
     const hasOpenSkill = OpenSkillBook();
 
     const hasOpenSuit = OpenSuit();
@@ -352,9 +429,9 @@ const OpenAllBox = () =>
     UseHolyGrail();
     Sleep();
     console.log("结束：已打开所有箱子");
-    if (hasOpenedWeaponBox || hasOpenedArmorBox)
+    if (haveNoOptionBox || haveOpenOptionalBox)
     {
-        console.log("有装备箱子被打开，优先穿装备");
+        console.log("已打开，优先穿装备");
         WearEquipments();
     }
     if (hasOpenSkill)
@@ -366,6 +443,10 @@ const OpenAllBox = () =>
     {
         console.log("had open suit card, start to wear suit");
         WearBestSuit();
+    }
+    if (HasPopupClose([817, 203, 46, 54]))
+    {
+        RandomPress([829, 216, 22, 25]);
     }
     return true;
 };
@@ -728,19 +809,19 @@ const AutoReleaseSkill = () =>
     PullDownSkill([540, 650]);
     RandomPress([532, 653, 33, 35]);
     //
-    const config = ReadConfig();
-    if (config.game.lv >= 45)
-    {
-        RandomPress([1133, 302, 32, 38]);
-        RandomPress([594, 650, 32, 36]);
-        PullDownSkill([610, 650]);
-        RandomPress([594, 650, 32, 36]);
-        //
-        RandomPress([946, 365, 32, 35]);
-        RandomPress([657, 651, 33, 37]);
-        PullDownSkill([670, 650]);
-        RandomPress([657, 651, 33, 37]);
-    }
+    // const config = ReadConfig();
+    // if (config.game.lv >= 45)
+    // {
+    //     RandomPress([1133, 302, 32, 38]);
+    //     RandomPress([594, 650, 32, 36]);
+    //     PullDownSkill([610, 650]);
+    //     RandomPress([594, 650, 32, 36]);
+    //     //
+    //     RandomPress([946, 365, 32, 35]);
+    //     RandomPress([657, 651, 33, 37]);
+    //     PullDownSkill([670, 650]);
+    //     RandomPress([657, 651, 33, 37]);
+    // }
 
     if (HasPopupClose([1208, 102, 38, 42]))
     {
@@ -975,13 +1056,14 @@ const DecomposeEquipment = (type) =>
         console.log("修改自动登录设置");
         RandomPress([1099, 616, 30, 26]); //设置图标
         WaitUntil(() => HasPopupClose([865, 125, 35, 34]));
+        Sleep();
         if (type == "total")
         {
             console.log("全部分解");
             if (!FindCheckMark([651, 234, 64, 38]))
             {
                 console.log("分解蓝色装备");
-                RandomPress([664, 245, 55, 15]);
+                RandomPress([667, 230, 42, 13]);
             }
         }
         else if (type == "partial")
@@ -990,7 +1072,7 @@ const DecomposeEquipment = (type) =>
             if (FindCheckMark([651, 234, 64, 38]))
             {
                 console.log("取消蓝色装备");
-                RandomPress([664, 245, 55, 15]);
+                RandomPress([667, 230, 42, 13]);
             }
             if (FindCheckMark([774, 214, 39, 47]))
             {

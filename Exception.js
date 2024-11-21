@@ -35,8 +35,7 @@ let randomTimeToClearBackpack = random(120, 180);
 let lastGetVerificationCodeTime = 0;
 let totalGetVerificationCodeTimes = 0;
 
-let lastGetFullScreen = new Date().getTime(); // 异常判断，每10分钟截屏一次
-let fullScreenClip = null;
+
 
 let lastResetConfigTime = 1726208812345;
 
@@ -204,7 +203,7 @@ const DisconnectionFlow = (shot) =>
 {
     if (FindBlueBtn([556, 430, 167, 55], shot) || FindBlueBtn([530, 436, 215, 77], shot))
     {
-        let hasDisconnection = FindImgInList(ExceptionImgList.disconnection, [551, 222, 172, 65], shot);
+        let hasDisconnection = FindImgInList(ExceptionImgList.disconnection, [554, 188, 180, 124], shot);
         if (hasDisconnection)
         {
             console.log("@游戏断开连接");
@@ -317,13 +316,17 @@ const MainUIFlow = (shot) =>
     {
         if (FindMultiColors(WhiteAvatarColorList, [32, 600, 52, 49], shot))
         {
+            Sleep(random(1, 10));
             PressBlank();
+            Sleep(5);
             console.log("点击开始游戏 有区服的主页面");
         }
         else
         {
             console.log("点击开始 主页面");
+            Sleep(random(1, 10));
             PressBlank();
+            Sleep(5);
         }
     }
 };
@@ -492,28 +495,6 @@ const PressSomeTip = (shot) =>
         RandomPress([947, 171, 38, 34]);
     }
 };
-const LongTimeSamePage = (shot) =>
-{
-    if (fullScreenClip == null)
-    {
-        fullScreenClip = shot;
-        return true;
-    }
-    let screenInterval = (new Date().getTime() - lastGetFullScreen) / 1000;
-    console.log("screen interval:" + screenInterval);
-    if (screenInterval > 10)
-    {
-        console.log("全屏截图");
-        lastGetFullScreen = new Date().getTime();
-        let isSame = FindImg(fullScreenClip);
-        console.log("当前页面是否无变化：" + isSame);
-        if (isSame)
-        {
-            console.log("10分钟了，屏幕内容一样，重启游戏。");
-            RestartGame("com.smilegate.lordnine.stove.google");
-        }
-    }
-};
 
 const PressCommonBtn = () =>
 {
@@ -531,14 +512,29 @@ const PressCommonBtn = () =>
             RandomPress([1030, 659, 95, 34]);
         }
     }
-    if (FindBlueBtn([657, 382, 203, 68], shot))
+    if (FindBlueBtn([657, 443, 192, 65], shot))
     {
-        if (FindImgInList(ExceptionImgList.quickMoving, [657, 443, 198, 65], shot))
+        if (FindImgInList(ExceptionImgList.quickMoving, [565, 203, 142, 59], shot))
         {
             console.log("快速移动按钮...");
             RandomPress([677, 458, 155, 30], 5);
         }
+        else if (FindImgInList(ExceptionImgList.confirmToGo, [492, 330, 298, 63], shot))
+        {
+            console.log("确定要前往新地图吗？");
+            console.log("点击确认");
+            RandomPress([680, 459, 149, 32]);
+        }
+        else if (FindBlueBtn([655, 443, 197, 65], shot))
+        {
+            if (FindRedBtn([429, 445, 200, 63], shot))
+            {
+                console.log("发现申请加入工会弹窗，点击确认");
+                RandomPress([678, 460, 156, 30]);
+            }
+        }
     }
+
     if (FindBlueBtn([655, 380, 207, 68], shot))
     {
         if (FindRedBtn([423, 380, 204, 69], shot))
@@ -565,66 +561,18 @@ const PressCommonBtn = () =>
         }
 
     }
-    if (FindBlueBtn([655, 443, 197, 65], shot))
-    {
-        if (FindRedBtn([429, 445, 200, 63], shot))
-        {
-            console.log("发现申请加入工会弹窗，点击确认");
-            RandomPress([678, 460, 156, 30]);
-        }
-    }
+
     if (FindBlueBtn([487, 621, 307, 76], shot))
     {
-        const joinGuildPageImgList = LoadImgList("icon/beginner/growthMission/joinGuild");
-        const hasGuildPage = FindImgInList(joinGuildPageImgList, [561, 644, 72, 69], shot);
-        if (hasGuildPage)
-        {
-            console.log("成长任务 6: 加入公会");
-            if (HasTip([446, 494, 70, 44], shot))
-            {
-                RandomPress([536, 659, 213, 35]);
-            }
-            const RightOnJoinGuildImg = ReadImg('icon/font/rightNow');
-            const FindStraightAwayBtn = (region) => FindImg(RightOnJoinGuildImg, region);
-            let hasStrBtn = false;
-            for (let i = 0; i < 15; i++)
-            {
-                hasStrBtn = FindStraightAwayBtn([1136, 199, 54, 353]);
-                if (!hasStrBtn)
-                {
-                    SwipeSlowly([492, 516, 76, 27], [496, 210, 70, 25], 4);
-                }
-                else
-                {
-                    console.log("发现立即加入的按钮" + hasStrBtn);
-                    RandomPress([hasStrBtn.x - 20, hasStrBtn.y, 100, 20]);
-                    Sleep(3);
-                    RandomPress([1228, 19, 21, 21]);
-                }
-            }
-            RightOnJoinGuildImg.recycle();
-            RecycleImgList(joinGuildPageImgList);
-            Sleep();
-            RandomPress([1228, 20, 36, 25]);
-        }
-        const blueBtnImgList = LoadImgList("blueBtn/confirmBtn");
+        const blueBtnImgList = LoadImgList("icon/font/confirmBtn");
         if (FindImgInList(blueBtnImgList, [588, 621, 99, 74]))
         {
             console.log("发现制作核萌的确认按钮，点击确认");
             RandomPress([529, 637, 226, 37]);
         }
         RecycleImgList(blueBtnImgList);
-        RecycleImgList(joinGuildPageImgList);
     }
-    if (FindBlueBtn([655, 445, 196, 66], shot))
-    {
-        if (FindImgInList(ExceptionImgList.confirmToGo, [492, 330, 298, 63], shot))
-        {
-            console.log("确定要前往新地图吗？");
-            console.log("点击确认");
-            RandomPress([680, 459, 149, 32]);
-        }
-    }
+
 };
 const PickMissionFinishAward = () =>
 {
@@ -651,11 +599,6 @@ const MakeSureInGame = (shot) =>
             {
                 RandomPress([544, 609, 202, 34]);
             }
-        }
-        if (IsHaltMode())
-        {
-            ExitHaltMode();
-            ChangeGameSetting();
         }
     }
     else

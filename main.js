@@ -5,8 +5,8 @@ const { MainStoryFlow } = require("./MainStory.js");
 
 const { InstanceFlow } = require("./Instance.js");
 
-const version = "2024/11/18 15:59";
-const versionColor = "#fce38a";
+const version = "2024/11/20 18:20";
+const versionColor = "#7FFFD4";
 let mainThread = null;
 let serverName = null;
 
@@ -318,15 +318,31 @@ const UI = () =>
     }, 3000);
 
 };
+
+const config = ReadConfig();
+if (!config.gameMode)
+{
+    config.gameMode = "mainStory";
+    RewriteConfig(config);
+}
+let gameMode = config.gameMode;
+
 const uiFloaty = () =>
 {
     const floatyWindow = floaty.window(
-        <card gravity="center" alpha="1" cardBackgroundColor="#71c9ce" cardCornerRadius="10">
-            <linear orientation="vertical" gravity="center">
-                <button id="start" h="40" w="120" color="#ffffff" bg="#a6e3e9" margin="15 10" >开始</button>
+        <card gravity="center|top" alpha="1" cardBackgroundColor="#71c9ce" cardCornerRadius="10">
+            <vertical gravity="center|top">
+                <button id="start" h="40" w="120" color="#ffffff" bg="#a6e3e9" marginTop="15" >开始</button>
                 <text id="delayTime" h='0' gravity="center" color="#ffffff" textSize="40sp"></text>
-                <button id="update" color="#ffffff" w="120" h="40" margin="5 10" bg="#a6e3e9">更新</button>
-                <button id="stop" color="#ffffff" w="120" h="40" margin="5 10" bg="#a6e3e9">停止</button>
+                <text id="more" textSize="20" h="25" gravity="center" marginTop="5">✡</text>
+            </vertical>
+            <vertical id="more_container" gravity="center|bottom" h="0">
+                <button id="update" color="#ffffff" w="120" h="40" bg="#a6e3e9">更新</button>
+                <button id="stop" color="#ffffff" w="120" h="40" marginTop="15" bg="#a6e3e9">停止</button>
+                <radiogroup orientation="horizontal" gravity="center" color="#ffffff">
+                    <radio id="mainStory" text="主线" textSize="10" checked="{{gameMode == 'mainStory' ? true : false}}" />
+                    <radio id="instance" text="挂机" textSize="10" checked="{{gameMode == 'instance' ? true : false}}" />
+                </radiogroup>
                 <linear orientation="horizontal" gravity="center">
                     <text id="createCharacter" w="60" textSize="8" color="#ffffff" >创建角色</text>
                     <text textSize="10" textStyle="italic" color={versionColor}>版本：{version}</text>
@@ -335,37 +351,21 @@ const uiFloaty = () =>
                     <text id="downloadAutoJs" textSize="10">下载autojs</text>
 
                 </linear>
-
-            </linear>
-
-
+            </vertical>
         </card>
     );
 
-    floatyWindow.setSize(400, 600);
+    floatyWindow.setSize(400, 270);
     floatyWindow.setPosition(185, 300);
 
     const uiInterval = setInterval(() => { }, 1000);
 
-    const config = ReadConfig();
 
-    if (!config.gameMode)
-    {
-        if (config.game.vm)
-        {
-            config.gameMode = "instance";
-        }
-        else
-        {
-            config.gameMode = "mainStory";
-        }
-        RewriteConfig(config);
-    }
+
     if (!config.delayTime)
     {
         config.delayTime = random(3, 1000);
         RewriteConfig(config);
-
     }
     specialConfig.gameMode = config.gameMode;
     specialConfig.initGameMode = config.gameMode;
@@ -413,9 +413,32 @@ const uiFloaty = () =>
             floatyWindow.close();
         }, (delayTime + 1) * 1000);
     });
+
+    floatyWindow.more.click(() =>
+    {
+        floatyWindow.setSize(400, 520);
+        floatyWindow.more_container.attr("h", 230);
+        floatyWindow.more.attr("h", 0);
+    });
+
     floatyWindow.update.click(UpdateScript);
     floatyWindow.stop.click(StopScript);
+    floatyWindow.mainStory.click(() =>
+    {
+        gameMode = "mainStory";
+        config.gameMode = "mainStory";
+        RewriteConfig(config);
+
+    });
+    floatyWindow.instance.click(() =>
+    {
+        gameMode = "instance";
+        config.gameMode = "instance";
+        RewriteConfig(config);
+
+    });
     floatyWindow.downloadAutoJs.click(DownloadAutoJs);
+
 };
 console.setGlobalLogConfig({
     "file": "/sdcard/LordNine/log.txt",

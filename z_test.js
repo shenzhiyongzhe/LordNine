@@ -42,6 +42,8 @@ const { LoadImgList, HaveDailyMissionIcon, IsHaltMode, FindImgInList, FindNumber
     HasPopupClose,
     IsLocked,
     FindBlueBtn,
+    FindRedBtn,
+    FindTipPoint,
 } = require("./utils.js");
 
 
@@ -275,12 +277,16 @@ function 关闭应用(packageName)
 // console.log(FindImgInList(skillBookImgList, [76, 310, 79, 87]));
 // const unableToUse = LoadImgList("backpack/unableToUse");
 // console.log(FindImgInList(unableToUse, [922, 268, 46, 53]));
-// const type = "propsBox";
+// const type = "propsBox_selected_three";
 // const PropsImgList = LoadImgList(`backpack/box/${type}`);
-// console.log(FindImgInList(PropsImgList, [990, 156, 68, 68]));
+// console.log(FindImgInList(PropsImgList, [989, 339, 134, 72]));
 // let curCombatPower = FindNumber("combatPower", [1141, 535, 115, 47]);
 // console.log("当前战力为：" + curCombatPower);
 // SwipeSlowly([670, 680, 5, 2], [670, 640, 5, 3], 1); let requireCombatPower = FindNumber("combatPower", [1143, 494, 108, 45]);
 // console.log(curCombatPower + "  >>>  " + requireCombatPower);
 
-console.log(FindBlueBtn([539, 647, 204, 66]));
+// console.log(FindBlueBtn([539, 647, 204, 66]));
+// SwipeSlowly([610, 680, 5, 2], [610, 640, 5, 3], 1);
+// SwipeSlowly([670, 680, 5, 2], [670, 640, 5, 3], 1);
+// const thirdPos = LoadImgList("backpack/box/optionalBox/2");
+// console.log(FindImgInList(thirdPos, [1056, 339, 70, 76]));
