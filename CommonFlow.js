@@ -1,37 +1,31 @@
 
 const {
+    specialConfig,
     ClickSkip, CloseMenu, CloseBackpack, ClearPage,
     EnterMenuItemPage, ExitHaltMode,
     FindBlueBtn, FindTipPoint, FindCheckMark, FindRedBtn, FindGoldBtn, FindGreenBtn, FindNumber, FindImgInList, FindFloatNumber, FindImg,
     GetDateTime, GoToTheNPC, GetServerName, GetCharacterLv,
-    HasMenu, HasPageback, HasPopupClose, HasSkip, HasMenuClose, HasTip,
+    HasMenu, HasPageback, HasPopupClose, HasSkip, HasMenuClose, HasTip, HaveToTapBlank,
     IsBackpackFull, IsHaltMode, IsInCity,
-    ReadImg, RandomPress, Sleep, FindMultiColors, OpenMenu,
+    FindMultiColors,
+    LoadImgList,
 
     WaitUntilPageBack,
-    SwipeSlowly,
+    SwipeSlowly, Sleep,
 
     PressBlank, WaitUntil,
     TapBlankToContinue, PullDownSkill, ReadConfig, RewriteConfig, PageBack,
 
-    OpenBackpack,
-    LoadImgList,
+    OpenBackpack, OpenMenu,
 
-    RecycleImgList,
+    ReadDealRecord, ReadAccountFile, RecycleImgList, ReadDailyDiamondRecord, ReadTradeRecord, ReadImg, RandomPress, ReturnHome,
 
-    ReadDealRecord, ReadAccountFile,
-    UpdateDealRecord,
-
-    ReturnHome,
-    specialConfig,
-    HaveToTapBlank,
-    ReadDailyDiamondRecord,
-    UpdateDailyDiamondRecord,
+    UpdateTradeRecord,
 
 
 } = require("./utils.js");
 
-const { IsEmpty, WearEquipments, StrengthenEquipment, OpenAllBox, UseHolyGrail, DecomposeEquipment, WearBestSuit, CheckSkillAutoRelease } = require("./Backpack.js");
+const { IsEmpty, WearEquipments, StrengthenEquipment, OpenAllBox, UseHolyGrail, DecomposeEquipment, WearBestSuit, CheckSkillAutoRelease, BuyCloak } = require("./Backpack.js");
 
 let lastComprehensiveImproveTime = 1726208812345;
 
@@ -229,7 +223,7 @@ const GetActivitiesAward = () =>
         return false;
     }
     Sleep(3);
-    let hasAvaluableItem;
+    let haveAvailable;
     for (let i = 0; i < 10; i++)
     {
         let hasTipPoint = FindTipPoint([286, 113, 35, 403]);
@@ -239,11 +233,17 @@ const GetActivitiesAward = () =>
             let pageShot = captureScreen();
             for (let i = 0; i < 7; i++)
             {
-                hasAvaluableItem = FindTipPoint([425 + i * 116, 265, 45, 260], pageShot);
-                if (hasAvaluableItem)
+                haveAvailable = FindTipPoint([425 + i * 116, 265, 45, 260], pageShot);
+                if (FindTipPoint([1137, 159, 45, 50], pageShot))
+                {
+                    console.log("领取最终奖励")
+                    RandomPress([1106, 188, 46, 50])
+                    RandomPress([602, 173, 274, 105])
+                }
+                if (haveAvailable)
                 {
                     console.log("发现可领取物品，点击领取");
-                    RandomPress([hasAvaluableItem.x - 50, hasAvaluableItem.y, 50, 50], 3);
+                    RandomPress([haveAvailable.x - 50, haveAvailable.y, 50, 50], 3);
                     PressBlank();
                     hadPickAward = true;
                     if (HasPopupClose([746, 97, 44, 48]))
@@ -568,7 +568,7 @@ const ShopBuy = () =>
     if (hadDailyShop)
     {
         const config = ReadConfig();
-        config.game.dailyShop = true;
+        config.daily.dailyShop = true;
         RewriteConfig(config);
     }
     return hadDailyShop;
@@ -629,7 +629,7 @@ const FriendShipShop = () =>
         Sleep();
     }
     const config = ReadConfig();
-    config.game.friendshipShop = true;
+    config.daily.friendshipShop = true;
     RewriteConfig(config);
     console.log("友好度商人购买结束");
 };
@@ -701,7 +701,7 @@ const IncreaseWeaponFeatures = () =>
             }
         }
     };
-    for (let i = 0; i < clickSkillTime; i++)
+    for (let i = 0; i < 3; i++)
     {
         RandomPress([197, 300 + i * 82, 146, 40]);
 
@@ -711,21 +711,21 @@ const IncreaseWeaponFeatures = () =>
         }
 
     }
-    if (skillNumber >= 5)
-    {
-        SwipeSlowly([280, 580, 40, 10], [280, 310, 40, 10], 1);
-        SwipeSlowly([280, 580, 40, 10], [280, 310, 40, 10], 1);
-        for (let i = 0; i < skillNumber - 4; i++)
-        {
-            RandomPress([197, 300 + i * 82, 146, 40]);
+    // if (skillNumber >= 5)
+    // {
+    //     SwipeSlowly([280, 580, 40, 10], [280, 310, 40, 10], 1);
+    //     SwipeSlowly([280, 580, 40, 10], [280, 310, 40, 10], 1);
+    //     for (let i = 0; i < skillNumber - 4; i++)
+    //     {
+    //         RandomPress([197, 300 + i * 82, 146, 40]);
 
-            for (let j = 0; j < 3; j++)
-            {
-                ActivateSkill(i + 4, j);
-            }
+    //         for (let j = 0; j < 3; j++)
+    //         {
+    //             ActivateSkill(i + 4, j);
+    //         }
 
-        }
-    }
+    //     }
+    // }
     PageBack();
     RecycleImgList(activateImgList);
     return true;
@@ -1079,6 +1079,7 @@ const UpgradeHolyRelics = () =>
 };
 const AddAttributePoint = () =>
 {
+    ClearPage();
     const abilityPointPlus = LoadImgList("backpack/abilityPointPlus");
 
     if (!FindImgInList(abilityPointPlus, [620, 467, 40, 40]))
@@ -1130,9 +1131,12 @@ const IsExchangeUnLock = () =>
         console.log("交易所已解开");
         config.gameMode = "instance";
         config.unlockTrade = true;
+        specialConfig.gameMode = "instance"
+        specialConfig.initGameMode = "instance"
         RewriteConfig(config);
-        alert("成号", "交易所已解开");
-        java.lang.System.exit(0);
+        GetSettlement()
+        // alert("成号", "交易所已解开");
+        // java.lang.System.exit(0);
     }
     else
     {
@@ -1243,7 +1247,7 @@ const GuildDonation = () =>
                     RandomPress([932, 90, 23, 24]);
 
                     const config = ReadConfig();
-                    config.game.guildDonation = true;
+                    config.daily.guildDonation = true;
                     RewriteConfig(config);
                     break;
                 }
@@ -1291,7 +1295,7 @@ const FriendshipDonation = () =>
 
     let haveDonated = false;
     const config = ReadConfig();
-    if (!config.game.friendshipDonation)
+    if (!config.daily.friendshipDonation)
     {
         console.log("今日未捐献");
         if (!EnterMenuItemPage('friendlinessLevel'))
@@ -1349,7 +1353,7 @@ const FriendshipDonation = () =>
 
         if (haveDonated)
         {
-            config.game.friendshipDonation = true;
+            config.daily.friendshipDonation = true;
             console.log("友好度捐献完成");
             RewriteConfig(config);
         }
@@ -1445,23 +1449,21 @@ const GetSettlement = () =>
             PageBack();
         }
     }
-
+    if (!beforeSettleDiamond)
+    {
+        beforeSettleDiamond = 0;
+    }
     let afterSettleDiamond = beforeSettleDiamond;
     if (hadSettled)
     {
         afterSettleDiamond = GetCurrentDiamond();
     }
-
-    console.log("结算后钻石：" + afterSettleDiamond);
-
-    if (!beforeSettleDiamond)
-    {
-        beforeSettleDiamond = 0;
-    }
     if (!afterSettleDiamond)
     {
-        afterSettleDiamond = 0;
+        afterSettleDiamond = beforeSettleDiamond;
     }
+    console.log("结算后钻石：" + afterSettleDiamond);
+
 
     let settlement = afterSettleDiamond - beforeSettleDiamond;
 
@@ -1471,12 +1473,21 @@ const GetSettlement = () =>
     //查看总钻石并保存数据至脚本
 
     const dealRecord = ReadDealRecord();
-    dealRecord[GetDateTime()] = settlement;
-    UpdateDealRecord(dealRecord);
 
     const dailyDiamond = ReadDailyDiamondRecord();
-    dailyDiamond[GetDateTime()] = afterSettleDiamond;
-    UpdateDailyDiamondRecord(dailyDiamond);
+
+    const tradeRecord = ReadTradeRecord()
+    for (let key in dealRecord)
+    {
+        let arr = [dealRecord[key], 0]
+        if (dailyDiamond[key] != undefined)
+        {
+            arr[1] = dailyDiamond[key]
+        }
+        tradeRecord[key] = arr
+    }
+    tradeRecord[GetDateTime()] = [settlement, afterSettleDiamond];
+    UpdateTradeRecord(tradeRecord)
 
     const date = new Date();
     const month = date.getMonth() + 1;
@@ -1484,7 +1495,7 @@ const GetSettlement = () =>
 
     let monthlyIncome = 0;
 
-    const currentMonthData = Object.keys(dealRecord).filter(key =>
+    const currentMonthData = Object.keys(tradeRecord).filter(key =>
     {
         let time = key.split("_");
         if (year == time[0] && month == time[1])
@@ -1497,15 +1508,18 @@ const GetSettlement = () =>
         }
     });
 
-    currentMonthData.map(key => monthlyIncome += dealRecord[key]);
+    currentMonthData.map(key => monthlyIncome += tradeRecord[key][0]);
 
     const config = ReadConfig();
 
-    if (!config.game.vm)
+    if (!config.googleAccount)
     {
         const account = ReadAccountFile();
         config.game.vm = account[3];
+        config.googleAccount = account[0];
+        config.googlePassword = account[1]
     }
+
     config.game.vm = config.game.vm.replace(/\n/g, '');
 
     if (!config.game.serverName)
@@ -1545,14 +1559,15 @@ const GetSettlement = () =>
         combatPower: config.game.combatPower,
         diamond: afterSettleDiamond,
         monthlyIncome: monthlyIncome,
-        historyDealRecord: JSON.stringify(dealRecord)
+        historyDealRecord: JSON.stringify(tradeRecord),
+        config: config
     };
-    console.log("postData: " + JSON.stringify(postData));
 
     try
     {
         console.log("发送数据给后台");
         const res = http.post("http://47.76.112.107:8001/devices", postData);
+        // const res = http.post("http://10.6.130.129:8001/devices", postData);
         if (res.statusCode == 200)
         {
             console.log("发送数据成功");
@@ -1735,19 +1750,19 @@ const DailyQuest = () =>
     GetCommonAward();
     const config = ReadConfig();
 
-    if (!config.game.guildDonation)
+    if (!config.daily.guildDonation)
     {
         GuildDonation();
     }
-    if (!config.game.friendshipDonation)
+    if (!config.daily.friendshipDonation)
     {
         FriendshipDonation();
     }
-    if (!config.game.dailyShop)
+    if (!config.daily.dailyShop)
     {
         ShopBuy();
     }
-    if (!config.game.friendshipShop)
+    if (!config.daily.friendshipShop)
     {
         FriendShipShop();
     }
@@ -1912,7 +1927,7 @@ const UnSealEngraving = () =>
         ["#99fe49", [[0, 1, "#99fd48"], [0, 2, "#8ce943"]]],
         ["#99fd48", [[0, 1, "#99ff49"], [0, 2, "#99ff49"]]]
     ];
-    const golenColorList = [
+    const goldenColorList = [
         ["#efcd45", [[0, 1, "#efcd45"], [0, 2, "#efcd45"]]],
         ["#f1cf46", [[0, 1, "#f7d447"], [0, 2, "#f9d647"]]],
         ["#fad647", [[0, 1, "#fbd748"], [0, 2, "#fbd748"]]],
@@ -1937,7 +1952,7 @@ const UnSealEngraving = () =>
             let haveArrow = FindImgInList(arrow, [898, 99, 61, 532]);
             if (haveArrow)
             {
-                for (let i = 0; i < 6; i++)
+                for (let j = 0; j < 10; j++)
                 {
                     let shot = captureScreen();
                     if (FindImgInList(exclude, [995, haveArrow.y - 5, 157, 50], shot))
@@ -1954,7 +1969,7 @@ const UnSealEngraving = () =>
                         console.log("稀有，下一格");
                         break;
                     }
-                    else if (FindMultiColors(golenColorList, [1180, haveArrow.y - 5, 70, 50], shot, 12))
+                    else if (FindMultiColors(goldenColorList, [1180, haveArrow.y - 5, 70, 50], shot, 12))
                     {
                         console.log("金色属性，下一格");
                         break;
@@ -1996,12 +2011,50 @@ const UnSealEngraving = () =>
     RecycleImgList(exclude);
     PageBack();
 };
-
+const needWearEquipment = () =>
+{
+    const config = ReadConfig();
+    if (!config.equipments)
+    {
+        console.log("需要穿装备");
+        return true;
+    }
+    else
+    {
+        const colorList = ["blue", "purple"];
+        for (let key in config.equipments)
+        {
+            if (!colorList.includes(config.equipments[key][0]))
+            {
+                console.log("需要穿装备");
+                return true;
+            }
+        }
+        console.log("@不需要穿装备");
+        return false;
+    }
+};
+const needBuyCloak = () =>
+{
+    if (!OpenBackpack())
+    {
+        return false;
+    }
+    const emptyCloak = LoadImgList("backpack/emptyCloak")
+    if (FindImgInList(emptyCloak, [330, 459, 71, 89]))
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
 const ComprehensiveImprovement = () =>
 {
     console.log("开始综合提升");
 
-    if ((new Date().getTime() - lastComprehensiveImproveTime) / 3600000 < 3)
+    if ((new Date().getTime() - lastComprehensiveImproveTime) / 3600000 < 5)
     {
         console.log("提升结束: 两次提升间隔较短，暂不操作");
         return true;
@@ -2011,21 +2064,29 @@ const ComprehensiveImprovement = () =>
     if (isBackpackFull)
     {
         console.log("提升：背包是满的，需要先清理背包");
-        WearEquipments();
-        StrengthenEquipment();
+        if (needWearEquipment())
+        {
+            WearEquipments();
+            StrengthenEquipment();
+        }
+
         LoginProps();
         DecomposeEquipment("total");
     }
 
-    DailyQuest();
-    // first open all box
-    OpenAllBox();
+    DailyQuest()
+
+    OpenAllBox() && OpenAllBox() && OpenAllBox()
 
     if (!isBackpackFull)
     {
         console.log("backpack is not full");
-        WearEquipments();
-        StrengthenEquipment();
+        if (needWearEquipment())
+        {
+            WearEquipments();
+            StrengthenEquipment();
+        }
+
         LoginProps();
         DecomposeEquipment("total");
     }
@@ -2070,45 +2131,43 @@ const ComprehensiveImprovement_Instance = () =>
         config.manufacture = [random(1, 15), random(16, 30)];
         RewriteConfig(config);
     }
-    const date = new Date();
-    const today = date.getDate();
-
-    if (today == config.manufacture[0] || today == config.manufacture[1])
-    {
-        console.log("半月制作一次");
-        MakeMaterial();
-    }
 
     const isBackpackFull = IsBackpackFull(captureScreen());
     if (isBackpackFull)
     {
         console.log("副本提升：背包是满的，需要先清理背包");
-        WearEquipments();
-        StrengthenEquipment();
         LoginProps();
         DecomposeEquipment();
     }
-    if (config.gameMode == "instance")
+    const date = new Date();
+    const today = date.getDate();
+
+    if ((today == config.manufacture[0] || today == config.manufacture[1]) && date.getHours() < 12)
     {
-        PutOnSale();
+        console.log("半月制作一次");
+        MakeMaterial();
     }
+
+    const haveOpenedBox = OpenAllBox();
+    let needWearEquipment = false;
+    if (needBuyCloak() && BuyCloak())
+    {
+        needWearEquipment = true;
+    }
+    if (haveOpenedBox || needWearEquipment)
+    {
+        WearEquipments()
+        StrengthenEquipment()
+    }
+
+    PutOnSale();
     console.log("副本模式下综合提升");
-
-    // first open all box
-    OpenAllBox();
-
-    if (!isBackpackFull && today % 3 == 1 && date.getHours() >= 12)
-    {
-        console.log("背包不是满的，领取奖励后开始整理背包");
-        WearEquipments();
-        StrengthenEquipment();
-
-    }
 
     //降低执行频率
     if (date.getDay() == 1 && date.getHours() >= 12)
     {
         console.log("每周一更新");
+
         IncreaseWeaponFeatures();
         UpgradeHolyRelics();
         StrengthenHorseEquipment();
@@ -2119,21 +2178,21 @@ const ComprehensiveImprovement_Instance = () =>
     UnSealEngraving();
 
     // CheckSkillAutoRelease();
-    if (config.game.lv > 45)
-    {
-        SwipeSlowly([610, 680, 5, 2], [610, 640, 5, 3], 1);
-        SwipeSlowly([670, 680, 5, 2], [670, 640, 5, 3], 1);
-    }
-
-
+    // if (config.game.lv > 45)
+    // {
+    //     SwipeSlowly([610, 680, 5, 2], [610, 640, 5, 3], 1);
+    //     SwipeSlowly([670, 680, 5, 2], [670, 640, 5, 3], 1);
+    // }
     console.log("副本：综合提升结束");
 
     return true;
 };
 
 module.exports = {
-    ChangeAbility, GetEmail, GetAchievement, GetMonsterKnowledgeAward, LoginProps, DailyQuest,
+    ChangeAbility, GetEmail, GetAchievement, GetMonsterKnowledgeAward, LoginProps, DailyQuest, needWearEquipment,
     ShopBuy, ComprehensiveImprovement, ComprehensiveImprovement_Instance, StrengthenHorseEquipment, IncreaseWeaponFeatures, GuildDonation,
 };
 
-
+// GetSettlement()
+// ComprehensiveImprovement_Instance();
+// PutOnSale();

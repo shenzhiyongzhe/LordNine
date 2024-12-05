@@ -5,7 +5,8 @@ const { MainStoryFlow } = require("./MainStory.js");
 
 const { InstanceFlow } = require("./Instance.js");
 
-const version = "2024/11/20 18:20";
+const version = `${app.versionName}`
+// console.log("version：" + app.versionName)
 const versionColor = "#7FFFD4";
 let mainThread = null;
 let serverName = null;
@@ -87,7 +88,6 @@ const AutoInstallApk = (url) =>
     }
 };
 const UpdateScript = () => DownLoadApk("LordNine.apk", "LordNine/LordNine.apk");
-const UpdateToBetaScript = () => DownLoadApk("LordNineBeta.apk", "LordNine/LordNineBeta.apk");
 const DownloadAutoJs = () => DownLoadApk("AutoJs.apk", "AutoJs.apk");
 const ChangeVPNSetting = () =>
 {
@@ -247,77 +247,6 @@ const ChangeVPNSetting = () =>
 
     console.log("设置完毕");
 };
-const UI = () =>
-{
-    ui.layout(`
-    <vertical>
-        <webview id="web" h="*"/>
-    </vertical>`);
-
-    ui.web.loadUrl("file://" + files.path("./UI/ui.html"));
-    ui.web.jsBridge.registerHandler("StartScript", (uiData, callBack) =>
-    {
-        StartScript(uiData);
-        setTimeout(() =>
-        {
-            //回调web
-            callBack("successful");
-        }, 1000);
-    });
-    ui.web.jsBridge.registerHandler("UpdateScript", (data, callBack) =>
-    {
-        UpdateScript();
-        // AutoInstallApk("LordNine/LordNine.apk");
-        callBack("successful");
-    });
-    ui.web.jsBridge.registerHandler("UpdateToBetaVersion", (data, callBack) =>
-    {
-        toast("开始测试版脚本");
-        UpdateToBetaScript();
-
-        // AutoInstallApk("LordNine/LordNine.apk");
-        callBack("successful");
-    });
-    ui.web.jsBridge.registerHandler("DownloadAutoJs", (data, callBack) =>
-    {
-        DownloadAutoJs();
-        callBack("successful");
-    });
-    ui.web.jsBridge.registerHandler("ChangeVPNSetting", (data, callBack) =>
-    {
-        ChangeVPNSetting();
-        callBack("change vpn successfully");
-    });
-    ui.web.jsBridge.registerHandler("GetCaptureScreenPermission", (data, callBack) =>
-    {
-        console.log(data);
-        GetCaptureScreenPermission();
-        callBack("获取屏幕权限成功");
-    });
-    ui.web.jsBridge.registerHandler("StopScript", (data, callBack) =>
-    {
-        console.log(data);
-        StopScript();
-        callBack("ui点击事件：停止脚本");
-    });
-    setTimeout(() =>
-    {
-        const localJson = ReadConfig();
-        if (!localJson.game.delayTime)
-        {
-            localJson.game.delayTime = random(0, 600);
-            RewriteConfig(localJson);
-        }
-        ui.web.jsBridge.callHandler("GetConfig", JSON.stringify(localJson), (callBack) =>
-        {
-            toastLog("读取配置文件成功");
-            console.log(JSON.stringify(localJson));
-            callBack("set config successfully");
-        }
-        );
-    }, 3000);
-
-};
 
 const config = ReadConfig();
 if (!config.gameMode)
@@ -358,7 +287,7 @@ const uiFloaty = () =>
     floatyWindow.setSize(400, 270);
     floatyWindow.setPosition(185, 300);
 
-    const uiInterval = setInterval(() => { }, 1000);
+    const uiInterval = setInterval(() => {}, 1000);
 
 
 
@@ -441,7 +370,7 @@ const uiFloaty = () =>
 
 };
 console.setGlobalLogConfig({
-    "file": "/sdcard/LordNine/log.txt",
+    "file": "/sdcard/LordNine/log.log",
     "filePattern": "%d{dd日}%m%n"
 });
 
@@ -455,8 +384,6 @@ const stateFloaty = () =>
     floaty_window.setPosition(0, 682);
     floaty_window.switch.click(() => threads.shutDownAll());
 };
-
-
 
 const Update = () =>
 {
@@ -485,9 +412,57 @@ const Update = () =>
         sleep(100);
     }
 };
+const FormatConfig = () =>
+{
+    console.log("格式化配置")
+    const config = ReadConfig()
+    const formattedConfig = {
+        game: {},
+        daily: {}
+    }
+    try
+    {
+        formattedConfig.gameMode = config.gameMode;
+        formattedConfig.delayTime = config.deathTime;
+        formattedConfig.unlockTrade = config.unlockTrade ? config.unlockTrade : false;
+        formattedConfig.accountSuspended = config.accountSuspended ? config.accountSuspended : false;
 
+        formattedConfig.game.today = config.game.today;
+        formattedConfig.game.deathTime = config.game.deathTime;
+        formattedConfig.game.reconnectionTime = config.game.reconnectionTime ? config.game.reconnectionTime : 0;
+        formattedConfig.game.serverName = config.game.serverName ? config.game.serverName : "999";
+        formattedConfig.game.name = config.game.name ? config.game.name : '';
+        formattedConfig.game.lv = config.game.lv ? config.game.lv : false;
+        formattedConfig.game.autoPotion = config.game.autoPotion ? config.game.autoPotion : false;
+        formattedConfig.game.diamond = config.game.diamond ? config.game.diamond : 0;
+        formattedConfig.game.monthlyIncome = config.game.monthlyIncome ? config.game.monthlyIncome : 0;
+        formattedConfig.game.combatPower = config.game.combatPower ? config.game.combatPower : 0;
+        formattedConfig.game.tradingTimes = config.game.tradingTimes ? config.game.tradingTimes : 0;
+        formattedConfig.game.changeGameSetting = config.game.changeGameSetting ? config.game.changeGameSetting : false;
+        formattedConfig.game.engraving_0 = config.game["engraving_0"] ? config.game["engraving_0"] : false;
+        formattedConfig.game.engraving_1 = config.game["engraving_1"] ? config.game["engraving_1"] : false;
+
+        formattedConfig.daily.dailyInstance = false;
+        formattedConfig.daily.acceptDailyMission = false;
+        formattedConfig.daily.hangUpSecretLab = false;
+
+        formattedConfig.daily.guildDonation = false;
+        formattedConfig.daily.dailyShop = false;
+        formattedConfig.daily.friendshipDonation = false;
+        formattedConfig.daily.friendshipShop = false;
+
+        RewriteConfig(formattedConfig)
+        console.log("配置格式化完成")
+    } catch (error)
+    {
+        console.log("格式化失败")
+        console.log(error)
+    }
+
+}
 const MainFlow = () =>
 {
+    // FormatConfig()
     stateFloaty();
 
     LaunchGame();
@@ -501,4 +476,5 @@ const MainFlow = () =>
 };
 
 uiFloaty()
+// FormatConfig()
 

@@ -22,20 +22,18 @@ const {
 
 const { WearEquipments, StrengthenEquipment, DecomposeEquipment, BuyPotion } = require("./Backpack.js");
 
-const { LoginProps } = require("./CommonFlow.js");
+const { LoginProps, needWearEquipment } = require("./CommonFlow.js");
 
-const { LordNineWordColorList, WhiteAvatarColorList, StartBtnSettingColorList, CrucifixColorList } = require("./Color/ExceptionColorList.js");
+const { LordNineWordColorList, WhiteAvatarColorList, StartBtnSettingColorList } = require("./Color/ExceptionColorList.js");
 const { TipColorList } = require("./Color/MainStoryColorList.js");
 
 let lastTimeOfBuyingPotion = 1726208812345;
 let lastTimeClearBackpack = 1726208812345;
 let lastTimeClearBackpack_haltMode = new Date().getTime();
-let randomTimeToClearBackpack = random(120, 180);
+let randomTimeToClearBackpack = random(150, 200);
 
 let lastGetVerificationCodeTime = 0;
 let totalGetVerificationCodeTimes = 0;
-
-
 
 let lastResetConfigTime = 1726208812345;
 
@@ -49,6 +47,7 @@ const ExceptionImgList = {
     loading: LoadImgList("special/loading"),
     confirmToGo: LoadImgList("special/confirmToGo"),
     quickMoving: LoadImgList("icon/font/quickMoving"),
+    crucifixIcon: LoadImgList("icon/crucifixIcon")
 };
 const HasTip = (region, shot) =>
 {
@@ -135,7 +134,6 @@ const NoPotionFlow_HaltMode = (shot) =>
 
 const BackpackFlow_HaltMode = () =>
 {
-
     if ((new Date().getTime() - lastTimeClearBackpack_haltMode) / 60000 > randomTimeToClearBackpack)
     {
         console.log("到达随机清理背包时间。");
@@ -143,13 +141,15 @@ const BackpackFlow_HaltMode = () =>
         {
             ExitHaltMode();
         }
-        if (new Date().getDate() % 2 == 0)
+
+
+        if (needWearEquipment())
         {
-            console.log("2的整数倍，穿戴装备");
             WearEquipments();
             StrengthenEquipment();
         }
         lastTimeClearBackpack_haltMode = new Date().getTime();
+        randomTimeToClearBackpack = random(150, 200);
         LoginProps();
         DecomposeEquipment("partial");
     }
@@ -316,8 +316,14 @@ const MainUIFlow = (shot) =>
     {
         if (FindMultiColors(WhiteAvatarColorList, [32, 600, 52, 49], shot))
         {
+            const jumpAnimation = LoadImgList("icon/font/jumpAnimation")
+            if (FindImgInList(jumpAnimation, [45, 649, 161, 61]))
+            {
+                RandomPress([49, 670, 127, 16])
+            }
+            RecycleImgList(jumpAnimation)
             Sleep(random(1, 10));
-            PressBlank();
+            RandomPress([416, 173, 438, 358])
             Sleep(5);
             console.log("点击开始游戏 有区服的主页面");
         }
@@ -325,13 +331,14 @@ const MainUIFlow = (shot) =>
         {
             console.log("点击开始 主页面");
             Sleep(random(1, 10));
-            PressBlank();
+            RandomPress([416, 173, 438, 358])
             Sleep(5);
         }
     }
 };
 
-const HasCrucifixIcon = () => FindMultiColors(CrucifixColorList, [327, 60, 40, 43]);
+const HasCrucifixIcon = (shot) => { shot = shot || captureScreen(); return FindImgInList(ExceptionImgList.crucifixIcon, [326, 63, 43, 42]) }
+
 const PickUpAbilityPoint = () =>
 {
     console.log("开始恢复属性点或装备");
@@ -398,24 +405,28 @@ const ResetConfig = () =>
     {
         lastResetConfigTime = new Date().getTime();
         const config = ReadConfig();
-        const newDay = new Date().getDate();
-        if (config.game.today != newDay && new Date().getHours() > 4)
+        const date = new Date();
+        if (config.game.today != date.getDate() && date.getHours() > 4)
         {
             console.log("新的一天，重置配置");
-            config.game.today = newDay;
+            config.game.today = date.getDate();
             config.game.deathTime = 0;
             config.game.reconnectionTime = 0;
             config.game.tradingTimes = 0;
 
-            config.game.dailyInstance = false;
-            config.game.dailyMission = false;
+            config.daily.dailyInstance = false;
+            config.daily.acceptDailyMission = false;
+            config.daily.hangUpSecretLab = false;
 
-            config.game.guildDonation = false;
-            config.game.friendshipDonation = false;
-            config.game.dailyShop = false;
-            config.game.friendshipShop = false;
-            config.game.accepteDailyMission = false;
-            config.game.hangUpSecretLab = false;
+            config.daily.guildDonation = false;
+            config.daily.friendshipDonation = false;
+            config.daily.dailyShop = false;
+            config.daily.friendshipShop = false;
+            if (date.getDay() == 1)
+            {
+                console.log("每周一，重置周事件")
+                config.delayTime = random(3, 1000)
+            }
             RewriteConfig(config);
         }
     }
@@ -464,12 +475,18 @@ const StovePopup = () =>
     const hasSelectAccount = textMatches(/(.*选择账号.*|.*계정 선택.*|.*Choose an account.*|.*选择帐号.*)/).findOne(20);
     if (hasSelectAccount)
     {
-        const hasAccount = textMatches(/(.*@gmail.com.*)/).findOne(20).parent().parent();
+        const hasAccount = textMatches(/(.*@gmail.com.*)/).findOne(20);
         if (hasAccount)
         {
-            hasAccount.click();
+            RandomPress([392, 288, 521, 42])
         }
     }
+    const loginAccountImgList = LoadImgList("special/loginAccount")
+    if (FindImgInList(loginAccountImgList, [267, 364, 163, 100]))
+    {
+        RandomPress([392, 288, 521, 42])
+    }
+    RecycleImgList(loginAccountImgList)
 };
 const PressSomeTip = (shot) =>
 {
@@ -632,6 +649,7 @@ const ExceptionFlow = () =>
 };
 
 module.exports = { ExceptionFlow };
+
 
 
 // ExceptionFlow()

@@ -15,6 +15,7 @@ const {
     ReadConfig,
     FindNumber,
     EnterMenuItemPage,
+    RewriteConfig,
 
 } = require("./utils.js");
 
@@ -50,8 +51,13 @@ const BackpackItemDetailColorList = {
     "purple": [
         ["#2d2438", [[12, 2, "#2d2438"], [35, 2, "#2d2438"], [34, 16, "#2d2438"], [-6, 20, "#2d2438"]]],
         ["#2d2438", [[17, 3, "#2d2438"], [40, 12, "#2d2438"], [28, 24, "#2d2438"], [3, 19, "#2d2438"]]]
+    ],
+    "orange": [
+        ["#3f2e22", [[17, -1, "#3f2e22"], [51, 2, "#3f2e22"], [35, 12, "#3f2e22"], [9, 11, "#3f2e22"]]]
+    ],
+    "red": [
+        ["#412022", [[15, 1, "#412022"], [33, 1, "#412022"], [26, 18, "#412022"], [5, 17, "#412022"]]]
     ]
-
 };
 
 const emptyGridImgList = LoadImgList("backpack/emptyGrid");
@@ -161,8 +167,6 @@ const OpenSkillBook = () =>
     RecycleImgList(unableToUse);
     RecycleImgList(haveLearned);
     Sleep();
-    console.log("结束，是否使用技能书： " + hasOpened);
-
     return hasOpened;
 };
 
@@ -219,7 +223,6 @@ const OpenSuit = () =>
             }
         }
     }
-    console.log("结束，是否打开时装：" + hadOpenSuit);
     RecycleImgList(swipeToConfirmImgList);
     return hadOpenSuit;
 };
@@ -280,7 +283,7 @@ const OpenNoOptionBox = () =>
     let shot = captureScreen();
     for (let i = 0; i < 5; i++)
     {
-        hasPropsBox = FindImgInList(PropsImgList, [925, 147, 269, 269], shot);
+        hasPropsBox = FindImgInList(PropsImgList, [926, 150, 265, 454], shot);
         if (hasPropsBox)
         {
             RandomPress([hasPropsBox.x, hasPropsBox.y, 30, 30]);
@@ -362,6 +365,7 @@ const OpenOptionalBox = () =>
         }
         return type;
     };
+
     let haveOpened = false;
     for (let i = 0; i < 5; i++)
     {
@@ -419,21 +423,15 @@ const OpenAllBox = () =>
     }
     Sleep();
 
-    const haveNoOptionBox = OpenNoOptionBox();
-
+    const haveOpenProps = OpenNoOptionBox();
     const haveOpenOptionalBox = OpenOptionalBox();
     const hasOpenSkill = OpenSkillBook();
-
     const hasOpenSuit = OpenSuit();
 
     UseHolyGrail();
     Sleep();
     console.log("结束：已打开所有箱子");
-    if (haveNoOptionBox || haveOpenOptionalBox)
-    {
-        console.log("已打开，优先穿装备");
-        WearEquipments();
-    }
+
     if (hasOpenSkill)
     {
         console.log("使用了技能书，开始自动释放");
@@ -448,7 +446,7 @@ const OpenAllBox = () =>
     {
         RandomPress([829, 216, 22, 25]);
     }
-    return true;
+    return haveOpenOptionalBox || haveOpenProps;
 };
 
 
@@ -517,81 +515,133 @@ const WearBestSuit = () =>
     }
 };
 // --------------------------- wear equipment ---------------------------------
-
-const IsBetterQuality = () =>
+const getItemColor = (region, shot) =>
 {
-    let left_color = null;
-    let right_color = null;
-    let hasLeftColor = false;
-    let hasRightColor = false;
-    const shot = captureScreen();
+    region = region || [620, 175, 122, 53];
+    shot = shot || captureScreen();
+    let color = null;
     for (let key in BackpackItemDetailColorList)
     {
-        hasLeftColor = FindMultiColors(BackpackItemDetailColorList[key], [310, 172, 128, 56], shot);
-        if (hasLeftColor)
+        color = FindMultiColors(BackpackItemDetailColorList[key], region, shot);
+        if (color)
         {
-            left_color = key;
-            break;
+            return key;
         }
     }
-    for (let key in BackpackItemDetailColorList)
-    {
-        hasRightColor = FindMultiColors(BackpackItemDetailColorList[key], [620, 175, 122, 53], shot);
-        if (hasRightColor)
-        {
-            right_color = key;
-            break;
-        }
-
-    }
-    console.log(left_color, right_color);
-    if (left_color == right_color)
-    {
-        return false;
-    }
-    if (left_color == null)
-    {
-        return true;
-    }
-    else if (left_color == "white")
-    {
-        if (right_color == "white" || right_color == null)
-        {
-            return false;
-        }
-        return true;
-    }
-    else if (left_color == "green")
-    {
-        if (right_color == "green" || right_color == "white" || right_color == null)
-        {
-            return false;
-        }
-        else
-        {
-            return true;
-        }
-    }
-    else if (left_color == "blue")
-    {
-        if (right_color == "blue" || right_color == "green" || right_color == "white" || right_color == null)
-        {
-            return false;
-        }
-        else
-        {
-            return true;
-        }
-    }
-    else if (left_color == "purple")
-    {
-        return false;
-    }
-    console.log("is better quality identify failed");
-    return false;
+    return null;
 };
 
-const SortEquipment = () => { RandomPress([1097, 668, 17, 19]); Sleep(3); };
+const BuyCloak = () =>
+{
+    console.log("fn:购买披风");
+
+    const config = ReadConfig();
+    if (config.game.diamond < 100)
+    {
+        console.log("小于100钻石，不购买");
+        return false;
+    }
+
+    if (!EnterMenuItemPage("trade"))
+    {
+        console.log("打开交易所失败，退出");
+        return false;
+    }
+
+    let haveBought = false;
+
+    const cloakMenuItem = LoadImgList("page/trade/menu/cloak");
+    const breakCloak = LoadImgList("page/trade/menu/breakCloak");
+    const bonderCloak = LoadImgList("page/trade/goods/bonderCloak");
+
+    let haveOpenedCloakPage = false;
+    for (let i = 0; i < 10; i++)
+    {
+        SwipeSlowly([130, 600, 5, 5], [130, 300, 5, 5], 1);
+
+        let hasCloakMenu = FindImgInList(cloakMenuItem, [2, 106, 80, 556]);
+        if (hasCloakMenu)
+        {
+            RandomPress([hasCloakMenu.x, hasCloakMenu.y, 150, 15]);
+        }
+        let hasBreakCloak = FindImgInList(breakCloak, [7, 106, 158, 529]);
+        if (hasBreakCloak)
+        {
+            RandomPress([hasBreakCloak.x, hasBreakCloak.y, 100, 15]);
+        }
+        if (FindImgInList(breakCloak, [315, 105, 126, 64]))
+        {
+            console.log("已打开破裂披风页面");
+            haveOpenedCloakPage = true;
+            break;
+        }
+        Sleep();
+    }
+    if (haveOpenedCloakPage)
+    {
+        for (let j = 0; j < 5; j++)
+        {
+            SwipeSlowly([630, 540, 5, 5], [630, 240, 5, 5], 3);
+            let haveBonderCloak = FindImgInList(bonderCloak, [373, 167, 200, 486]);
+            if (haveBonderCloak)
+            {
+                console.log("交易所有货:束缚者披风");
+                Sleep()
+                let purchasePrice = FindNumber("purchasePrice", [404, haveBonderCloak.y + 10, 78, 60]);
+                console.log("销售价格为：" + purchasePrice)
+                if (purchasePrice <= 60)
+                {
+                    console.log(purchasePrice + " <<< 60");
+                    RandomPress([394, haveBonderCloak.y - 5, 505, 50]);
+                    WaitUntil(() => FindImgInList(bonderCloak, [361, 197, 180, 83]))
+                    if (FindNumber("purchasePrice", [723, 201, 60, 60]))
+                    {
+                        RandomPress([387, 221, 555, 52], 2)
+                        if (WaitUntil(() => HasPopupClose([905, 63, 48, 47])))
+                        {
+                            if (FindBlueBtn([710, 595, 185, 58]))
+                            {
+                                if (FindNumber("sellPrice", [871, 506, 54, 35]) <= 60)
+                                {
+                                    console.log("点击购买")
+                                    RandomPress([733, 609, 139, 31], 2)
+                                    if (FindNumber("purchasePrice", [684, 342, 60, 59]) <= 60)
+                                    {
+                                        if (FindBlueBtn([545, 403, 187, 63]))
+                                        {
+                                            console.log("确定购买")
+                                            RandomPress([568, 421, 144, 28]);
+                                            haveBought = true;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                else
+                {
+                    console.log(purchasePrice + " >>> 60");
+                }
+                break;
+            }
+        }
+    }
+    RecycleImgList(cloakMenuItem)
+    RecycleImgList(breakCloak)
+    RecycleImgList(bonderCloak)
+
+    if (HasPopupClose([905, 63, 48, 47]))
+    {
+        RandomPress([918, 74, 20, 23])
+    }
+    else if (HasPopupClose([793, 249, 41, 44]))
+    {
+        RandomPress([804, 260, 21, 20])
+    }
+    PageBack()
+    return haveBought;
+};
 const WearEquipment = () =>
 {
     console.log("开始穿装备");
@@ -602,20 +652,159 @@ const WearEquipment = () =>
         return false;
     }
 
-    // const config = ReadConfig();
-    // if (!config.game.equipment)
-    // {
-    //     config.game.equipment = {};
-    //     // config.game.equipment.weapon = {material:""};
-    //     config.game.equipment.helmet = { material: "", color: "gray" };
-    //     config.game.equipment.top = { material: "", color: "gray" };
-    //     config.game.equipment.bottom = { material: "", color: "gray" };
-    //     config.game.equipment.gloves = { material: "", color: "gray" };
-    //     config.game.equipment.shoes = { material: "", color: "gray" };
-    // }
     const magicWandImgList = LoadImgList("backpack/magicWand");
     const identifyTapScreenImgList = LoadImgList("backpack/identifyTapScreen");
 
+    const IsBetterToWear = () =>
+    {
+        const shot = captureScreen();
+        const left_color = getItemColor([310, 172, 128, 56], shot);
+        const right_color = getItemColor([620, 175, 122, 53], shot);
+
+        console.log(left_color, right_color);
+
+        if (left_color == null)
+        {
+            console.log("新装备，穿戴");
+            return true;
+        }
+        else if (left_color == right_color)
+        {
+            const left_material = getEquipmentMaterial([344, 146, 58, 42], shot);
+            const right_material = getEquipmentMaterial([658, 147, 48, 40], shot);
+            if (left_material == "fabric" && right_material != "fabric")
+            {
+                console.log("已穿戴布料装备");
+                return false;
+            }
+            else if (left_material != "fabric" && right_material == "fabric")
+            {
+                console.log("优先穿戴布料装备");
+                return true;
+            }
+            else
+            {
+                const left_lv = getStrengtheningLv([307, 110, 49, 37], shot);
+                const right_lv = getStrengtheningLv([617, 109, 46, 38], shot);
+                if (left_lv < right_lv)
+                {
+                    console.log("穿戴布料，并且强化等级高的装备");
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+
+        }
+        else if (left_color == "white" && (right_color == "green" || right_color == "blue" || right_color == "purple"))
+        {
+            return true;
+        }
+        if (left_color == "green" && (right_color == "blue" || right_color == "purple"))
+        {
+            return true;
+        }
+        else if (left_color == "blue" && right_color == "purple")
+        {
+            return true;
+        }
+        else if (left_color == "purple" && right_color == "orange")
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+
+    };
+    const lv5 = LoadImgList("backpack/font/strengtheningLv/lv5");
+    const lv6 = LoadImgList("backpack/font/strengtheningLv/lv6");
+    const lv7 = LoadImgList("backpack/font/strengtheningLv/lv7");
+    const getStrengtheningLv = (region, shot) =>
+    {
+        shot = shot || captureScreen();
+        if (FindImgInList(lv5, region, shot))
+        {
+            return 5;
+        }
+        else if (FindImgInList(lv6, region, shot))
+        {
+            return 6;
+        }
+        else if (FindImgInList(lv7, region, shot))
+        {
+            return 7;
+        }
+        return 0;
+    };
+    const fabric = LoadImgList("backpack/font/equipmentMaterial/fabric");
+    const leather = LoadImgList("backpack/font/equipmentMaterial/leather");
+    const metal = LoadImgList("backpack/font/equipmentMaterial/metal");
+    const getEquipmentMaterial = (region, shot) =>
+    {
+        shot = shot || captureScreen();
+        if (FindImgInList(fabric, region, shot))
+        {
+            return "fabric";
+        }
+        else if (FindImgInList(leather, region, shot))
+        {
+            return "leather";
+        }
+        else if (FindImgInList(metal, region, shot))
+        {
+            return "metal";
+        }
+        else
+        {
+            return null;
+        }
+    };
+    const GetTheEquipedInfo = () =>
+    {
+        console.log("获取穿戴的装备颜色与强化等级");
+        if (!OpenBackpack())
+        {
+            console.log("打开背包失败，退出");
+            return false;
+        }
+        const equipedPosition = [
+            [422, 436, 31, 39],
+            [488, 431, 29, 43],
+            [555, 433, 33, 40],
+            [457, 518, 28, 43],
+            [523, 515, 27, 44],
+        ];
+        const colors = [];
+        const lvList = [];
+        if (HasPopupClose([873, 105, 41, 47]))
+        {
+            RandomPress([881, 116, 20, 21]);
+        }
+        equipedPosition.forEach(pos =>
+        {
+            RandomPress(pos);
+            let shot = captureScreen();
+            colors.push(getItemColor([623, 170, 120, 61], shot));
+            lvList.push(getStrengtheningLv([616, 105, 50, 47], shot));
+        });
+        if (colors.length != 5)
+        {
+            return false;
+        }
+        const config = ReadConfig();
+        const equipments = {};
+        equipments.helmet = [colors[0], lvList[0]];
+        equipments.guard = [colors[1], lvList[1]];
+        equipments.pants = [colors[2], lvList[2]];
+        equipments.gloves = [colors[3], lvList[3]];
+        equipments.boots = [colors[4], lvList[4]];
+        config.equipments = equipments;
+        RewriteConfig(config);
+    };
     let hasWornEquipment = false;
     const IdentifyEquipment = () =>
     {
@@ -665,23 +854,20 @@ const WearEquipment = () =>
                 console.log("已经遍历完所有装备,结束");
                 break out;
             }
-            RandomPress([955 + j * 62, 179 + i * 62, 24, 26]);
-            Sleep();
+            RandomPress([955 + j * 62, 179 + i * 62, 24, 26], 3);
             if (FindImgInList(magicWandImgList, [618, 152, 56, 36]))
             {
                 console.log("发现武器法杖。");
                 if (FindImgInList(magicWandImgList, [307, 147, 65, 41])) //当前身上是不是法杖
                 {
                     console.log("当前装备已是法杖，判断品质是否更好");
-                    if (IsBetterQuality())
+                    if (IsBetterToWear())
                     {
-                        RandomPress([955 + j * 62, 179 + i * 62, 24, 26]);
-                        Sleep(3.5);
+                        RandomPress([955 + j * 62, 179 + i * 62, 24, 26], 5);
                         if (!HasBackpackClose() && HasBackpackMenuClose())
                         {
                             IdentifyEquipment();
-                            OpenBackpack("equipment");
-                            SortEquipment();
+                            OpenBackpack("equipment", true);
                             RandomPress([955 + j * 62, 179 + i * 62, 24, 26]);
                             RandomPress([955 + j * 62, 179 + i * 62, 24, 26]);
                             Sleep();
@@ -694,13 +880,11 @@ const WearEquipment = () =>
                 else
                 {
                     console.log("当前身上穿的不是法杖，切换武器为法杖");
-                    RandomPress([955 + j * 62, 179 + i * 62, 24, 26]);
-                    Sleep(3.5);
+                    RandomPress([955 + j * 62, 179 + i * 62, 24, 26], 5);
                     if (!HasBackpackClose() && HasBackpackMenuClose())
                     {
                         IdentifyEquipment();
-                        OpenBackpack("equipment");
-                        SortEquipment();
+                        OpenBackpack("equipment", true);
                         RandomPress([955 + j * 62, 179 + i * 62, 24, 26]);
                         RandomPress([955 + j * 62, 179 + i * 62, 24, 26]);
                         Sleep();
@@ -712,21 +896,20 @@ const WearEquipment = () =>
 
             }
 
-            else if (IsBetterQuality())
+            else if (IsBetterToWear())
             {
                 if (FindImgInList(magicWandImgList, [307, 147, 65, 41])) //当前身上是不是法杖
                 {
                     console.log("当前穿的是法杖，暂不穿戴更高级的非法杖装备");
                     continue;
                 }
-                console.log("当前装备品质更高");
+                console.log("点击穿戴");
                 RandomPress([955 + j * 62, 179 + i * 62, 24, 26]);
                 Sleep(3.5);
                 if (!HasBackpackClose() && HasBackpackMenuClose())
                 {
                     IdentifyEquipment();
-                    OpenBackpack("equipment");
-                    SortEquipment();
+                    OpenBackpack("equipment", true);
                     RandomPress([955 + j * 62, 179 + i * 62, 24, 26]);
                     RandomPress([955 + j * 62, 179 + i * 62, 24, 26]);
                     Sleep();
@@ -734,31 +917,48 @@ const WearEquipment = () =>
                 }
                 hasWornEquipment = true;
                 break out;
-                // SortEquipment();
             }
 
         }
     }
     console.log("穿戴完成");
 
-    for (let key in magicWandImgList)
+    if (!hasWornEquipment)
     {
-        magicWandImgList[key].recycle();
+        GetTheEquipedInfo();
     }
+
+    RecycleImgList(magicWandImgList);
     RecycleImgList(identifyTapScreenImgList);
+    RecycleImgList(lv5);
+    RecycleImgList(lv6);
+    RecycleImgList(lv7);
+    RecycleImgList(fabric);
+    RecycleImgList(leather);
+    RecycleImgList(metal);
+
+
     return hasWornEquipment;
 };
+
 const WearEquipments = () =>
 {
     console.log("//开始连续穿戴装备//");
-
+    let haveWorn = false;
     for (let i = 0; i < 6; i++)
     {
         let hasWornNewEquipment = WearEquipment();
         if (!hasWornNewEquipment)
+        {
             break;
+        }
+        else
+        {
+            haveWorn = true;
+        }
     }
     console.log("//连续穿戴装备结束//");
+    return haveWorn;
 };
 
 // --------------------------- skill book ---------------------------------
@@ -938,6 +1138,8 @@ const StrengthenEquipment = () =>
     {
         let isEquiped = false;
         let hadStrengthened = false;
+        let strengthenBtnRecPos = [387, 566, 213, 70]
+        let strengthenBtnClickPos = [422, 581, 154, 36]
         if (type == "weapon")
         {
             RandomPress([1090, 152, 39, 43]);
@@ -946,9 +1148,11 @@ const StrengthenEquipment = () =>
         {
             RandomPress([1088, 214, 40, 48]); //防具页面
         }
-        else if (type == "ornement")
+        else if (type == "ornament")
         {
             RandomPress([1090, 279, 40, 38]); //ornement页面
+            strengthenBtnRecPos = [497, 564, 218, 70];
+            strengthenBtnClickPos = [521, 577, 168, 40]
         }
         out: for (let i = 0; i < 2; i++)
         {
@@ -963,10 +1167,9 @@ const StrengthenEquipment = () =>
                         let canStillStrengthenArmor = CanStillStrengthen();
                         if (canStillStrengthenArmor)
                         {
-                            if (FindBlueBtn([387, 566, 213, 70]))
+                            if (FindBlueBtn(strengthenBtnRecPos))
                             {
-                                RandomPress([422, 581, 154, 36]);
-                                Sleep(4);
+                                RandomPress(strengthenBtnClickPos, 6);
                                 hadStrengthened = true;
                             }
                             else
@@ -993,14 +1196,11 @@ const StrengthenEquipment = () =>
         return hadStrengthened;
     };
 
-    const hadStrengthenedWeapon = LoopStrengthen("weapon");
-    const hadStrengthenArmor = LoopStrengthen("armor");
-    // const hadStrengthenOrnament = LoopStrengthen("ornement");
-    console.log("强化装备结束，是否强化武器：" + hadStrengthenedWeapon);
-    console.log("是否强化防具：" + hadStrengthenArmor);
+    LoopStrengthen("weapon");
+    LoopStrengthen("armor");
+    LoopStrengthen("ornament");
     CloseBackpack();
     ClearPage();
-    // console.log("是否强化武器：" + hadStrengthenOrnament);
 };
 const DropSomeItem = () =>
 {
@@ -1390,7 +1590,7 @@ const BuyPotion = () =>
             isBuyPotion = true;
         }
         const config = ReadConfig();
-        if (config.game.gameMode == "mainStory")
+        if (config.gameMode == "mainStory")
         {
             RandomPress([168, 336, 126, 32]);
             WaitUntil(() => HasPopupClose([791, 114, 46, 46]), 200, 30);
@@ -1412,6 +1612,7 @@ const BuyPotion = () =>
                 console.log("购买恢复增加咒文书");
             }
         }
+        return isBuyPotion;
     };
     if (WaitUntilPageBack())
     {
@@ -1430,6 +1631,7 @@ const BuyPotion = () =>
 };
 
 module.exports = {
+    BuyCloak,
     IsEmpty,
     OpenAllBox,
     OpenSkillBook, AutoReleaseSkill, CheckSkillAutoRelease,
@@ -1437,4 +1639,3 @@ module.exports = {
     UseHolyGrail, WearBestSuit,
     AutoPotion, UnAutoPotion, BuyPotion,
 };
-

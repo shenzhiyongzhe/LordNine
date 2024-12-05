@@ -44,6 +44,10 @@ const { LoadImgList, HaveDailyMissionIcon, IsHaltMode, FindImgInList, FindNumber
     FindBlueBtn,
     FindRedBtn,
     FindTipPoint,
+    ReadImg,
+    RandomPress,
+    FindImg,
+    ReadTradeRecord,
 } = require("./utils.js");
 
 
@@ -227,9 +231,6 @@ function 关闭应用(packageName)
 //     console.log(error);
 // }
 
-
-
-
 // const date = new Date();
 // const month = date.getMonth() + 1;
 // const year = date.getFullYear();
@@ -273,20 +274,56 @@ function 关闭应用(packageName)
 // {
 //     console.log(error);
 // }
-// const skillBookImgList = LoadImgList("backpack/skillBook");
-// console.log(FindImgInList(skillBookImgList, [76, 310, 79, 87]));
-// const unableToUse = LoadImgList("backpack/unableToUse");
-// console.log(FindImgInList(unableToUse, [922, 268, 46, 53]));
-// const type = "propsBox_selected_three";
-// const PropsImgList = LoadImgList(`backpack/box/${type}`);
-// console.log(FindImgInList(PropsImgList, [989, 339, 134, 72]));
-// let curCombatPower = FindNumber("combatPower", [1141, 535, 115, 47]);
-// console.log("当前战力为：" + curCombatPower);
-// SwipeSlowly([670, 680, 5, 2], [670, 640, 5, 3], 1); let requireCombatPower = FindNumber("combatPower", [1143, 494, 108, 45]);
-// console.log(curCombatPower + "  >>>  " + requireCombatPower);
+// SwipeSlowly([630, 540, 5, 5], [630, 240, 5, 5], 3);
+// console.log(FindNumber("purchasePrice", [699, 347, 45, 51]));
+// console.log(FindNumber("sellPrice", [699, 347, 45, 51]))
+// const a = { "he": 1, "she": 2 }
+// for (let key in a)
+// {
+//     console.log(key)
+// }
+// const a = {"2024_11_25_13_12":[
+//     0,
+//     1187],
+// "2024_11_26_9_10":[
+//     23,
+//     1210],
+// "2024_11_26_14_48":[
+//     0,
+//     1252]
+// }
+// { "vm": "VM010245081025", "serverName": "3区6", "lv": 54, "combatPower": 26315, "diamond": 1252, "monthlyIncome": 784, "historyDealRecord": "{\"2024_11_13_15_18\":[14,0],\"2024_11_1_11_14_11_44\":[0,0]}" }
 
-// console.log(FindBlueBtn([539, 647, 204, 66]));
-// SwipeSlowly([610, 680, 5, 2], [610, 640, 5, 3], 1);
-// SwipeSlowly([670, 680, 5, 2], [670, 640, 5, 3], 1);
-// const thirdPos = LoadImgList("backpack/box/optionalBox/2");
-// console.log(FindImgInList(thirdPos, [1056, 339, 70, 76]));
+const getRecentOneMonthDates = (removeYear, underline) =>
+{
+    const today = new Date();
+    const dates = [];
+    for (let i = 0; i < 30; i++)
+    {
+        const date = new Date();
+        date.setDate(today.getDate() - i); // 往前推i天
+        let str = date.toISOString().split('T')[0]
+        if (removeYear)
+        {
+            str = str.slice(5, 10)
+        }
+        if (underline)
+        {
+            str = str.split("-").join("_")
+        }
+        dates.push(str); // 将日期格式化为 YYYY-MM-DD
+    }
+
+    return dates.reverse(); // 确保日期按升序排列
+}
+
+// console.log(JSON.stringify(getRecentOneMonthDates()))
+
+let array = Array(5).fill(null).map(() => []);
+
+console.log(array);
+
+
+
+
+

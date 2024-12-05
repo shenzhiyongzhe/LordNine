@@ -8,7 +8,8 @@ const {
     ExitHaltMode, EnterMenuItemPage,
     FindBlueBtn, FindNumber, FindRedBtn, FindGoldBtn, FindImgInList, FindImg, FindMultiColors,
     GetCharacterLv,
-    HasMenu, HasPageback, HasBackpackMenuClose, HasSkip, HasPopupClose, HaveMainStoryIcon, HasTransformIcon, HaveDailyMissionIcon, HaveFinished,
+    HasMenu, HasPageback, HasBackpackMenuClose, HasSkip, HasPopupClose, HaveMainStoryIcon, HasTransformIcon,
+    HaveDailyMissionIcon, HaveFinished, HasTip,
     IsHaltMode, IsInCity, IsMoving, IsInQuest, IsAuto_active, IsAuto_inactive,
     LoadImgList,
     OpenBackpack, OpenBackpackMenu, OpenMenu,
@@ -34,9 +35,6 @@ let storyMode = "mainMission";
 
 
 let lastTransformationTime = 1726208812345;
-
-
-
 let challengeBossTimeArray = [];
 
 let isSameMainStory = null;
@@ -60,14 +58,11 @@ const GrowthMissionColorList = [
 ];
 
 
-
 const growthMissionIconImgList = LoadImgList("icon/growthMissionIcon");
 const secretLabImgList = LoadImgList("special/notMoving/secretLab");
 const talkBubbleImgList = LoadImgList("icon/talkBubble");
 const npcTalk_leaveImgList = LoadImgList("icon/npcTalk_leave");
 const backpackTrashIcon = LoadImgList("backpack/trash");
-
-
 
 
 const HaveGrowthMissionIcon = (shot) =>
@@ -85,11 +80,6 @@ const HaveGrowthMissionIcon = (shot) =>
 };
 
 
-const IsMissionComplete = (shot, region) =>
-{
-    shot = shot || captureScreen();
-
-};
 const TapMainStory = () => RandomPress([905, 131, 224, 36], 3);
 
 
@@ -101,7 +91,7 @@ const GrowthImgList = {
     coreAnimalPage: LoadImgList("icon/beginner/growthMission/coreAnimalPage"),
     skillBookMerchantPage: ReadImg("icon/beginner/growthMission/skillBookMerchant"),
     weaponFeaturesPage: LoadImgList("icon/beginner/growthMission/weaponFeaturesPage"),
-    joinGulidPage: LoadImgList("icon/beginner/growthMission/joinGuild"),
+    joinGuildPage: LoadImgList("icon/beginner/growthMission/joinGuild"),
     holyRelicPage: LoadImgList("icon/beginner/growthMission/holyRelicPage"),
     dailyMissionPage: ReadImg("icon/beginner/growthMission/dailyMissionPage"),
     towerOfTrialsPage: ReadImg("icon/beginner/growthMission/towerOfTrialsPage"),
@@ -129,10 +119,6 @@ const IsContinuouslyChallengeBoss = () =>
         return false;
     }
 };
-
-
-
-
 
 
 const HasNext = (shot) => { shot = shot || captureScreen(); return FindMultiColors(NextColorList, [1219, 670, 31, 31], shot); };
@@ -167,7 +153,7 @@ const ClickMainStory = () =>
     {
         return true;
     }
-    if (!HasMenu() || !HaveMainStoryIcon())
+    if (!HasMenu() && !HaveMainStoryIcon())
     {
         return false;
     }
@@ -189,8 +175,8 @@ const ClickMainStory = () =>
         {
             TapMainStory();
         }
-        Sleep(3);
-        console.log("点击主线,并等待三秒");
+        Sleep(random(3, 10));
+        console.log("点击主线,并等待随机时间");
     }
     else
     {
@@ -317,10 +303,6 @@ const SwipeRight = (sec) => gesture(sec * 1000, [190, 596], [260, 596]);
 const weaponSelectColorList = [
     ["#3c302a", [[292, -96, "#746d62"], [434, 0, "#535355"], [586, -140, "#877662"], [791, -123, "#363224"]]]
 ];
-const PurpleMainStoryColorList = [
-    ["#d5b0ff", [[3, 1, "#d5b0ff"], [10, 6, "#b898dc"], [355, 9, "#dbc996"], [342, 8, "#dccb96"]]]
-];
-
 
 const BossTitleColorList = [
     ["#fc2d01", [[17, -1, "#fd2d00"], [31, -7, "#ff2d00"], [31, 5, "#fd2d00"], [47, -1, "#fd2d00"]]],
@@ -344,7 +326,6 @@ const BossTitleColorList = [
     ["#2e2f2f", [[497, 96, "#ff2d00"], [497, 99, "#ff2d00"], [497, 102, "#ff2d00"], [501, 101, "#fe2d01"]]],
     // []
 ];
-
 
 
 const DeathFlow = (message) =>
@@ -831,6 +812,14 @@ const MainStoryBranch = () =>
         {
             RandomPress([1052, 636, 157, 33]);
         }
+        else
+        {
+            RandomPress([222, 243, 748, 235], 3)
+            if (FindBlueBtn([1032, 621, 197, 62]))
+            {
+                RandomPress([1052, 636, 157, 33]);
+            }
+        }
         return true;
     }
 
@@ -1047,9 +1036,13 @@ const MainStoryException = () =>
     {
         DeathFlow();
     }
+    if (IsHaltMode())
+    {
+        ExitHaltMode()
+        ChangeGameSetting()
+    }
     IsNotMovingCheck();
 };
-
 
 
 //01: lv5
@@ -1057,7 +1050,7 @@ const MainStoryException = () =>
 //03 lv10
 //04 weapon skill 武器特性
 //05 lv15
-//06 join gulic 加入公会
+//06 join guild 加入公会
 //07 lv20
 //08 strengthen holy 
 //09 lv25
@@ -1117,8 +1110,8 @@ const GrowthMissionFlow = () =>
         ClearPage();
         OpenAllBox();
     }
-    const hasweaponFeaturesPage = FindImgInList(GrowthImgList.weaponFeaturesPage, [1095, 6, 133, 53], shot);
-    if (hasweaponFeaturesPage)
+    const hasWeaponFeaturesPage = FindImgInList(GrowthImgList.weaponFeaturesPage, [1095, 6, 133, 53], shot);
+    if (hasWeaponFeaturesPage)
     {
         console.log("成长任务4：武器特性 ");
         RandomPress([631, 178, 21, 23]);
@@ -1129,7 +1122,7 @@ const GrowthMissionFlow = () =>
         ClearPage();
 
     }
-    const hasGuildPage = FindImgInList(GrowthImgList.joinGulidPage, [561, 644, 72, 69], shot);
+    const hasGuildPage = FindImgInList(GrowthImgList.joinGuildPage, [561, 644, 72, 69], shot);
     if (hasGuildPage)
     {
         console.log("成长任务 6: 加入公会");
@@ -1191,10 +1184,9 @@ const GrowthMissionFlow = () =>
             StrengthenEquipment();
         }
         storyMode = "mainMission";
-
     }
-    const hasCoreAinmalPage = FindImgInList(GrowthImgList.coreAnimalPage, [1141, 8, 124, 53], shot);
-    if (hasCoreAinmalPage)
+    const hasCoreAnimalPage = FindImgInList(GrowthImgList.coreAnimalPage, [1141, 8, 124, 53], shot);
+    if (hasCoreAnimalPage)
     {
         console.log("成长任务 16: 合成核萌");
         // cell gap 
@@ -1252,7 +1244,7 @@ const GrowthMissionFlow = () =>
             specialConfig.lastModeChangeTime = new Date();
         }
 
-        else if (config.game.deathTime >= 100)
+        else if (config.game.deathTime >= 30)
         {
             console.log("今日死亡次数过多，先去挂机,死亡次数为：" + config.game.deathTime);
             specialConfig.gameMode = "instance";
@@ -1345,7 +1337,6 @@ const IsNotMovingCheck = () =>
     if (storyMode == "mainMission")
     {
         ClickMainStory();
-        Sleep(3);
         MainStoryBranch();
     }
     else if (storyMode == "growthMission")

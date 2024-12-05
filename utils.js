@@ -11,23 +11,40 @@ const defaultConfig = {
     gameMode: "mainStory",
     delayTime: random(0, 600),
     unlockTrade: false,
+    accountSuspended: false,
+
     game: {
         "today": 0,
         "deathTime": 0,
         "reconnectionTime": 0,
+        "serverName": 999,
+        "name": '',
         "lv": 0,
         "autoPotion": false,
-        "gulidDonation": false,
+        "diamond": 0,
         "monthlyIncome": 0,
         "combatPower": 1000,
+        "tradingTimes": 0,
+        "changeGameSetting": false,
+        "engraving_0": false,
+        "engraving_1": false,
     },
     daily: {
         "dailyInstance": false,
-        "dailyMission": false,
+        "acceptDailyMission": false,
+        "hangUpSecretLab": false,
+
         "dailyShop": false,
+        "friendshipShop": false,
         "guildDonation": false,
         "friendshipDonation": false,
-        "accepteDailyMission": false,
+    },
+    equipments: {
+        helmet: null,
+        guard: null,
+        pants: null,
+        gloves: null,
+        boots: null,
     }
 };
 
@@ -816,7 +833,7 @@ const FinishedMissionColorList = [
     ["#fdfdfd", [[2, 0, "#fdfdfd"], [13, 4, "#fdfdfd"], [20, 8, "#fcfcfc"], [21, 9, "#fafafa"]]],
     ["#fcfcfc", [[2, 0, "#fcfcfc"], [0, 6, "#ffffff"], [3, 6, "#ffffff"], [14, 1, "#f5f5f4"]]]
 ];
-const accompletImgList = LoadImgList("icon/font/accomplete");
+const accomplishImgList = LoadImgList("icon/font/accomplete");
 const HaveFinished = (region, shot) =>
 {
     shot = shot || captureScreen();
@@ -825,7 +842,7 @@ const HaveFinished = (region, shot) =>
     {
         return haveFinish;
     }
-    haveFinish = FindImgInList(accompletImgList, region, shot);
+    haveFinish = FindImgInList(accomplishImgList, region, shot);
     if (haveFinish)
     {
         return haveFinish;
@@ -1005,7 +1022,7 @@ const IsHaltMode = (shot) =>
 };
 const EnterHaltMode = () =>
 {
-    for (let i = 0; i < 10; i++)
+    for (let i = 0; i < 5; i++)
     {
         if (HasHaltModeBtn())
         {
@@ -1018,7 +1035,7 @@ const EnterHaltMode = () =>
                 return true;
             }
         }
-        Sleep();
+        Sleep(5);
     }
     return false;
 };
@@ -1038,6 +1055,7 @@ const ExitHaltMode = () =>
     return false;
 };
 const LaunchGame = () => app.launch("com.smilegate.lordnine.stove.google");
+
 const HaveToTapBlank = (region, shot) => { shot = shot || captureScreen(); return FindImgInList(tapBlankImgList, region); };
 const TapBlankToContinue = (shot) =>
 {
@@ -1133,7 +1151,6 @@ const OpenBackpack = (type, sort) =>
     {
         if (FindImgInList(backpackTrashIcon, [975, 646, 55, 57]))
         {
-            console.log("背包已打开");
             break;
         }
         else if (HasBackpack())
@@ -1191,7 +1208,7 @@ const OpenBackpack = (type, sort) =>
         const isGoldPage = HasOpenTheBackPage([1183, 351, 27, 83]);
         if (!isGoldPage)
         {
-            console.log("打开自动使用药水页面");
+            console.log("打开金币钻石资产详情页");
             RandomPress([1217, 383, 20, 17]);
         }
     }
@@ -1200,7 +1217,7 @@ const OpenBackpack = (type, sort) =>
         const isAutoPage = HasOpenTheBackPage([1186, 422, 18, 76]);
         if (!isAutoPage)
         {
-            console.log("open auto page");
+            console.log("打开自动药水页面");
             RandomPress([1217, 450, 19, 19]);
         }
     }
@@ -1280,13 +1297,8 @@ const RandomPress = ([startX, startY, w, h], delay) =>
 };
 
 
-const RecycleImgList = (list) =>
-{
-    for (let i = 0; i < list.length; i++)
-    {
-        list[i].recycle();
-    }
-};
+const RecycleImgList = (list) => list.forEach(img => img.recycle());
+
 
 /**
  * 
@@ -1419,6 +1431,7 @@ const ReadConfig = () =>
 };
 const dealFile = "/sdcard/LordNine/dealRecord.json";
 const dailyDiamondRecord = "/sdcard/LordNine/dailyDiamondRecord.json";
+const tradeRecord = "/sdcard/LordNine/tradeRecord.json"
 const emptyObj = {};
 const ReadJsonFile = (path) =>
 {
@@ -1450,10 +1463,11 @@ const ReadJsonFile = (path) =>
         }
     }
 };
-const RewriteJsonFile = (path, obj) => files.write(path, JSON.stringify(obj, null, 2));
+const RewriteJsonFile = (path, obj) => files.write(path, JSON.stringify(obj));
 
 const ReadDealRecord = () => ReadJsonFile(dealFile);
 const ReadDailyDiamondRecord = () => ReadJsonFile(dailyDiamondRecord);
+const ReadTradeRecord = () => ReadJsonFile(tradeRecord)
 
 const ReadAccountFile = () =>
 {
@@ -1476,9 +1490,7 @@ const ReadAccountFile = () =>
     }
 };
 
-const UpdateDealRecord = (obj) => RewriteJsonFile(dealFile, obj);
-const UpdateDailyDiamondRecord = (obj) => RewriteJsonFile(dailyDiamondRecord, obj);
-
+const UpdateTradeRecord = (obj) => RewriteJsonFile(tradeRecord, obj)
 const RewriteConfig = (config) =>
 {
     console.log("fn: 更新配置");
@@ -1868,9 +1880,9 @@ module.exports = {
     TapBlankToContinue, TapTip,
     OpenMenu, OpenBackpack, OpenBackpackMenu,
     PageBack, PressBlank, PullDownSkill, PressToAuto,
-    RandomPress, ReadImg, ReturnHome, RestartGame, RecycleImgList, ReadConfig, RewriteConfig, ReadDealRecord, ReadAccountFile, ReadDailyDiamondRecord, UpdateDailyDiamondRecord,
+    RandomPress, ReadImg, ReturnHome, RestartGame, RecycleImgList, ReadConfig, RewriteConfig, ReadDealRecord, ReadAccountFile, ReadDailyDiamondRecord, ReadTradeRecord,
+    UpdateTradeRecord,
     Sleep, SwipeSlowly, StopScript,
-    UpdateDealRecord,
     WaitUntil, WaitUntilMenu, WaitUntilPageBack, WaitUntilFindColor,
 };
 

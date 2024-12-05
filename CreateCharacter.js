@@ -305,6 +305,7 @@ const CheckLogin = () =>
     return isLogin;
 };
 const accountArray = ReadAccountFile();
+
 const SetCountryAndBirth = () =>
 {
     let hadNeedSelectCountry = textMatches(/(.*국가 선택.*|.*選擇國家.*)/).findOne(20);
@@ -674,6 +675,12 @@ const InputEmailUrl = () =>
             console.log("find url bar.");
             break;
         }
+        let openNewTab = textMatches(/.*打开新的标签页.*/).findOne(20)
+        if (openNewTab)
+        {
+            console.log("点击打开新的标签页")
+            click(openNewTab.bounds().centerX(), openNewTab.bounds().centerY())
+        }
         let hasAcceptAndContinue_zh = text("接受并继续").findOne(20);
         if (hasAcceptAndContinue_zh)
         {
@@ -792,6 +799,22 @@ const InputEmailUrl = () =>
                     console.log("发现关联账号，点击使用该账户继续");
                     click(hasUseIdentificationContinue.bounds().centerX(), hasUseIdentificationContinue.bounds().centerY());
                 }
+                let hasForgetEmail_zh = text("忘记了电子邮件地址？").findOne(20);
+                if (hasForgetEmail_zh)
+                {
+                    console.log("发现忘记电子邮件地址。 开始输入邮箱。");
+                    setText(accountArray[0]);
+                    Sleep(3);
+                    ClickNextBtn();
+                }
+                let hasPasswordInputBox_zh = text("显示密码").findOne(20);
+                if (hasPasswordInputBox_zh)
+                {
+                    console.log("发现密码输入框，开始输入密码");
+                    setText(accountArray[1]);
+                    Sleep(3);
+                    ClickNextBtn();
+                }
                 if (text("Use the web version").findOne(20))
                 {
                     console.log("发现网页邮箱，输入邮箱地址成功，退出");
@@ -831,7 +854,6 @@ const GetEmailVerificationCode = () =>
 {
     console.log("开始获取邮箱验证码");
     app.launch("com.android.chrome");
-
 
     InputEmailUrl();
 
@@ -1063,6 +1085,7 @@ const LoginFlow = () =>
         {
             ClickNextBtn();
         }
+        ClickNextBtn()
         if (textMatches(/.*已完成裝置.*/).findOne(20))
         {
             ClickConfirmBtn();

@@ -17,12 +17,9 @@ const StartBtnSettingColorList = [
     ["#bfaf89", [[-1, 17, "#a49574"], [16, 16, "#9b8e6e"], [14, 1, "#bfaf89"], [7, -2, "#bfaf88"]]]
 ];
 
-const CrucifixColorList = [
-    ["#bcaa51", [[19, 0, "#bba950"], [10, -10, "#eed967"], [9, 18, "#bca952"], [9, 0, "#1a1d1a"]]],
-    ["#f0dc69", [[-11, 11, "#baa850"], [8, 11, "#b8a64f"], [-1, 28, "#bdab53"], [0, 28, "#bdab53"]]]
-];
+
 
 
 module.exports = {
-    LordNineWordColorList, WhiteAvatarColorList, StartBtnSettingColorList, CrucifixColorList
+    LordNineWordColorList, WhiteAvatarColorList, StartBtnSettingColorList,
 };
