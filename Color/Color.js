@@ -101,7 +101,9 @@ const CheckMarkColorList = [
     ["#e8d680", [[3, 2, "#ffe98b"], [4, 4, "#bfaf67"], [6, 1, "#f4e086"], [9, -1, "#af9e5e"]]],
     ["#f0e0ac", [[2, 3, "#ffeeb8"], [4, 6, "#ffeeb8"], [7, 2, "#ffeeb8"], [10, 0, "#ffeeb8"]]], //server name a name confirm
 ];
-
+const whiteCheckMark = [
+    ["#ffffff", [[3, 3, "#ffffff"], [5, 0, "#ffffff"], [8, -2, "#ffffff"], [10, -4, "#ffffff"]]]
+]
 const GoldBtnColorList = [
     ["#39362f", [[47, -2, "#3a3630"], [97, 0, "#39362f"], [-3, 12, "#39352f"], [45, 24, "#444038"]]],
     ["#39362f", [[30, -1, "#3a3630"], [98, 0, "#39362f"], [102, 23, "#3c3932"], [-6, 22, "#39362f"]]]
@@ -221,6 +223,6 @@ const NoPotionColorList = [
 
 module.exports = {
     PagebackColorList, MenuColorList, MenuCloseColorList, BlueBtnColorList, RedBtnColorList, TipPointColorList, BackpackColorList, BackpackFullColorList,
-    SkipColorList, CheckMarkColorList, GoldBtnColorList, GreenBtnColorList, PopupCloseColorList, PleaseTapBlankColorList, QuestColorList, Auto_inactiveColorList,
-    Auto_activeColorList, NoPotionColorList
+    SkipColorList, CheckMarkColorList, whiteCheckMark, GoldBtnColorList, GreenBtnColorList, PopupCloseColorList, PleaseTapBlankColorList, QuestColorList, Auto_inactiveColorList,
+    Auto_activeColorList, NoPotionColorList,
 };

@@ -63,7 +63,7 @@ const secretLabImgList = LoadImgList("special/notMoving/secretLab");
 const talkBubbleImgList = LoadImgList("icon/talkBubble");
 const npcTalk_leaveImgList = LoadImgList("icon/npcTalk_leave");
 const backpackTrashIcon = LoadImgList("backpack/trash");
-
+const bossFlagIcon = LoadImgList("icon/bossFlagIcon")
 
 const HaveGrowthMissionIcon = (shot) =>
 {
@@ -324,7 +324,7 @@ const BossTitleColorList = [
     ["#ff2d00", [[-2, 2, "#fe2d00"], [16, -2, "#ff2d00"], [27, 0, "#fe2d00"], [44, 5, "#ff2d00"]]],
     ["#fe2d00", [[6, 0, "#fe2d00"], [20, -4, "#ff2d00"], [21, 5, "#fe2d01"], [49, -4, "#fe2d01"]]],
     ["#2e2f2f", [[497, 96, "#ff2d00"], [497, 99, "#ff2d00"], [497, 102, "#ff2d00"], [501, 101, "#fe2d01"]]],
-    // []
+    ["#fc2e03", [[3, 0, "#ff2d00"], [5, 0, "#fc2e03"], [6, 0, "#fc2e03"], [8, 0, "#f42f08"]]]
 ];
 
 
@@ -369,8 +369,7 @@ const DeathFlow = (message) =>
             }
         }
     }
-    const hasMenu = WaitUntilMenu();
-    if (!hasMenu)
+    if (!WaitUntilMenu())
     {
         console.log("Death Flow: 未发现菜单按钮");
     }
@@ -420,7 +419,18 @@ const DeathFlow = (message) =>
     storyMode = "growthMission";
 };
 
-const IsAttackBoss = () => FindMultiColors(BossTitleColorList, [893, 153, 228, 23]);
+const IsAttackBoss = () =>
+{
+    const shot = captureScreen()
+    if (FindMultiColors(BossTitleColorList, [893, 153, 228, 23], shot) || FindImgInList(bossFlagIcon, [462, 38, 63, 72], shot))
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
 
 const AttackingBossFlow = (number) =>
 {
@@ -507,7 +517,18 @@ const AttackingBossFlow = (number) =>
         return true;
     };
 
-    const IsAimAtBoss = () => FindMultiColors(AimAtBossColorList, [533, 4, 218, 42]);
+    const IsAimAtBoss = () =>
+    {
+        const shot = captureScreen();
+        if (FindMultiColors(AimAtBossColorList, [533, 4, 218, 42], shot) || FindImgInList(bossFlagIcon, [462, 38, 63, 72], shot))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
     // const BossHalfHPImgList = LoadImgList("icon/bossHalfHP");
     const IsBossDead = () =>
     {
@@ -518,7 +539,7 @@ const AttackingBossFlow = (number) =>
             {
                 lostTitleCount++;
                 console.log("失去boss目标次数: " + lostTitleCount);
-                if (lostTitleCount > 15)
+                if (lostTitleCount > 10)
                 {
                     console.log("boss 目标丢失，退出boss 流程");
                     return true;
@@ -580,7 +601,7 @@ const AttackingBossFlow = (number) =>
     let time = 0;
 
     let moveTimeArr = [
-        [2],
+        [2.3],
         [2.6],
         [2.8],
         [2.6],
@@ -606,7 +627,25 @@ const AttackingBossFlow = (number) =>
         if (HasMenu())
         {
             time++;
-            if (number == 1)
+            if (number == 0)
+            {
+                TapSwitchEnemy();
+                SwipeDown(moveTime[0]);
+                Sleep(1);
+
+                TapSwitchEnemy();
+                SwipeRight(moveTime[0]);
+                Sleep(1);
+
+                TapSwitchEnemy();
+                SwipeUp(moveTime[0]);
+                Sleep(1);
+
+                TapSwitchEnemy();
+                SwipeLeft(moveTime[0]);
+                Sleep(1);
+            }
+            else if (number == 1)
             {
                 SwipeRight(moveTime[0]);
                 Sleep(3);
@@ -1243,8 +1282,13 @@ const GrowthMissionFlow = () =>
             specialConfig.gameMode = "instance";
             specialConfig.lastModeChangeTime = new Date();
         }
-
-        else if (config.game.deathTime >= 30)
+        else if (config.unlockTrade && config.game.deathTime >= 3)
+        {
+            console.log("后续推进主线死亡三次，返回主线挂机")
+            specialConfig.gameMode = "instance"
+            specialConfig.lastModeChangeTime = new Date();
+        }
+        else if (!config.unlockTrade && config.game.deathTime >= 20)
         {
             console.log("今日死亡次数过多，先去挂机,死亡次数为：" + config.game.deathTime);
             specialConfig.gameMode = "instance";

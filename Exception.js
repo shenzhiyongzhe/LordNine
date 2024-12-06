@@ -316,12 +316,11 @@ const MainUIFlow = (shot) =>
     {
         if (FindMultiColors(WhiteAvatarColorList, [32, 600, 52, 49], shot))
         {
-            const jumpAnimation = LoadImgList("icon/font/jumpAnimation")
-            if (FindImgInList(jumpAnimation, [45, 649, 161, 61]))
+            const whiteCheckMark = [["#ffffff", [[5, 4, "#ffffff"], [10, 0, "#ffffff"]]]]
+            if (!FindMultiColors(whiteCheckMark, [38, 662, 37, 37]))
             {
-                RandomPress([49, 670, 127, 16])
+                RandomPress([83, 669, 90, 17])
             }
-            RecycleImgList(jumpAnimation)
             Sleep(random(1, 10));
             RandomPress([416, 173, 438, 358])
             Sleep(5);
@@ -425,13 +424,21 @@ const ResetConfig = () =>
             if (date.getDay() == 1)
             {
                 console.log("每周一，重置周事件")
-                config.delayTime = random(3, 1000)
+                config.delayTime = random(3, 1200)
+                config.tradingHours = [
+                    [random(0, 3), random(0, 59)],
+                    [random(4, 7), random(0, 59)],
+                    [random(8, 11), random(0, 59)],
+                    [random(12, 15), random(0, 59)],
+                    [random(16, 19), random(0, 59)],
+                    [random(20, 23), random(0, 59)],
+                ];
             }
+  
             RewriteConfig(config);
         }
     }
 };
-
 
 // *******************************************************************  确保在游戏中 *********************************************************************
 

@@ -247,13 +247,71 @@ const ChangeVPNSetting = () =>
 
     console.log("设置完毕");
 };
-
-const config = ReadConfig();
-if (!config.gameMode)
+const FormatConfig = () =>
 {
-    config.gameMode = "mainStory";
-    RewriteConfig(config);
+    console.log("格式化配置")
+    const config = ReadConfig()
+    const formattedConfig = {
+        game: {},
+        daily: {}
+    }
+    try
+    {
+        formattedConfig.gameMode = config.gameMode;
+        formattedConfig.delayTime = config.deathTime;
+        formattedConfig.unlockTrade = config.unlockTrade ? config.unlockTrade : false;
+        formattedConfig.accountSuspended = config.accountSuspended ? config.accountSuspended : false;
+
+        formattedConfig.game.today = config.game.today;
+        formattedConfig.game.deathTime = config.game.deathTime;
+        formattedConfig.game.reconnectionTime = config.game.reconnectionTime ? config.game.reconnectionTime : 0;
+        formattedConfig.game.serverName = config.game.serverName ? config.game.serverName : "999";
+        formattedConfig.game.name = config.game.name ? config.game.name : '';
+        formattedConfig.game.lv = config.game.lv ? config.game.lv : false;
+        formattedConfig.game.autoPotion = config.game.autoPotion ? config.game.autoPotion : false;
+        formattedConfig.game.diamond = config.game.diamond ? config.game.diamond : 0;
+        formattedConfig.game.monthlyIncome = config.game.monthlyIncome ? config.game.monthlyIncome : 0;
+        formattedConfig.game.combatPower = config.game.combatPower ? config.game.combatPower : 0;
+        formattedConfig.game.tradingTimes = config.game.tradingTimes ? config.game.tradingTimes : 0;
+        formattedConfig.game.changeGameSetting = config.game.changeGameSetting ? config.game.changeGameSetting : false;
+        formattedConfig.game.engraving_0 = config.game["engraving_0"] ? config.game["engraving_0"] : false;
+        formattedConfig.game.engraving_1 = config.game["engraving_1"] ? config.game["engraving_1"] : false;
+
+        formattedConfig.daily.dailyInstance = false;
+        formattedConfig.daily.acceptDailyMission = false;
+        formattedConfig.daily.hangUpSecretLab = false;
+
+        formattedConfig.daily.guildDonation = false;
+        formattedConfig.daily.dailyShop = false;
+        formattedConfig.daily.friendshipDonation = false;
+        formattedConfig.daily.friendshipShop = false;
+
+        RewriteConfig(formattedConfig)
+        console.log("配置格式化完成")
+    } catch (error)
+    {
+        console.log("格式化失败")
+        console.log(error)
+    }
+
 }
+const config = ReadConfig();
+
+if (config.ui || !config.game)
+{
+    FormatConfig()
+}
+if (config.unlockTrade)
+{
+    specialConfig.gameMode = "instance";
+    specialConfig.initGameMode = "instance"
+}
+else
+{
+    specialConfig.gameMode = "mainStory"
+    specialConfig.initGameMode = "mainStory"
+}
+
 let gameMode = config.gameMode;
 
 const uiFloaty = () =>
@@ -289,15 +347,12 @@ const uiFloaty = () =>
 
     const uiInterval = setInterval(() => {}, 1000);
 
-
-
     if (!config.delayTime)
     {
         config.delayTime = random(3, 1000);
         RewriteConfig(config);
     }
-    specialConfig.gameMode = config.gameMode;
-    specialConfig.initGameMode = config.gameMode;
+
 
     floatyWindow.createCharacter.click(() =>
     {
@@ -401,68 +456,28 @@ const Update = () =>
         }
         if (specialConfig.gameMode != specialConfig.initGameMode)
         {
-            if (Math.abs(specialConfig.lastModeChangeTime.getTime() - new Date().getTime()) / (3600 * 1000) >= 5)
+            if (Math.abs(specialConfig.lastModeChangeTime.getTime() - new Date().getTime()) / (3600 * 1000) >= 8)
             {
                 console.log("--- game mode changed ----");
                 console.log("game mode changed over 5 hours");
                 console.log("back to main story");
-                specialConfig.gameMode = "mainStory";
+                const config = ReadConfig()
+                if (config.unlockTrade)
+                {
+                    specialConfig.gameMode = "instance"
+                }
+                else
+                {
+                    specialConfig.gameMode = "mainStory";
+                }
             }
         }
         sleep(100);
     }
 };
-const FormatConfig = () =>
-{
-    console.log("格式化配置")
-    const config = ReadConfig()
-    const formattedConfig = {
-        game: {},
-        daily: {}
-    }
-    try
-    {
-        formattedConfig.gameMode = config.gameMode;
-        formattedConfig.delayTime = config.deathTime;
-        formattedConfig.unlockTrade = config.unlockTrade ? config.unlockTrade : false;
-        formattedConfig.accountSuspended = config.accountSuspended ? config.accountSuspended : false;
 
-        formattedConfig.game.today = config.game.today;
-        formattedConfig.game.deathTime = config.game.deathTime;
-        formattedConfig.game.reconnectionTime = config.game.reconnectionTime ? config.game.reconnectionTime : 0;
-        formattedConfig.game.serverName = config.game.serverName ? config.game.serverName : "999";
-        formattedConfig.game.name = config.game.name ? config.game.name : '';
-        formattedConfig.game.lv = config.game.lv ? config.game.lv : false;
-        formattedConfig.game.autoPotion = config.game.autoPotion ? config.game.autoPotion : false;
-        formattedConfig.game.diamond = config.game.diamond ? config.game.diamond : 0;
-        formattedConfig.game.monthlyIncome = config.game.monthlyIncome ? config.game.monthlyIncome : 0;
-        formattedConfig.game.combatPower = config.game.combatPower ? config.game.combatPower : 0;
-        formattedConfig.game.tradingTimes = config.game.tradingTimes ? config.game.tradingTimes : 0;
-        formattedConfig.game.changeGameSetting = config.game.changeGameSetting ? config.game.changeGameSetting : false;
-        formattedConfig.game.engraving_0 = config.game["engraving_0"] ? config.game["engraving_0"] : false;
-        formattedConfig.game.engraving_1 = config.game["engraving_1"] ? config.game["engraving_1"] : false;
-
-        formattedConfig.daily.dailyInstance = false;
-        formattedConfig.daily.acceptDailyMission = false;
-        formattedConfig.daily.hangUpSecretLab = false;
-
-        formattedConfig.daily.guildDonation = false;
-        formattedConfig.daily.dailyShop = false;
-        formattedConfig.daily.friendshipDonation = false;
-        formattedConfig.daily.friendshipShop = false;
-
-        RewriteConfig(formattedConfig)
-        console.log("配置格式化完成")
-    } catch (error)
-    {
-        console.log("格式化失败")
-        console.log(error)
-    }
-
-}
 const MainFlow = () =>
 {
-    // FormatConfig()
     stateFloaty();
 
     LaunchGame();

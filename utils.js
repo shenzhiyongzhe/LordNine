@@ -3,6 +3,7 @@ const { PagebackColorList, MenuColorList, MenuCloseColorList, BlueBtnColorList, 
     SkipColorList, CheckMarkColorList, TipPointColorList, GoldBtnColorList, RedBtnColorList, PopupCloseColorList, BackpackFullColorList,
     QuestColorList, Auto_activeColorList, Auto_inactiveColorList,
     GreenBtnColorList, NoPotionColorList,
+    whiteCheckMark,
 } = require("./Color/Color.js");
 const { TipColorList, } = require("./Color/MainStoryColorList.js");
 
@@ -49,6 +50,7 @@ const defaultConfig = {
 };
 
 let mirrorConfig = null;
+
 let specialConfig = {
     gameMode: null,
     initGameMode: null,
@@ -427,7 +429,7 @@ const FindTipPoint = (region, shot) =>
 const FindGoldBtn = (region, shot) => { shot = shot || captureScreen(); return FindMultiColors(GoldBtnColorList, region, shot); };
 const FindGreenBtn = (region, shot) => { shot = shot || captureScreen(); return FindMultiColors(GreenBtnColorList, region, shot); };
 const FindCheckMark = (region) => FindMultiColors(CheckMarkColorList, region);
-
+const FindWhiteCheckMark = (region, shot) => { shot = shot || captureScreen(); return FindMultiColors(whiteCheckMark, region, shot) }
 const FindImgInList = (imgList, region, shot) =>
 {
     shot = shot || captureScreen();
@@ -1870,7 +1872,7 @@ module.exports = {
     CloseBackpack, CloseMenu, ClickSkip, ChangeHaltModeTime, ChangeRecoverPotionPercentToMax, ChangeRecoverPotionPercentToNormal, ClearPage, ChangeGameSetting, ClickAuto,
     DeathCheck,
     EnterMenuItemPage, ExitHaltMode, EnterHaltMode,
-    FindBlueBtn, FindTipPoint, FindImg, FindMultiColors, FindCheckMark, FindRedBtn, FindGoldBtn, FindGreenBtn, FindImgInList, FindNumber, FindFloatNumber,
+    FindBlueBtn, FindTipPoint, FindImg, FindMultiColors, FindCheckMark, FindRedBtn, FindGoldBtn, FindGreenBtn, FindImgInList, FindNumber, FindFloatNumber, FindWhiteCheckMark,
     GoToTheNPC, GetVerificationCode, GetCharacterLv, GetDateTime, GetServerName,
     HasPageback, HasMenu, HasMenuClose, HollowPress, HasSkip, HasBackpackClose, HasBackpackMenuClose, HasPopupClose, HasTip, HaveMainStoryIcon, HasTransformIcon, HaveDailyMissionIcon,
     HaveFinished, HasMap, HaveToTapBlank,

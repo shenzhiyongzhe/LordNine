@@ -16,6 +16,7 @@ const {
     FindNumber,
     EnterMenuItemPage,
     RewriteConfig,
+    FindWhiteCheckMark,
 
 } = require("./utils.js");
 
@@ -187,6 +188,7 @@ const OpenSuit = () =>
     const IsJumpAnimation = () => FindMultiColors(JumpAnimationColorList, [12, 657, 49, 54]);
 
     const suitImgList = LoadImgList("backpack/suit");
+    const unableToUse = LoadImgList("backpack/unableToUse");
 
     const swipeToConfirmImgList = LoadImgList("icon/font/swipeToConfirm");
 
@@ -195,6 +197,12 @@ const OpenSuit = () =>
         let hasOpenedSuit = FindImg(suitImgList[i], [932, 155, 256, 447]);
         if (hasOpenedSuit)
         {
+            console.log("发现时装抽卡")
+            if (FindImgInList(unableToUse, [hasOpenedSuit.x - 30, hasOpenedSuit.y - 20, 40, 40]))
+            {
+                console.log("无法使用，跳过");
+                continue;
+            }
             RandomPress([hasOpenedSuit.x, hasOpenedSuit.y, 30, 30]);
             RandomPress([hasOpenedSuit.x, hasOpenedSuit.y, 30, 30]);
             for (let i = 0; i < 60; i++)
@@ -202,6 +210,10 @@ const OpenSuit = () =>
                 if (HasSkip())
                 {
                     ClickSkip();
+                }
+                if (FindBlueBtn([642, 503, 182, 64]))
+                {
+                    RandomPress([673, 519, 126, 33])
                 }
                 if (FindImgInList(swipeToConfirmImgList, [504, 598, 254, 66]))
                 {
@@ -215,6 +227,10 @@ const OpenSuit = () =>
                 }
                 if (FindBlueBtn([1055, 639, 214, 72]))
                 {
+                    if (!FindWhiteCheckMark([20, 667, 38, 33]))
+                    {
+                        RandomPress([66, 673, 142, 17])
+                    }
                     RandomPress([1080, 656, 166, 36]);
                     hadOpenSuit = true;
                     break;
@@ -223,7 +239,9 @@ const OpenSuit = () =>
             }
         }
     }
+    RecycleImgList(unableToUse)
     RecycleImgList(swipeToConfirmImgList);
+    RecycleImgList(suitImgList)
     return hadOpenSuit;
 };
 const OpenSelectedPropsBox = () =>

@@ -21,6 +21,7 @@ const {
     ReadDealRecord, ReadAccountFile, RecycleImgList, ReadDailyDiamondRecord, ReadTradeRecord, ReadImg, RandomPress, ReturnHome,
 
     UpdateTradeRecord,
+    ChangeRecoverPotionPercentToNormal,
 
 
 } = require("./utils.js");
@@ -573,66 +574,7 @@ const ShopBuy = () =>
     }
     return hadDailyShop;
 };
-const FriendShipShop = () =>
-{
-    const hasFriendshipNPC = GoToTheNPC("friend");
-    if (!hasFriendshipNPC)
-    {
-        return false;
-    }
-    const cannotPurchaseImgList = LoadImgList("icon/font/cannotPurchase");
-    const PressMax = () => RandomPress([756, 407, 53, 24]);
-    const PressPurchaseBtn = () => RandomPress([676, 558, 125, 28]);
 
-    const PurchaseItem = (position) =>
-    {
-        let hadPurchase = false;
-        RandomPress(position, 0.5);
-        for (let i = 0; i < 10; i++)
-        {
-            if (FindBlueBtn([647, 543, 174, 62]))
-            {
-                PressMax();
-                PressPurchaseBtn();
-                hadPurchase = true;
-                break;
-            }
-            else
-            {
-                if (FindImgInList(cannotPurchaseImgList, [643, 95, 98, 56]))
-                {
-                    console.log("无法购买");
-                    hadPurchase = false;
-                    break;
-                }
-            }
-            Sleep(0.5);
-        }
-        return hadPurchase;
-    };
-    RandomPress([19, 286, 34, 36]);
-    PurchaseItem([157, 97, 148, 34]); //黑色奥雷
-    // RandomPress([20, 83, 34, 38]);
-    // PurchaseItem([156, 177, 150, 38]);//实验室传送卷轴
-    PageBack();
-    for (let i = 0; i < 10; i++)
-    {
-        if (HasMenu())
-        {
-            break;
-        }
-        if (FindRedBtn([459, 544, 175, 57]))
-        {
-            RandomPress([803, 118, 26, 30]);
-        }
-        ClearPage();
-        Sleep();
-    }
-    const config = ReadConfig();
-    config.daily.friendshipShop = true;
-    RewriteConfig(config);
-    console.log("友好度商人购买结束");
-};
 
 const IncreaseWeaponFeatures = () =>
 {
@@ -1292,76 +1234,91 @@ const FriendshipDonation = () =>
     const CanDonate = () => FindBlueBtn([1063, 208, 200, 71]);
     const PressDonationBtn = () => RandomPress([1090, 227, 151, 32]);
     const PressConfirmBtn = () => RandomPress([668, 559, 136, 29]);
-
-    let haveDonated = false;
-    const config = ReadConfig();
-    if (!config.daily.friendshipDonation)
+    console.log("今日未捐献");
+    if (!EnterMenuItemPage('friendlinessLevel'))
     {
-        console.log("今日未捐献");
-        if (!EnterMenuItemPage('friendlinessLevel'))
+        console.log("进入友好度失败");
+        return false;
+    }
+    let haveDonated = false;
+
+    const stage_0 = LoadImgList("icon/font/friendshipStage/0");
+    const stage_1 = LoadImgList("icon/font/friendshipStage/1");
+    if (FindImgInList(stage_0, [117, 485, 44, 52]))
+    {
+        console.log("优先四号友好度商人");
+        RandomPress([67, 465, 227, 56]); // 四号位置
+        for (let i = 0; i < 2; i++)
         {
-            console.log("进入友好度失败");
-            return false;
-        }
-        else
-        {
-            const stage_0 = LoadImgList("icon/font/friendshipStage/0");
-            const stage_1 = LoadImgList("icon/font/friendshipStage/1");
-            if (FindImgInList(stage_0, [117, 485, 44, 52]))
+            if (CanDonate())
             {
-                console.log("优先四号友好度商人");
-                RandomPress([67, 465, 227, 56]); // 四号位置
-                for (let i = 0; i < 2; i++)
+                PressDonationBtn();
+                if (WaitUntil(() => FindRedBtn([456, 541, 183, 67])))
                 {
-                    if (CanDonate())
-                    {
-                        PressDonationBtn();
-                        if (WaitUntil(() => FindRedBtn([456, 541, 183, 67])))
-                        {
-                            RandomPress([613, 408, 60, 24]); //+100
-                            PressConfirmBtn();
-                            haveDonated = true;
-                        }
-
-                    }
-                    if (FindImgInList(stage_1, [117, 485, 44, 52]))
-                    {
-                        console.log("一阶段友好度已捐满，退出");
-                        break;
-                    }
+                    RandomPress([613, 408, 60, 24]); //+100
+                    PressConfirmBtn();
+                    haveDonated = true;
                 }
-            }
 
+            }
             if (FindImgInList(stage_1, [117, 485, 44, 52]))
             {
-                console.log("友好度一级完成，捐献第二个友好度商人");
-                RandomPress([57, 142, 238, 59]);
-                if (CanDonate())
-                {
-                    PressDonationBtn();
-                    if (WaitUntil(() => FindRedBtn([456, 541, 183, 67])))
-                    {
-                        RandomPress([708, 409, 57, 24]);
-                        PressConfirmBtn();
-                        haveDonated = true;
-                    }
-                }
+                console.log("一阶段友好度已捐满，退出");
+                break;
             }
-            RecycleImgList(stage_0);
-            RecycleImgList(stage_1);
-        }
-
-        if (haveDonated)
-        {
-            config.daily.friendshipDonation = true;
-            console.log("友好度捐献完成");
-            RewriteConfig(config);
         }
     }
-    else
+    else if (FindImgInList(stage_0, [109, 266, 60, 67]))
     {
-        console.log("今日已捐献友好证书");
+        console.log("其次二号友好度商人");
+        RandomPress([54, 244, 252, 70]); // 四号位置
+        for (let i = 0; i < 2; i++)
+        {
+            if (CanDonate())
+            {
+                PressDonationBtn();
+                if (WaitUntil(() => FindRedBtn([456, 541, 183, 67])))
+                {
+                    RandomPress([613, 408, 60, 24]); //+100
+                    PressConfirmBtn();
+                    haveDonated = true;
+                }
+
+            }
+            if (FindImgInList(stage_1, [117, 485, 44, 52]))
+            {
+                console.log("一阶段友好度已捐满，退出");
+                break;
+            }
+        }
     }
+
+    else if (FindImgInList(stage_1, [117, 485, 44, 52]))
+    {
+        console.log("友好度一级都完成，捐献第三个友好度商人");
+        RandomPress([57, 142, 238, 59]);
+        if (CanDonate())
+        {
+            PressDonationBtn();
+            if (WaitUntil(() => FindRedBtn([456, 541, 183, 67])))
+            {
+                RandomPress([708, 409, 57, 24]);
+                PressConfirmBtn();
+                haveDonated = true;
+            }
+        }
+    }
+    RecycleImgList(stage_0);
+    RecycleImgList(stage_1);
+
+    if (haveDonated)
+    {
+        const config = ReadConfig();
+        config.daily.friendshipDonation = true;
+        console.log("友好度捐献完成");
+        RewriteConfig(config);
+    }
+
     for (let i = 0; i < 10; i++)
     {
         PageBack();
@@ -1381,6 +1338,66 @@ const FriendshipDonation = () =>
         ClearPage();
         Sleep();
     }
+};
+const FriendShipShop = () =>
+{
+    const hasFriendshipNPC = GoToTheNPC("friend");
+    if (!hasFriendshipNPC)
+    {
+        return false;
+    }
+    const cannotPurchaseImgList = LoadImgList("icon/font/cannotPurchase");
+    const PressMax = () => RandomPress([756, 407, 53, 24]);
+    const PressPurchaseBtn = () => RandomPress([676, 558, 125, 28]);
+
+    const PurchaseItem = (position) =>
+    {
+        let hadPurchase = false;
+        RandomPress(position, random(1, 3));
+        for (let i = 0; i < 10; i++)
+        {
+            if (FindBlueBtn([647, 543, 174, 62]))
+            {
+                PressMax();
+                PressPurchaseBtn();
+                hadPurchase = true;
+                break;
+            }
+            else
+            {
+                if (FindImgInList(cannotPurchaseImgList, [643, 95, 98, 56]))
+                {
+                    console.log("无法购买");
+                    hadPurchase = false;
+                    break;
+                }
+            }
+            Sleep(0.5);
+        }
+        return hadPurchase;
+    };
+    RandomPress([19, 286, 34, 36]);
+    PurchaseItem([157, 97, 148, 34]); //黑色奥雷
+    RandomPress([24, 153, 27, 30]);
+    PurchaseItem([157, 97, 148, 34]); //炼金术催化剂
+    PageBack();
+    for (let i = 0; i < 10; i++)
+    {
+        if (HasMenu())
+        {
+            break;
+        }
+        if (FindRedBtn([459, 544, 175, 57]))
+        {
+            RandomPress([803, 118, 26, 30]);
+        }
+        ClearPage();
+        Sleep();
+    }
+    const config = ReadConfig();
+    config.daily.friendshipShop = true;
+    RewriteConfig(config);
+    console.log("友好度商人购买结束");
 };
 const GetCurrentDiamond = () =>
 {
@@ -1430,7 +1447,7 @@ const GetSettlement = () =>
                 console.log("有上架过期的商品，取消上架");
                 let hadRelogin;
                 //取消贩售失败的商品
-                for (let i = 0; i < 8; i++)
+                for (let i = 0; i < 5; i++)
                 {
                     let shot = captureScreen();
                     for (let j = 0; j < 5; j++)
@@ -1470,23 +1487,9 @@ const GetSettlement = () =>
     settlement = settlement > 0 ? settlement : 0;
     console.log("此次结算钻石为：" + settlement);
 
-    //查看总钻石并保存数据至脚本
-
-    const dealRecord = ReadDealRecord();
-
-    const dailyDiamond = ReadDailyDiamondRecord();
-
     const tradeRecord = ReadTradeRecord()
-    for (let key in dealRecord)
-    {
-        let arr = [dealRecord[key], 0]
-        if (dailyDiamond[key] != undefined)
-        {
-            arr[1] = dailyDiamond[key]
-        }
-        tradeRecord[key] = arr
-    }
-    tradeRecord[GetDateTime()] = [settlement, afterSettleDiamond];
+
+    tradeRecord[GetDateTime()] = [settlement, beforeSettleDiamond, afterSettleDiamond];
     UpdateTradeRecord(tradeRecord)
 
     const date = new Date();
@@ -1522,8 +1525,9 @@ const GetSettlement = () =>
 
     config.game.vm = config.game.vm.replace(/\n/g, '');
 
-    if (!config.game.serverName)
+    if (!config.game.serverName || config.game.serverName.includes("null") || config.game.serverName == "999")
     {
+        console.log("server name error")
         config.game.serverName = GetServerName();
     }
     if (!config.game.lv || config.game.lv < 30)
@@ -1560,7 +1564,7 @@ const GetSettlement = () =>
         diamond: afterSettleDiamond,
         monthlyIncome: monthlyIncome,
         historyDealRecord: JSON.stringify(tradeRecord),
-        config: config
+        config: JSON.stringify(config)
     };
 
     try
@@ -2146,13 +2150,20 @@ const ComprehensiveImprovement_Instance = () =>
     {
         console.log("半月制作一次");
         MakeMaterial();
+        console.log("半月，切换模式为主线。")
+        specialConfig.gameMode = "mainStory"
     }
 
     const haveOpenedBox = OpenAllBox();
     let needWearEquipment = false;
-    if (needBuyCloak() && BuyCloak())
+    if (needBuyCloak())
     {
-        needWearEquipment = true;
+        WearEquipments()
+        if (needBuyCloak())
+        {
+            BuyCloak()
+            needWearEquipment = true;
+        }
     }
     if (haveOpenedBox || needWearEquipment)
     {
@@ -2173,7 +2184,9 @@ const ComprehensiveImprovement_Instance = () =>
         StrengthenHorseEquipment();
         FusionSuit();
         WearBestSuit();
+        ChangeRecoverPotionPercentToNormal()
     }
+
     AddAttributePoint();
     UnSealEngraving();
 
@@ -2193,6 +2206,8 @@ module.exports = {
     ShopBuy, ComprehensiveImprovement, ComprehensiveImprovement_Instance, StrengthenHorseEquipment, IncreaseWeaponFeatures, GuildDonation,
 };
 
+// FriendshipDonation()
+// FriendShipShop()
 // GetSettlement()
 // ComprehensiveImprovement_Instance();
 // PutOnSale();

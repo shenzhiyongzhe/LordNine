@@ -21,6 +21,7 @@ const { FindMultiColors, RandomPress, HasMenu, HasMenuClose, WaitUntilPageBack, 
     EnterHaltMode,
     ReturnHome,
     specialConfig,
+    FindCheckMark,
 } = require("./utils");
 const { ComprehensiveImprovement_Instance, DailyQuest, LoginProps } = require("./CommonFlow");
 const { UnAutoPotion, DecomposeEquipment } = require("./Backpack");
@@ -63,10 +64,11 @@ for (let i = 0; i < 8; i++)
 }
 
 let instance_mode = "hangUpInstance";
-let lastHangUpWildTime, lastTimeEnterHaltMode = new Date().getTime();
+let lastHangUpWildTime = new Date().getTime();
+let lastTimeEnterHaltMode = new Date().getTime();
 let lastTimeEnterInstance = 1726208812345;
 let lastTimeClickDailyMission = 1726208812345;
-
+let lastTimeComprehensiveImprovement = 1726208812345
 let clickDailyMissionAwardsTimes = 0;
 
 let tradingHours = null;
@@ -456,7 +458,12 @@ const DailyMission = () =>
         }
         else
         {
-            const missionMap = [25, 181, 188, 27];
+            let missionMap = [25, 181, 188, 27];
+            // if (config.game.combatPower >= 25000)
+            // {
+            //     missionMap = [31, 231, 169, 32]
+            //     console.log("接受暮光之丘的每日任务")
+            // }
             RandomPress(missionMap);
             if (!FindBlueBtn([1071, 647, 208, 61]))
             {
@@ -599,6 +606,7 @@ const HangUpSecretLab = () =>
     }
 
 };
+
 const HangUpWild = () =>
 {
     console.log("fn: 去野外挂机");
@@ -624,8 +632,8 @@ const HangUpWild = () =>
         const combatPower = config.game.combatPower;
         if (combatPower < 18000)
         {
-            mapName = [0, 3, random(0, 2)];
-            console.log("去被污染的盆地挂机");
+            HangUpSecretLab();
+            return true;
         }
         else if (combatPower >= 18000 && combatPower < 24000)
         {
@@ -637,7 +645,7 @@ const HangUpWild = () =>
             mapName = [1, 2, random(0, 2)];
             console.log("去暮光之丘挂机");
         }
-        else if (combatPower > 26000 && 30000)
+        else if (combatPower > 28000 && 35000)
         {
             mapName = [2, 1, 0];
             console.log("去鸟兰挂机")
@@ -692,6 +700,7 @@ const HangUpWild = () =>
         return false;
     }
 };
+
 const IsNoExp = () =>
 {
     let clip = images.clip(captureScreen(), 90, 610, 140, 15);
@@ -713,6 +722,10 @@ const InstanceExceptionCheck = () =>
                 {
                     console.log("@没有攻击目标，向右移动")
                     gesture(5 * 1000, [190, 596], [260, 596]);
+                }
+                else
+                {
+                    ReturnHome()
                 }
             }
         }
@@ -847,28 +860,50 @@ const InstanceExceptionCheck = () =>
             }
         }
     }
-
-
+    if (HasPopupClose([25, 1, 55, 54]))
+    {
+        RandomPress([42, 684, 23, 27]) //setting
+        let shot = captureScreen()
+        for (let i = 0; i < 12; i++)
+        {
+            let haveCheckMark = FindCheckMark([404, 294, 385, 220], shot)
+            if (haveCheckMark)
+            {
+                RandomPress([haveCheckMark.x, haveCheckMark.y, 30, 5])
+                shot = captureScreen()
+            }
+        }
+        RandomPress([853, 207, 24, 24])
+        RandomPress([166, 19, 739, 259])
+        RandomPress([42, 17, 23, 28])
+    }
 
 };
+
 const IsTimeToComprehensive = () =>
 {
     if (tradingHours == null)
     {
         const config = ReadConfig();
+        if (!config.dailyTradingHours)
+        {
+            console.log("随机生成交易时间");
+            tradingHours = [
+                [random(0, 3), random(0, 59)],
+                [random(4, 7), random(0, 59)],
+                [random(8, 11), random(0, 59)],
+                [random(12, 15), random(0, 59)],
+                [random(16, 19), random(0, 59)],
+                [random(20, 23), random(0, 59)],
+            ];
+            config.dailyTradingHours = tradingHours;
+            RewriteConfig(config);
+        }
+        else
+        {
+            tradingHours = config.dailyTradingHours;
+        }
 
-        console.log("随机生成交易时间");
-        tradingHours = [
-            [random(0, 3), random(0, 59)],
-            [random(4, 7), random(0, 59)],
-            [random(8, 11), random(0, 59)],
-            [random(12, 15), random(0, 59)],
-            [random(16, 19), random(0, 59)],
-            [random(20, 23), random(0, 59)],
-        ];
-        config.dailyTradingHours = tradingHours;
-
-        RewriteConfig(config);
     }
     const curTime = new Date();
     const hours = curTime.getHours();
@@ -883,8 +918,19 @@ const IsTimeToComprehensive = () =>
             console.log("综合提升时间为：" + time[0] + "时" + time[1] + "分");
         }
     });
-    return isTimeToComprehensive;
+    const interval = (curTime.getTime() - lastTimeComprehensiveImprovement) / 3600000
+    if (interval > 8 && isTimeToComprehensive)
+    {
+        lastTimeComprehensiveImprovement = curTime.getTime()
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 };
+
+
 const InstanceFlow = () =>
 {
     InstanceExceptionCheck();

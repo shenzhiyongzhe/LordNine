@@ -48,6 +48,7 @@ const { LoadImgList, HaveDailyMissionIcon, IsHaltMode, FindImgInList, FindNumber
     RandomPress,
     FindImg,
     ReadTradeRecord,
+    FindCheckMark,
 } = require("./utils.js");
 
 
@@ -318,10 +319,23 @@ const getRecentOneMonthDates = (removeYear, underline) =>
 }
 
 // console.log(JSON.stringify(getRecentOneMonthDates()))
-
-let array = Array(5).fill(null).map(() => []);
-
-console.log(array);
+if (HasPopupClose([25, 1, 55, 54]))
+{
+    RandomPress([42, 684, 23, 27]) //setting
+    let shot = captureScreen()
+    for (let i = 0; i < 12; i++)
+    {
+        let haveCheckMark = FindCheckMark([404, 294, 385, 220], shot)
+        if (haveCheckMark)
+        {
+            RandomPress([haveCheckMark.x, haveCheckMark.y, 30, 5])
+            shot = captureScreen()
+        }
+    }
+    RandomPress([853, 207, 24, 24])
+    RandomPress([166, 19, 739, 259])
+    RandomPress([42, 17, 23, 28])
+}
 
 
 
