@@ -294,10 +294,10 @@ const TapDialog = () =>
     }
 };
 
-const SwipeUp = (sec) => gesture(sec * 1000, [175, 580], [175, 480]);
-const SwipeDown = (sec) => gesture(sec * 1000, [175, 610], [175, 680]);
-const SwipeLeft = (sec) => gesture(sec * 1000, [160, 596], [90, 596]);
-const SwipeRight = (sec) => gesture(sec * 1000, [190, 596], [260, 596]);
+const SwipeUp = (sec) => gesture(sec * 1000, [248, 580], [248, 480]);
+const SwipeDown = (sec) => gesture(sec * 1000, [248, 610], [248, 680]);
+const SwipeLeft = (sec) => gesture(sec * 1000, [235, 593], [135, 593]);
+const SwipeRight = (sec) => gesture(sec * 1000, [262, 593], [362, 593]);
 
 // ------------------------------------------  main story branch -------------------------------------------
 const weaponSelectColorList = [
@@ -1464,5 +1464,3 @@ const MainStoryFlow = () =>
 
 module.exports = { MainStoryFlow };
 
-
-// DeathFlow();

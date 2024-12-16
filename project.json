@@ -1,7 +1,5 @@
 {
-  "abis": [
-    "arm64-v8a"
-  ],
+  "abis": ["arm64-v8a"],
   "assets": [
     {
       "form": "/storage/emulated/0/脚本/LordNine",
@@ -16,9 +14,7 @@
   },
   "useFeatures": [],
   "icon": null,
-  "ignoredDirs": [
-    "build"
-  ],
+  "ignoredDirs": ["build"],
   "encrypt-code": false,
   "launchConfig": {
     "displaySplash": false,
@@ -27,10 +23,7 @@
     "hideLogs": true,
     "stableMode": true,
     "volumeUpcontrol": false,
-    "permissions": [
-      "accessibility_services",
-      "draw_overlay"
-    ],
+    "permissions": ["accessibility_services", "draw_overlay"],
     "serviceDesc": "使脚本自动操作(点击、长按、滑动等)所需，若关闭则只能执行不涉及自动操作的脚本。",
     "splashIcon": "res/splashIcon.png",
     "splashText": "Powered by Autoxjs.com"
@@ -49,14 +42,9 @@
   "scripts": {},
   "signingConfig": {
     "alias": "lordnine",
-    "keystore": "/storage/emulated/0/脚本/.keyStore/lordnine.bks",
-    "v1Sign": true,
-    "v2Sign": true,
-    "v3Sign": true,
-    "v4Sign": false
+    "keystore": "/storage/emulated/0/脚本/.keyStore/lordnine.keystore"
   },
   "sourcePath": "/storage/emulated/0/脚本/LordNine/main.js",
-  "useNodejs": false,
   "versionCode": 4,
-  "versionName": "12.6.2"
+  "versionName": "12.16.7"
 }

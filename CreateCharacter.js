@@ -4,7 +4,7 @@ const {
     HasSkip, HasPopupClose, LoadImgList, GetVerificationCode,
     ReadConfig, RewriteConfig, ReadImg, RandomPress, RestartGame, ReadAccountFile,
     WaitUntil, WaitUntilFindColor,
-    Sleep, SwipeSlowly,
+    Sleep, SwipeSlowly, SetCountryAndBirth,
     RecycleImgList,
 } = require("./utils.js");
 
@@ -53,10 +53,11 @@ const GenerateRandomName = () =>
     name[0] = CharDiction[Math.floor(random() * 51)];
     return name.join("");
 };
+
 const LoadServerImgList = () =>
 {
     let imgList = null;
-    for (let i = 0; i < 7; i++)
+    for (let i = 0; i < 8; i++)
     {
         imgList = LoadImgList(`icon/beginner/serverNameList/${i}`);
         serverNameImgList.push(imgList);
@@ -70,6 +71,7 @@ const ClickNextBtn = (findTime) =>
     findTime = findTime || 20;
     const hasNext_kr = text("다음").findOne(findTime);
     const hasNext_zh = text("下一步").findOne(findTime);
+    const hasNext_en = text("Next").findOne(findTime)
     if (hasNext_zh)
     {
         hasNext_zh.click();
@@ -79,6 +81,10 @@ const ClickNextBtn = (findTime) =>
     {
         hasNext_kr.click();
         console.log("检测到韩文 点击下一步");
+    }
+    else if (hasNext_en)
+    {
+        hasNext_en.click()
     }
 };
 const ClickConfirmBtn = (findTime) =>
@@ -146,14 +152,14 @@ const CheckLogin = () =>
                 close_btn.click();
             }
         }
-        let hasSelectAccount = textMatches(/.*选择账号.*|.*계정 선택.*|.*选择帐号.*/).findOne(20);
+        let hasSelectAccount = textMatches(/.*选择账号.*|.*계정 선택.*|.*选择帐号.*|.*再添加一个账号.*/).findOne(20);
         if (hasSelectAccount)
         {
             let hasAccount = textMatches(/(.*@gmail.com.*)/).findOne(20);
             if (hasAccount)
             {
                 console.log("发现谷歌账号选择页面，点击使用该账号直接登录");
-                hasAccount.parent().parent().click();
+                click(hasAccount.bounds().centerX(), hasAccount.bounds().centerY())
             }
         }
         let hasAgreeConcept = text("모두 동의 후 계속하기 (선택항목 포함)").findOne(20);
@@ -306,84 +312,7 @@ const CheckLogin = () =>
 };
 const accountArray = ReadAccountFile();
 
-const SetCountryAndBirth = () =>
-{
-    let hadNeedSelectCountry = textMatches(/(.*국가 선택.*|.*選擇國家.*)/).findOne(20);
-    if (hadNeedSelectCountry)
-    {
-        console.log("SetCountryAndBirth");
-        hadNeedSelectCountry.click();
-        Sleep(3);
-        setText("Korea");
-        let hasCanada = textMatches(/(.*Korea.*)/).findOne(2000);
-        if (hasCanada)
-        {
-            Sleep(3);
-            RandomPress([298, 401, 219, 44]);
-        }
-    }
 
-    let hadNeedInputBirthday = textMatches(/(.*MM.DD.YYYY.*)/).findOne(4000);
-    if (hadNeedInputBirthday)
-    {
-
-        RandomPress([258, 317, 236, 28]);
-        const month = random(1, 12).toString().padStart("0", 2);
-        setText(0, month);
-        const day = random(1, 28).toString().padStart("0", 2);
-        setText(1, day);
-        const year = random(1960, 2004).toString().padStart("0", 2);
-        setText(2, year);
-        console.log("birthday input finished");
-        Sleep(3);
-        for (let i = 0; i < 30; i++)
-        {
-            let hadTermsAndConditions = text("확인").findOne(20);
-            if (hadTermsAndConditions)
-            {
-                console.log("同意条款");
-                hadTermsAndConditions.click();
-            }
-            let hasConfirm_cn = text("下一步").findOne(20);
-            let hasConirm_kr = text("다음").findOne(20);
-            if (hasConfirm_cn)
-            {
-                Sleep(5);
-                hasConfirm_cn.click();
-                console.log("click next");
-                Sleep(3);
-            }
-            else if (hasConirm_kr)
-            {
-                Sleep(5);
-                hasConirm_kr.click();
-                console.log("click next");
-                Sleep(3);
-            }
-            let hasConfirm_2_cn = text("確認").findOne(20);
-            let hasConfirm_2_kr = text("다음").findOne(20);
-            if (hasConfirm_2_cn)
-            {
-                Sleep(5);
-                hasConfirm_2_cn.click();
-                console.log("click confirm");
-                Sleep(3);
-                break;
-            }
-            else if (hasConfirm_2_kr)
-            {
-                Sleep(5);
-                hasConfirm_2_kr.click();
-                console.log("click confirm");
-                Sleep(3);
-                break;
-            }
-            Sleep();
-        }
-
-        console.log("finish set country and birth");
-    }
-};
 const LoginGoogleAccount = () =>
 {
     console.log("开始登录 Google 账号");
@@ -699,6 +628,14 @@ const InputEmailUrl = () =>
             console.log("text:首次打开谷歌浏览器，确认协议.");
             hadAggreeConcept.click();
         }
+        if (textMatches(/.*要将Chrome设为您的默认浏览器应用吗.*/).findOne(20))
+        {
+            let haveCancel = text('取消').findOne(20)
+            if (haveCancel)
+            {
+                haveCancel.click()
+            }
+        }
         let hasAddAccount = text("취소").findOne(20);
         if (hasAddAccount)
         {
@@ -768,6 +705,7 @@ const InputEmailUrl = () =>
             console.log("发现关联账号，点击使用该账户继续");
             click(hasUseIdentificationContinue.bounds().centerX(), hasUseIdentificationContinue.bounds().centerY());
         }
+
         Sleep();
         console.log("loop: " + i);
     }
@@ -815,6 +753,14 @@ const InputEmailUrl = () =>
                     Sleep(3);
                     ClickNextBtn();
                 }
+                let haveShowPassword_en = text("Show password").findOne(20)
+                if (haveShowPassword_en)
+                {
+                    console.log("发现密码输入框，开始输入密码");
+                    setText(accountArray[1]);
+                    Sleep(3);
+                    ClickNextBtn()
+                }
                 if (text("Use the web version").findOne(20))
                 {
                     console.log("发现网页邮箱，输入邮箱地址成功，退出");
@@ -838,6 +784,16 @@ const InputEmailUrl = () =>
                 if (text("Primary").findOne(20))
                 {
                     console.log("已经进入邮箱，退出");
+                    return true;
+                }
+                if (textMatches(/.*收件箱.*/).findOne(20))
+                {
+                    console.log("已经进入邮箱页面，退出")
+                    return true;
+                }
+                if (text("刷新").findOne(20))
+                {
+                    console.log("发现刷新按钮，刷新页面");
                     return true;
                 }
                 Sleep();
@@ -901,6 +857,7 @@ const GetEmailVerificationCode = () =>
         }
         let has_refresh_page = text("새로고침").findOne(20);
         let has_refreshBtn = text("Refresh").findOne(20);
+        let has_refreshBtn_zh = text("刷新").findOne(20);
         const WaitUntilRefreshPage = () =>
         {
             for (let i = 0; i < 40; i++)
@@ -912,6 +869,12 @@ const GetEmailVerificationCode = () =>
                     return true;
                 }
                 if (text("새로고침").findOne(20))
+                {
+                    console.log("发现刷新按钮，刷新页面");
+                    Sleep(6);
+                    return true;
+                }
+                if (text("刷新").findOne(20))
                 {
                     console.log("发现刷新按钮，刷新页面");
                     Sleep(6);
@@ -939,6 +902,13 @@ const GetEmailVerificationCode = () =>
                     hadPrimaryBtn.click();
                     Sleep();
                 }
+                let haveReceived = text("收件箱").findOne(20);
+                if (haveReceived)
+                {
+                    console.log("发现收件箱，点击返回主页")
+                    haveReceived.click();
+                    Sleep();
+                }
                 let hasStoveEmail = textMatches(/(.*인증 메일 안내.*)/).findOne(20);
                 if (hasStoveEmail)
                 {
@@ -951,7 +921,9 @@ const GetEmailVerificationCode = () =>
                     hasStoveEmail_zh.click();
                     Sleep();
                 }
+                Sleep()
             }
+
             let hasStoveEmail = textMatches(/(.*인증 메일 안내.*)/).findOne(20);
             if (hasStoveEmail)
             {
@@ -964,7 +936,7 @@ const GetEmailVerificationCode = () =>
                 hasStoveEmail_zh.click();
                 Sleep();
             }
-            let hasLatestEmail = textMatches(/(.*0 minutes ago.*|.*1 minute ago.*|.*2 minute ago.*)/).findOne(20);
+            let hasLatestEmail = textMatches(/(.*0 minutes ago.*|.*1 minute ago.*|.*2 minute ago.*|.*0分钟前.*|.*1分钟前.*)/).findOne(20);
             if (hasLatestEmail)
             {
                 let hasStoveEmail = textMatches(/(.*인증 메일 안내.*)/).findOne(20);
@@ -988,36 +960,19 @@ const GetEmailVerificationCode = () =>
             }
             return code;
         };
-        if (has_refresh_page || has_refreshBtn)
+        if (has_refresh_page || has_refreshBtn || has_refreshBtn_zh)
         {
             console.log("发现重新加载按钮，重新加载页面");
-            if (has_refresh_page)
+            Sleep(5);
+            console.log("向下拉动，刷新页面");
+            swipe(420, 520, 420, 920, 2000);
+            WaitUntilRefreshPage();
+
+            code = GetLastestCode();
+            if (code != null)
             {
-                Sleep(5);
-                console.log("向下拉动，刷新页面");
-                swipe(420, 520, 420, 920, 2000);
-                WaitUntilRefreshPage();
-
-                code = GetLastestCode();
-                if (code != null)
-                {
-                    return code;
-                }
+                return code;
             }
-            else if (has_refreshBtn)
-            {
-                Sleep(5);
-                console.log("向下拉动，刷新页面");
-                swipe(420, 520, 420, 920, 2000);
-                WaitUntilRefreshPage();
-
-                code = GetLastestCode();
-                if (code != null)
-                {
-                    return code;
-                }
-            }
-
         }
         let hasInboxBtn = text("Inbox").findOne(20);
         if (hasInboxBtn)
@@ -1085,7 +1040,11 @@ const LoginFlow = () =>
         {
             ClickNextBtn();
         }
-        ClickNextBtn()
+        if (FindMultiColors(BlackBtnColorList, [281, 528, 720, 104]))
+        {
+            RandomPress([333, 557, 624, 48])
+        }
+        // ClickNextBtn()
         if (textMatches(/.*已完成裝置.*/).findOne(20))
         {
             ClickConfirmBtn();
@@ -1313,7 +1272,7 @@ const EnterRandomServer = () =>
     let hasServer = false;
     let isServerFull;
     const serverAvailableList = [];
-    out: for (let n = 0; n < 7; n++)
+    out: for (let n = 0; n < 8; n++)
     {
         if (n != 0)
         {
@@ -1343,7 +1302,7 @@ const EnterRandomServer = () =>
         }
     }
     Sleep();
-    for (let i = 0; i < 6; i++)
+    for (let i = 0; i < 8; i++)
     {
         SwipeSlowly([600, 250, 10, 10], [600, 550, 10, 10], 1);
     }
@@ -1469,6 +1428,7 @@ const SetName = () =>
             }
         }
         config.game.name = name;
+        config.createCharacterTime = new Date().toJSON()
         RewriteConfig(config);
     }
     else
@@ -1522,13 +1482,13 @@ const CreateCharacterFlow = (serverName) =>
     SetName();
 
     FirstEnterGameClickSkip();
+
 };
 
-module.exports = { CreateCharacterFlow, };
+const temporaryLoginGoogle = () =>
+{
+    CheckLogin()
+    LoginFlow();
+}
+module.exports = { CreateCharacterFlow, temporaryLoginGoogle };
 
-
-
-
-// console.log(GetEmailVerificationCode());
-// InputEmailUrl();
-// GetEmailVerificationCode();

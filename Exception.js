@@ -16,6 +16,7 @@ const {
     ChangeGameSetting,
     DeathCheck,
     TapTip,
+    SetCountryAndBirth,
 
 
 } = require("./utils.js");
@@ -92,9 +93,9 @@ const NoPotionFlow = (shot) =>
             DecomposeEquipment("partial");
         }
         const buyPotionInterval = (new Date().getTime() - lastTimeOfBuyingPotion) / 60000;
-        if (buyPotionInterval < 2) 
+        if (buyPotionInterval < 10) 
         {
-            console.log("连续购买药水时间间隔小于2分钟，不重复购买");
+            console.log("连续购买药水时间间隔小于10分钟，不重复购买");
             return false;
         }
         else
@@ -408,6 +409,7 @@ const ResetConfig = () =>
         if (config.game.today != date.getDate() && date.getHours() > 4)
         {
             console.log("新的一天，重置配置");
+            config.delayTime = random(3, 1200)
             config.game.today = date.getDate();
             config.game.deathTime = 0;
             config.game.reconnectionTime = 0;
@@ -415,7 +417,7 @@ const ResetConfig = () =>
 
             config.daily.dailyInstance = false;
             config.daily.acceptDailyMission = false;
-            config.daily.hangUpSecretLab = false;
+            config.daily.hangUpSecretLab = 0;
 
             config.daily.guildDonation = false;
             config.daily.friendshipDonation = false;
@@ -434,7 +436,7 @@ const ResetConfig = () =>
                     [random(20, 23), random(0, 59)],
                 ];
             }
-  
+
             RewriteConfig(config);
         }
     }
@@ -494,6 +496,19 @@ const StovePopup = () =>
         RandomPress([392, 288, 521, 42])
     }
     RecycleImgList(loginAccountImgList)
+
+    const haveServiceAndRule = text('條款及條件').findOne(20)
+
+    if (haveServiceAndRule)
+    {
+        const haveConfirm = text('確定').findOne(20)
+        if (haveConfirm)
+        {
+            SetCountryAndBirth()
+        }
+        console.log("输入日期弹窗")
+
+    }
 };
 const PressSomeTip = (shot) =>
 {
@@ -657,9 +672,5 @@ const ExceptionFlow = () =>
 
 module.exports = { ExceptionFlow };
 
-
-
-// ExceptionFlow()
-// DeathFlow_HaltMode(captureScreen())
 
 

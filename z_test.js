@@ -222,78 +222,6 @@ function 关闭应用(packageName)
 
 // UpdateDealRecord(dealRecord);
 
-// try
-// {
-//     console.log("发送数据给后台");
-//     const res = http.post("http://47.76.112.107:8001/devices", postData);
-//     console.log(res);
-// } catch (error)
-// {
-//     console.log(error);
-// }
-
-// const date = new Date();
-// const month = date.getMonth() + 1;
-// const year = date.getFullYear();
-
-// let monthlyIncome = 0;
-
-// const currentMonthData = Object.keys(dealRecord).filter(key =>
-// {
-//     let time = key.split("_");
-//     if (year == time[0] && month == time[1])
-//     {
-//         return true;
-//     }
-//     else
-//     {
-//         return false;
-//     }
-// });
-
-// currentMonthData.map(key => monthlyIncome += dealRecord[key]);
-
-// const config = ReadConfig();
-// const postData = {
-//     vm: "VM010245081080",
-//     serverName: config.game.serverName,
-//     lv: config.game.lv,
-//     combatPower: config.game.combatPower,
-//     diamond: 100,
-//     monthlyIncome: monthlyIncome,
-//     historyDealRecord: JSON.stringify(dealRecord)
-// };
-// console.log("postData: " + JSON.stringify(postData));
-
-
-// try
-// {
-//     console.log("发送数据给后台");
-//     const res = http.post("http://10.6.130.129:8001/devices", postData);
-//     console.log(res.statusCode);
-// } catch (error)
-// {
-//     console.log(error);
-// }
-// SwipeSlowly([630, 540, 5, 5], [630, 240, 5, 5], 3);
-// console.log(FindNumber("purchasePrice", [699, 347, 45, 51]));
-// console.log(FindNumber("sellPrice", [699, 347, 45, 51]))
-// const a = { "he": 1, "she": 2 }
-// for (let key in a)
-// {
-//     console.log(key)
-// }
-// const a = {"2024_11_25_13_12":[
-//     0,
-//     1187],
-// "2024_11_26_9_10":[
-//     23,
-//     1210],
-// "2024_11_26_14_48":[
-//     0,
-//     1252]
-// }
-// { "vm": "VM010245081025", "serverName": "3区6", "lv": 54, "combatPower": 26315, "diamond": 1252, "monthlyIncome": 784, "historyDealRecord": "{\"2024_11_13_15_18\":[14,0],\"2024_11_1_11_14_11_44\":[0,0]}" }
 
 const getRecentOneMonthDates = (removeYear, underline) =>
 {
@@ -318,25 +246,8 @@ const getRecentOneMonthDates = (removeYear, underline) =>
     return dates.reverse(); // 确保日期按升序排列
 }
 
-// console.log(JSON.stringify(getRecentOneMonthDates()))
-if (HasPopupClose([25, 1, 55, 54]))
-{
-    RandomPress([42, 684, 23, 27]) //setting
-    let shot = captureScreen()
-    for (let i = 0; i < 12; i++)
-    {
-        let haveCheckMark = FindCheckMark([404, 294, 385, 220], shot)
-        if (haveCheckMark)
-        {
-            RandomPress([haveCheckMark.x, haveCheckMark.y, 30, 5])
-            shot = captureScreen()
-        }
-    }
-    RandomPress([853, 207, 24, 24])
-    RandomPress([166, 19, 739, 259])
-    RandomPress([42, 17, 23, 28])
-}
-
+const a = 'INS-AE73913A95714570'
+console.log(typeof 1 == 'number')
 
 
 

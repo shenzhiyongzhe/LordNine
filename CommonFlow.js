@@ -459,7 +459,7 @@ const LoginProps = (type) =>
         SetLoginSetting();
     }
 
-    out: for (let i = 0; i < 20; i++)
+    out: for (let i = 0; i < 15; i++)
     {
         hasTipPoint = FindTipPoint([511, 122, 421, 494]);
         if (hasTipPoint)
@@ -1410,7 +1410,12 @@ const GetCurrentDiamond = () =>
     CloseBackpack();
     return diamond;
 };
-
+const getOriginDate = () =>
+{
+    const arr = new Date().toJSON().split('T');
+    arr[1] = arr[1].slice(0, 8);
+    return arr.join(' ')
+}
 const GetSettlement = () =>
 {
     console.log("fn: 开始结算");
@@ -1489,19 +1494,38 @@ const GetSettlement = () =>
 
     const tradeRecord = ReadTradeRecord()
 
-    tradeRecord[GetDateTime()] = [settlement, beforeSettleDiamond, afterSettleDiamond];
+    const formatedRecord = {}
+
+    for (let key in tradeRecord)
+    {
+        if (key.includes('_'))
+        {
+            let arr = key.split('_')
+            let str = arr[0] + "-" + arr[1].toString().padStart(2, '0') + "-" + arr[2].toString().padStart(2, '0') + " " + arr[3].toString().padStart(2, '0') + ":" + arr[4].toString().padStart(2, '0')
+            formatedRecord[str] = tradeRecord[key];
+        }
+    }
+    if (formatedRecord == {} || Object.keys(formatedRecord).length < 3)
+    {
+        console.log("已经格式化交易数据")
+    }
+    else
+    {
+        UpdateTradeRecord(formatedRecord)
+    }
+
+    tradeRecord[getOriginDate()] = [settlement, beforeSettleDiamond, afterSettleDiamond];
+
     UpdateTradeRecord(tradeRecord)
 
-    const date = new Date();
-    const month = date.getMonth() + 1;
-    const year = date.getFullYear();
 
     let monthlyIncome = 0;
 
+    const thisMonth = new Date().toJSON().slice(0, 7)
+
     const currentMonthData = Object.keys(tradeRecord).filter(key =>
     {
-        let time = key.split("_");
-        if (year == time[0] && month == time[1])
+        if (key.startsWith(thisMonth))
         {
             return true;
         }
@@ -1515,21 +1539,16 @@ const GetSettlement = () =>
 
     const config = ReadConfig();
 
-    if (!config.googleAccount)
-    {
-        const account = ReadAccountFile();
-        config.game.vm = account[3];
-        config.googleAccount = account[0];
-        config.googlePassword = account[1]
-    }
+
 
     config.game.vm = config.game.vm.replace(/\n/g, '');
 
-    if (!config.game.serverName || config.game.serverName.includes("null") || config.game.serverName == "999")
+    if (!config.game.serverName || config.game.serverName.toString() == "999")
     {
         console.log("server name error")
         config.game.serverName = GetServerName();
     }
+
     if (!config.game.lv || config.game.lv < 30)
     {
         console.log("等级信息错误");
@@ -1553,6 +1572,11 @@ const GetSettlement = () =>
     if (!monthlyIncome)
     {
         monthlyIncome = "0";
+    }
+    if (beforeSettleDiamond == afterSettleDiamond)
+    {
+        console.log("结算前后数字相同，返回上次结果")
+        afterSettleDiamond = config.diamond;
     }
     config.game.monthlyIncome = monthlyIncome;
     config.game.diamond = afterSettleDiamond;
@@ -1730,6 +1754,11 @@ const TradeGoods = () =>
 const PutOnSale = () =>
 {
     console.log("开始进行物品上架");
+    if (!HasMenu())
+    {
+        console.log("没有发现菜单按钮，退出上架")
+        return false;
+    }
     GetSettlement();//结算过期上架物品
     LoginProps();
     DecomposeEquipment("partial");
@@ -2028,6 +2057,10 @@ const needWearEquipment = () =>
         const colorList = ["blue", "purple"];
         for (let key in config.equipments)
         {
+            if (config.equipments[key] == null)
+            {
+                return true;
+            }
             if (!colorList.includes(config.equipments[key][0]))
             {
                 console.log("需要穿装备");
@@ -2206,8 +2239,3 @@ module.exports = {
     ShopBuy, ComprehensiveImprovement, ComprehensiveImprovement_Instance, StrengthenHorseEquipment, IncreaseWeaponFeatures, GuildDonation,
 };
 
-// FriendshipDonation()
-// FriendShipShop()
-// GetSettlement()
-// ComprehensiveImprovement_Instance();
-// PutOnSale();

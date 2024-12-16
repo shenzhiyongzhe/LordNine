@@ -23,16 +23,17 @@ const GetCaptureScreenPermission = () =>
 
 GetCaptureScreenPermission();
 
+
 // engines.stopAllAndToast();
 // java.lang.System.exit(0);
 //com.smilegate.lordnine.stove.google
 // 10.6.130.129
 //adb -s 10.245.81.17:5555  pull /sdcard/脚本/LordNine/build/lordnine_v1.0.0.apk C:/nginx/Rom/LordNine.apk
-// adb -s 10.245.81.25:5555  pull /sdcard/脚本/LordNine/build/lordnine_v11.28.4.apk C:/nginx/Rom/LordNine.apk
+// adb -s 10.245.81.25:5555  pull /sdcard/脚本/LordNine/build/lordnine_v12.16.1.apk C:/nginx/Rom/LordNine.apk
 
-//adb -s 10.128.122.46:5555  pull /sdcard/脚本/LordNine/build/lordnine_v12.6.1.apk C:/nginx/Rom/LordNine.apk
+//adb -s 10.128.122.46:5555  pull /sdcard/脚本/LordNine/build/lordnine_v12.12.1.apk C:/nginx/Rom/LordNine.apk
 
-//adb -s 10.128.122.46:5555  pull /sdcard/脚本/LordNine/build/lordnine_v1.0.1.apk C:/nginx/Rom/LordNineBeta.apk
+
 
 //adb -s 10.245.81.17:5555  shell pm enable org.autojs.autoxjs.v6
 

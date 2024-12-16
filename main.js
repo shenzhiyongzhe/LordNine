@@ -1,5 +1,5 @@
 
-const { RewriteConfig, Sleep, specialConfig, LaunchGame, ReadConfig, } = require("./utils.js");
+const { RewriteConfig, Sleep, specialConfig, LaunchGame, ReadConfig, ReadAccountFile } = require("./utils.js");
 const { ExceptionFlow } = require("./Exception");
 const { MainStoryFlow } = require("./MainStory.js");
 
@@ -7,9 +7,43 @@ const { InstanceFlow } = require("./Instance.js");
 
 const version = `${app.versionName}`
 // console.log("version：" + app.versionName)
+
 const versionColor = "#7FFFD4";
 let mainThread = null;
 let serverName = null;
+
+let loginGoogleDelay = 0;
+let gameMode = null;
+
+function Init()
+{
+    const config = ReadConfig();
+    if (!config.googleAccount)
+    {
+        const account = ReadAccountFile();
+        config.game.vm = account[3];
+        config.googleAccount = account[0];
+        config.googlePassword = account[1]
+        RewriteConfig(config)
+    }
+    if (config.ui || !config.gameMode)
+    {
+        FormatConfig()
+    }
+    if (config.unlockTrade)
+    {
+        specialConfig.gameMode = "instance";
+        specialConfig.initGameMode = "instance"
+    }
+    else
+    {
+        specialConfig.gameMode = "mainStory"
+        specialConfig.initGameMode = "mainStory"
+    }
+
+    gameMode = config.gameMode;
+}
+
 
 const GetCaptureScreenPermission = () =>
 {
@@ -37,7 +71,17 @@ const DownLoadApk = (downloadUrl, savePath) =>
 {
     threads.start(function ()
     {
-        const url = `http://10.6.130.129:82/${downloadUrl}`;
+        let url = null;
+        const config = ReadConfig()
+
+        if (config.game.vm.startsWith("INS"))
+        {
+            url = `http://10.6.130.129:82/${downloadUrl}`;
+        }
+        else if (config.game.vm.startsWith("VM"))
+        {
+            url = `http://10.6.130.129:82/${downloadUrl}`;
+        }
         const fullSavePath = `/sdcard/${savePath}`;
 
         let r = http.client().newCall(
@@ -71,20 +115,6 @@ const AutoInstallApk = (url) =>
     if (files.exists(`/sdcard/${url}`))
     {
         app.viewFile(`/sdcard/${url}`);
-
-        //     let hasUpdate = textMatches(/(.*업데이트.*|.*更新.*)/).findOne(5000);
-        //     if (hasUpdate)
-        //     {
-        //         hasUpdate.click();
-        //         // sleep(2000);
-        //     }
-
-        //     let hasOpen = textMatches(/(.*열기.*|.*打开.*)/).findOne(15000);
-        //     if (hasOpen)
-        //     {
-        //         console.log("open");
-        //         hasOpen.click();
-        //     }
     }
 };
 const UpdateScript = () => DownLoadApk("LordNine.apk", "LordNine/LordNine.apk");
@@ -267,7 +297,7 @@ const FormatConfig = () =>
         formattedConfig.game.reconnectionTime = config.game.reconnectionTime ? config.game.reconnectionTime : 0;
         formattedConfig.game.serverName = config.game.serverName ? config.game.serverName : "999";
         formattedConfig.game.name = config.game.name ? config.game.name : '';
-        formattedConfig.game.lv = config.game.lv ? config.game.lv : false;
+        formattedConfig.game.lv = config.game.lv ? config.game.lv : 0;
         formattedConfig.game.autoPotion = config.game.autoPotion ? config.game.autoPotion : false;
         formattedConfig.game.diamond = config.game.diamond ? config.game.diamond : 0;
         formattedConfig.game.monthlyIncome = config.game.monthlyIncome ? config.game.monthlyIncome : 0;
@@ -279,7 +309,7 @@ const FormatConfig = () =>
 
         formattedConfig.daily.dailyInstance = false;
         formattedConfig.daily.acceptDailyMission = false;
-        formattedConfig.daily.hangUpSecretLab = false;
+        formattedConfig.daily.hangUpSecretLab = 0;
 
         formattedConfig.daily.guildDonation = false;
         formattedConfig.daily.dailyShop = false;
@@ -295,50 +325,35 @@ const FormatConfig = () =>
     }
 
 }
-const config = ReadConfig();
-
-if (config.ui || !config.game)
-{
-    FormatConfig()
-}
-if (config.unlockTrade)
-{
-    specialConfig.gameMode = "instance";
-    specialConfig.initGameMode = "instance"
-}
-else
-{
-    specialConfig.gameMode = "mainStory"
-    specialConfig.initGameMode = "mainStory"
-}
-
-let gameMode = config.gameMode;
 
 const uiFloaty = () =>
 {
+    Init()
+    const config = ReadConfig()
     const floatyWindow = floaty.window(
         <card gravity="center|top" alpha="1" cardBackgroundColor="#71c9ce" cardCornerRadius="10">
-            <vertical gravity="center|top">
-                <button id="start" h="40" w="120" color="#ffffff" bg="#a6e3e9" marginTop="15" >开始</button>
+            <text id="stop" color="#ffffff" w="30" h="30" bg="#71c9ce" marginLeft="85">✕</text>
+            <vertical gravity="center|top" >
+                <button id="start" h="40" w="120" color="#ffffff" bg="#a6e3e9" marginTop="20" >开始</button>
                 <text id="delayTime" h='0' gravity="center" color="#ffffff" textSize="40sp"></text>
-                <text id="more" textSize="20" h="25" gravity="center" marginTop="5">✡</text>
+                <text id="more" textSize="20" h="25" gravity="center">✡</text>
+                <vertical id="more_container" gravity="center" h="0" marginTop="10">
+                    <button id="update" color="#ffffff" w="120" h="40" bg="#a6e3e9">更新</button>
+                    <radiogroup orientation="horizontal" gravity="center" color="#ffffff">
+                        <radio id="mainStory" text="主线" textSize="10" checked="{{gameMode == 'mainStory' ? true : false}}" />
+                        <radio id="instance" text="挂机" textSize="10" checked="{{gameMode == 'instance' ? true : false}}" />
+                    </radiogroup>
+                    <horizontal gravity="center">
+                        <text id="createCharacter" w="60" textSize="12" color="#ffffff">创建角色</text>
+                        <text textSize="12" textStyle="italic" color={versionColor} >版本：{version}</text>
+                    </horizontal>
+                    <linear orientation="horizontal" gravity="center" >
+                        <text id="loginGoogle" w="60" textSize="12" color="#ffffff" >谷歌登录</text>
+                        <text id="downloadAutoJs" textSize="10">下载autojs</text>
+                    </linear>
+                </vertical>
             </vertical>
-            <vertical id="more_container" gravity="center|bottom" h="0">
-                <button id="update" color="#ffffff" w="120" h="40" bg="#a6e3e9">更新</button>
-                <button id="stop" color="#ffffff" w="120" h="40" marginTop="15" bg="#a6e3e9">停止</button>
-                <radiogroup orientation="horizontal" gravity="center" color="#ffffff">
-                    <radio id="mainStory" text="主线" textSize="10" checked="{{gameMode == 'mainStory' ? true : false}}" />
-                    <radio id="instance" text="挂机" textSize="10" checked="{{gameMode == 'instance' ? true : false}}" />
-                </radiogroup>
-                <linear orientation="horizontal" gravity="center">
-                    <text id="createCharacter" w="60" textSize="8" color="#ffffff" >创建角色</text>
-                    <text textSize="10" textStyle="italic" color={versionColor}>版本：{version}</text>
-                </linear>
-                <linear orientation="horizontal" gravity="center" >
-                    <text id="downloadAutoJs" textSize="10">下载autojs</text>
 
-                </linear>
-            </vertical>
         </card>
     );
 
@@ -346,13 +361,6 @@ const uiFloaty = () =>
     floatyWindow.setPosition(185, 300);
 
     const uiInterval = setInterval(() => {}, 1000);
-
-    if (!config.delayTime)
-    {
-        config.delayTime = random(3, 1000);
-        RewriteConfig(config);
-    }
-
 
     floatyWindow.createCharacter.click(() =>
     {
@@ -363,9 +371,22 @@ const uiFloaty = () =>
         });
     });
 
+
+    floatyWindow.loginGoogle.click(() =>
+    {
+        dialogs.input("请输入延迟时间（单位 秒）", "3", (time) =>
+        {
+            console.log("登录谷歌延迟时间为:" + time);
+            loginGoogleDelay = parseInt(time);
+            loginGoogleDelay = random(0, loginGoogleDelay)
+            toastLog(`随机手动输入延迟时间为${loginGoogleDelay}s`)
+            toastLog(`总延迟时间为${loginGoogleDelay + config.delayTime}s`)
+        });
+    });
+
     floatyWindow.start.click(() =>
     {
-        delayTime = config.delayTime;
+        delayTime = config.delayTime + loginGoogleDelay;
         let count = delayTime;
         floatyWindow.delayTime.attr("h", 100);
         floatyWindow.start.attr("h", 0);
@@ -401,7 +422,7 @@ const uiFloaty = () =>
     floatyWindow.more.click(() =>
     {
         floatyWindow.setSize(400, 520);
-        floatyWindow.more_container.attr("h", 230);
+        floatyWindow.more_container.attr("h", 180);
         floatyWindow.more.attr("h", 0);
     });
 
@@ -486,6 +507,12 @@ const MainFlow = () =>
         console.log("开始导入创建角色模块");
         const { CreateCharacterFlow } = require("./CreateCharacter.js");
         CreateCharacterFlow(serverName);
+    }
+    if (loginGoogleDelay != 0)
+    {
+        console.log("仅谷歌登录")
+        const { temporaryLoginGoogle } = require("./CreateCharacter.js");
+        temporaryLoginGoogle()
     }
     Update();
 };

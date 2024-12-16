@@ -410,15 +410,22 @@ const ClickDailyMission = () =>
         Sleep(random(1, 5));
         RandomPress([haveDailyMissionIcon.x, haveDailyMissionIcon.y, 100, 40]);
         instance_mode = "dailyMission";
+        return true;
     }
     else 
     {
         console.log("未发现每日任务图标。");
+        ClearPage()
         const config = ReadConfig();
         if (config.daily.acceptDailyMission)
         {
             console.log("每日任务已做完，切换到野外挂机");
             instance_mode = "hangUpWild";
+            return false;
+        }
+        else
+        {
+            return true;
         }
     }
 
@@ -577,31 +584,53 @@ const HangUpSecretLab = () =>
         return false;
     }
     console.log("到达秘密实验室前。");
-    Sleep(random(1, 10))
+    Sleep(random(1, 15))
     if (!OpenMap())
     {
+        console.log("第二次打开地图失败。退出")
         return false;
     }
+    const randomIndex = random(1, 4)
+    // RandomPress(FirstLevel[0]);
     RandomPress(SecondLevel[4]);
-    RandomPress(ThirdLevel[1]);
+    RandomPress(ThirdLevel[randomIndex]);
+
+    let secretLabMoveTime = 0;
+    const config = ReadConfig();
+
+    if (config.game.combatPower <= 27000)
+    {
+        console.log('战力小于27000，只进入30级区域')
+        secretLabMoveTime = random(5, 40)
+    }
+    else
+    {
+        console.log("战力大于27000，随机整个秘密实验室")
+        secretLabMoveTime = random(5, 120)
+    }
 
     if (FindBlueBtn([936, 646, 251, 67]))
     {
-        console.log("点击自动移动,前往第一个boss位置");
         RandomPress([967, 663, 203, 35]);
+        console.log("前往秘密实验室，自动移动中...");
         if (WaitUntil(() => HasMenu(), 2000, 30))
         {
-            console.log("@秘密实验室");
-            Sleep(random(5, 35))
+            console.log("@到达秘密实验室");
+            console.log("秘密实验室移动时间为 " + secretLabMoveTime)
+
+            Sleep(secretLabMoveTime)
             PressToAuto();
-            const config = ReadConfig();
-            if (!config.daily.hangUpSecretLab)
+            if (typeof config.daily.hangUpSecretLab != 'number')
             {
-                config.daily.hangUpSecretLab = true;
-                // config.game.hangUpSecretLabTime = new Date().getTime();
+                config.daily.hangUpSecretLab == 1;
                 RewriteConfig(config);
             }
-
+            else
+            {
+                config.daily.hangUpSecretLab += 1;
+            }
+            console.log("今日进入秘密实验室次数为：" + config.daily.hangUpSecretLab)
+            RewriteConfig(config);
         }
     }
 
@@ -611,22 +640,19 @@ const HangUpWild = () =>
 {
     console.log("fn: 去野外挂机");
 
+    if (ClickDailyMission())
+    {
+        console.log("每日任务未做完，优先每日任务")
+        return true;
+    }
     const config = ReadConfig();
 
-    if (!config.daily.hangUpSecretLab)
+    if (config.daily.hangUpSecretLab < 3)
     {
         HangUpSecretLab();
         return true;
     }
-    // else
-    // {
-    //     if ((new Date().getTime() - config.game.hangUpSecretLabTime) / 3600000 < 4)
-    //     {
-    //         console.log("实验室挂机时间小于4小时，重新回到实验室挂机。");
-    //         HangUpSecretLab();
-    //         return true;
-    //     }
-    // }
+
     if (mapName == null)
     {
         const combatPower = config.game.combatPower;
@@ -707,6 +733,7 @@ const IsNoExp = () =>
     Sleep(30);
     return FindImg(clip, [90, 610, 140, 15]);
 };
+
 const InstanceExceptionCheck = () =>
 {
     if (IsHaltMode())
@@ -918,6 +945,7 @@ const IsTimeToComprehensive = () =>
             console.log("综合提升时间为：" + time[0] + "时" + time[1] + "分");
         }
     });
+
     const interval = (curTime.getTime() - lastTimeComprehensiveImprovement) / 3600000
     if (interval > 8 && isTimeToComprehensive)
     {
@@ -930,6 +958,7 @@ const IsTimeToComprehensive = () =>
     }
 };
 
+let switchMapTime = parseFloat((Math.random() + 4).toFixed(2));
 
 const InstanceFlow = () =>
 {
@@ -968,9 +997,10 @@ const InstanceFlow = () =>
 
     if (instance_mode == "hangUpWild")
     {
-        if ((curTime - lastHangUpWildTime) / 3600000 >= 5)
+        if ((curTime - lastHangUpWildTime) / 3600000 >= switchMapTime)
         {
-            console.log("@五小时，切换地图");
+            switchMapTime = parseFloat((Math.random() + 4).toFixed(2));
+            console.log(`@${switchMapTime}小时，切换地图`);
             HangUpWild();
         }
 
@@ -989,16 +1019,15 @@ const InstanceFlow = () =>
             lastTimeClickDailyMission = curTime;
         }
     }
-    else if (instance_mode == "monsterCollection")
-    {
-        console.log("monster mode");
-    }
+    // else if (instance_mode == "monsterCollection")
+    // {
+    //     console.log("monster mode");
+    // }
 
 };
 
 
 module.exports = { InstanceFlow };
-// HangUpSecretLab()
 
 
 

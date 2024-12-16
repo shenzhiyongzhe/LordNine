@@ -143,6 +143,3 @@ const ListenServerFlow = () =>
 
 module.exports = { ListenServer, ListenServerFlow };
 
-// ListenServerFlow();
-// console.log(FindImg(ReadImg(`icon/beginner/serverNameList/${4}`), [73, 162, 228, 434]));
-// console.log(FindMultiColors(CanNotCreateCharacterColorList, [291, 326, 101, 41]));

@@ -754,9 +754,10 @@ const MatchTemplateList = (imgList, region, shot) =>
     });
     return filterArr;
 };
-const FormatDateTime = (date, format) =>
+const FormatDateTime = (format) =>
 {
     format = format || "_";
+    const date = new Date()
     const year = date.getFullYear(); // 年份，例如 2023
     const month = date.getMonth() + 1; // 月份，0-11，0 表示一月，11 表示十二月
     const day = date.getDate(); // 日期，1-31
@@ -765,7 +766,8 @@ const FormatDateTime = (date, format) =>
     return `${year}${format}${month}${format}${day}${format}${hour}${format}${minute}`;
 };
 
-const GetDateTime = () => FormatDateTime(new Date());
+const GetDateTime = (format) => FormatDateTime(format);
+
 const GetVerificationCode = () =>
 {
     const url = "https://upload.chaojiying.net/Upload/Processing.php";
@@ -1473,10 +1475,36 @@ const ReadTradeRecord = () => ReadJsonFile(tradeRecord)
 
 const ReadAccountFile = () =>
 {
-    if (files.exists("/sdcard/disposition.txt"))
+    if (files.exists('/sdcard/GoogleProfile.txt'))
     {
-        const accountString = files.read("/sdcard/disposition.txt");
-        const accountArray = accountString.split("---");
+        const new_content = files.read('/sdcard/GoogleProfile.txt');
+        const arr = new_content.split('---')
+
+        if (arr.length < 2)
+        {
+            alert("账号信息有误，退出脚本")
+            StopScript()
+        }
+        else
+        {
+            arr[2] = "2233"
+
+            if (files.exists('/sdcard/IPdisposition.txt'))
+            {
+                const ip_content = files.read('/sdcard/IPdisposition.txt');
+                const ip_arr = ip_content.split('---')
+                if (ip_arr.length >= 2)
+                {
+                    arr[3] = ip_arr[1]
+                }
+            }
+            return arr;
+        }
+    }
+    else if (files.exists("/sdcard/disposition.txt"))
+    {
+        const old_content = files.read("/sdcard/disposition.txt");
+        const accountArray = old_content.split("---");
         if (accountArray.length == 4)
         {
             return accountArray;
@@ -1814,6 +1842,7 @@ const CommonTipList = [
     [807, 142, 21, 29],//游戏开始的第一个紫色问好
     [1212, 23, 26, 28], //菜单
     [1149, 116, 26, 29], //核萌
+    [1154, 24, 18, 21],//open backpack (icon)
 ];
 const TapArrow = () =>
 {
@@ -1866,6 +1895,85 @@ const TapArrow = () =>
 
 const StopScript = () => java.lang.System.exit(0);
 
+const SetCountryAndBirth = () =>
+{
+    let hadNeedSelectCountry = textMatches(/(.*국가 선택.*|.*選擇國家.*)/).findOne(20);
+    if (hadNeedSelectCountry)
+    {
+        console.log("SetCountryAndBirth");
+        hadNeedSelectCountry.click();
+        Sleep(3);
+        setText("Korea");
+        let hasCanada = textMatches(/(.*Korea.*)/).findOne(2000);
+        if (hasCanada)
+        {
+            Sleep(3);
+            RandomPress([298, 401, 219, 44]);
+        }
+    }
+
+    let hadNeedInputBirthday = textMatches(/(.*MM.DD.YYYY.*)/).findOne(4000);
+    if (hadNeedInputBirthday)
+    {
+
+        RandomPress([258, 317, 236, 28]);
+        const month = random(1, 12).toString().padStart("0", 2);
+        setText(0, month);
+        const day = random(1, 28).toString().padStart("0", 2);
+        setText(1, day);
+        const year = random(1960, 2004).toString().padStart("0", 2);
+        setText(2, year);
+        console.log("birthday input finished");
+        Sleep(3);
+        for (let i = 0; i < 30; i++)
+        {
+            let hadTermsAndConditions = text("확인").findOne(20);
+            if (hadTermsAndConditions)
+            {
+                console.log("同意条款");
+                hadTermsAndConditions.click();
+            }
+            let hasConfirm_cn = text("下一步").findOne(20);
+            let hasConirm_kr = text("다음").findOne(20);
+            if (hasConfirm_cn)
+            {
+                Sleep(5);
+                hasConfirm_cn.click();
+                console.log("click next");
+                Sleep(3);
+            }
+            else if (hasConirm_kr)
+            {
+                Sleep(5);
+                hasConirm_kr.click();
+                console.log("click next");
+                Sleep(3);
+            }
+            let hasConfirm_2_cn = text("確認").findOne(20);
+            let hasConfirm_2_kr = text("다음").findOne(20);
+            if (hasConfirm_2_cn)
+            {
+                Sleep(5);
+                hasConfirm_2_cn.click();
+                console.log("click confirm");
+                Sleep(3);
+                break;
+            }
+            else if (hasConfirm_2_kr)
+            {
+                Sleep(5);
+                hasConfirm_2_kr.click();
+                console.log("click confirm");
+                Sleep(3);
+                break;
+            }
+            Sleep();
+        }
+
+        console.log("finish set country and birth");
+    }
+};
+
 module.exports = {
     specialConfig,
     BuySkillBook,
@@ -1884,7 +1992,7 @@ module.exports = {
     PageBack, PressBlank, PullDownSkill, PressToAuto,
     RandomPress, ReadImg, ReturnHome, RestartGame, RecycleImgList, ReadConfig, RewriteConfig, ReadDealRecord, ReadAccountFile, ReadDailyDiamondRecord, ReadTradeRecord,
     UpdateTradeRecord,
-    Sleep, SwipeSlowly, StopScript,
+    Sleep, SwipeSlowly, StopScript, SetCountryAndBirth,
     WaitUntil, WaitUntilMenu, WaitUntilPageBack, WaitUntilFindColor,
 };
 
