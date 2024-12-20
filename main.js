@@ -18,13 +18,45 @@ let gameMode = null;
 function Init()
 {
     const config = ReadConfig();
-    if (!config.googleAccount)
+
+    if (!config.delayTime)
+    {
+        config.delayTime = random(1, 1200)
+    }
+
+    if (!config.googleAccount || config.game.vm.length < 10)
     {
         const account = ReadAccountFile();
+        config.createCharacterTime = new Date().toJSON()
         config.game.vm = account[3];
         config.googleAccount = account[0];
         config.googlePassword = account[1]
         RewriteConfig(config)
+        try
+        {
+            const postData = {
+                vm: config.game.vm,
+                config
+            }
+            console.log("发送数据给后台");
+            const res = http.post("http://47.76.112.107:8001/devices", postData);
+            // const res = http.post("http://10.6.130.129:8001/devices", postData);
+            if (res.statusCode == 200)
+            {
+                console.log("发送数据成功");
+                if (config.game.tradingTimes)
+                {
+                    config.game.tradingTimes++;
+                }
+                else
+                {
+                    config.game.tradingTimes = 1;
+                }
+            }
+        } catch (error)
+        {
+            console.log(error);
+        }
     }
     if (config.ui || !config.gameMode)
     {
@@ -76,7 +108,7 @@ const DownLoadApk = (downloadUrl, savePath) =>
 
         if (config.game.vm.startsWith("INS"))
         {
-            url = `http://10.6.130.129:82/${downloadUrl}`;
+            url = `http://10.16.1.117:82/${downloadUrl}`;
         }
         else if (config.game.vm.startsWith("VM"))
         {
@@ -288,9 +320,10 @@ const FormatConfig = () =>
     try
     {
         formattedConfig.gameMode = config.gameMode;
-        formattedConfig.delayTime = config.deathTime;
+        formattedConfig.delayTime = config.delayTime ? config.delayTime : random(0, 600);
         formattedConfig.unlockTrade = config.unlockTrade ? config.unlockTrade : false;
         formattedConfig.accountSuspended = config.accountSuspended ? config.accountSuspended : false;
+        formattedConfig.totalDeathTimes = config.totalDeathTimes ? config.totalDeathTimes : 0;
 
         formattedConfig.game.today = config.game.today;
         formattedConfig.game.deathTime = config.game.deathTime;
@@ -301,6 +334,7 @@ const FormatConfig = () =>
         formattedConfig.game.autoPotion = config.game.autoPotion ? config.game.autoPotion : false;
         formattedConfig.game.diamond = config.game.diamond ? config.game.diamond : 0;
         formattedConfig.game.monthlyIncome = config.game.monthlyIncome ? config.game.monthlyIncome : 0;
+        formattedConfig.game.dailyDiamond = config.game.dailyDiamond ? config.game.dailyDiamond : 0;
         formattedConfig.game.combatPower = config.game.combatPower ? config.game.combatPower : 0;
         formattedConfig.game.tradingTimes = config.game.tradingTimes ? config.game.tradingTimes : 0;
         formattedConfig.game.changeGameSetting = config.game.changeGameSetting ? config.game.changeGameSetting : false;
@@ -329,7 +363,6 @@ const FormatConfig = () =>
 const uiFloaty = () =>
 {
     Init()
-    const config = ReadConfig()
     const floatyWindow = floaty.window(
         <card gravity="center|top" alpha="1" cardBackgroundColor="#71c9ce" cardCornerRadius="10">
             <text id="stop" color="#ffffff" w="30" h="30" bg="#71c9ce" marginLeft="85">✕</text>
@@ -362,12 +395,21 @@ const uiFloaty = () =>
 
     const uiInterval = setInterval(() => {}, 1000);
 
+    const config = ReadConfig()
+
     floatyWindow.createCharacter.click(() =>
     {
         dialogs.input("请输入区服编号", "999", (name) =>
         {
             console.log("serverName:" + name);
             serverName = name;
+        });
+        dialogs.input("请输入延迟时间（单位 秒）", "15000", (time) =>
+        {
+            console.log("登录谷歌延迟时间为:" + time);
+            loginGoogleDelay = parseInt(time);
+            loginGoogleDelay = random(0, loginGoogleDelay) + 1;
+            toastLog(`延迟时间为${loginGoogleDelay + config.delayTime}s`)
         });
     });
 
@@ -378,9 +420,8 @@ const uiFloaty = () =>
         {
             console.log("登录谷歌延迟时间为:" + time);
             loginGoogleDelay = parseInt(time);
-            loginGoogleDelay = random(0, loginGoogleDelay)
-            toastLog(`随机手动输入延迟时间为${loginGoogleDelay}s`)
-            toastLog(`总延迟时间为${loginGoogleDelay + config.delayTime}s`)
+            loginGoogleDelay = random(0, loginGoogleDelay) + 1
+            toastLog(`延迟时间为${loginGoogleDelay + config.delayTime}s`)
         });
     });
 
@@ -445,8 +486,9 @@ const uiFloaty = () =>
     floatyWindow.downloadAutoJs.click(DownloadAutoJs);
 
 };
+
 console.setGlobalLogConfig({
-    "file": "/sdcard/LordNine/log.log",
+    "file": `/sdcard/LordNine/${new Date().toJSON().slice(0, 10)}.log`,
     "filePattern": "%d{dd日}%m%n"
 });
 
@@ -518,5 +560,4 @@ const MainFlow = () =>
 };
 
 uiFloaty()
-// FormatConfig()
 

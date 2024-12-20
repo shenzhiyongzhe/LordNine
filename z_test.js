@@ -196,7 +196,6 @@ function 关闭应用(packageName)
     app.launch(packageName);
 }
 
-
 // console.log(IsHaltMode());
 
 // console.log(FindNumber("combatPower", [668, 253, 40, 34]));
@@ -245,10 +244,103 @@ const getRecentOneMonthDates = (removeYear, underline) =>
 
     return dates.reverse(); // 确保日期按升序排列
 }
+// const verificationCodeStr = textMatches(/.*有效時間為10分鐘.*/).findOne(20)
+// if (verificationCodeStr)
+// {
+//     const arr = verificationCodeStr.text().split('認證碼')
+//     if (arr.length > 3)
+//     {
+//         code = arr[2].trim().slice(0, 6)
+//     }
+// }
+const GetLastestCode = () =>
+{
+    let code = null;
 
-const a = 'INS-AE73913A95714570'
-console.log(typeof 1 == 'number')
+    console.log("@来回查看三次，确保最新");
+    for (let i = 0; i < 3; i++)
+    {
+        let hasInboxBtn = text("Inbox").findOne(20);
+        if (hasInboxBtn)
+        {
+            hasInboxBtn.click();
+            Sleep();
+        }
+        let hadPrimaryBtn = text("Primary").findOne(20);
+        if (hadPrimaryBtn)
+        {
+            hadPrimaryBtn.click();
+            Sleep();
+        }
+        let haveReceived = text("收件箱").findOne(20);
+        if (haveReceived)
+        {
+            console.log("发现收件箱，点击返回主页")
+            haveReceived.click();
+            Sleep();
+        }
+        // let hasStoveEmail = textMatches(/(.*인증 메일 안내.*)/).findOne(20);
+        // if (hasStoveEmail)
+        // {
+        //     RandomPress([74, 535, 551, 76])
+        //     Sleep();
+        // }
+        let hasStoveEmail_zh = text('STOVE [STOVE] 驗證信說明').find()
+        if (hasStoveEmail_zh)
+        {
+            hasStoveEmail_zh[0].click()
+            console.log("for:点击最新的 stove 邮件")
+        }
+        Sleep()
+    }
 
+    // let hasStoveEmail = textMatches(/(.*인증 메일 안내.*)/).findOne(20);
+    // if (hasStoveEmail)
+    // {
+    //     RandomPress([74, 535, 551, 76])
+    //     Sleep();
+    // }
 
+    let hasStoveEmail_zh = text('STOVE [STOVE] 驗證信說明').find()
+    if (hasStoveEmail_zh)
+    {
+        console.log("点击最新的 stove 邮件")
+        hasStoveEmail_zh.click()
+        Sleep()
+    }
+    let hasLatestEmail = textMatches(/(.*0 minutes ago.*|.*1 minute ago.*|.*2 minute ago.*|.*3 minute ago.*|.*4 minute ago.*|.*5 minute ago.*|.*0分钟前.*|.*1分钟前.*|.*2分钟前.*|.*3分钟前.*|.*4分钟前.*|.*5分钟前.*)/).findOne(20);
+    if (hasLatestEmail)
+    {
+        console.log("@已经进入验证码邮件页面")
 
+        let verificationCodeStr = textMatches(/.*您好， 為了進行身分確認，請在輸入欄中輸入以下認證碼。           認證碼.*/).find()
+        if (verificationCodeStr)
+        {
+            const arr = verificationCodeStr[verificationCodeStr.length - 1].text().split('認證碼')
+            if (arr.length >= 3)
+            {
+                code = arr[2].trim().slice(0, 6)
+            }
+        }
 
+    }
+    else
+    {
+        console.log('没有最新的邮件，下拉刷新')
+        swipe(420, 520, 420, 920, 2000);
+    }
+    return code;
+};
+console.log(GetLastestCode())
+// console.log()
+// console.log(text('STOVE [STOVE] 驗證信說明').find()[0].click())
+// let verificationCodeStr = textMatches(/.*有效時間為10分鐘.*/).findOne(20)
+// if (verificationCodeStr)
+// {
+//     const arr = verificationCodeStr.text().split('認證碼')
+//     if (arr.length > 3)
+//     {
+//         code = arr[2].trim().slice(0, 6)
+//         console.log("验证码为：" + code)
+//     }
+// }

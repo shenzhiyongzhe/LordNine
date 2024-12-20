@@ -13,7 +13,7 @@ const defaultConfig = {
     delayTime: random(0, 600),
     unlockTrade: false,
     accountSuspended: false,
-
+    totalDeathTimes:0,
     game: {
         "today": 0,
         "deathTime": 0,
@@ -24,6 +24,7 @@ const defaultConfig = {
         "autoPotion": false,
         "diamond": 0,
         "monthlyIncome": 0,
+        "dailyDiamond": 0,
         "combatPower": 1000,
         "tradingTimes": 0,
         "changeGameSetting": false,
@@ -293,40 +294,60 @@ const ChangeGameSetting = () =>
         console.log("进入设置页面失败，退出");
         return false;
     }
-    //改变省电模式为不进入省电模式
-    RandomPress([182, 77, 92, 26]); //游戏设置页
-    RandomPress([631, 324, 115, 23]); //关闭省电
-    RandomPress([1131, 205, 102, 24]); //取消接受队伍消息
+    Sleep(random(1, 3))
 
-    RandomPress([339, 75, 66, 24], 3); //环境设置页
-    RandomPress([1133, 265, 102, 24]); //解析度低
-    RandomPress([1127, 499, 103, 23]); //算绘低
-    RandomPress([1128, 558, 106, 24]); //影格帧率30
-    RandomPress([1136, 618, 99, 22]); //即使绘影
-    const characterNumber = LoadImgList("icon/oneTimeCheck/characterNumber");
-    for (let i = 0; i < 6; i++)
+    RandomPress([1132, 225, 97, 23]) //自动战斗范围无限制
+    RandomPress([958, 529, 116, 26]) //移动时维持自动战斗
+    RandomPress([187, 78, 75, 24]) //游戏设置页
+    RandomPress([1128, 226, 112, 24]) //取消接收
+    RandomPress([641, 378, 101, 25]) //省电模式关闭
+    SwipeSlowly([640, 600, 10, 10], [640, 300, 10, 10], 1);
+    SwipeSlowly([640, 600, 10, 10], [640, 300, 10, 10], 1);
+    //关闭角色资讯
+    for (let i = 0; i < 5; i++)
     {
-        SwipeSlowly([640, 600, 10, 10], [640, 300, 10, 10], 1);
-        if (FindImgInList(characterNumber, [241, 596, 194, 68]))
+        let haveCheckMark = FindCheckMark([692, 436, 554, 69])
+        if (haveCheckMark)
         {
-            console.log("滑到底了");
-            RandomPress([1127, 149, 103, 25]); //灯光品质 低
-            RandomPress([1129, 210, 103, 21]); //关闭后期处理
-            RandomPress([1126, 266, 107, 23]); //状态异常效果
-            RandomPress([1139, 385, 89, 22]); //插件效果
-            RandomPress([1135, 442, 90, 22]); //效果 低
-            RandomPress([1126, 502, 111, 21]); //环境效果 关闭
-            RandomPress([1131, 561, 103, 23]); //镜头晃动 关闭
-            RandomPress([1125, 618, 110, 25]); //人物显示上限
-            if (FindNumber("combatPower", [1161, 614, 38, 33]) == 10)
+            RandomPress([haveCheckMark.x, haveCheckMark.y - 2, 30, 5])
+        }
+        Sleep()
+    }
+    RandomPress([1126, 603, 108, 22]) //关闭迷你聊天
+    RandomPress([332, 78, 77, 24], 3) //环境页
+    RandomPress([1123, 300, 114, 26]) //解析度低
+    RandomPress([1126, 607, 111, 24]) //算会0.8
+    const gameSettingFont = []
+    for (let i = 0; i < 11; i++)
+    {
+        let imgList = LoadImgList(`page/gameSetting/${i}`)
+        gameSettingFont.push(imgList)
+    }
+    out: for (let i = 0; i < 6; i++)
+    {
+        SwipeSlowly([640, 600, 10, 10], [640, 300, 10, 10], 1.5);
+        for (let j = 0; j < gameSettingFont.length; j++)
+        {
+            let haveFont = FindImgInList(gameSettingFont[j], [244, 109, 204, 544])
+            if (haveFont)
             {
-                isChangeSuccess = true;
-                console.log("更改设置成功");
-                break;
+                RandomPress([1120, haveFont.y, 120, 20])
+                console.log("设置关闭或低")
+                if (j == 10)
+                {
+                    console.log("到达底部")
+                    isChangeSuccess = true;
+                    const config = ReadConfig()
+                    config.game.changeGameSetting = true;
+                    RewriteConfig(config)
+                    break out;
+                }
             }
+
         }
     }
-    PageBack();
+    PageBack()
+    gameSettingFont.forEach(arr => arr.forEach(img => img.recycle()))
     return isChangeSuccess;
 };
 const GetServerName = () =>
@@ -1495,7 +1516,7 @@ const ReadAccountFile = () =>
                 const ip_arr = ip_content.split('---')
                 if (ip_arr.length >= 2)
                 {
-                    arr[3] = ip_arr[1]
+                    arr[3] = ip_arr[3]
                 }
             }
             return arr;
@@ -1996,3 +2017,5 @@ module.exports = {
     WaitUntil, WaitUntilMenu, WaitUntilPageBack, WaitUntilFindColor,
 };
 
+
+// ChangeGameSetting()

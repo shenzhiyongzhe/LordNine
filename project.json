@@ -21,7 +21,7 @@
     "hideAccessibilityServices": false,
     "hideLauncher": false,
     "hideLogs": true,
-    "stableMode": true,
+    "stableMode": false,
     "volumeUpcontrol": false,
     "permissions": ["accessibility_services", "draw_overlay"],
     "serviceDesc": "使脚本自动操作(点击、长按、滑动等)所需，若关闭则只能执行不涉及自动操作的脚本。",
@@ -45,6 +45,6 @@
     "keystore": "/storage/emulated/0/脚本/.keyStore/lordnine.keystore"
   },
   "sourcePath": "/storage/emulated/0/脚本/LordNine/main.js",
-  "versionCode": 4,
-  "versionName": "12.16.7"
+  "versionCode": 14,
+  "versionName": "12.20.3"
 }

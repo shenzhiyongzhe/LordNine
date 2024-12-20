@@ -79,7 +79,7 @@ let monsterMapList = null;
 const death_haltMode = LoadImgList("special/death_haltmode");
 
 
-const DeathFlow_HaltMode = (shot) =>
+const DeathCheck_HaltMode = (shot) =>
 {
     if (FindImgInList(death_haltMode, [582, 526, 119, 60], shot))
     {
@@ -106,11 +106,7 @@ const HangUpInstance = () =>
 
     if (!config.game.changeGameSetting)
     {
-        const isChangeSuccess = ChangeGameSetting();
-        if (isChangeSuccess)
-        {
-            config.game.changeGameSetting = true;
-        }
+        ChangeGameSetting();
     }
 
     const hasEnterInstancePage = EnterMenuItemPage("instance");
@@ -136,7 +132,7 @@ const HangUpInstance = () =>
     ];
     const timeOverImgList = LoadImgList("icon/instance/timeOver");
 
-    let curCombatPower = FindNumber("combatPower", [1176, 451, 92, 51]);
+    let curCombatPower = FindNumber("combatPower", [1154, 600, 111, 43]);
     console.log("当前战力为：" + curCombatPower);
 
     const CanEnterInstance = () => FindBlueBtn([979, 637, 276, 74]);
@@ -154,34 +150,21 @@ const HangUpInstance = () =>
         }
         RandomPress(instancePos[i]);
         let canEnterInstance = CanEnterInstance();
-        let hadPressSecondLevel = false;
+        let requireCombatPower = FindNumber("combatPower", [1171, 494, 81, 39]);
+
         if (canEnterInstance)
         {
-            if (curCombatPower > 23500)
+            if (curCombatPower - requireCombatPower > 10000)
             {
-                console.log("战力大于23500，点击第二层");
+                console.log("战力高于需求战力10000点，点击第二层");
                 RandomPress([990, 361, 55, 49]);
-                hadPressSecondLevel = true;
             }
-            let requireCombatPower = FindNumber("combatPower", [1189, 493, 76, 47]);
-            if (hadPressSecondLevel)
-            {
-                if (curCombatPower < requireCombatPower)
-                {
-                    RandomPress([700, 361, 49, 51]); //first level
-                    requireCombatPower = FindNumber("combatPower", [1189, 493, 76, 47]);
-                }
-            }
-
-            if (curCombatPower > requireCombatPower)
-            {
-                console.log(curCombatPower + "  >>>  " + requireCombatPower);
-                PressEnterInstanceBtn();
-                lastTimeEnterInstance = new Date().getTime();
-                instance_mode = "hangUpInstance";
-                haveAvailableInstance = true;
-                break;
-            }
+            console.log(curCombatPower + "  >>>  " + requireCombatPower);
+            PressEnterInstanceBtn();
+            lastTimeEnterInstance = new Date().getTime();
+            instance_mode = "hangUpInstance";
+            haveAvailableInstance = true;
+            break;
         }
     }
     if (!haveAvailableInstance)
@@ -221,6 +204,15 @@ const HangUpInstance = () =>
 const AcceptDailyMission = () =>
 {
     console.log("fn: " + "接受每日任务");
+    const config = ReadConfig()
+
+    if (config.game.lv < 35)
+    {
+        console.log("等级小于35级，暂不接受每日任务")
+        config.daily.acceptDailyMission = true;
+        RewriteConfig(config);
+    }
+
     const dailyMissionItem = LoadImgList("icon/font/dailyMission/dailyMissionItem");
     const weeklyMissionItem = LoadImgList("icon/font/dailyMission/weeklyMissionItem");
 
@@ -373,7 +365,6 @@ const AcceptDailyMission = () =>
 
     if (haveAcceptMax)
     {
-        const config = ReadConfig();
         config.daily.acceptDailyMission = true;
         RewriteConfig(config);
     }
@@ -393,7 +384,7 @@ const AcceptDailyMission = () =>
 };
 const ClickDailyMission = () =>
 {
-    console.log("fn: 点击成长任务");
+    console.log("fn: 点击每日任务");
     if (IsHaltMode())
     {
         ExitHaltMode();
@@ -410,6 +401,7 @@ const ClickDailyMission = () =>
         Sleep(random(1, 5));
         RandomPress([haveDailyMissionIcon.x, haveDailyMissionIcon.y, 100, 40]);
         instance_mode = "dailyMission";
+        console.log("点击每日任务图标，开始进行")
         return true;
     }
     else 
@@ -425,6 +417,7 @@ const ClickDailyMission = () =>
         }
         else
         {
+            console.log("未接受每日任务。")
             return true;
         }
     }
@@ -640,17 +633,24 @@ const HangUpWild = () =>
 {
     console.log("fn: 去野外挂机");
 
+
     if (ClickDailyMission())
     {
         console.log("每日任务未做完，优先每日任务")
         return true;
     }
+
+    lastHangUpWildTime = new Date().getTime();
+
     const config = ReadConfig();
 
-    if (config.daily.hangUpSecretLab < 3)
+    if (config.unlockTrade)
     {
-        HangUpSecretLab();
-        return true;
+        if (config.daily.hangUpSecretLab < 3)
+        {
+            HangUpSecretLab();
+            return true;
+        }
     }
 
     if (mapName == null)
@@ -658,7 +658,8 @@ const HangUpWild = () =>
         const combatPower = config.game.combatPower;
         if (combatPower < 18000)
         {
-            HangUpSecretLab();
+            mapName = [0, 3, random(0, 2)]
+            console.log("去被污染的盆地挂机")
             return true;
         }
         else if (combatPower >= 18000 && combatPower < 24000)
@@ -666,12 +667,12 @@ const HangUpWild = () =>
             mapName = [1, 1, random(0, 2)];
             console.log("去新月湖挂机");
         }
-        else if (combatPower >= 24000 && combatPower < 26000)
+        else if (combatPower >= 24000 && combatPower < 28000)
         {
             mapName = [1, 2, random(0, 2)];
             console.log("去暮光之丘挂机");
         }
-        else if (combatPower > 28000 && 35000)
+        else if (combatPower >= 28000)
         {
             mapName = [2, 1, 0];
             console.log("去鸟兰挂机")
@@ -701,7 +702,6 @@ const HangUpWild = () =>
     WaitUntilMenu();
     Sleep(random(1, 5));
 
-    lastHangUpWildTime = new Date().getTime();
 
     if (IsAuto_inactive())
     {
@@ -742,42 +742,32 @@ const InstanceExceptionCheck = () =>
         {
             console.log("@没有经验增加");
             ExitHaltMode();
-            PressToAuto()
-            if (instance_mode == "instance")
-            {
-                if (!HasPopupClose([769, 4, 46, 45]))
-                {
-                    console.log("@没有攻击目标，向右移动")
-                    gesture(5 * 1000, [190, 596], [260, 596]);
-                }
-                else
-                {
-                    ReturnHome()
-                }
-            }
+            ReturnHome()
         }
         if (instance_mode == "dailyMission")
         {
             ExitHaltMode();
         }
-        DeathFlow_HaltMode();
-
+        DeathCheck_HaltMode();
     }
     else
     {
         const deathBtn = DeathCheck();
+        const config = ReadConfig();
+
         if (deathBtn)
         {
-            RandomPress([deathBtn.x - 50, deathBtn.y, 150, 20], 15);
+            RandomPress([deathBtn.x - 50, deathBtn.y, 150, 20], random(10,30));
+            config.totalDeathTimes = config.totalDeathTimes ? config.totalDeathTimes:0;
+            config.totalDeathTimes++;
+            RewriteConfig(config)
         }
 
-        const config = ReadConfig();
         if (IsInCity() && !IsMoving())
         {
             console.log("在主城, 未移动，挂机模式为" + instance_mode);
             if (instance_mode == "hangUpInstance")
             {
-
                 if (!config.daily.dailyInstance)
                 {
                     HangUpInstance();
@@ -1028,6 +1018,7 @@ const InstanceFlow = () =>
 
 
 module.exports = { InstanceFlow };
+// HangUpInstance()
 
 
 

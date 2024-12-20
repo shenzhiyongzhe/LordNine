@@ -254,6 +254,7 @@ const GetActivitiesAward = () =>
                     break;
                 }
             }
+            //任务进度条 奖励
             let hasBar = FindTipPoint([727, 315, 35, 282]);
             if (hasBar)
             {
@@ -265,6 +266,23 @@ const GetActivitiesAward = () =>
             {
                 RandomPress([hasBar_2.x - 100, hasBar_2.y + 10, 100, 20]);
                 PressBlank();
+            }
+            //点击分页
+            if (!hasBar && !hasBar_2)
+            {
+                RandomPress([360, 273, 72, 27])
+                hasBar = FindTipPoint([727, 315, 35, 282]);
+                if (hasBar)
+                {
+                    RandomPress([hasBar.x - 100, hasBar.y + 10, 100, 30]);
+                    PressBlank();
+                }
+                hasBar_2 = FindTipPoint([1151, 319, 30, 274]);
+                if (hasBar_2)
+                {
+                    RandomPress([hasBar_2.x - 100, hasBar_2.y + 10, 100, 20]);
+                    PressBlank();
+                }
             }
         }
         Sleep();
@@ -912,112 +930,81 @@ const UpgradeHolyRelics = () =>
         ["#070707", [[3, 0, "#070707"], [1, 6, "#070707"], [1, 15, "#070707"], [2, 31, "#070707"]]]
     ];
     const IsUnlocked = () => FindMultiColors(blackColorList, [1093, 644, 25, 56]);
-    for (let i = 0; i < 10; i++)
+
+    const holyPosition = [
+        [57, 86, 194, 69],
+        [49, 192, 198, 68],
+        [53, 299, 205, 69],
+        [48, 407, 226, 68]
+    ]
+    for (let j = 0; j < 4; j++)
     {
-        //is up to lv20
-        if (FindBlueBtn([1105, 641, 163, 64]))
+        RandomPress(holyPosition[j], 2)
+        if (!IsUnlocked())
         {
-            RandomPress([1126, 657, 119, 32]);
-            if (FindBlueBtn([657, 442, 195, 70]))
+            console.log("解锁此圣物栏")
+            if (FindBlueBtn([948, 640, 317, 66]))
             {
-                RandomPress([679, 458, 154, 36]);
-                Sleep(5);
+                RandomPress([976, 656, 259, 33], 2);
+                if (FindBlueBtn([657, 402, 197, 62]))
+                {
+                    RandomPress([679, 415, 156, 35], 5);
+                    if (!IsUnlocked())
+                    {
+                        console.log("没有解锁材料，解锁失败")
+                        continue;
+                    }
+                }
             }
         }
-        else
+        for (let i = 0; i < 7; i++)
+        {
+            if (FindBlueBtn([1111, 650, 145, 46]))
+            {
+                RandomPress([1126, 657, 119, 32]);
+                if (FindBlueBtn([659, 493, 192, 62]))
+                {
+                    RandomPress([683, 506, 149, 34]);
+                    Sleep(5);
+                }
+                console.log("升级圣物次数：" + i)
+            }
+            else
+            {
+                console.log("无法升级。下一格")
+                break;
+            }
+            Sleep()
+        }
+    }
+    PageBack()
+    for (let i = 0; i < 10; i++)
+    {
+        let shot = captureScreen()
+        if (HasMenu())
         {
             break;
         }
-    }
-    RandomPress([38, 187, 257, 80]);
-    let secondUnlocked = false;
-    if (!IsUnlocked())
-    {
-        if (FindBlueBtn([946, 641, 317, 66]))
+        if (FindBlueBtn([657, 493, 199, 62], shot)) //确定升级按钮
         {
-            RandomPress([972, 657, 268, 32]);
-            if (FindBlueBtn([655, 443, 201, 70]))
-            {
-                RandomPress([674, 460, 162, 32]);
-                Sleep(3);
-                if (IsUnlocked())
-                {
-                    secondUnlocked = true;
-                }
-            }
+            RandomPress([681, 505, 148, 33])
         }
-    }
-    else
-    {
-        secondUnlocked = true;
-    }
-
-    if (secondUnlocked)
-    {
-        Sleep();
-        for (let i = 0; i < 10; i++)
+        if (FindRedBtn([431, 491, 194, 62], shot)) //取消按钮
         {
-            //is up to lv20
-            if (FindBlueBtn([1105, 641, 163, 64]))
-            {
-                RandomPress([1126, 657, 119, 32]);
-                if (FindBlueBtn([657, 442, 195, 70]))
-                {
-                    RandomPress([679, 458, 154, 36]);
-                    Sleep(5);
-                }
-            }
-            else
-            {
-                break;
-            }
+            RandomPress([459, 504, 140, 37])
         }
-    }
-    RandomPress([66, 306, 216, 60]);
-    let thirdUnlocked = false;
-    if (!IsUnlocked())
-    {
-        if (FindBlueBtn([946, 641, 317, 66]))
+        if (FindBlueBtn([656, 400, 200, 66], shot)) //解锁圣物按钮。
         {
-            RandomPress([972, 657, 268, 32]);
-            if (FindBlueBtn([655, 443, 201, 70]))
-            {
-                RandomPress([674, 460, 162, 32]);
-                Sleep(3);
-                if (IsUnlocked())
-                {
-                    secondUnlocked = true;
-                }
-            }
+            RandomPress([682, 414, 152, 35])
         }
-    }
-    else
-    {
-        thirdUnlocked = true;
-    }
-
-    if (thirdUnlocked)
-    {
-        Sleep();
-        for (let i = 0; i < 10; i++)
+        if (HasPopupClose([823, 168, 46, 40], shot))
         {
-            //is up to lv20
-            if (FindBlueBtn([1105, 641, 163, 64]))
-            {
-                RandomPress([1126, 657, 119, 32]);
-                if (FindBlueBtn([657, 442, 195, 70]))
-                {
-                    RandomPress([679, 458, 154, 36]);
-                    Sleep(5);
-                }
-            }
-            else
-            {
-                break;
-            }
+            RandomPress([835, 178, 21, 18])
         }
+        PageBack()
+        Sleep()
     }
-    PageBack();
+    console.log("fn:强化圣物结束。")
 };
 const AddAttributePoint = () =>
 {
@@ -1420,7 +1407,6 @@ const GetSettlement = () =>
 {
     console.log("fn: 开始结算");
     const beforeSettleDiamond = GetCurrentDiamond();
-    console.log("结算前钻石数量：" + beforeSettleDiamond);
     let hadSettled = false;
     if (OpenMenu())
     {
@@ -1471,21 +1457,28 @@ const GetSettlement = () =>
             PageBack();
         }
     }
-    if (!beforeSettleDiamond)
-    {
-        beforeSettleDiamond = 0;
-    }
+
+    beforeSettleDiamond = beforeSettleDiamond ? beforeSettleDiamond : 0;
     let afterSettleDiamond = beforeSettleDiamond;
     if (hadSettled)
     {
         afterSettleDiamond = GetCurrentDiamond();
+        afterSettleDiamond = afterSettleDiamond ? afterSettleDiamond : 0;
     }
-    if (!afterSettleDiamond)
-    {
-        afterSettleDiamond = beforeSettleDiamond;
-    }
+
+    console.log("结算前钻石数量：" + beforeSettleDiamond);
+
     console.log("结算后钻石：" + afterSettleDiamond);
 
+    if (beforeSettleDiamond == 0 && afterSettleDiamond == 0)
+    {
+        ClearPage()
+        if (!HasMenu())
+        {
+            console.log('不在游戏页面，退出')
+            return false;
+        }
+    }
 
     let settlement = afterSettleDiamond - beforeSettleDiamond;
 
@@ -1504,19 +1497,15 @@ const GetSettlement = () =>
             let str = arr[0] + "-" + arr[1].toString().padStart(2, '0') + "-" + arr[2].toString().padStart(2, '0') + " " + arr[3].toString().padStart(2, '0') + ":" + arr[4].toString().padStart(2, '0')
             formatedRecord[str] = tradeRecord[key];
         }
-    }
-    if (formatedRecord == {} || Object.keys(formatedRecord).length < 3)
-    {
-        console.log("已经格式化交易数据")
-    }
-    else
-    {
-        UpdateTradeRecord(formatedRecord)
+        else
+        {
+            formatedRecord[key] = tradeRecord[key];
+        }
     }
 
     tradeRecord[getOriginDate()] = [settlement, beforeSettleDiamond, afterSettleDiamond];
 
-    UpdateTradeRecord(tradeRecord)
+    UpdateTradeRecord(formatedRecord)
 
 
     let monthlyIncome = 0;
@@ -1537,9 +1526,9 @@ const GetSettlement = () =>
 
     currentMonthData.map(key => monthlyIncome += tradeRecord[key][0]);
 
+    monthlyIncome = monthlyIncome ? monthlyIncome : 0;
+
     const config = ReadConfig();
-
-
 
     config.game.vm = config.game.vm.replace(/\n/g, '');
 
@@ -1569,24 +1558,32 @@ const GetSettlement = () =>
         config.game.combatPower = 0;
     }
 
-    if (!monthlyIncome)
+    let totalDiamond = 0;
+    config.game.diamond = config.game.diamond ? config.game.diamond : 0
+    if (afterSettleDiamond == 0)
     {
-        monthlyIncome = "0";
+        console.log("结算后数字0，返回上次结果")
+        totalDiamond = config.game.diamond;
     }
-    if (beforeSettleDiamond == afterSettleDiamond)
+    else
     {
-        console.log("结算前后数字相同，返回上次结果")
-        afterSettleDiamond = config.diamond;
+        totalDiamond = afterSettleDiamond;
+        config.game.diamond = afterSettleDiamond;
     }
+    config.game.dailyDiamond = config.game.dailyDiamond ? config.game.dailyDiamond : 0;
+
     config.game.monthlyIncome = monthlyIncome;
-    config.game.diamond = afterSettleDiamond;
+    config.game.diamond = totalDiamond;
+    config.game.dailyDiamond += settlement;
+
     const postData = {
         vm: config.game.vm,
         serverName: config.game.serverName,
         lv: config.game.lv,
         combatPower: config.game.combatPower,
-        diamond: afterSettleDiamond,
+        diamond: totalDiamond,
         monthlyIncome: monthlyIncome,
+        dailyDiamond: config.game.dailyDiamond,
         historyDealRecord: JSON.stringify(tradeRecord),
         config: JSON.stringify(config)
     };
@@ -1612,6 +1609,7 @@ const GetSettlement = () =>
     {
         console.log(error);
     }
+    console.log(JSON.stringify(config))
     RewriteConfig(config);
 
 };
@@ -2073,25 +2071,43 @@ const needWearEquipment = () =>
 };
 const needBuyCloak = () =>
 {
-    if (!OpenBackpack())
+    const config = ReadConfig()
+    if (!config.equipments)
     {
+        console.log("异常情况，退出");
         return false;
     }
-    const emptyCloak = LoadImgList("backpack/emptyCloak")
-    if (FindImgInList(emptyCloak, [330, 459, 71, 89]))
+    else if (config.game.diamond < 100)
     {
-        return true;
+        console.log("钻石数量小于100,暂不购买")
+        return false;
     }
     else
     {
+        const cloak = config.equipments.cloak;
+        if (cloak)
+        {
+            if (cloak[0] == 'blue')
+            {
+                console.log("已经购买了披风")
+                return false;
+            }
+            else
+            {
+                console.log("可以购买披风")
+                return true;
+            }
+        }
+        console.log("异常，不购买披风")
         return false;
     }
 }
+
 const ComprehensiveImprovement = () =>
 {
     console.log("开始综合提升");
 
-    if ((new Date().getTime() - lastComprehensiveImproveTime) / 3600000 < 5)
+    if ((new Date().getTime() - lastComprehensiveImproveTime) / 3600000 < 3)
     {
         console.log("提升结束: 两次提升间隔较短，暂不操作");
         return true;
@@ -2101,14 +2117,10 @@ const ComprehensiveImprovement = () =>
     if (isBackpackFull)
     {
         console.log("提升：背包是满的，需要先清理背包");
-        if (needWearEquipment())
-        {
-            WearEquipments();
-            StrengthenEquipment();
-        }
-
+        WearEquipments();
+        StrengthenEquipment();
         LoginProps();
-        DecomposeEquipment("total");
+        DecomposeEquipment("partial");
     }
 
     DailyQuest()
@@ -2118,15 +2130,12 @@ const ComprehensiveImprovement = () =>
     if (!isBackpackFull)
     {
         console.log("backpack is not full");
-        if (needWearEquipment())
-        {
-            WearEquipments();
-            StrengthenEquipment();
-        }
-
+        WearEquipments();
+        StrengthenEquipment();
         LoginProps();
-        DecomposeEquipment("total");
+        DecomposeEquipment();
     }
+
     IncreaseWeaponFeatures();
     UpgradeHolyRelics();
     StrengthenHorseEquipment();
@@ -2238,4 +2247,3 @@ module.exports = {
     ChangeAbility, GetEmail, GetAchievement, GetMonsterKnowledgeAward, LoginProps, DailyQuest, needWearEquipment,
     ShopBuy, ComprehensiveImprovement, ComprehensiveImprovement_Instance, StrengthenHorseEquipment, IncreaseWeaponFeatures, GuildDonation,
 };
-

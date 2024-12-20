@@ -82,9 +82,7 @@ const NoPotionFlow = (shot) =>
                 console.log("死亡流程: 确认死亡");
             }
         }
-        const delayTime = random(0, 32);
 
-        console.log("角色当前没有药水了 延迟" + delayTime + "s");
         Sleep(delayTime);
         if (IsBackpackFull())
         {
@@ -101,10 +99,11 @@ const NoPotionFlow = (shot) =>
         else
         {
             console.log("回家买药水...");
+            const delayTime = random(0, 32);
+            console.log("角色当前没有药水了 延迟" + delayTime + "s");
             BuyPotion();
             lastTimeOfBuyingPotion = new Date().getTime();
         }
-
     }
 };
 const NoPotionFlow_HaltMode = (shot) =>
@@ -414,7 +413,7 @@ const ResetConfig = () =>
             config.game.deathTime = 0;
             config.game.reconnectionTime = 0;
             config.game.tradingTimes = 0;
-
+            config.game.dailyDiamond = 0;
             config.daily.dailyInstance = false;
             config.daily.acceptDailyMission = false;
             config.daily.hangUpSecretLab = 0;
@@ -423,11 +422,11 @@ const ResetConfig = () =>
             config.daily.friendshipDonation = false;
             config.daily.dailyShop = false;
             config.daily.friendshipShop = false;
+
             if (date.getDay() == 1)
             {
                 console.log("每周一，重置周事件")
-                config.delayTime = random(3, 1200)
-                config.tradingHours = [
+                config.dailyTradingHours = [
                     [random(0, 3), random(0, 59)],
                     [random(4, 7), random(0, 59)],
                     [random(8, 11), random(0, 59)],
@@ -458,10 +457,11 @@ const StovePopup = () =>
         console.log("发现游戏评分窗口，以后再说");
         click(hasRate_ch.bounds().centerX(), hasRate_ch.bounds().centerY());
     }
-    const hasUpdateNotice = textMatches(/.*詳細維護資訊請參考官方公告。.*/).findOne(20);
+    const hasUpdateNotice = textMatches(/.*臨時維護公告.*/).findOne(20);
     if (hasUpdateNotice)
     {
-        console.log("发现游戏公告弹窗，关闭脚本");
+        console.log("游戏维护，关闭脚本");
+        alert("游戏维护中...", "维护中...")
         engines.stopAllAndToast();
     }
     const hasLimitAccount = textMatches(/(.*服務使用限制介紹.*)/).findOne(20);

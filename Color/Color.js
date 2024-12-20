@@ -100,6 +100,7 @@ const CheckMarkColorList = [
     ["#ead781", [[3, 3, "#f1dc84"], [5, 6, "#c7b76d"], [8, 2, "#f9e488"], [12, -2, "#e6d37f"]]],
     ["#e8d680", [[3, 2, "#ffe98b"], [4, 4, "#bfaf67"], [6, 1, "#f4e086"], [9, -1, "#af9e5e"]]],
     ["#f0e0ac", [[2, 3, "#ffeeb8"], [4, 6, "#ffeeb8"], [7, 2, "#ffeeb8"], [10, 0, "#ffeeb8"]]], //server name a name confirm
+    ["#e9c75d", [[2, 2, "#e9c75d"], [5, 2, "#e9c75d"], [7, 0, "#e9c75d"], [9, -2, "#e9c75d"]]],//设置页面资讯勾选项
 ];
 const whiteCheckMark = [
     ["#ffffff", [[3, 3, "#ffffff"], [5, 0, "#ffffff"], [8, -2, "#ffffff"], [10, -4, "#ffffff"]]]

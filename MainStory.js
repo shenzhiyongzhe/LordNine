@@ -79,13 +79,12 @@ const HaveGrowthMissionIcon = (shot) =>
     return false;
 };
 
-
 const TapMainStory = () => RandomPress([905, 131, 224, 36], 3);
-
 
 const MainStoryBranchImgList = {
     manufacturePage: LoadImgList("icon/beginner/growthMission/manufacturePage"),
     abilityPage: LoadImgList('icon/beginner/growthMission/abilityPage'),
+    skillBookPage: LoadImgList('backpack/skillBookPage')
 };
 const GrowthImgList = {
     coreAnimalPage: LoadImgList("icon/beginner/growthMission/coreAnimalPage"),
@@ -125,11 +124,11 @@ const HasNext = (shot) => { shot = shot || captureScreen(); return FindMultiColo
 const ClickNext = (shot) => RandomPress([1152, 678, 53, 14], shot);
 const HasTalkBubble = (shot) =>
 {
-    if (FindMultiColors(TalkBubbleColorList, [465, 389, 140, 35], shot))
+    if (FindMultiColors(TalkBubbleColorList, [480, 385, 293, 43], shot))
     {
         return true;
     }
-    if (FindImgInList(talkBubbleImgList, [495, 390, 123, 34], shot))
+    if (FindImgInList(talkBubbleImgList, [480, 385, 293, 43], shot))
     {
         return true;
     }
@@ -270,7 +269,8 @@ const TapDialog = () =>
     }
     if (hasTalkBubble)
     {
-        RandomPress([538, 399, 206, 17]);
+        RandomPress([488, 398, 248, 17]);
+        console.log("点击对话气泡")
         if (IsSpeedUpOff(shot))
         {
             RandomPress([1109, 39, 139, 14]);
@@ -290,14 +290,15 @@ const TapDialog = () =>
     if (FindImgInList(npcTalk_leaveImgList, [900, 408, 48, 50]))
     {
         console.log("发现npc 对话，离开选项");
+        RandomPress([478, 394, 312, 24], 3) //气泡位置
         RandomPress([916, 419, 97, 31]);
     }
 };
 
-const SwipeUp = (sec) => gesture(sec * 1000, [248, 580], [248, 480]);
-const SwipeDown = (sec) => gesture(sec * 1000, [248, 610], [248, 680]);
-const SwipeLeft = (sec) => gesture(sec * 1000, [235, 593], [135, 593]);
-const SwipeRight = (sec) => gesture(sec * 1000, [262, 593], [362, 593]);
+const SwipeUp = (sec) => gesture(sec * 1000, [195, 575], [195, 475]);
+const SwipeDown = (sec) => gesture(sec * 1000, [195, 605], [195, 705]);
+const SwipeLeft = (sec) => gesture(sec * 1000, [180, 590], [80, 590]);
+const SwipeRight = (sec) => gesture(sec * 1000, [210, 590], [310, 590]);
 
 // ------------------------------------------  main story branch -------------------------------------------
 const weaponSelectColorList = [
@@ -353,6 +354,8 @@ const DeathFlow = (message) =>
 
     const config = ReadConfig();
     config.game.deathTime++;
+    config.totalDeathTimes = config.totalDeathTimes ? config.totalDeathTimes : 0;
+    config.totalDeathTimes++;
     if (message != null)
     {
         console.log("death message: " + message);
@@ -406,11 +409,7 @@ const DeathFlow = (message) =>
     }
     if (!config.game.changeGameSetting)
     {
-        let isChangeSuccess = ChangeGameSetting();
-        if (isChangeSuccess)
-        {
-            config.game.changeGameSetting = true;
-        }
+        ChangeGameSetting();
     }
     RewriteConfig(config);
 
@@ -874,14 +873,16 @@ const MainStoryBranch = () =>
 
         PullDownSkill([420, 640]);
         console.log("开始改变画面设置");
-        const changeSuccess = ChangeGameSetting();
-        if (!changeSuccess)
+        ChangeGameSetting();
+        for (let i = 0; i < 30; i++)
         {
-            console.log("修改设置失败!");
-            ChangeGameSetting();
+            if (HasMenu())
+            {
+                break;
+            }
+            ClearPage()
+            Sleep()
         }
-        // start to change weapon
-
         if (HasMenu())
         {
             console.log("开始开新手箱子...");
@@ -892,7 +893,6 @@ const MainStoryBranch = () =>
             Sleep();
         }
         Sleep();
-
     }
     const hasBackpackMenuClose = HasBackpackMenuClose();
     if (hasBackpackMenuClose)
@@ -919,6 +919,13 @@ const MainStoryBranch = () =>
             OpenAllBox();
             WearEquipments();
         }
+
+    }
+    const hasSkillBookPage = FindImgInList(MainStoryBranchImgList.skillBookPage, [1005, 100, 107, 45], shot)
+    if (hasSkillBookPage)
+    {
+        console.log("发现技能书页面，开始穿戴技能")
+        AutoReleaseSkill()
 
     }
     if (HasPageback())

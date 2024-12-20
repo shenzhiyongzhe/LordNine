@@ -244,20 +244,7 @@ const OpenSuit = () =>
     RecycleImgList(suitImgList)
     return hadOpenSuit;
 };
-const OpenSelectedPropsBox = () =>
-{
-    console.log("打开道具自选箱子，默认第三个选项");
-    const hasOpenBackpack = OpenBackpack("props");
-    if (!hasOpenBackpack)
-    {
-        console.log("打开背包失败");
-        return false;
-    }
-    for (let i = 0; i < 5; i++)
-    {
 
-    }
-};
 const UseHolyGrail = () =>
 {
     console.log("开始使用圣杯");
@@ -284,7 +271,6 @@ const UseHolyGrail = () =>
     RecycleImgList(holyGrailImgList);
     return hasUsedHolyGrail;
 };
-
 
 const OpenNoOptionBox = () =>
 {
@@ -466,7 +452,6 @@ const OpenAllBox = () =>
     }
     return haveOpenOptionalBox || haveOpenProps;
 };
-
 
 const WearBestSuit = () =>
 {
@@ -738,6 +723,7 @@ const WearEquipment = () =>
         }
 
     };
+
     const lv5 = LoadImgList("backpack/font/strengtheningLv/lv5");
     const lv6 = LoadImgList("backpack/font/strengtheningLv/lv6");
     const lv7 = LoadImgList("backpack/font/strengtheningLv/lv7");
@@ -781,6 +767,7 @@ const WearEquipment = () =>
             return null;
         }
     };
+
     const GetTheEquipedInfo = () =>
     {
         console.log("获取穿戴的装备颜色与强化等级");
@@ -789,19 +776,23 @@ const WearEquipment = () =>
             console.log("打开背包失败，退出");
             return false;
         }
+
         const equipedPosition = [
-            [422, 436, 31, 39],
-            [488, 431, 29, 43],
-            [555, 433, 33, 40],
-            [457, 518, 28, 43],
-            [523, 515, 27, 44],
+            [421, 430, 30, 46],
+            [488, 431, 31, 44],
+            [555, 432, 32, 45],
+            [420, 515, 34, 44],
+            [486, 514, 33, 47],
+            [552, 512, 33, 45],
         ];
+
         const colors = [];
         const lvList = [];
         if (HasPopupClose([873, 105, 41, 47]))
         {
             RandomPress([881, 116, 20, 21]);
         }
+
         equipedPosition.forEach(pos =>
         {
             RandomPress(pos);
@@ -809,7 +800,8 @@ const WearEquipment = () =>
             colors.push(getItemColor([623, 170, 120, 61], shot));
             lvList.push(getStrengtheningLv([616, 105, 50, 47], shot));
         });
-        if (colors.length != 5)
+
+        if (colors.length != 6)
         {
             return false;
         }
@@ -818,8 +810,9 @@ const WearEquipment = () =>
         equipments.helmet = [colors[0], lvList[0]];
         equipments.guard = [colors[1], lvList[1]];
         equipments.pants = [colors[2], lvList[2]];
-        equipments.gloves = [colors[3], lvList[3]];
-        equipments.boots = [colors[4], lvList[4]];
+        equipments.cloak = [colors[3], lvList[3]]
+        equipments.gloves = [colors[4], lvList[4]];
+        equipments.boots = [colors[5], lvList[5]];
         config.equipments = equipments;
         RewriteConfig(config);
     };
@@ -954,7 +947,6 @@ const WearEquipment = () =>
     RecycleImgList(fabric);
     RecycleImgList(leather);
     RecycleImgList(metal);
-
 
     return hasWornEquipment;
 };
@@ -1235,11 +1227,11 @@ const DecomposeEquipment = (type) =>
     type = type || "partial";
     if (type == "total")
     {
-        console.log("开始分解全部装备");
+        console.log("开始分解全部装备包括蓝装");
     }
     else
     {
-        console.log("开始分解除去武器的所有装备");
+        console.log("开始分解除去武器的所有装备，不包括蓝装");
     }
     let hasOpen = OpenBackpack();
     if (hasOpen)
