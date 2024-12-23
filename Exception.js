@@ -398,46 +398,69 @@ const PickUpAbilityPoint = () =>
     RecycleImgList(lostAbilityPointImgList);
 };
 
+let haveResetDailyDiamond = false;
+let haveResetDailyConfig = false;
+
+let resetHour = random(4, 12)
+
 const ResetConfig = () =>
 {
-    if ((new Date().getTime() - lastResetConfigTime) / 3600000 > 3)
+    const config = ReadConfig()
+    const date = new Date();
+    const today = date.getDate()
+    const hours = date.getHours()
+    const minutes = date.getMinutes()
+
+    let haveReset = false;
+
+    if (!haveResetDailyDiamond && hours == 23 && minutes >= 45 && minutes < 59)
     {
-        lastResetConfigTime = new Date().getTime();
-        const config = ReadConfig();
-        const date = new Date();
-        if (config.game.today != date.getDate() && date.getHours() > 4)
+        console.log('****** 凌晨重置每日收益 ******')
+        haveResetDailyDiamond = true;
+        haveResetDailyConfig = false;
+        config.game.tradingTimes = 0;
+        config.game.dailyDiamond = 0;
+        haveReset = true;
+    }
+
+    if ((hours >= resetHour && !haveResetDailyConfig) || (config.game.today != today && hours > resetHour))
+    {
+        console.log(`早上${resetHour}:${minutes}点，重置每日事项`);
+        haveResetDailyConfig = true;
+        haveResetDailyDiamond = false;
+        haveReset = true;
+
+        config.delayTime = random(3, 1200)
+        config.game.today = today
+        config.game.deathTime = 0;
+        config.game.reconnectionTime = 0;
+
+        config.daily.dailyInstance = false;
+        config.daily.acceptDailyMission = false;
+        config.daily.hangUpSecretLab = 0;
+
+        config.daily.guildDonation = false;
+        config.daily.friendshipDonation = false;
+        config.daily.dailyShop = false;
+        config.daily.friendshipShop = false;
+
+        if (date.getDay() == 1)
         {
-            console.log("新的一天，重置配置");
-            config.delayTime = random(3, 1200)
-            config.game.today = date.getDate();
-            config.game.deathTime = 0;
-            config.game.reconnectionTime = 0;
-            config.game.tradingTimes = 0;
-            config.game.dailyDiamond = 0;
-            config.daily.dailyInstance = false;
-            config.daily.acceptDailyMission = false;
-            config.daily.hangUpSecretLab = 0;
-
-            config.daily.guildDonation = false;
-            config.daily.friendshipDonation = false;
-            config.daily.dailyShop = false;
-            config.daily.friendshipShop = false;
-
-            if (date.getDay() == 1)
-            {
-                console.log("每周一，重置周事件")
-                config.dailyTradingHours = [
-                    [random(0, 3), random(0, 59)],
-                    [random(4, 7), random(0, 59)],
-                    [random(8, 11), random(0, 59)],
-                    [random(12, 15), random(0, 59)],
-                    [random(16, 19), random(0, 59)],
-                    [random(20, 23), random(0, 59)],
-                ];
-            }
-
-            RewriteConfig(config);
+            console.log("每周一，重置周事件")
+            config.dailyTradingHours = [
+                [random(0, 3), random(0, 59)],
+                [random(4, 7), random(0, 59)],
+                [random(8, 11), random(0, 59)],
+                [random(12, 15), random(0, 59)],
+                [random(16, 19), random(0, 59)],
+                [random(20, 23), random(0, 59)],
+            ];
         }
+        haveReset = true;
+    }
+    if (haveReset)
+    {
+        RewriteConfig(config);
     }
 };
 
