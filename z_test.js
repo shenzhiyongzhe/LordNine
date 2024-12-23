@@ -256,58 +256,58 @@ const getRecentOneMonthDates = (removeYear, underline) =>
 const GetLastestCode = () =>
 {
     let code = null;
-
-    console.log("@来回查看三次，确保最新");
-    for (let i = 0; i < 3; i++)
+    const refreshEmailPage = () =>
     {
-        let hasInboxBtn = text("Inbox").findOne(20);
-        if (hasInboxBtn)
+        console.log("@来回查看三次，确保最新");
+        for (let i = 0; i < 4; i++)
         {
-            hasInboxBtn.click();
-            Sleep();
+            let hasInboxBtn = text("Inbox").findOne(20);
+            if (hasInboxBtn)
+            {
+                hasInboxBtn.click();
+                Sleep();
+            }
+            let hadPrimaryBtn = text("Primary").findOne(20);
+            if (hadPrimaryBtn)
+            {
+                hadPrimaryBtn.click();
+                Sleep();
+            }
+            let haveReceived = text("收件箱").findOne(20);
+            if (haveReceived)
+            {
+                console.log("发现收件箱，点击返回主页")
+                haveReceived.click();
+                Sleep();
+            }
+            let has_refreshBtn = text("Refresh").findOne(20);
+            if (has_refreshBtn)
+            {
+                has_refreshBtn.click()
+                Sleep(3)
+            }
+            let has_refreshBtn_zh = text("刷新").findOne(20);
+            if (has_refreshBtn_zh)
+            {
+                has_refreshBtn_zh.click()
+                Sleep(3)
+            }
+            let hasStoveEmail_zh = text('STOVE [STOVE] 驗證信說明').find()
+            if (hasStoveEmail_zh)
+            {
+                console.log("发现邮件")
+                hasStoveEmail_zh[0].click()
+                Sleep()
+                console.log('下拉刷新')
+                swipe(420, 520, 420, 920, 2000);
+                Sleep()
+                break;
+            }
+            Sleep()
         }
-        let hadPrimaryBtn = text("Primary").findOne(20);
-        if (hadPrimaryBtn)
-        {
-            hadPrimaryBtn.click();
-            Sleep();
-        }
-        let haveReceived = text("收件箱").findOne(20);
-        if (haveReceived)
-        {
-            console.log("发现收件箱，点击返回主页")
-            haveReceived.click();
-            Sleep();
-        }
-        // let hasStoveEmail = textMatches(/(.*인증 메일 안내.*)/).findOne(20);
-        // if (hasStoveEmail)
-        // {
-        //     RandomPress([74, 535, 551, 76])
-        //     Sleep();
-        // }
-        let hasStoveEmail_zh = text('STOVE [STOVE] 驗證信說明').find()
-        if (hasStoveEmail_zh)
-        {
-            hasStoveEmail_zh[0].click()
-            console.log("for:点击最新的 stove 邮件")
-        }
-        Sleep()
     }
 
-    // let hasStoveEmail = textMatches(/(.*인증 메일 안내.*)/).findOne(20);
-    // if (hasStoveEmail)
-    // {
-    //     RandomPress([74, 535, 551, 76])
-    //     Sleep();
-    // }
-
-    let hasStoveEmail_zh = text('STOVE [STOVE] 驗證信說明').find()
-    if (hasStoveEmail_zh)
-    {
-        console.log("点击最新的 stove 邮件")
-        hasStoveEmail_zh.click()
-        Sleep()
-    }
+    refreshEmailPage()
     let hasLatestEmail = textMatches(/(.*0 minutes ago.*|.*1 minute ago.*|.*2 minute ago.*|.*3 minute ago.*|.*4 minute ago.*|.*5 minute ago.*|.*0分钟前.*|.*1分钟前.*|.*2分钟前.*|.*3分钟前.*|.*4分钟前.*|.*5分钟前.*)/).findOne(20);
     if (hasLatestEmail)
     {
@@ -320,20 +320,54 @@ const GetLastestCode = () =>
             if (arr.length >= 3)
             {
                 code = arr[2].trim().slice(0, 6)
+                console.log("最终的验证码为：" + code)
+                return code;
             }
         }
 
     }
     else
     {
-        console.log('没有最新的邮件，下拉刷新')
-        swipe(420, 520, 420, 920, 2000);
+        refreshEmailPage()
     }
     return code;
 };
-console.log(GetLastestCode())
+
+
+// console.log(GetLastestCode())
 // console.log()
-// console.log(text('STOVE [STOVE] 驗證信說明').find()[0].click())
+// const hasEmail = text('STOVE [STOVE] 驗證信說明').findOne(20)
+// const hasEmail_2 = text('STOVE [STOVE] 驗證信說明').boundsInside(10, 160, 100, 1200).findOne(20)
+// if (hasEmail)
+// {
+//     console.log(hasEmail.bounds())
+//     console.log(hasEmail.bounds().centerX(), hasEmail.bounds().centerY())
+// }
+// console.log(hasEmail_2)
+// if (hasEmail_2)
+// {
+//     console.log("最新的邮箱在第一个位置")
+// }
+const codeList = []
+
+let verificationCodeStr = textMatches(/.*您好， 為了進行身分確認，請在輸入欄中輸入以下認證碼。           認證碼.*/).find()
+if (verificationCodeStr)
+{
+    verificationCodeStr.map(item =>
+    {
+        if (item.text)
+        {
+            let str = item.text()
+            let match = str.match(/\b\d{6}\b/)
+            if (match)
+            {
+                codeList.push(match[0])
+            }
+        }
+    })
+
+}
+console.log(codeList[codeList.length - 1])
 // let verificationCodeStr = textMatches(/.*有效時間為10分鐘.*/).findOne(20)
 // if (verificationCodeStr)
 // {
