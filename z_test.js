@@ -52,8 +52,6 @@ const { LoadImgList, HaveDailyMissionIcon, IsHaltMode, FindImgInList, FindNumber
 } = require("./utils.js");
 
 
-
-
 //检查权限
 
 // const intent = Intent(Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION);
@@ -348,33 +346,230 @@ const GetLastestCode = () =>
 // {
 //     console.log("最新的邮箱在第一个位置")
 // }
-const codeList = []
-
-let verificationCodeStr = textMatches(/.*您好， 為了進行身分確認，請在輸入欄中輸入以下認證碼。           認證碼.*/).find()
-if (verificationCodeStr)
+const GetEmailVerificationCode = () =>
 {
-    verificationCodeStr.map(item =>
+    console.log("开始获取邮箱验证码");
+
+    let code = null;
+
+    for (let i = 0; i < 400; i++)
     {
-        if (item.text)
+        let hasUseWebVersion = text("Use the web version").findOne(20);
+        if (hasUseWebVersion)
         {
-            let str = item.text()
-            let match = str.match(/\b\d{6}\b/)
-            if (match)
+            console.log("click web version");
+            click(hasUseWebVersion.bounds().centerX(), hasUseWebVersion.bounds().centerY());
+            Sleep(3);
+        }
+        let hasTranslateFlowty = text("한국어").findOne(20);
+        if (hasTranslateFlowty)
+        {
+            console.log("发现谷歌翻译，点击关闭");
+            Sleep(3);
+            RandomPress([651, 1211, 28, 29]);
+        }
+
+        let account_picker_continue_as_button = textMatches(/(.*계속.*)/).findOne(20);
+        if (account_picker_continue_as_button)
+        {
+            console.log("发现关联账户弹窗，点击该账户进入邮箱");
+            account_picker_continue_as_button.click();
+            Sleep(3);
+        }
+        let has_positive_button = text("사용").findOne(20);
+        if (has_positive_button)
+        {
+            console.log("发现关联账号的使用按钮，点击使用");
+            has_positive_button.click();
+        }
+        let has_refresh_page = text("새로고침").findOne(20);
+        let has_refreshBtn = text("Refresh").findOne(20);
+        let has_refreshBtn_zh = text("刷新").findOne(20);
+
+        if (has_refresh_page || has_refreshBtn || has_refreshBtn_zh)
+        {
+            console.log("发现重新加载按钮，重新加载页面");
+            Sleep(3);
+            console.log("向下拉动，刷新页面");
+            swipe(420, 520, 420, 920, 2000);
+            break;
+        }
+        let hasInboxBtn = text("Inbox").findOne(20);
+        if (hasInboxBtn)
+        {
+            console.log("发现inbox 按钮");
+            hasInboxBtn.click();
+        }
+        let hadPrimaryBtn = text("Primary").findOne(20);
+        if (hadPrimaryBtn)
+        {
+            console.log("发现primary按钮，点击返回邮箱");
+            hadPrimaryBtn.click();
+        }
+        Sleep();
+    }
+    const WaitUntilRefreshPage = () =>
+    {
+        for (let i = 0; i < 40; i++)
+        {
+            if (text("Refresh").findOne(20))
             {
-                codeList.push(match[0])
+                console.log("发现刷新按钮，刷新页面");
+                Sleep(6);
+                return true;
+            }
+            if (text("새로고침").findOne(20))
+            {
+                console.log("发现刷新按钮，刷新页面");
+                Sleep(6);
+                return true;
+            }
+            if (text("刷新").findOne(20))
+            {
+                console.log("发现刷新按钮，刷新页面");
+                Sleep(6);
+                return true;
+            }
+            Sleep(3);
+        }
+    };
+
+    const GetLastestCode = () =>
+    {
+        let code = null;
+        let haveCode = false;
+        const refreshEmailPage = () =>
+        {
+            console.log("@来回查看三次，确保最新");
+            for (let i = 0; i < 4; i++)
+            {
+                let hasInboxBtn = text("Inbox").findOne(20);
+                if (hasInboxBtn)
+                {
+                    hasInboxBtn.click();
+                    Sleep();
+                }
+                let hadPrimaryBtn = text("Primary").findOne(20);
+                if (hadPrimaryBtn)
+                {
+                    hadPrimaryBtn.click();
+                    Sleep();
+                }
+                let haveReceived = text("收件箱").findOne(20);
+                if (haveReceived)
+                {
+                    console.log("发现收件箱，点击返回主页")
+                    haveReceived.click();
+                    Sleep();
+                }
+                let has_refreshBtn = text("Refresh").findOne(20);
+                if (has_refreshBtn)
+                {
+                    has_refreshBtn.click()
+                    Sleep(3)
+                }
+                let has_refreshBtn_zh = text("刷新").findOne(20);
+                if (has_refreshBtn_zh)
+                {
+                    has_refreshBtn_zh.click()
+                    Sleep(3)
+                }
+                let hasEmail = textMatches(/.*驗證信說明.*/).find()
+                if (hasEmail.empty())
+                {
+                    console.log("没找到╭(╯^╰)╮")
+                }
+                else
+                {
+                    haveCode = true;
+                    console.log('-----发现最新的邮件-----')
+                    hasEmail[0].click()
+                }
+                Sleep()
             }
         }
-    })
+        const getCode = () =>
+        {
+            console.log("获取验证码")
+            Sleep()
+            let verificationCodeStr = textMatches(/.*請在輸入欄中輸入以下認證碼.*/).find()
+            if (verificationCodeStr)
+            {
+                const codeList = []
+                verificationCodeStr.map(item =>
+                {
+                    if (item.text)
+                    {
+                        let str = item.text()
+                        let match = str.match(/\b\d{6}\b/)
+                        if (match)
+                        {
+                            codeList.push(match[0])
+                        }
+                    }
+                })
+                console.log("codelist: " + JSON.stringify(codeList))
+                if (codeList.length >= 1)
+                {
+                    code = codeList[codeList.length - 1]
+                    return code;
+                }
+                return null
+            }
+            else
+            {
+                console.log('╭(╯^╰)╮ 未发现新邮件')
+                return null;
+            }
+        }
+        refreshEmailPage()
+        if (haveCode)
+        {
+            getCode()
+        }
+        return code;
+    };
+    WaitUntilRefreshPage();
 
+    for (let i = 0; i < 5; i++)
+    {
+        code = GetLastestCode();
+        if (code != null && code.length == 6)
+        {
+            return code;
+        }
+        Sleep()
+    }
+    return code;
+};
+// console.log(GetEmailVerificationCode())
+function isSixDigits(str)
+{
+    const regex = /^\d{6}$/;
+    return regex.test(str);
 }
-console.log(codeList[codeList.length - 1])
-// let verificationCodeStr = textMatches(/.*有效時間為10分鐘.*/).findOne(20)
-// if (verificationCodeStr)
-// {
-//     const arr = verificationCodeStr.text().split('認證碼')
-//     if (arr.length > 3)
-//     {
-//         code = arr[2].trim().slice(0, 6)
-//         console.log("验证码为：" + code)
-//     }
-// }
+
+// 测试示例
+const testStrings = ["123456", "12345", "1234567", "abc123", "12345a"];
+
+testStrings.forEach(testStr =>
+{
+    console.log(`"${testStr}" 是否是6个数字: ${isSixDigits(testStr)}`);
+});
+
+
+let hasAppleLoginPopup = textMatches(/.*lordnine signin with apple.*/).findOne(20);
+if (hasAppleLoginPopup)
+{
+    console.log("误点击苹果账号登录，点击关闭苹果登录弹窗");
+    let close_btn = id("close_button").findOne(20);
+    if (close_btn)
+    {
+        console.log('节点关闭')
+        close_btn.click();
+    }
+    else
+    {
+        RandomPress([1161, 38, 29, 27])
+    }
+}

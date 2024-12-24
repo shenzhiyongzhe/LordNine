@@ -1,5 +1,5 @@
 
-const baseUrl = "http://10.6.130.129:82/LordNine/";
+const baseUrl = "http://10.16.1.117:82/LordNine/";
 const ignoreList = [".gitignore", "z_test.js", "z0_tool.js", "z1_syncFile.js", "../", "frame", ".git"];
 
 const getUrl = (path) =>
@@ -51,7 +51,7 @@ const getUrl = (path) =>
 
 const downloadFile = (url) =>
 {
-    http.get(`http://10.6.130.129:82/LordNine/${url}`, {}, function (res, err)
+    http.get(`${baseUrl}${url}`, {}, function (res, err)
     {
         if (err)
         {

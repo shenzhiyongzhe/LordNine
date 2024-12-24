@@ -736,7 +736,7 @@ const InputEmailUrl = () =>
         Sleep();
         if (textMatches(/(.*mail.google.com.*)/).findOne(3000))
         {
-            Sleep(2);
+            Sleep();
             console.log("固定点击第一个");
             RandomPress([117, 195, 348, 48]);
             console.log("输入邮箱网址完成。");
@@ -919,6 +919,7 @@ const GetEmailVerificationCode = () =>
     const GetLastestCode = () =>
     {
         let code = null;
+        let haveCode = null;
         const refreshEmailPage = () =>
         {
             console.log("@来回查看三次，确保最新");
@@ -962,53 +963,70 @@ const GetEmailVerificationCode = () =>
                 }
                 else
                 {
+                    haveCode = true;
                     console.log('-----发现最新的邮件-----')
-                    // console.log(hasEmail[0])
                     hasEmail[0].click()
-                    Sleep()
-                    let verificationCodeStr = textMatches(/.*請在輸入欄中輸入以下認證碼.*/).find()
-                    if (verificationCodeStr)
-                    {
-                        const codeList = []
-                        verificationCodeStr.map(item =>
-                        {
-                            if (item.text)
-                            {
-                                let str = item.text()
-                                let match = str.match(/\b\d{6}\b/)
-                                if (match)
-                                {
-                                    codeList.push(match[0])
-                                }
-                            }
-                        })
-                        console.log("codelist: " + JSON.stringify(codeList))
-                        if (codeList.length >= 1)
-                        {
-                            code = codeList[codeList.length - 1]
-                            return code;
-                        }
-                    }
-                    else
-                    {
-                        console.log('╭(╯^╰)╮ 未发现新邮件')
-                    }
                 }
                 Sleep()
+            }
+        }
+        const getCode = () =>
+        {
+            console.log("获取验证码")
+            Sleep()
+            let verificationCodeStr = textMatches(/.*請在輸入欄中輸入以下認證碼.*/).find()
+            if (verificationCodeStr)
+            {
+                const codeList = []
+                verificationCodeStr.map(item =>
+                {
+                    if (item.text)
+                    {
+                        let str = item.text()
+                        let match = str.match(/\b\d{6}\b/)
+                        if (match)
+                        {
+                            codeList.push(match[0])
+                        }
+                    }
+                })
+                console.log("codelist: " + JSON.stringify(codeList))
+                if (codeList.length >= 1)
+                {
+                    code = codeList[codeList.length - 1]
+                    return code;
+                }
+                return null
+            }
+            else
+            {
+                console.log('╭(╯^╰)╮ 未发现新邮件')
+                return null;
             }
         }
 
         refreshEmailPage()
 
+        if (haveCode)
+        {
+            getCode()
+        }
         return code;
     };
     WaitUntilRefreshPage();
 
+    function isSixDigits(str)
+    {
+        const regex = /^\d{6}$/;
+        return regex.test(str);
+    }
+
     for (let i = 0; i < 5; i++)
     {
         code = GetLastestCode();
-        if (code != null && code.length == 6)
+        if (code != null && code.length == 6 && isSixDigits(code))
         {
+            console.log("最终的验证码为：" + code)
             return code;
         }
         Sleep()
