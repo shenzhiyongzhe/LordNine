@@ -13,15 +13,51 @@ let mainThread = null;
 let serverName = null;
 
 let loginGoogleDelay = 0;
+let createCharacterDelay = 0;
+
 let gameMode = null;
 
 function Init()
 {
     const config = ReadConfig();
 
+    if (config.ui || !config.gameMode)
+    {
+        FormatConfig()
+    }
+
+    let needRewrite = false;
+
     if (!config.delayTime)
     {
         config.delayTime = random(1, 1200)
+        needRewrite = true;
+    }
+    if (!config.randomDayOfTheWeek)
+    {
+        config.randomDayOfTheWeek = random(1, 7)
+        needRewrite = true;
+    }
+    if (!config.resetHour)
+    {
+        config.resetHour = random(4, 12)
+        console.log("增加新的配置选项：resetHour")
+        needRewrite = true;
+    }
+    if (!config.totalDeathTimes)
+    {
+        config.totalDeathTimes = 0;
+        needRewrite = true;
+    }
+    if (!config.game.tradingTimes)
+    {
+        config.game.tradingTimes = 0;
+        needRewrite = true;
+    }
+    if (!config.manufacture)
+    {
+        config.manufacture = [random(1, 15), random(16, 30)];
+        needRewrite = true;
     }
 
     if (!config.googleAccount || config.game.vm.length < 10)
@@ -31,7 +67,9 @@ function Init()
         config.game.vm = account[3];
         config.googleAccount = account[0];
         config.googlePassword = account[1]
-        RewriteConfig(config)
+
+        needRewrite = true;
+
         try
         {
             const postData = {
@@ -58,10 +96,12 @@ function Init()
             console.log(error);
         }
     }
-    if (config.ui || !config.gameMode)
+
+    if (needRewrite)
     {
-        FormatConfig()
+        RewriteConfig(config)
     }
+
     if (config.unlockTrade)
     {
         specialConfig.gameMode = "instance";
@@ -72,6 +112,7 @@ function Init()
         specialConfig.gameMode = "mainStory"
         specialConfig.initGameMode = "mainStory"
     }
+
 
     gameMode = config.gameMode;
 }
@@ -95,8 +136,8 @@ const GetCaptureScreenPermission = () =>
     });
 };
 
-// const StopScript = () => java.lang.System.exit(0);
-const StopScript = () => engines.stopAllAndToast();
+const StopScript = () => java.lang.System.exit(0);
+// const StopScript = () => engines.stopAllAndToast();
 
 
 const DownLoadApk = (downloadUrl, savePath) =>
@@ -142,15 +183,10 @@ const DownLoadApk = (downloadUrl, savePath) =>
     }
     );
 };
-const AutoInstallApk = (url) =>
-{
-    if (files.exists(`/sdcard/${url}`))
-    {
-        app.viewFile(`/sdcard/${url}`);
-    }
-};
+
 const UpdateScript = () => DownLoadApk("LordNine.apk", "LordNine/LordNine.apk");
 const DownloadAutoJs = () => DownLoadApk("AutoJs.apk", "AutoJs.apk");
+
 const ChangeVPNSetting = () =>
 {
     app.launch("fun.kitsunebi.kitsunebi4android");
@@ -289,7 +325,6 @@ const ChangeVPNSetting = () =>
 
             Sleep(1);
         }
-
         for (let i = 0; i < 10; i++)
         {
             let backBtn = desc("위로 이동").findOne(20);
@@ -309,6 +344,7 @@ const ChangeVPNSetting = () =>
 
     console.log("设置完毕");
 };
+
 const FormatConfig = () =>
 {
     console.log("格式化配置")
@@ -393,26 +429,41 @@ const uiFloaty = () =>
     floatyWindow.setSize(400, 270);
     floatyWindow.setPosition(185, 300);
 
-    const uiInterval = setInterval(() => {}, 1000);
-
     const config = ReadConfig()
+
+    const startBtnEvent = () =>
+    {
+
+    }
+
+
+    let defaultAutoStartTime = 10;
+    const uiInterval = setInterval(() =>
+    {
+        // defaultAutoStartTime--
+        // if (defaultAutoStartTime <= 0)
+        // {
+        //     toastLog('3分钟未操作，默认开始脚本')
+        //     startBtnEvent()
+        // }
+    }, 1000);
+
 
     floatyWindow.createCharacter.click(() =>
     {
+        dialogs.input("请输入延迟时间（单位 秒）", "15000", (time) =>
+        {
+            console.log("登录谷歌延迟时间为:" + time);
+            createCharacterDelay = parseInt(time);
+            createCharacterDelay = random(0, createCharacterDelay) + 1;
+            toastLog(`延迟时间为${createCharacterDelay + config.delayTime}s`)
+        });
         dialogs.input("请输入区服编号", "999", (name) =>
         {
             console.log("serverName:" + name);
             serverName = name;
         });
-        dialogs.input("请输入延迟时间（单位 秒）", "15000", (time) =>
-        {
-            console.log("登录谷歌延迟时间为:" + time);
-            loginGoogleDelay = parseInt(time);
-            loginGoogleDelay = random(0, loginGoogleDelay) + 1;
-            toastLog(`延迟时间为${loginGoogleDelay + config.delayTime}s`)
-        });
     });
-
 
     floatyWindow.loginGoogle.click(() =>
     {
@@ -427,8 +478,8 @@ const uiFloaty = () =>
 
     floatyWindow.start.click(() =>
     {
-        delayTime = config.delayTime + loginGoogleDelay;
-        let count = delayTime;
+        const totalDelayTime = config.delayTime + loginGoogleDelay + createCharacterDelay;
+        let count = totalDelayTime
         floatyWindow.delayTime.attr("h", 100);
         floatyWindow.start.attr("h", 0);
         floatyWindow.delayTime.setText(`${count}s`);
@@ -443,6 +494,7 @@ const uiFloaty = () =>
             if (count <= 0)
             {
                 clearInterval(delayInterval);
+                floatyWindow.close()
             }
         }, 1000);
 
@@ -456,8 +508,7 @@ const uiFloaty = () =>
 
             clearInterval(uiInterval);
 
-            floatyWindow.close();
-        }, (delayTime + 1) * 1000);
+        }, (totalDelayTime + 1) * 1000);
     });
 
     floatyWindow.more.click(() =>
@@ -473,13 +524,16 @@ const uiFloaty = () =>
     {
         gameMode = "mainStory";
         config.gameMode = "mainStory";
+        console.log("悬浮窗点击事件：更改模式为主线")
         RewriteConfig(config);
 
     });
+
     floatyWindow.instance.click(() =>
     {
         gameMode = "instance";
         config.gameMode = "instance";
+        console.log("悬浮窗点击事件：更改模式为挂机")
         RewriteConfig(config);
 
     });
@@ -519,11 +573,10 @@ const Update = () =>
         }
         if (specialConfig.gameMode != specialConfig.initGameMode)
         {
-            if (Math.abs(specialConfig.lastModeChangeTime.getTime() - new Date().getTime()) / (3600 * 1000) >= 8)
+            if (Math.abs(specialConfig.lastModeChangeTime.getTime() - new Date().getTime()) / (3600 * 1000) >= 4)
             {
                 console.log("--- game mode changed ----");
                 console.log("game mode changed over 5 hours");
-                console.log("back to main story");
                 const config = ReadConfig()
                 if (config.unlockTrade)
                 {
@@ -549,6 +602,7 @@ const MainFlow = () =>
         console.log("开始导入创建角色模块");
         const { CreateCharacterFlow } = require("./CreateCharacter.js");
         CreateCharacterFlow(serverName);
+        console.log("&&& 创建角色流程结束 &&&")
     }
     if (loginGoogleDelay != 0)
     {

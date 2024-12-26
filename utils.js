@@ -11,9 +11,12 @@ const { TipColorList, } = require("./Color/MainStoryColorList.js");
 const defaultConfig = {
     gameMode: "mainStory",
     delayTime: random(0, 600),
+    resetHour: random(4, 12),
+    randomDayOfTheWeek: random(1, 7),
     unlockTrade: false,
     accountSuspended: false,
-    totalDeathTimes:0,
+    totalDeathTimes: 0,
+    manufacture: [random(1, 15), random(16, 30)],
     game: {
         "today": 0,
         "deathTime": 0,
@@ -243,6 +246,7 @@ const ClearPage = () =>
     CloseMenu(shot);
     PageBack(shot);
     TapBlankToContinue(shot);
+    TapTip()
     return false;
 };
 const OpenSetting = () =>
@@ -1877,22 +1881,22 @@ const TapArrow = () =>
         {
             hadFindArrow = true;
             console.log("箭头方向: " + key + " " + "位置：" + hasArrow);
-            const position = hasArrow;
             if (key == "up")
             {
-                RandomPress([position.x - 5, position.y - 48, 10, 30]);
+                RandomPress([hasArrow.x - 5, hasArrow.y - 48, 10, 30]);
             }
             else if (key == "down")
             {
-                RandomPress([position.x, position.y + 20, 10, 10]);
+                RandomPress([hasArrow.x, hasArrow.y + 20, 10, 10]);
             }
             else if (key == "left")
             {
-                RandomPress([position.x - 20, position.y, 10, 10]);
+                console.log('点击左边箭头')
+                RandomPress([hasArrow.x - 40, hasArrow.y, 10, 10]);
             }
             else if (key == "right")
             {
-                RandomPress([position.x + 10, position.y, 30, 10]);
+                RandomPress([hasArrow.x + 10, hasArrow.y, 30, 10]);
             }
         }
     }
@@ -1936,7 +1940,6 @@ const SetCountryAndBirth = () =>
     let hadNeedInputBirthday = textMatches(/(.*MM.DD.YYYY.*)/).findOne(4000);
     if (hadNeedInputBirthday)
     {
-
         RandomPress([258, 317, 236, 28]);
         const month = random(1, 12).toString().padStart("0", 2);
         setText(0, month);

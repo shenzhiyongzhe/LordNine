@@ -13,7 +13,7 @@
     "build_time": 0
   },
   "useFeatures": [],
-  "icon": null,
+  "icon": "./img/logo.png",
   "ignoredDirs": ["build"],
   "encrypt-code": false,
   "launchConfig": {
@@ -42,9 +42,9 @@
   "scripts": {},
   "signingConfig": {
     "alias": "lordnine",
-    "keystore": "/storage/emulated/0/脚本/.keyStore/lordnine.keystore"
+    "keystore": "/storage/emulated/0/脚本/LordNine/.keyStore/lordnine.keystore"
   },
   "sourcePath": "/storage/emulated/0/脚本/LordNine/main.js",
-  "versionCode": 26,
-  "versionName": "12.23.2"
+  "versionCode": 28,
+  "versionName": "12.25.6"
 }

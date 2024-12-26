@@ -149,7 +149,7 @@ const BackpackFlow_HaltMode = () =>
             StrengthenEquipment();
         }
         lastTimeClearBackpack_haltMode = new Date().getTime();
-        randomTimeToClearBackpack = random(150, 200);
+        randomTimeToClearBackpack = random(160, 240);
         LoginProps();
         DecomposeEquipment("partial");
     }
@@ -272,44 +272,7 @@ const DisconnectionFlow = (shot) =>
         }
     }
 };
-const InputVerificationFlow = (shot) =>
-{
-    const hasPreventAutoLogin = FindImgInList(ExceptionImgList.preventAutoLogin, [535, 205, 206, 55], shot);
-    if (hasPreventAutoLogin)
-    {
-        console.log("发现防自动登录窗口,开始获取验证码并输入");
-        const getVerificationCodeTimeInterval = Math.abs(lastGetVerificationCodeTime - new Date().getMinutes());
-        if (getVerificationCodeTimeInterval < 1)
-        {
-            console.log("获取验证码间隔时间太短,跳过获取验证码");
-            return true;
-        }
-        if (totalGetVerificationCodeTimes >= 10)
-        {
-            alert("获取验证码次数过多", "获取验证码次数过多");
-            return true;
-        }
-        const code = GetVerificationCode();
-        console.log("验证码为: " + code);
-        totalGetVerificationCodeTimes++;
 
-
-        RandomPress([476, 422, 331, 21]);
-        setText(code);
-        const hasConfirm = textMatches(/(.*확인.*|.*确认.*)/).findOne(100);
-        if (hasConfirm)
-        {
-            hasConfirm.click();
-            Sleep();
-        }
-        RandomPress([1172, 667, 85, 37]);
-        const hasBlueConfirm = FindBlueBtn([503, 328, 279, 184]);
-        if (hasBlueConfirm)
-        {
-            click(hasBlueConfirm.x, hasBlueConfirm.y);
-        }
-    }
-};
 const MainUIFlow = (shot) =>
 {
     if (HaveLordNineWord(shot))
@@ -401,65 +364,75 @@ const PickUpAbilityPoint = () =>
 let haveResetDailyDiamond = false;
 let haveResetDailyConfig = false;
 
-let resetHour = random(4, 12)
-
 const ResetConfig = () =>
 {
-    const config = ReadConfig()
-    const date = new Date();
-    const today = date.getDate()
-    const hours = date.getHours()
-    const minutes = date.getMinutes()
-
     let haveReset = false;
 
-    if (!haveResetDailyDiamond && hours == 23 && minutes >= 45 && minutes < 59)
+    if (!haveResetDailyConfig)
     {
-        console.log('****** 凌晨重置每日收益 ******')
-        haveResetDailyDiamond = true;
-        haveResetDailyConfig = false;
-        config.game.tradingTimes = 0;
-        config.game.dailyDiamond = 0;
-        haveReset = true;
-    }
+        const config = ReadConfig()
 
-    if ((hours >= resetHour && !haveResetDailyConfig) || (config.game.today != today && hours > resetHour))
-    {
-        console.log(`早上${resetHour}:${minutes}点，重置每日事项`);
-        haveResetDailyConfig = true;
-        haveResetDailyDiamond = false;
-        haveReset = true;
-
-        config.delayTime = random(3, 1200)
-        config.game.today = today
-        config.game.deathTime = 0;
-        config.game.reconnectionTime = 0;
-
-        config.daily.dailyInstance = false;
-        config.daily.acceptDailyMission = false;
-        config.daily.hangUpSecretLab = 0;
-
-        config.daily.guildDonation = false;
-        config.daily.friendshipDonation = false;
-        config.daily.dailyShop = false;
-        config.daily.friendshipShop = false;
-
-        if (date.getDay() == 1)
+        const date = new Date();
+        const today = date.getDate()
+        const hours = date.getHours()
+        const minutes = date.getMinutes()
+        if (config.game.today != today && hours >= config.resetHour)
         {
-            console.log("每周一，重置周事件")
-            config.dailyTradingHours = [
-                [random(0, 3), random(0, 59)],
-                [random(4, 7), random(0, 59)],
-                [random(8, 11), random(0, 59)],
-                [random(12, 15), random(0, 59)],
-                [random(16, 19), random(0, 59)],
-                [random(20, 23), random(0, 59)],
-            ];
+            console.log(`早上${config.resetHour}:${minutes}点，重置每日事项`);
+
+            config.resetHour = random(4, 12)
+
+            haveResetDailyConfig = true;
+            haveResetDailyDiamond = false;
+
+            config.delayTime = random(3, 1200)
+            config.game.today = today
+            config.game.deathTime = 0;
+            config.game.reconnectionTime = 0;
+
+            config.daily.dailyInstance = false;
+            config.daily.acceptDailyMission = false;
+            config.daily.hangUpSecretLab = 0;
+
+            config.daily.guildDonation = false;
+            config.daily.friendshipDonation = false;
+            config.daily.dailyShop = false;
+            config.daily.friendshipShop = false;
+
+            if (date.getDay() == 1)
+            {
+                console.log("每周一，重置周事件")
+                config.dailyTradingHours = [
+                    [random(0, 3), random(0, 59)],
+                    [random(4, 7), random(0, 59)],
+                    [random(8, 11), random(0, 59)],
+                    [random(12, 15), random(0, 59)],
+                    [random(16, 19), random(0, 59)],
+                    [random(20, 23), random(0, 59)],
+                ];
+            }
+            haveReset = true;
         }
-        haveReset = true;
     }
+    if (!haveResetDailyDiamond)
+    {
+        const date_2 = new Date()
+        const hours_2 = date_2.getHours()
+        const minutes_2 = date_2.getMinutes()
+        if (hours_2 == 23 && minutes_2 >= 45 && minutes_2 < 59)
+        {
+            console.log('****** 晚上重置每日收益 ******')
+            haveResetDailyDiamond = true;
+            haveResetDailyConfig = false;
+            config.game.tradingTimes = 0;
+            config.game.dailyDiamond = 0;
+            haveReset = true;
+        }
+    }
+
     if (haveReset)
     {
+        console.log("reset config")
         RewriteConfig(config);
     }
 };
@@ -521,16 +494,19 @@ const StovePopup = () =>
     RecycleImgList(loginAccountImgList)
 
     const haveServiceAndRule = text('條款及條件').findOne(20)
-
     if (haveServiceAndRule)
     {
         const haveConfirm = text('確定').findOne(20)
         if (haveConfirm)
         {
-            SetCountryAndBirth()
+            haveConfirm.click()
+            console.log("输入日期弹窗")
         }
-        console.log("输入日期弹窗")
-
+    }
+    const haveConfirmInfo = text('確認資訊').findOne(20)
+    if (haveConfirmInfo)
+    {
+        SetCountryAndBirth()
     }
 };
 const PressSomeTip = (shot) =>
@@ -652,7 +628,6 @@ const MakeSureInGame = (shot) =>
         PressCommonBtn();
         PressSomeTip(shot);
         ClickSkip();
-        InputVerificationFlow(shot);
         PickMissionFinishAward();
         if (FindImgInList(ExceptionImgList.identifySuccessfully, [586, 61, 109, 51], shot))
         {

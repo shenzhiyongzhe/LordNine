@@ -22,6 +22,7 @@ const {
 
     UpdateTradeRecord,
     ChangeRecoverPotionPercentToNormal,
+    ChangeGameSetting,
 
 
 } = require("./utils.js");
@@ -951,7 +952,7 @@ const UpgradeHolyRelics = () =>
                     RandomPress([679, 415, 156, 35], 5);
                     if (!IsUnlocked())
                     {
-                        console.log("没有解锁材料，解锁失败")
+                        console.log("无法解锁，下一个")
                         continue;
                     }
                 }
@@ -959,15 +960,14 @@ const UpgradeHolyRelics = () =>
         }
         for (let i = 0; i < 7; i++)
         {
-            if (FindBlueBtn([1111, 650, 145, 46]))
+            if (FindBlueBtn([1106, 644, 158, 58]))
             {
-                RandomPress([1126, 657, 119, 32]);
-                if (FindBlueBtn([659, 493, 192, 62]))
+                RandomPress([1124, 658, 119, 28], 3);
+                if (FindBlueBtn([656, 490, 198, 65]))
                 {
-                    RandomPress([683, 506, 149, 34]);
-                    Sleep(5);
+                    RandomPress([691, 505, 133, 34], 5);
+                    console.log("升级圣物次数：" + i)
                 }
-                console.log("升级圣物次数：" + i)
             }
             else
             {
@@ -1596,14 +1596,7 @@ const GetSettlement = () =>
         if (res.statusCode == 200)
         {
             console.log("发送数据成功");
-            if (config.game.tradingTimes)
-            {
-                config.game.tradingTimes++;
-            }
-            else
-            {
-                config.game.tradingTimes = 1;
-            }
+            config.game.tradingTimes++;
         }
     } catch (error)
     {
@@ -1911,7 +1904,7 @@ const MakeMaterial = () =>
             console.log("点击制作材料");
             RandomPress([haveHorseStrengtheningMaterial.x, haveHorseStrengtheningMaterial.y, 150, 10]);
         }
-        horseArmor = FindImgInList(horseArmorImg, [233, 114, 100, 352]);
+        horseArmor = FindImgInList(horseArmorImg, [723, 233, 80, 75]);
         if (horseArmor)
         {
             console.log("find horse armor");
@@ -2172,12 +2165,6 @@ const ComprehensiveImprovement_Instance = () =>
         ExitHaltMode();
     }
 
-    if (!config.manufacture)
-    {
-        config.manufacture = [random(1, 15), random(16, 30)];
-        RewriteConfig(config);
-    }
-
     const isBackpackFull = IsBackpackFull(captureScreen());
     if (isBackpackFull)
     {
@@ -2188,12 +2175,14 @@ const ComprehensiveImprovement_Instance = () =>
     const date = new Date();
     const today = date.getDate();
 
-    if ((today == config.manufacture[0] || today == config.manufacture[1]) && date.getHours() < 12)
+    if ((today == config.manufacture[0] || today == config.manufacture[1]) && config.game.tradingTimes == 2)
     {
         console.log("半月制作一次");
+        IncreaseWeaponFeatures();
         MakeMaterial();
         console.log("半月，切换模式为主线。")
-        specialConfig.gameMode = "mainStory"
+        // specialConfig.gameMode = "mainStory"
+        ChangeGameSetting()
     }
 
     const haveOpenedBox = OpenAllBox();
@@ -2217,16 +2206,15 @@ const ComprehensiveImprovement_Instance = () =>
     console.log("副本模式下综合提升");
 
     //降低执行频率
-    if (date.getDay() == 1 && date.getHours() >= 12)
+    if (config.game.tradingTimes == 1 && date.getDay() == config.randomDayOfTheWeek)
     {
-        console.log("每周一更新");
-
-        IncreaseWeaponFeatures();
+        console.log("@每周随机一天执行。");
         UpgradeHolyRelics();
         StrengthenHorseEquipment();
         FusionSuit();
         WearBestSuit();
         ChangeRecoverPotionPercentToNormal()
+        UpgradeAbilityLevel()
     }
 
     AddAttributePoint();

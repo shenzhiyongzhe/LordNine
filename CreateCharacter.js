@@ -309,10 +309,13 @@ const CheckLogin = () =>
             console.log("输入生日");
             SetCountryAndBirth();
         }
-        if (textMatches(/.*[40003].*/).findOne(20))
+        if (text('[40003] InitializeError').findOne(20))
         {
-            console.log("40003错误，退出脚本");
-            engines.stopAllAndToast();
+            let hadOrangeConfirm_txt = text("確定").findOne(20);
+            if (hadOrangeConfirm_txt)
+            {
+                console.log("40003错误，退出脚本");
+            }
         }
         if (textMatches(/.*已發送驗證碼至電子信箱.*/).findOne(20))
         {
@@ -1114,10 +1117,9 @@ const LoginFlow = () =>
         {
             break;
         }
-        if (textMatches(/.*[40003].*/).findOne(20))
+        if (text('[40003] InitializeError').findOne(20))
         {
             console.log("40003错误，退出脚本");
-            engines.stopAllAndToast();
         }
         Sleep();
     }
@@ -1535,4 +1537,5 @@ const temporaryLoginGoogle = () =>
     LoginFlow();
 }
 module.exports = { CreateCharacterFlow, temporaryLoginGoogle };
+
 

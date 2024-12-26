@@ -225,6 +225,12 @@ const OpenSuit = () =>
                         RandomPress([61, 675, 137, 14]);
                     }
                 }
+                if (FindBlueBtn([1061, 575, 205, 60]))
+                {
+                    console.log("点击查看全部")
+                    RandomPress([1082, 586, 166, 39])
+                    hadOpenSuit = true;
+                }
                 if (FindBlueBtn([1055, 639, 214, 72]))
                 {
                     if (!FindWhiteCheckMark([20, 667, 38, 33]))
