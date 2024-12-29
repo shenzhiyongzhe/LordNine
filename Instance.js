@@ -1,15 +1,43 @@
-
-const { FindMultiColors, RandomPress, HasMenu, HasMenuClose, WaitUntilPageBack, FindBlueBtn, Sleep, IsMoving, PageBack, WaitUntil, IsHaltMode, ExitHaltMode,
-    FindImg, IsInCity, WaitUntilMenu, EnterMenuItemPage, FindNumber,
-    ChangeHaltModeTime, ChangeRecoverPotionPercentToNormal, ClickAuto,
+const {
+    FindMultiColors,
+    RandomPress,
+    HasMenu,
+    HasMenuClose,
+    WaitUntilPageBack,
+    FindBlueBtn,
+    Sleep,
+    IsMoving,
+    PageBack,
+    WaitUntil,
+    IsHaltMode,
+    ExitHaltMode,
+    FindImg,
+    IsInCity,
+    WaitUntilMenu,
+    EnterMenuItemPage,
+    FindNumber,
+    ChangeHaltModeTime,
+    ChangeRecoverPotionPercentToNormal,
+    ClickAuto,
     DeathCheck,
-    IsLocked, IsInQuest, IsAuto_active, IsAuto_inactive, IsNoPotion,
+    IsLocked,
+    IsInQuest,
+    IsAuto_active,
+    IsAuto_inactive,
+    IsNoPotion,
     LoadImgList,
-    FindImgInList, FindRedBtn, FindGoldBtn,
+    FindImgInList,
+    FindRedBtn,
+    FindGoldBtn,
 
-    HasPopupClose, HaveDailyMissionIcon, HaveFinished, HasMap,
+    HasPopupClose,
+    HaveDailyMissionIcon,
+    HaveFinished,
+    HasMap,
     PressToAuto,
-    RecycleImgList, ReadConfig, RewriteConfig,
+    RecycleImgList,
+    ReadConfig,
+    RewriteConfig,
 
     MatchTemplateList,
     SwipeSlowly,
@@ -22,33 +50,107 @@ const { FindMultiColors, RandomPress, HasMenu, HasMenuClose, WaitUntilPageBack, 
     ReturnHome,
     specialConfig,
     FindCheckMark,
+    StopScript,
 } = require("./utils");
-const { ComprehensiveImprovement_Instance, DailyQuest, LoginProps } = require("./CommonFlow");
+const {
+    ComprehensiveImprovement_Instance,
+    DailyQuest,
+    LoginProps,
+} = require("./CommonFlow");
 const { UnAutoPotion, DecomposeEquipment } = require("./Backpack");
 
-
 const MapIconColorList = [
-    ["#c9ba89", [[16, 2, "#50452f"], [8, 14, "#d0bf8d"], [-2, 15, "#dccb96"], [16, 16, "#d7c692"]]],
-    ["#cfbe8d", [[-1, 16, "#dccb96"], [7, 20, "#dac994"], [16, 17, "#d1c18f"], [17, 17, "#d7c692"]]],
-    ["#cbba89", [[4, -7, "#dccb96"], [7, -2, "#dccb96"], [-2, 15, "#dccb96"], [18, 17, "#958863"]]],
-    ["#cbba89", [[6, -1, "#d7c692"], [3, 6, "#dccb96"], [-1, 15, "#dccb96"], [16, 17, "#d9c894"]]],
-    ["#c8b889", [[5, 1, "#dbc996"], [-2, 16, "#dccb96"], [16, 17, "#cebd8b"], [6, 20, "#d3c18f"]]],
-    ["#ccbb89", [[6, 0, "#d7c692"], [-1, 16, "#dccb96"], [7, 20, "#d3c18f"], [16, 18, "#d9c894"]]],
-    ["#c8b888", [[5, 0, "#dbc996"], [-2, 15, "#dccb96"], [6, 19, "#d3c18f"], [16, 16, "#cebd8b"]]]
-
+    [
+        "#c9ba89",
+        [
+            [16, 2, "#50452f"],
+            [8, 14, "#d0bf8d"],
+            [-2, 15, "#dccb96"],
+            [16, 16, "#d7c692"],
+        ],
+    ],
+    [
+        "#cfbe8d",
+        [
+            [-1, 16, "#dccb96"],
+            [7, 20, "#dac994"],
+            [16, 17, "#d1c18f"],
+            [17, 17, "#d7c692"],
+        ],
+    ],
+    [
+        "#cbba89",
+        [
+            [4, -7, "#dccb96"],
+            [7, -2, "#dccb96"],
+            [-2, 15, "#dccb96"],
+            [18, 17, "#958863"],
+        ],
+    ],
+    [
+        "#cbba89",
+        [
+            [6, -1, "#d7c692"],
+            [3, 6, "#dccb96"],
+            [-1, 15, "#dccb96"],
+            [16, 17, "#d9c894"],
+        ],
+    ],
+    [
+        "#c8b889",
+        [
+            [5, 1, "#dbc996"],
+            [-2, 16, "#dccb96"],
+            [16, 17, "#cebd8b"],
+            [6, 20, "#d3c18f"],
+        ],
+    ],
+    [
+        "#ccbb89",
+        [
+            [6, 0, "#d7c692"],
+            [-1, 16, "#dccb96"],
+            [7, 20, "#d3c18f"],
+            [16, 18, "#d9c894"],
+        ],
+    ],
+    [
+        "#c8b888",
+        [
+            [5, 0, "#dbc996"],
+            [-2, 15, "#dccb96"],
+            [6, 19, "#d3c18f"],
+            [16, 16, "#cebd8b"],
+        ],
+    ],
 ];
 
-
 const InInstanceColorList = [
-    ["#ffffff", [[7, -6, "#ffffff"], [7, -4, "#ffffff"], [14, -1, "#fcfcfc"], [13, 12, "#e6e6e5"]]],
-    ["#ffffff", [[-6, 3, "#fefefd"], [-5, 15, "#e3e3e3"], [7, 2, "#ededed"], [5, 16, "#e6e6e5"]]]
+    [
+        "#ffffff",
+        [
+            [7, -6, "#ffffff"],
+            [7, -4, "#ffffff"],
+            [14, -1, "#fcfcfc"],
+            [13, 12, "#e6e6e5"],
+        ],
+    ],
+    [
+        "#ffffff",
+        [
+            [-6, 3, "#fefefd"],
+            [-5, 15, "#e3e3e3"],
+            [7, 2, "#ededed"],
+            [5, 16, "#e6e6e5"],
+        ],
+    ],
 ];
 
 const FirstLevel = [
     [20, 181, 31, 40],
     [20, 247, 31, 40],
     [20, 317, 32, 40],
-    [20, 380, 33, 40]
+    [20, 380, 33, 40],
 ];
 
 const SecondLevel = [];
@@ -68,16 +170,14 @@ let lastHangUpWildTime = new Date().getTime();
 let lastTimeEnterHaltMode = new Date().getTime();
 let lastTimeEnterInstance = 1726208812345;
 let lastTimeClickDailyMission = 1726208812345;
-let lastTimeComprehensiveImprovement = 1726208812345
+let lastTimeComprehensiveImprovement = 1726208812345;
 let clickDailyMissionAwardsTimes = 0;
 
 let tradingHours = null;
 let mapName = null;
 let monsterMapList = null;
 
-
 const death_haltMode = LoadImgList("special/death_haltmode");
-
 
 const DeathCheck_HaltMode = (shot) =>
 {
@@ -87,7 +187,6 @@ const DeathCheck_HaltMode = (shot) =>
         ExitHaltMode();
     }
 };
-
 
 const HangUpInstance = () =>
 {
@@ -136,7 +235,13 @@ const HangUpInstance = () =>
     console.log("当前战力为：" + curCombatPower);
 
     const CanEnterInstance = () => FindBlueBtn([979, 637, 276, 74]);
-    const PressEnterInstanceBtn = () => { RandomPress([1010, 656, 214, 37]); Sleep(10); WaitUntilMenu(); PressToAuto(); };
+    const PressEnterInstanceBtn = () =>
+    {
+        RandomPress([1010, 656, 214, 37]);
+        Sleep(10);
+        WaitUntilMenu();
+        PressToAuto();
+    };
 
     let haveAvailableInstance = false;
 
@@ -178,22 +283,19 @@ const HangUpInstance = () =>
             if (HasMenu())
             {
                 break;
-            }
-            else if (HasPopupClose([1031, 84, 51, 54]))
+            } else if (HasPopupClose([1031, 84, 51, 54]))
             {
                 RandomPress([1031, 84, 51, 54]);
             }
             ClearPage();
             Sleep();
         }
-    }
-    else
+    } else
     {
         if (!IsInCity())
         {
             EnterHaltMode();
         }
-
     }
     config.game.combatPower = curCombatPower;
     RewriteConfig(config);
@@ -204,26 +306,36 @@ const HangUpInstance = () =>
 const AcceptDailyMission = () =>
 {
     console.log("fn: " + "接受每日任务");
-    const config = ReadConfig()
+    const config = ReadConfig();
 
     if (config.game.lv < 35)
     {
-        console.log("等级小于35级，暂不接受每日任务")
+        console.log("等级小于35级，暂不接受每日任务");
         config.daily.acceptDailyMission = true;
         RewriteConfig(config);
     }
 
-    const dailyMissionItem = LoadImgList("icon/font/dailyMission/dailyMissionItem");
-    const weeklyMissionItem = LoadImgList("icon/font/dailyMission/weeklyMissionItem");
+    const dailyMissionItem = LoadImgList(
+        "icon/font/dailyMission/dailyMissionItem"
+    );
+    const weeklyMissionItem = LoadImgList(
+        "icon/font/dailyMission/weeklyMissionItem"
+    );
 
     const inProgressImgList = LoadImgList("icon/font/dailyMission/inProgress");
     const isCompleteImgList = LoadImgList("icon/font/dailyMission/complete");
     const acceptMaxImgList = LoadImgList("icon/font/dailyMission/accepteMax");
 
-    const missionAwardImgList = LoadImgList("icon/font/dailyMission/missionCompleteAward");
-    const weeklyMissionGoalImgList = LoadImgList("icon/font/dailyMission/weeklyMissionGoal");
+    const missionAwardImgList = LoadImgList(
+        "icon/font/dailyMission/missionCompleteAward"
+    );
+    const weeklyMissionGoalImgList = LoadImgList(
+        "icon/font/dailyMission/weeklyMissionGoal"
+    );
 
-    const weeklyMissionIconImgList = LoadImgList("icon/font/dailyMission/weeklyMissionIcon");
+    const weeklyMissionIconImgList = LoadImgList(
+        "icon/font/dailyMission/weeklyMissionIcon"
+    );
     let dailyMissionItemPoints;
 
     let haveAcceptMax = false;
@@ -240,18 +352,33 @@ const AcceptDailyMission = () =>
             }
             for (let k = 0; k < 5; k++)
             {
-                dailyMissionItemPoints = MatchTemplateList(dailyMissionItem, [331, 101, 82, 549]);
+                dailyMissionItemPoints = MatchTemplateList(
+                    dailyMissionItem,
+                    [331, 101, 82, 549]
+                );
                 for (let j = 0; j < dailyMissionItemPoints.length; j++)
                 {
-                    if (FindImgInList(inProgressImgList, [680, dailyMissionItemPoints[j].y - 12, 70, 30]))
+                    if (
+                        FindImgInList(inProgressImgList, [
+                            680,
+                            dailyMissionItemPoints[j].y - 12,
+                            70,
+                            30,
+                        ])
+                    )
                     {
                         console.log("正在进行中...");
-                    }
-                    else if (FindImgInList(isCompleteImgList, [700, dailyMissionItemPoints[j].y - 15, 40, 25]))
+                    } else if (
+                        FindImgInList(isCompleteImgList, [
+                            700,
+                            dailyMissionItemPoints[j].y - 15,
+                            40,
+                            25,
+                        ])
+                    )
                     {
                         console.log("已完成");
-                    }
-                    else
+                    } else
                     {
                         RandomPress([300, dailyMissionItemPoints[j].y - 20, 350, 40]);
                         if (FindBlueBtn([1069, 646, 205, 60]))
@@ -277,8 +404,7 @@ const AcceptDailyMission = () =>
             console.log("刷新任务列表");
             RandomPress([678, 459, 154, 33], 2);
             hadRefresh = true;
-        }
-        else
+        } else
         {
             console.log("刷新任务列表失败");
             break;
@@ -302,20 +428,35 @@ const AcceptDailyMission = () =>
             console.log("已检查周任务，已接受，返回");
             break;
         }
-        let weeklyMissionItemPoints = MatchTemplateList(weeklyMissionItem, [282, 122, 118, 518]);
+        let weeklyMissionItemPoints = MatchTemplateList(
+            weeklyMissionItem,
+            [282, 122, 118, 518]
+        );
         for (let j = 0; j < weeklyMissionItemPoints.length; j++)
         {
-            if (FindImgInList(inProgressImgList, [675, weeklyMissionItemPoints[j].y - 15, 80, 30]))
+            if (
+                FindImgInList(inProgressImgList, [
+                    675,
+                    weeklyMissionItemPoints[j].y - 15,
+                    80,
+                    30,
+                ])
+            )
             {
                 console.log("正在进行中");
                 isCorrectNum++;
-            }
-            else if (FindImgInList(isCompleteImgList, [690, weeklyMissionItemPoints[j].y - 15, 80, 30]))
+            } else if (
+                FindImgInList(isCompleteImgList, [
+                    690,
+                    weeklyMissionItemPoints[j].y - 15,
+                    80,
+                    30,
+                ])
+            )
             {
                 console.log("已完成");
                 isCorrectNum++;
-            }
-            else
+            } else
             {
                 RandomPress([350, weeklyMissionItemPoints[j].y - 15, 300, 30]);
                 if (FindBlueBtn([1069, 645, 210, 62]))
@@ -327,14 +468,23 @@ const AcceptDailyMission = () =>
             }
         }
         //纠错，防止接受错误周任务
-        let inProgressPoints = MatchTemplateList(inProgressImgList, [677, 113, 96, 530]);
+        let inProgressPoints = MatchTemplateList(
+            inProgressImgList,
+            [677, 113, 96, 530]
+        );
         for (let k = 0; k < inProgressPoints.length; k++)
         {
-            if (FindImgInList(weeklyMissionItem, [285, inProgressPoints[k].y + 5, 100, 30]))
+            if (
+                FindImgInList(weeklyMissionItem, [
+                    285,
+                    inProgressPoints[k].y + 5,
+                    100,
+                    30,
+                ])
+            )
             {
                 console.log("检查周任务：正确");
-            }
-            else
+            } else
             {
                 console.log("接受错误周任务");
                 RandomPress([285, inProgressPoints[k].y - 10, 300, 30]);
@@ -342,8 +492,7 @@ const AcceptDailyMission = () =>
                 {
                     console.log("是周任务，不需要放弃");
                     isCorrectNum++;
-                }
-                else if (FindRedBtn([1072, 647, 202, 59]))
+                } else if (FindRedBtn([1072, 647, 202, 59]))
                 {
                     console.log("点击放弃");
                     RandomPress([1097, 659, 158, 32]);
@@ -401,27 +550,24 @@ const ClickDailyMission = () =>
         Sleep(random(1, 5));
         RandomPress([haveDailyMissionIcon.x, haveDailyMissionIcon.y, 100, 40]);
         instance_mode = "dailyMission";
-        console.log("点击每日任务图标，开始进行")
+        console.log("点击每日任务图标，开始进行");
         return true;
-    }
-    else 
+    } else
     {
         console.log("未发现每日任务图标。");
-        ClearPage()
+        ClearPage();
         const config = ReadConfig();
         if (config.daily.acceptDailyMission)
         {
             console.log("每日任务已做完，切换到野外挂机");
             instance_mode = "hangUpWild";
             return false;
-        }
-        else
+        } else
         {
-            console.log("未接受每日任务。")
+            console.log("未接受每日任务。");
             return true;
         }
     }
-
 };
 const DailyMission = () =>
 {
@@ -430,8 +576,7 @@ const DailyMission = () =>
     if (config.daily.acceptDailyMission)
     {
         console.log("已接受每日任务");
-    }
-    else
+    } else
     {
         console.log("开始每日任务");
         if (IsHaltMode())
@@ -455,8 +600,7 @@ const DailyMission = () =>
                 instance_mode = "hangUpWild";
             }
             return false;
-        }
-        else
+        } else
         {
             let missionMap = [25, 181, 188, 27];
             // if (config.game.combatPower >= 25000)
@@ -477,14 +621,11 @@ const DailyMission = () =>
                 return false;
             }
             AcceptDailyMission();
-
         }
-
     }
 
     ClickDailyMission();
 };
-
 
 const CollectMonsterCollection = () =>
 {
@@ -529,10 +670,11 @@ const OpenMap = () =>
     return false;
 };
 
-
 const EnterMap = (mapName) =>
 {
     console.log("fn：进入地图：" + mapName);
+    console.log("开始掷骰子，质检是否直接传送");
+    const randomIndex = random(1, 100);
     const [firstLevel, secondLevel, thirdLevel] = mapName;
 
     let hasMoved = false;
@@ -540,25 +682,34 @@ const EnterMap = (mapName) =>
     RandomPress(FirstLevel[firstLevel]);
     RandomPress(SecondLevel[secondLevel]);
     RandomPress(ThirdLevel[thirdLevel]);
-    if (FindBlueBtn([1066, 647, 162, 67]))
+
+    if (randomIndex > 50)
     {
-        RandomPress([1086, 664, 120, 30]);
-        if (FindBlueBtn([651, 382, 217, 69]))
+        console.log('快速移动鉴定成功');
+        if (FindBlueBtn([1066, 647, 162, 67]))
         {
-            RandomPress([681, 401, 150, 28]);
-            console.log("@等待传送...");
-            Sleep(15);
-            if (WaitUntil(HasMenu, 2000, 30))
+            RandomPress([1086, 664, 120, 30]);
+            if (FindBlueBtn([651, 382, 217, 69]))
             {
-                hasMoved = true;
+                RandomPress([681, 401, 150, 28]);
+                console.log("@等待传送...");
+                Sleep(15);
+                if (WaitUntil(HasMenu, 2000, 30))
+                {
+                    hasMoved = true;
+                }
             }
+        } else if (FindBlueBtn([907, 651, 162, 61]))
+        {
+            RandomPress([936, 667, 111, 27]);
+            PageBack();
+            hasMoved = true;
         }
     }
-    else if (FindBlueBtn([907, 651, 162, 61]))
+    else
     {
-        RandomPress([936, 667, 111, 27]);
-        PageBack();
-        hasMoved = true;
+        console.log('快速移动鉴定失败，开始走路过去。');
+
     }
     return hasMoved;
 };
@@ -577,13 +728,13 @@ const HangUpSecretLab = () =>
         return false;
     }
     console.log("到达秘密实验室前。");
-    Sleep(random(1, 15))
+    Sleep(random(1, 15));
     if (!OpenMap())
     {
-        console.log("第二次打开地图失败。退出")
+        console.log("第二次打开地图失败。退出");
         return false;
     }
-    const randomIndex = random(1, 4)
+    const randomIndex = random(1, 4);
     // RandomPress(FirstLevel[0]);
     RandomPress(SecondLevel[4]);
     RandomPress(ThirdLevel[randomIndex]);
@@ -593,13 +744,12 @@ const HangUpSecretLab = () =>
 
     if (config.game.combatPower <= 27000)
     {
-        console.log('战力小于27000，只进入30级区域')
-        secretLabMoveTime = random(5, 40)
-    }
-    else
+        console.log("战力小于27000，只进入30级区域");
+        secretLabMoveTime = random(10, 40);
+    } else
     {
-        console.log("战力大于27000，随机整个秘密实验室")
-        secretLabMoveTime = random(5, 120)
+        console.log("战力大于27000，随机整个秘密实验室");
+        secretLabMoveTime = random(5, 120);
     }
 
     if (FindBlueBtn([936, 646, 251, 67]))
@@ -609,34 +759,31 @@ const HangUpSecretLab = () =>
         if (WaitUntil(() => HasMenu(), 2000, 30))
         {
             console.log("@到达秘密实验室");
-            console.log("秘密实验室移动时间为 " + secretLabMoveTime)
+            console.log("秘密实验室移动时间为 " + secretLabMoveTime);
 
-            Sleep(secretLabMoveTime)
+            Sleep(secretLabMoveTime);
             PressToAuto();
-            if (typeof config.daily.hangUpSecretLab != 'number')
+            if (typeof config.daily.hangUpSecretLab != "number")
             {
                 config.daily.hangUpSecretLab == 1;
                 RewriteConfig(config);
-            }
-            else
+            } else
             {
                 config.daily.hangUpSecretLab += 1;
             }
-            console.log("今日进入秘密实验室次数为：" + config.daily.hangUpSecretLab)
+            console.log("今日进入秘密实验室次数为：" + config.daily.hangUpSecretLab);
             RewriteConfig(config);
         }
     }
-
 };
 
 const HangUpWild = () =>
 {
     console.log("fn: 去野外挂机");
 
-
     if (ClickDailyMission())
     {
-        console.log("每日任务未做完，优先每日任务")
+        console.log("每日任务未做完，优先每日任务");
         return true;
     }
 
@@ -658,31 +805,26 @@ const HangUpWild = () =>
         const combatPower = config.game.combatPower;
         if (combatPower < 18000)
         {
-            mapName = [0, 3, random(0, 2)]
-            console.log("去被污染的盆地挂机")
+            mapName = [0, 3, random(0, 2)];
+            console.log("去被污染的盆地挂机");
             return true;
-        }
-        else if (combatPower >= 18000 && combatPower < 24000)
+        } else if (combatPower >= 18000 && combatPower < 24000)
         {
             mapName = [1, 1, random(0, 2)];
             console.log("去新月湖挂机");
-        }
-        else if (combatPower >= 24000 && combatPower < 28000)
+        } else if (combatPower >= 24000 && combatPower < 28000)
         {
             mapName = [1, 2, random(0, 2)];
             console.log("去暮光之丘挂机");
-        }
-        else if (combatPower >= 28000)
+        } else if (combatPower >= 28000)
         {
             mapName = [2, 1, 0];
-            console.log("去鸟兰挂机")
-        }
-        else
+            console.log("去鸟兰挂机");
+        } else
         {
             console.log("@异常情况，默认去被污染的土地挂机");
             mapName = [0, 3, random(0, 2)];
         }
-
     }
 
     const hasOpenMap = OpenMap();
@@ -702,26 +844,16 @@ const HangUpWild = () =>
     WaitUntilMenu();
     Sleep(random(1, 5));
 
-
     if (IsAuto_inactive())
     {
         if (config.game.autoPotion == true)
         {
-            ChangeRecoverPotionPercentToNormal();
-            let isSuccess = UnAutoPotion();
-            if (isSuccess)
-            {
-                console.log("关闭自动使用药水成功");
-                config.game.autoPotion = false;
-                RewriteConfig(config);
-            }
         }
         PressToAuto();
         console.log("去野外挂机成功");
         EnterHaltMode();
         return true;
-    }
-    else
+    } else
     {
         return false;
     }
@@ -742,25 +874,26 @@ const InstanceExceptionCheck = () =>
         {
             console.log("@没有经验增加");
             ExitHaltMode();
-            ReturnHome()
+            ReturnHome();
         }
         if (instance_mode == "dailyMission")
         {
             ExitHaltMode();
         }
         DeathCheck_HaltMode();
-    }
-    else
+    } else
     {
         const deathBtn = DeathCheck();
         const config = ReadConfig();
 
         if (deathBtn)
         {
-            RandomPress([deathBtn.x - 50, deathBtn.y, 150, 20], random(10,30));
-            config.totalDeathTimes = config.totalDeathTimes ? config.totalDeathTimes:0;
+            RandomPress([deathBtn.x - 50, deathBtn.y, 150, 20], random(10, 30));
+            config.totalDeathTimes = config.totalDeathTimes
+                ? config.totalDeathTimes
+                : 0;
             config.totalDeathTimes++;
-            RewriteConfig(config)
+            RewriteConfig(config);
         }
 
         if (IsInCity() && !IsMoving())
@@ -771,26 +904,20 @@ const InstanceExceptionCheck = () =>
                 if (!config.daily.dailyInstance)
                 {
                     HangUpInstance();
-                }
-                else
+                } else
                 {
                     instance_mode = "dailyMission";
                 }
-
-            }
-            else if (instance_mode == "dailyMission")
+            } else if (instance_mode == "dailyMission")
             {
-
                 if (!config.daily.acceptDailyMission)
                 {
                     DailyMission();
-                }
-                else
+                } else
                 {
                     ClickDailyMission();
                 }
-            }
-            else if (instance_mode == "hangUpWild")
+            } else if (instance_mode == "hangUpWild")
             {
                 HangUpWild();
             }
@@ -804,21 +931,19 @@ const InstanceExceptionCheck = () =>
                     console.log("instance check: 没有自动攻击，点击自动攻击");
                     PressToAuto();
                 }
-            }
-            else if (instance_mode == "dailyMission")
+            } else if (instance_mode == "dailyMission")
             {
                 if (IsAuto_active())
                 {
                     DailyMission();
-                }
-                else if (IsAuto_inactive() && !IsMoving())
+                } else if (IsAuto_inactive() && !IsMoving())
                 {
                     DailyMission();
                     for (let i = 0; i < 6; i++)
                     {
                         if (!IsMoving() && !IsInQuest())
                         {
-                            console.log('随机点屏幕，随机移动');
+                            console.log("随机点屏幕，随机移动");
                             RandomPress([337, 157, 508, 314]);
                             instance_mode = "dailyMission";
                             break;
@@ -850,15 +975,17 @@ const InstanceExceptionCheck = () =>
                         instance_mode == "hangUpWild";
                         console.log("今日每日任务已做完，切换模式为：野外挂机");
                         clickDailyMissionAwardsTimes = 0;
-                    }
-                    else
+                    } else
                     {
                         DailyMission();
                     }
                 }
             }
 
-            if ((instance_mode == "hangUpInstance" || instance_mode == "hangUpWild") && !IsInCity())
+            if (
+                (instance_mode == "hangUpInstance" || instance_mode == "hangUpWild") &&
+                !IsInCity()
+            )
             {
                 if (!IsHaltMode())
                 {
@@ -871,30 +998,27 @@ const InstanceExceptionCheck = () =>
                         EnterHaltMode();
                         lastTimeEnterHaltMode = currentTime;
                     }
-
                 }
-
             }
         }
     }
     if (HasPopupClose([25, 1, 55, 54]))
     {
-        RandomPress([42, 684, 23, 27]) //setting
-        let shot = captureScreen()
+        RandomPress([42, 684, 23, 27]); //setting
+        let shot = captureScreen();
         for (let i = 0; i < 12; i++)
         {
-            let haveCheckMark = FindCheckMark([404, 294, 385, 220], shot)
+            let haveCheckMark = FindCheckMark([404, 294, 385, 220], shot);
             if (haveCheckMark)
             {
-                RandomPress([haveCheckMark.x, haveCheckMark.y, 30, 5])
-                shot = captureScreen()
+                RandomPress([haveCheckMark.x, haveCheckMark.y, 30, 5]);
+                shot = captureScreen();
             }
         }
-        RandomPress([853, 207, 24, 24])
-        RandomPress([166, 19, 739, 259])
-        RandomPress([42, 17, 23, 28])
+        RandomPress([853, 207, 24, 24]);
+        RandomPress([166, 19, 739, 259]);
+        RandomPress([42, 17, 23, 28]);
     }
-
 };
 
 const IsTimeToComprehensive = () =>
@@ -915,18 +1039,16 @@ const IsTimeToComprehensive = () =>
             ];
             config.dailyTradingHours = tradingHours;
             RewriteConfig(config);
-        }
-        else
+        } else
         {
             tradingHours = config.dailyTradingHours;
         }
-
     }
     const curTime = new Date();
     const hours = curTime.getHours();
     const minute = curTime.getMinutes();
     let isTimeToComprehensive = false;
-    tradingHours.forEach(time =>
+    tradingHours.forEach((time) =>
     {
         if (time[0] == hours && time[1] == minute)
         {
@@ -936,13 +1058,13 @@ const IsTimeToComprehensive = () =>
         }
     });
 
-    const interval = (curTime.getTime() - lastTimeComprehensiveImprovement) / 3600000
+    const interval =
+        (curTime.getTime() - lastTimeComprehensiveImprovement) / 3600000;
     if (interval > 8 && isTimeToComprehensive)
     {
-        lastTimeComprehensiveImprovement = curTime.getTime()
+        lastTimeComprehensiveImprovement = curTime.getTime();
         return true;
-    }
-    else
+    } else
     {
         return false;
     }
@@ -972,14 +1094,12 @@ const InstanceFlow = () =>
         {
             console.log("今日副本暂未完成，优先进副本");
             HangUpInstance();
-        }
-        else if (!config.daily.acceptDailyMission)
+        } else if (!config.daily.acceptDailyMission)
         {
             console.log("每日任务未完成. 优先进行每日任务");
             DailyMission();
             lastTimeEnterInstance = curTime;
-        }
-        else
+        } else
         {
             lastTimeEnterInstance = curTime;
         }
@@ -993,9 +1113,7 @@ const InstanceFlow = () =>
             console.log(`@${switchMapTime}小时，切换地图`);
             HangUpWild();
         }
-
-    }
-    else if (instance_mode == "dailyMission")
+    } else if (instance_mode == "dailyMission")
     {
         if ((curTime - lastTimeClickDailyMission) / 60000 > 30)
         {
@@ -1005,7 +1123,7 @@ const InstanceFlow = () =>
                 ExitHaltMode();
             }
 
-            DailyMission()
+            DailyMission();
             lastTimeClickDailyMission = curTime;
         }
     }
@@ -1013,20 +1131,8 @@ const InstanceFlow = () =>
     // {
     //     console.log("monster mode");
     // }
-
 };
-
 
 module.exports = { InstanceFlow };
 // HangUpInstance()
-
-
-
-
-
-
-
-
-
-
 

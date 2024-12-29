@@ -1,5 +1,5 @@
 
-const { RewriteConfig, Sleep, specialConfig, LaunchGame, ReadConfig, ReadAccountFile } = require("./utils.js");
+const { RewriteConfig, Sleep, specialConfig, LaunchGame, ReadConfig, ReadAccountFile, StopScript } = require("./utils.js");
 const { ExceptionFlow } = require("./Exception");
 const { MainStoryFlow } = require("./MainStory.js");
 
@@ -60,8 +60,9 @@ function Init()
         needRewrite = true;
     }
 
-    if (!config.googleAccount || config.game.vm.length < 10)
+    if (!config.googleAccount || !config.game.vm || config.game.vm.length < 10)
     {
+        console.log('@配置不存在账号信息，开始读取账号文件');
         const account = ReadAccountFile();
         config.createCharacterTime = new Date().toJSON()
         config.game.vm = account[3];
@@ -82,14 +83,6 @@ function Init()
             if (res.statusCode == 200)
             {
                 console.log("发送数据成功");
-                if (config.game.tradingTimes)
-                {
-                    config.game.tradingTimes++;
-                }
-                else
-                {
-                    config.game.tradingTimes = 1;
-                }
             }
         } catch (error)
         {
@@ -136,7 +129,6 @@ const GetCaptureScreenPermission = () =>
     });
 };
 
-const StopScript = () => java.lang.System.exit(0);
 // const StopScript = () => engines.stopAllAndToast();
 
 

@@ -1487,25 +1487,9 @@ const GetSettlement = () =>
 
     const tradeRecord = ReadTradeRecord()
 
-    const formatedRecord = {}
-
-    for (let key in tradeRecord)
-    {
-        if (key.includes('_'))
-        {
-            let arr = key.split('_')
-            let str = arr[0] + "-" + arr[1].toString().padStart(2, '0') + "-" + arr[2].toString().padStart(2, '0') + " " + arr[3].toString().padStart(2, '0') + ":" + arr[4].toString().padStart(2, '0')
-            formatedRecord[str] = tradeRecord[key];
-        }
-        else
-        {
-            formatedRecord[key] = tradeRecord[key];
-        }
-    }
-
     tradeRecord[getOriginDate()] = [settlement, beforeSettleDiamond, afterSettleDiamond];
 
-    UpdateTradeRecord(formatedRecord)
+    UpdateTradeRecord(tradeRecord)
 
 
     let monthlyIncome = 0;
@@ -2215,6 +2199,14 @@ const ComprehensiveImprovement_Instance = () =>
         WearBestSuit();
         ChangeRecoverPotionPercentToNormal()
         UpgradeAbilityLevel()
+        ChangeRecoverPotionPercentToNormal();
+        let isSuccess = UnAutoPotion();
+        if (isSuccess)
+        {
+            console.log("关闭自动使用药水成功");
+            config.game.autoPotion = false;
+            RewriteConfig(config);
+        }
     }
 
     AddAttributePoint();

@@ -17,6 +17,7 @@ const {
     DeathCheck,
     TapTip,
     SetCountryAndBirth,
+    StopScript,
 
 
 } = require("./utils.js");
@@ -268,7 +269,23 @@ const DisconnectionFlow = (shot) =>
         if (needRestartGame)
         {
             console.log("加载时间过长，开始重启游戏");
-            RestartGame("com.smilegate.lordnine.stove.google", 3);
+            RestartGame("com.smilegate.lordnine.stove.google");
+        }
+    }
+    if (FindBlueBtn([650, 428, 173, 59], shot))
+    {
+        const serverMaintenance = LoadImgList('special/serverMaintenance')
+        const haveServerMaintenance = FindImgInList(serverMaintenance, [565, 227, 147, 53], shot)
+        RecycleImgList(serverMaintenance)
+
+        if (haveServerMaintenance)
+        {
+            const serverMaintenanceDelayTime = random(1, 100)
+            console.log(`发现服务器维护弹窗，延迟${serverMaintenanceDelayTime}s 点击结束，并弹窗提示。`);
+            Sleep(serverMaintenanceDelayTime)
+            RandomPress([674, 443, 127, 29])
+            alert("服务器维护中", "检测到游戏服务器维护中")
+            StopScript()
         }
     }
 };
@@ -367,11 +384,9 @@ let haveResetDailyConfig = false;
 const ResetConfig = () =>
 {
     let haveReset = false;
-
+    const config = ReadConfig()
     if (!haveResetDailyConfig)
     {
-        const config = ReadConfig()
-
         const date = new Date();
         const today = date.getDate()
         const hours = date.getHours()
@@ -429,7 +444,6 @@ const ResetConfig = () =>
             haveReset = true;
         }
     }
-
     if (haveReset)
     {
         console.log("reset config")
@@ -464,7 +478,8 @@ const StovePopup = () =>
     if (hasLimitAccount)
     {
         console.log("检测到账号被封，关闭脚本");
-        engines.stopAllAndToast();
+        alert("游戏账户被封禁，", "检测到游戏账号被封禁")
+        StopScript()
     }
     const agreeAllToContinue = text("全部同意後繼續（包含可選項目）").findOne(20);
     if (agreeAllToContinue)

@@ -1332,13 +1332,13 @@ const RecycleImgList = (list) => list.forEach(img => img.recycle());
 /**
  * 
  * @param {*} func 执行函数
- * @param {*} frequence 执行频率，单位毫秒
- * @param {*} loopTime  循环次数
+ * @param {*} frequence 执行频率，单位毫秒 默认1500
+ * @param {*} loopTime  循环次数 默认20次
  * @returns 
  */
 const WaitUntil = (func, frequence, loopTime) =>
 {
-    frequence = frequence || 1000;
+    frequence = frequence || 1500;
     loopTime = loopTime || 20;
     for (let i = 0; i < loopTime; i++)
     {
@@ -1569,7 +1569,7 @@ const RestartGame = (packageName, time) =>
     }
     home();
     time = time || random(60, 300);
-    console.log("延迟时间：" + time);
+    console.log("强制停止后的延迟启动时间：" + time);
     Sleep(time);
     app.launch(packageName);
 };
