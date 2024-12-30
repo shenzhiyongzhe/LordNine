@@ -14,7 +14,7 @@
   },
   "useFeatures": [],
   "icon": "./img/logo.png",
-  "ignore":["build","z_test.js","z0_tool.js","z1_syncFile.js"],
+  "ignore":["z_test.js","z0_tool.js","z1_syncFile.js"],
   "ignoredDirs": ["build"],
   "encrypt-code": false,
   "launchConfig": {

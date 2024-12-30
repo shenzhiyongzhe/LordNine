@@ -4,7 +4,6 @@ const {
     BuySkillBook,
     ClearPage, ClickSkip, CloseMenu, CloseBackpack, ChangeRecoverPotionPercentToMax, ChangeGameSetting,
     DeathCheck,
-
     ExitHaltMode, EnterMenuItemPage,
     FindBlueBtn, FindNumber, FindRedBtn, FindGoldBtn, FindImgInList, FindImg, FindMultiColors,
     GetCharacterLv,
@@ -14,13 +13,10 @@ const {
     LoadImgList,
     OpenBackpack, OpenBackpackMenu, OpenMenu,
     PullDownSkill, PageBack, PressBlank,
-
     ReadConfig, RewriteConfig, RecycleImgList, ReturnHome, ReadImg, RandomPress,
-    SwipeSlowly, Sleep,
+    SwipeSlowly, Sleep, SwipeUp, SwipeDown, SwipeLeft, SwipeRight,
     TapTip,
     WaitUntil, WaitUntilPageBack, WaitUntilMenu,
-
-
 } = require("./utils.js");
 
 const { NextColorList, TalkBubbleColorList, SpeedUpOffColorList, } = require("./Color/MainStoryColorList.js");
@@ -295,10 +291,7 @@ const TapDialog = () =>
     }
 };
 
-const SwipeUp = (sec) => gesture(sec * 1000, [195, 575], [195, 475]);
-const SwipeDown = (sec) => gesture(sec * 1000, [195, 605], [195, 705]);
-const SwipeLeft = (sec) => gesture(sec * 1000, [180, 590], [80, 590]);
-const SwipeRight = (sec) => gesture(sec * 1000, [210, 590], [310, 590]);
+
 
 // ------------------------------------------  main story branch -------------------------------------------
 const weaponSelectColorList = [

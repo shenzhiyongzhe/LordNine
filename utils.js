@@ -1004,6 +1004,10 @@ let moveObj = {
 };
 const IsMoving = () =>
 {
+    if (!HasMap())
+    {
+        return true;
+    }
     let isMoving = true;
     if (moveObj.clipCount == 0)
     {
@@ -1997,6 +2001,10 @@ const SetCountryAndBirth = () =>
         console.log("finish set country and birth");
     }
 };
+const SwipeUp = (sec) => gesture(sec * 1000, [195, 575], [195, 475]);
+const SwipeDown = (sec) => gesture(sec * 1000, [195, 605], [195, 705]);
+const SwipeLeft = (sec) => gesture(sec * 1000, [180, 590], [80, 590]);
+const SwipeRight = (sec) => gesture(sec * 1000, [210, 590], [310, 590]);
 
 module.exports = {
     specialConfig,
@@ -2016,7 +2024,7 @@ module.exports = {
     PageBack, PressBlank, PullDownSkill, PressToAuto,
     RandomPress, ReadImg, ReturnHome, RestartGame, RecycleImgList, ReadConfig, RewriteConfig, ReadDealRecord, ReadAccountFile, ReadDailyDiamondRecord, ReadTradeRecord,
     UpdateTradeRecord,
-    Sleep, SwipeSlowly, StopScript, SetCountryAndBirth,
+    Sleep, SwipeSlowly, StopScript, SetCountryAndBirth, SwipeUp, SwipeDown, SwipeLeft, SwipeRight,
     WaitUntil, WaitUntilMenu, WaitUntilPageBack, WaitUntilFindColor,
 };
 

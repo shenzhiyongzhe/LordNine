@@ -1739,7 +1739,11 @@ const PutOnSale = () =>
     DecomposeEquipment("partial");
     TradeGoods();
     LoginProps("total");
-    DecomposeEquipment("total");
+    if (random(1, 100) > 95)
+    {
+        console.log("5%概率事件，交易后分解装备");
+        DecomposeEquipment("total");
+    }
     console.log("__物品上架结束");
 };
 
