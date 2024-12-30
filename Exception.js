@@ -200,6 +200,9 @@ const IsTimeout = () =>
     }
     return false;
 };
+
+let clickMainUITimes = 0;
+
 const DisconnectionFlow = (shot) =>
 {
     if (FindBlueBtn([556, 430, 167, 55], shot) || FindBlueBtn([530, 436, 215, 77], shot))
@@ -243,6 +246,7 @@ const DisconnectionFlow = (shot) =>
             }
 
         }
+        clickMainUITimes = 0;
     }
 
     if (FindImgInList(ExceptionImgList.loading, [23, 664, 59, 43]))
@@ -289,7 +293,6 @@ const DisconnectionFlow = (shot) =>
         }
     }
 };
-
 const MainUIFlow = (shot) =>
 {
     if (HaveLordNineWord(shot))
@@ -312,6 +315,12 @@ const MainUIFlow = (shot) =>
             Sleep(random(1, 10));
             RandomPress([416, 173, 438, 358])
             Sleep(5);
+        }
+        clickMainUITimes++;
+        if (clickMainUITimes >= 30)
+        {
+            console.log('点击主屏幕次数过多，弹窗提醒');
+            alert("异常检测", "点击主屏幕次数过多")
         }
     }
 };

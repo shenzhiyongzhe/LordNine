@@ -709,7 +709,7 @@ const EnterMap = (mapName) =>
     else
     {
         console.log('快速移动鉴定失败，开始走路过去。');
-
+        return false;
     }
     return hasMoved;
 };
