@@ -781,12 +781,6 @@ const HangUpWild = () =>
 {
     console.log("fn: 去野外挂机");
 
-    if (ClickDailyMission())
-    {
-        console.log("每日任务未做完，优先每日任务");
-        return true;
-    }
-
     lastHangUpWildTime = new Date().getTime();
 
     const config = ReadConfig();
@@ -846,9 +840,6 @@ const HangUpWild = () =>
 
     if (IsAuto_inactive())
     {
-        if (config.game.autoPotion == true)
-        {
-        }
         PressToAuto();
         console.log("去野外挂机成功");
         EnterHaltMode();
