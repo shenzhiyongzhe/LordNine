@@ -34,11 +34,6 @@ let lastTimeClearBackpack = 1726208812345;
 let lastTimeClearBackpack_haltMode = new Date().getTime();
 let randomTimeToClearBackpack = random(150, 200);
 
-let lastGetVerificationCodeTime = 0;
-let totalGetVerificationCodeTimes = 0;
-
-let lastResetConfigTime = 1726208812345;
-
 
 const ExceptionImgList = {
     disconnection: LoadImgList("special/disconnection"),
@@ -164,14 +159,23 @@ const BackpackFullFlow = (shot) =>
         console.log("背包已满，开始清理背包");
         if ((new Date().getTime() - lastTimeClearBackpack) / 60000 > 10)
         {
-            if (new Date().getHours % 4 == 0)
+            lastTimeClearBackpack = new Date().getTime();
+            const config = ReadConfig()
+            if (!config.unlockTrade)
             {
-                console.log("8的整数倍，穿戴装备");
+                console.log("未完成主线，穿戴装备");
                 WearEquipments();
                 StrengthenEquipment();
+                LoginProps();
             }
-            lastTimeClearBackpack = new Date().getTime();
-            LoginProps();
+            else
+            {
+                if (random(1, 100) > 70)
+                {
+                    LoginProps();
+                }
+            }
+
             DecomposeEquipment("partial");
         }
         // else

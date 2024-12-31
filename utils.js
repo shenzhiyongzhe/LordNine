@@ -987,7 +987,7 @@ const PressToAuto = () =>
 {
     if (IsAuto_inactive())
     {
-        const delayTime = random(1, 15);
+        const delayTime = random(3, 30);
         console.log("延迟" + delayTime + "s点击auto");
         Sleep(delayTime);
         ClickAuto();
@@ -997,6 +997,7 @@ const PressToAuto = () =>
     {
         return true;
     }
+    return false;
 };
 let moveObj = {
     clipCount: 0,
@@ -1059,7 +1060,7 @@ const EnterHaltMode = () =>
     {
         if (HasHaltModeBtn())
         {
-            let randomTime = random(3, 10);
+            let randomTime = random(3, 120);
             console.log("延迟进入省电模式：" + randomTime);
             Sleep(randomTime);
             RandomPress([49, 405, 14, 24], 5);

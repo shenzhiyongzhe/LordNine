@@ -683,7 +683,7 @@ const EnterMap = (mapName) =>
     RandomPress(SecondLevel[secondLevel]);
     RandomPress(ThirdLevel[thirdLevel]);
 
-    if (randomIndex > 99)
+    if (randomIndex > 50)
     {
         console.log('۞快速移动鉴定成功,直接传送');
         if (FindBlueBtn([1066, 647, 162, 67]))
@@ -798,6 +798,8 @@ const HangUpSecretLab = () =>
         }
     }
 };
+const upArrow = LoadImgList('page/map/arrow/up')
+const downArrow = LoadImgList("page/map/arrow/down")
 
 const randomMoveOperation = () =>
 {
@@ -850,9 +852,83 @@ const randomMoveOperation = () =>
     const randomIllustrations = () =>
     {
         console.log("随机选择怪物移动过去");
+        if (!OpenMap())
+        {
+            console.log("打开背包失败");
+            return false;
+        }
+        RandomPress([1240, 211, 31, 35])
+        RandomPress([967, 130, 226, 456], 3)
+
+        const shot = captureScreen()
+        const haveUpArrow = FindImgInList(upArrow, [1152, 111, 72, 553], shot)
+        if (!haveUpArrow)
+        {
+            console.log("未发现向上箭头，退出");
+            return false;
+        }
+
+        console.log("发现向上的箭头，寻找向下的箭头:" + haveUpArrow);
+        for (let i = 0; i < 9; i++)
+        {
+            let haveDownArrow = FindImgInList(downArrow, [1160, haveUpArrow.y + 50 + i * 53 >= 720 ? 670 : haveUpArrow.y + 50 + i * 53, 50, 40], shot)
+            let clickableRange = []
+            if (haveDownArrow)
+            {
+                console.log("发现向下箭头:" + haveDownArrow);
+                clickableRange = [980, haveUpArrow.y + 50, 200, haveDownArrow.y - 40 - haveUpArrow.y + 30]
+                console.log('可点击区域为：' + clickableRange);
+                RandomPress(clickableRange)
+                break;
+            }
+            else if (i == 8)
+            {
+                console.log("循环结束：未发现向下箭头");
+                clickableRange = [980, haveUpArrow.y + 60, 200, 660 - haveUpArrow.y]
+                console.log('可点击区域为：' + clickableRange);
+                RandomPress(clickableRange)
+            }
+        }
+        let canAutoMove = false;
+        let canQuickMove = false;
+        if (FindBlueBtn([563, 604, 161, 59]))
+        {
+            console.log("可自动移动");
+            canAutoMove = true;
+        }
+        if (FindBlueBtn([731, 605, 157, 57]))
+        {
+            console.log("可快速移动");
+            canQuickMove = true;
+        }
+
+        if (canAutoMove && canQuickMove)
+        {
+            if (random(1, 100))
+            {
+                console.log('随机：点击自动移动');
+                RandomPress([590, 616, 114, 32])
+            }
+            else
+            {
+                console.log('随机：点击快速移动');
+                RandomPress([755, 618, 118, 29])
+            }
+        }
+        else if (canAutoMove)
+        {
+            console.log("只能自动移动");
+            RandomPress([590, 616, 114, 32])
+        }
+        else if (canQuickMove)
+        {
+            console.log("可以快速移动。");
+            RandomPress([755, 618, 118, 29])
+        }
+        PageBack()
     }
-    const randomIndex = Math.floor(Math.random() * 2)
-    const operationFunc = [randomClick, randomSwipe]
+    const operationFunc = [randomClick, randomSwipe, randomIllustrations]
+    const randomIndex = Math.floor(Math.random() * operationFunc.length)
     console.log("随机索引为：" + randomIndex);
     operationFunc[randomIndex]()
 
@@ -915,13 +991,9 @@ const HangUpWild = () =>
 
     console.log("等待传送到目的地...");
     WaitUntilMenu();
-    Sleep(random(1, 5));
-
+    randomMoveOperation()
     if (IsAuto_inactive())
     {
-        if (config.game.autoPotion == true)
-        {
-        }
         PressToAuto();
         console.log("去野外挂机成功");
         EnterHaltMode();
@@ -1200,88 +1272,10 @@ const InstanceFlow = () =>
             lastTimeClickDailyMission = curTime;
         }
     }
-    // else if (instance_mode == "monsterCollection")
-    // {
-    //     console.log("monster mode");
-    // }
+
 };
 
-// module.exports = { InstanceFlow };
+module.exports = { InstanceFlow };
 
 
 // HangUpInstance()
-
-const randomIllustrations = () =>
-{
-    console.log("随机选择怪物移动过去");
-    if (!OpenMap())
-    {
-        console.log("打开背包失败");
-        return false;
-    }
-    RandomPress([1240, 211, 31, 35])
-    RandomPress([967, 130, 226, 456])
-    const upArrow = LoadImgList('page/map/arrow/up')
-    const downArrow = LoadImgList("page/map/arrow/down")
-    const shot = captureScreen()
-    const haveUpArrow = FindImgInList(upArrow, [1152, 111, 72, 553], shot)
-    if (haveUpArrow)
-    {
-        console.log("未发现向上箭头，退出");
-        return false;
-    }
-
-    console.log("发现向上的箭头，寻找向下的箭头:" + haveUpArrow);
-    for (let i = 0; i < 9; i++)
-    {
-        let haveDownArrow = FindImgInList(downArrow, [1160, haveUpArrow.y + 50 + i * 53 >= 720 ? 670 : haveUpArrow.y + 50 + i * 53, 50, 40], shot)
-        let clickableRange = []
-        if (haveDownArrow)
-        {
-            console.log("发现向下箭头:" + haveDownArrow);
-            clickableRange = [980, haveUpArrow.y + 50, 200, haveDownArrow.y - haveUpArrow.y]
-            console.log('可点击区域为：' + clickableRange);
-            RandomPress(clickableRange)
-            break;
-        }
-        else if (i == 8)
-        {
-            console.log("循环结束：未发现向下箭头");
-            clickableRange = [980, haveUpArrow.y + 50, 200, haveUpArrow.y + 40 >= 720 ? 720 : haveUpArrow.y + 40]
-            console.log('可点击区域为：' + clickableRange);
-            RandomPress(clickableRange)
-        }
-    }
-    let canAutoMove = false;
-    let canQuickMove = false;
-    if (FindBlueBtn([563, 604, 161, 59]))
-    {
-        console.log("可自动移动");
-        canAutoMove = true;
-    }
-    else if (FindBlueBtn([731, 605, 157, 57]))
-    {
-        console.log("可快速移动");
-        canQuickMove = true;
-    }
-    if (canAutoMove && canQuickMove)
-    {
-        if (random(1, 100))
-        {
-            RandomPress([590, 616, 114, 32])
-        }
-        else
-        {
-            RandomPress([755, 618, 118, 29])
-        }
-    }
-    else if (canAutoMove)
-    {
-        RandomPress([590, 616, 114, 32])
-    }
-    else if (canQuickMove)
-    {
-        RandomPress([755, 618, 118, 29])
-    }
-}
-randomIllustrations()
