@@ -27,7 +27,7 @@ const {
 
 } = require("./utils.js");
 
-const { IsEmpty, WearEquipments, StrengthenEquipment, OpenAllBox, UseHolyGrail, DecomposeEquipment, WearBestSuit, CheckSkillAutoRelease, BuyCloak } = require("./Backpack.js");
+const { IsEmpty, WearEquipments, StrengthenEquipment, OpenAllBox, UseHolyGrail, DecomposeEquipment, WearBestSuit, CheckSkillAutoRelease, BuyCloak, UnAutoPotion } = require("./Backpack.js");
 
 let lastComprehensiveImproveTime = 1726208812345;
 
