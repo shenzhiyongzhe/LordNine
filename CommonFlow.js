@@ -569,10 +569,9 @@ const ShopBuy = () =>
         }
     }
 
-    for (let i = 0; i < 15; i++)
+    PageBack();
+    for (let i = 0; i < 60; i++)
     {
-        PageBack();
-
         if (FindBlueBtn([540, 445, 201, 63]))
         {
             console.log("发现服务器异常弹窗，稍后再试");
