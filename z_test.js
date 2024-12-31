@@ -26,3 +26,4 @@ const str = '2459191551 2859191344 2259190760 2159190442 2259190019 2259190879 2
 const arr = str.split(' ')
 arr.map((item, index) => arr[index] = parseInt(item))
 console.log(arr);
+console.log('这是主分支');
