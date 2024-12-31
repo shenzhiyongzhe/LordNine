@@ -23,4 +23,4 @@
 //     = require("./utils.js");
 // console.log(specialConfig)
 
-console.log('这是main分支');
+console.log('这是新特性分支');

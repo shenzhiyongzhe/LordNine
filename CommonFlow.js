@@ -2190,7 +2190,7 @@ const ComprehensiveImprovement_Instance = () =>
     console.log("副本模式下综合提升");
 
     //降低执行频率
-    if (config.game.tradingTimes == 1 && date.getDay() == config.randomDayOfTheWeek)
+    if (date.getDay() == config.randomDayOfTheWeek)
     {
         console.log("@每周随机一天执行。");
         UpgradeHolyRelics();
