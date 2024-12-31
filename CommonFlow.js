@@ -509,26 +509,45 @@ const LoginProps = (type) =>
 
 const ShopBuy = () =>
 {
-    //buy strengthening stone 
     console.log("开始商城购买");
+    let haveEnterShopPage = false;
     let hadDailyShop = false;
-    const hasOpenMenu = HasMenu();
-    if (!hasOpenMenu)
+    for (let i = 0; i < 30; i++)
     {
-        console.log("no menu button");
-        return false;
+        if (HasMenu())
+        {
+            RandomPress([971, 19, 34, 33])
+            if (WaitUntil(HasPageback))
+            {
+                console.log("进入商城页面");
+                haveEnterShopPage = true;
+                break;
+            }
+        }
+        if (FindBlueBtn([540, 445, 201, 63]))
+        {
+            console.log("发现服务器异常弹窗，稍后再试");
+            RandomPress([568, 457, 150, 35], 3);
+            if (HasMenu())
+            {
+                console.log("回到主页面");
+                hadDailyShop = true;
+                break;
+            }
+        }
+        ClearPage()
+
+        Sleep()
     }
-    RandomPress([975, 20, 27, 27]);
-    Sleep();
-    const hasEnterShopPage = WaitUntilPageBack();
-    if (!hasEnterShopPage)
+    if (!haveEnterShopPage)
     {
-        console.log("enter shop page failed!");
-        PageBack();
-        return false;
+        console.log("未打开商店，退出");
     }
-    console.log("已进入商城页面");
-    Sleep(3);
+    else
+    {
+        console.log("已进入商城页面");
+        Sleep(3);
+    }
     const NotCheckedColorList = [
         ["#303030", [[5, 0, "#303030"], [11, 1, "#303030"], [-2, 7, "#303030"], [7, 7, "#303030"]]]
     ];
@@ -543,11 +562,16 @@ const ShopBuy = () =>
             {
                 console.log("发现服务器异常弹窗，稍后再试");
                 RandomPress([568, 457, 150, 35]);
-                return false;
             }
             if (FindBlueBtn([651, 556, 242, 81]))
             {
+                console.log("发现购买按钮");
                 break;
+            }
+            if (HasMenu())
+            {
+                console.log("回到主页面，退出");
+                return false;
             }
             Sleep();
         }
@@ -557,6 +581,7 @@ const ShopBuy = () =>
             {
                 RandomPress([250, 162 + i * 85, 21, 22]);
             }
+            Sleep()
         }
         if (FindBlueBtn([652, 556, 238, 78])) // comfirm button
         {
@@ -566,27 +591,30 @@ const ShopBuy = () =>
         }
         else if (FindRedBtn([383, 560, 240, 65]))
         {
+            console.log("点击取消购买");
+            hadDailyShop = true;
             RandomPress([414, 574, 184, 33]); //cancel button
         }
     }
 
-    for (let i = 0; i < 15; i++)
-    {
-        PageBack();
+    PageBack();
 
-        if (FindBlueBtn([540, 445, 201, 63]))
+    for (let i = 0; i < 300; i++)
+    {
+        if (FindBlueBtn([540, 441, 203, 69]))
         {
             console.log("发现服务器异常弹窗，稍后再试");
             RandomPress([568, 457, 150, 35]);
         }
-
         if (HasMenu())
         {
             break;
         }
+        ClearPage()
         Sleep();
     }
     console.log("商城购买完毕，是否成功购买: " + hadDailyShop);
+
     if (hadDailyShop)
     {
         const config = ReadConfig();
@@ -595,6 +623,7 @@ const ShopBuy = () =>
     }
     return hadDailyShop;
 };
+
 const ShopExchange = () =>
 {
     console.log("开始交换活动物品");
@@ -2342,4 +2371,3 @@ module.exports = {
     ChangeAbility, GetEmail, GetAchievement, GetMonsterKnowledgeAward, LoginProps, DailyQuest, needWearEquipment,
     ShopBuy, ComprehensiveImprovement, ComprehensiveImprovement_Instance, StrengthenHorseEquipment, IncreaseWeaponFeatures, GuildDonation,
 };
-
