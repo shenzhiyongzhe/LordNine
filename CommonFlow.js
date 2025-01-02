@@ -510,71 +510,41 @@ const LoginProps = (type) =>
 const ShopBuy = () =>
 {
     console.log("开始商城购买");
-    let haveEnterShopPage = false;
     let hadDailyShop = false;
     for (let i = 0; i < 30; i++)
     {
         if (HasMenu())
         {
-            RandomPress([971, 19, 34, 33])
-            if (WaitUntil(HasPageback))
-            {
-                console.log("进入商城页面");
-                haveEnterShopPage = true;
-                break;
-            }
+            RandomPress([971, 19, 34, 33], 6)
         }
         if (FindBlueBtn([540, 445, 201, 63]))
         {
-            console.log("发现服务器异常弹窗，稍后再试");
+            console.log("发现服务器异常弹窗，稍后再试 1");
             RandomPress([568, 457, 150, 35], 3);
-            if (HasMenu())
-            {
-                console.log("回到主页面");
-                hadDailyShop = true;
-                break;
-            }
+            hadDailyShop = true;
+            break;
+        }
+        if (HasPageback())
+        {
+            console.log("进入商城页面");
+            break;
         }
         ClearPage()
-
         Sleep()
     }
-    if (!haveEnterShopPage)
-    {
-        console.log("未打开商店，退出");
-    }
-    else
-    {
-        console.log("已进入商城页面");
-        Sleep(3);
-    }
+
     const NotCheckedColorList = [
         ["#303030", [[5, 0, "#303030"], [11, 1, "#303030"], [-2, 7, "#303030"], [7, 7, "#303030"]]]
     ];
+
     const IsNotCheck = (region) => FindMultiColors(NotCheckedColorList, region);
 
     if (FindBlueBtn([44, 641, 192, 69]))
     {
         RandomPress([87, 658, 119, 31], 3);
-        for (let i = 0; i < 20; i++)
-        {
-            if (FindBlueBtn([540, 445, 201, 63]))
-            {
-                console.log("发现服务器异常弹窗，稍后再试");
-                RandomPress([568, 457, 150, 35]);
-            }
-            if (FindBlueBtn([651, 556, 242, 81]))
-            {
-                console.log("发现购买按钮");
-                break;
-            }
-            if (HasMenu())
-            {
-                console.log("回到主页面，退出");
-                return false;
-            }
-            Sleep();
-        }
+    }
+    if (HasPopupClose([1013, 73, 59, 56]))
+    {
         for (let i = 0; i < 5; i++)
         {
             if (IsNotCheck([234, 144 + i * 85, 56, 62]))
@@ -583,10 +553,11 @@ const ShopBuy = () =>
             }
             Sleep()
         }
-        if (FindBlueBtn([652, 556, 238, 78])) // comfirm button
+        if (FindBlueBtn([652, 556, 238, 78])) // confirm button
         {
             RandomPress([679, 574, 191, 41], 3);
             PressBlank();
+            console.log("购买成功，点击空白");
             hadDailyShop = true;
         }
         else if (FindRedBtn([383, 560, 240, 65]))
@@ -603,16 +574,24 @@ const ShopBuy = () =>
     {
         if (FindBlueBtn([540, 441, 203, 69]))
         {
-            console.log("发现服务器异常弹窗，稍后再试");
+            console.log("发现服务器异常弹窗，稍后再试 2");
             RandomPress([568, 457, 150, 35]);
+            hadDailyShop = true;
         }
-        if (HasMenu())
+        else if (FindRedBtn([383, 560, 240, 65]))
+        {
+            console.log("点击取消购买 2");
+            hadDailyShop = true;
+            RandomPress([414, 574, 184, 33]); //cancel button
+        }
+        else if (HasMenu())
         {
             break;
         }
-        ClearPage()
+        PageBack()
         Sleep();
     }
+
     console.log("商城购买完毕，是否成功购买: " + hadDailyShop);
 
     if (hadDailyShop)
@@ -628,102 +607,110 @@ const ShopExchange = () =>
 {
     console.log("开始交换活动物品");
     let haveEnterShopPage = false;
-    for (let i = 0; i < 10; i++)
+    for (let i = 0; i < 30; i++)
     {
         if (HasMenu())
         {
-            RandomPress([971, 19, 34, 33])
-            if (WaitUntil(HasPageback))
-            {
-                console.log("进入商城页面");
-                haveEnterShopPage = true;
-                break;
-            }
+            RandomPress([971, 19, 34, 33], 6)
         }
-        else
+        if (FindBlueBtn([540, 445, 201, 63]))
         {
-            ClearPage()
+            console.log("发现服务器异常弹窗，稍后再试 1");
+            RandomPress([568, 457, 150, 35], 3);
+            haveEnterShopPage = false;
+            break;
         }
+        if (HasPageback())
+        {
+            console.log("进入商城页面");
+            haveEnterShopPage = true;
+            break;
+        }
+        ClearPage()
         Sleep()
     }
     if (!haveEnterShopPage)
     {
         console.log("未打开商店，退出");
-        return false;
     }
-    const sellout = LoadImgList("page/shop/sellout")
-    Sleep(5)
-    RandomPress([198, 77, 59, 24]) //exchange page
-    const itemPos = [
-        [281, 191, 235, 145],
-        [578, 201, 248, 134],
-        [893, 194, 232, 139],
-        [282, 473, 236, 139],
-        [589, 474, 233, 136]
-    ]
-    const selloutRegion = [
-        [344, 300, 112, 65],
-        [662, 303, 72, 54],
-        [958, 302, 84, 62],
-        [353, 581, 93, 56],
-        [657, 582, 84, 54]
-    ]
-    for (let i = 0; i < 5; i++)
+    else
     {
-        if (FindImgInList(sellout, selloutRegion[i]))
+        console.log("成功打开商店");
+        const sellout = LoadImgList("page/shop/sellout")
+        Sleep(5)
+        RandomPress([198, 77, 59, 24]) //exchange page
+        const itemPos = [
+            [281, 191, 235, 145],
+            [578, 201, 248, 134],
+            [893, 194, 232, 139],
+            [282, 473, 236, 139],
+            [589, 474, 233, 136]
+        ]
+        const selloutRegion = [
+            [344, 300, 112, 65],
+            [662, 303, 72, 54],
+            [958, 302, 84, 62],
+            [353, 581, 93, 56],
+            [657, 582, 84, 54]
+        ]
+        for (let i = 0; i < 5; i++)
         {
-            console.log("已经售完，下一个");
-            continue;
-        }
-        RandomPress(itemPos[i])
-        if (WaitUntil(() => HasPopupClose([932, 89, 52, 44]), 1000, 10))
-        {
-            if (FindBlueBtn([658, 561, 236, 63]))
+            if (FindImgInList(sellout, selloutRegion[i]))
             {
-                RandomPress([527, 487, 50, 18])
-                RandomPress([682, 576, 186, 33])
-                console.log("点击确认购买");
+                console.log("已经售完，下一个");
+                continue;
             }
+            RandomPress(itemPos[i])
+            if (WaitUntil(() => HasPopupClose([932, 89, 52, 44]), 1000, 10))
+            {
+                if (FindBlueBtn([658, 561, 236, 63]))
+                {
+                    RandomPress([527, 487, 50, 18])
+                    RandomPress([682, 576, 186, 33])
+                    console.log("点击确认购买");
+                }
+            }
+            if (FindBlueBtn([539, 438, 202, 73]))
+            {
+                console.log("发现然后再试的确认弹窗，点击确认");
+                RandomPress([570, 459, 147, 34])
+                break;
+            }
+            else if (HasPopupClose([932, 103, 53, 54]))
+            {
+                RandomPress([947, 118, 30, 28])
+            }
+            else if (HasPopupClose([933, 87, 54, 46]))
+            {
+                RandomPress([933, 87, 54, 46])
+            }
+            else if (FindBlueBtn([656, 538, 236, 65]))
+            {
+                RandomPress([689, 555, 180, 31])
+            }
+            Sleep()
         }
-        if (FindBlueBtn([539, 438, 202, 73]))
-        {
-            console.log("发现然后再试的确认弹窗，点击确认");
-            RandomPress([570, 459, 147, 34])
-            break;
-        }
-        else if (HasPopupClose([932, 103, 53, 54]))
-        {
-            RandomPress([947, 118, 30, 28])
-        }
-        else if (HasPopupClose([933, 87, 54, 46]))
-        {
-            RandomPress([933, 87, 54, 46])
-        }
-        else if (FindBlueBtn([656, 538, 236, 65]))
-        {
-            RandomPress([689, 555, 180, 31])
-        }
-        Sleep()
+        RecycleImgList(sellout)
+        PageBack()
     }
-    RecycleImgList(sellout)
-    PageBack()
-    for (let i = 0; i < 10; i++)
+
+    for (let i = 0; i < 100; i++)
     {
         if (HasMenu())
         {
             break;
         }
-        else if (HasPopupClose([932, 103, 53, 54]))
+        if (HasPopupClose([932, 103, 53, 54]))
         {
             RandomPress([947, 118, 30, 28])
         }
-        else if (HasPopupClose([933, 87, 54, 46]))
+        if (HasPopupClose([933, 87, 54, 46]))
         {
             RandomPress([933, 87, 54, 46])
         }
-        else if (FindBlueBtn([539, 438, 202, 73]))
+        if (FindBlueBtn([539, 438, 202, 73]))
         {
-            console.log("发现然后再试的确认弹窗，点击确认");
+            console.log("发现然后再试的确认弹窗，点击确认 2");
             RandomPress([570, 459, 147, 34])
         }
         Sleep()

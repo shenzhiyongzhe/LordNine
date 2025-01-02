@@ -34,10 +34,6 @@ let lastTimeClearBackpack = 1726208812345;
 let lastTimeClearBackpack_haltMode = new Date().getTime();
 let randomTimeToClearBackpack = random(150, 200);
 
-let lastGetVerificationCodeTime = 0;
-let totalGetVerificationCodeTimes = 0;
-
-let lastResetConfigTime = 1726208812345;
 
 
 const ExceptionImgList = {
@@ -386,23 +382,28 @@ const PickUpAbilityPoint = () =>
     RecycleImgList(lostEquipmentImgList);
     RecycleImgList(lostAbilityPointImgList);
 };
+let lastTimeOfResettingConfig = 1726208812345;
 
-let haveResetDailyDiamond = false;
 let haveResetDailyConfig = false;
 
 const ResetConfig = () =>
 {
-    let haveReset = false;
-    const config = ReadConfig()
-    if (!haveResetDailyConfig)
+    const date = new Date();
+    if ((date.getTime() - lastTimeOfResettingConfig) / 600000 < 10)
     {
-        const date = new Date();
+        return false;
+    }
+    else
+    {
+        lastTimeOfResettingConfig = date.getTime()
+        const config = ReadConfig()
         const today = date.getDate()
         const hours = date.getHours()
         const minutes = date.getMinutes()
         if (config.game.today != today && hours >= config.resetHour)
         {
             console.log(`早上${config.resetHour}:${minutes}点，重置每日事项`);
+            config.game.today = today
 
             config.resetHour = random(4, 12)
 
@@ -410,9 +411,10 @@ const ResetConfig = () =>
             haveResetDailyDiamond = false;
 
             config.delayTime = random(3, 1200)
-            config.game.today = today
             config.game.deathTime = 0;
             config.game.reconnectionTime = 0;
+            config.game.tradingTimes = 0;
+            config.game.dailyDiamond = 0;
 
             config.daily.dailyInstance = false;
             config.daily.acceptDailyMission = false;
@@ -435,29 +437,12 @@ const ResetConfig = () =>
                     [random(20, 23), random(0, 59)],
                 ];
             }
-            haveReset = true;
+            console.log("reset config")
+            RewriteConfig(config);
         }
     }
-    if (!haveResetDailyDiamond)
-    {
-        const date_2 = new Date()
-        const hours_2 = date_2.getHours()
-        const minutes_2 = date_2.getMinutes()
-        if (hours_2 == 23 && minutes_2 >= 45 && minutes_2 < 59)
-        {
-            console.log('****** 晚上重置每日收益 ******')
-            haveResetDailyDiamond = true;
-            haveResetDailyConfig = false;
-            config.game.tradingTimes = 0;
-            config.game.dailyDiamond = 0;
-            haveReset = true;
-        }
-    }
-    if (haveReset)
-    {
-        console.log("reset config")
-        RewriteConfig(config);
-    }
+
+
 };
 
 // *******************************************************************  确保在游戏中 *********************************************************************
