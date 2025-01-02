@@ -56,6 +56,7 @@ const copyFile = (fileList) =>
 const filePaths = getFileUrl("/sdcard/脚本/LordNine/");
 copyFile(filePaths)
 toastLog('同步成功');
+
 // console.log(getUrl());
 
 // files.createWithDirs("/sdcard/脚本/" + 'img/mainStory_confirm.png')

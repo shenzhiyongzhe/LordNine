@@ -475,13 +475,13 @@ const uiFloaty = () =>
         floatyWindow.delayTime.attr("h", 100);
         floatyWindow.start.attr("h", 0);
         floatyWindow.delayTime.setText(`${count}s`);
+        console.log("游戏延迟启动中...");
         const delayInterval = setInterval(() =>
         {
             ui.run(() =>
             {
                 floatyWindow.delayTime.setText(`${count}s`);
             });
-            console.log("delayTime:" + count);
             count--;
             if (count <= 0)
             {
@@ -497,9 +497,7 @@ const uiFloaty = () =>
             console.log("《《《 游戏开始 》》》");
             console.log("游戏模式为：" + specialConfig.gameMode);
             mainThread = threads.start(MainFlow);
-
             clearInterval(uiInterval);
-
         }, (totalDelayTime + 1) * 1000);
     });
 
@@ -530,7 +528,6 @@ const uiFloaty = () =>
 
     });
     floatyWindow.downloadAutoJs.click(DownloadAutoJs);
-
 };
 
 console.setGlobalLogConfig({

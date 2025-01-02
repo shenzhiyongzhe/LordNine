@@ -221,7 +221,7 @@ const GetActivitiesAward = () =>
     RandomPress([917, 18, 27, 28]);
     if (!WaitUntil(() => HasPopupClose([1145, 63, 36, 36])))
     {
-        console.log("enter failed");
+        console.log("进入活动页面失败，退出");
         return false;
     }
     Sleep(3);
@@ -262,14 +262,14 @@ const GetActivitiesAward = () =>
                 RandomPress([hasBar.x - 100, hasBar.y + 10, 100, 30]);
                 PressBlank();
             }
-            let hasBar_2 = FindTipPoint([1151, 319, 30, 274]);
-            if (hasBar_2)
+            let hasBar_right = FindTipPoint([1151, 319, 30, 274]);
+            if (hasBar_right)
             {
-                RandomPress([hasBar_2.x - 100, hasBar_2.y + 10, 100, 20]);
+                RandomPress([hasBar_right.x - 100, hasBar_right.y + 10, 100, 20]);
                 PressBlank();
             }
             //点击分页
-            if (!hasBar && !hasBar_2)
+            if (!hasBar && !hasBar_right)
             {
                 RandomPress([360, 273, 72, 27])
                 hasBar = FindTipPoint([727, 315, 35, 282]);
@@ -278,10 +278,23 @@ const GetActivitiesAward = () =>
                     RandomPress([hasBar.x - 100, hasBar.y + 10, 100, 30]);
                     PressBlank();
                 }
-                hasBar_2 = FindTipPoint([1151, 319, 30, 274]);
-                if (hasBar_2)
+                hasBar_right = FindTipPoint([1151, 319, 30, 274]);
+                if (hasBar_right)
                 {
-                    RandomPress([hasBar_2.x - 100, hasBar_2.y + 10, 100, 20]);
+                    RandomPress([hasBar_right.x - 100, hasBar_right.y + 10, 100, 20]);
+                    PressBlank();
+                }
+                RandomPress([478, 274, 71, 27])
+                hasBar = FindTipPoint([727, 315, 35, 282]);
+                if (hasBar)
+                {
+                    RandomPress([hasBar.x - 100, hasBar.y + 10, 100, 30]);
+                    PressBlank();
+                }
+                hasBar_right = FindTipPoint([1151, 319, 30, 274]);
+                if (hasBar_right)
+                {
+                    RandomPress([hasBar_right.x - 100, hasBar_right.y + 10, 100, 20]);
                     PressBlank();
                 }
             }
@@ -1860,8 +1873,13 @@ const PutOnSale = () =>
     LoginProps();
     DecomposeEquipment("partial");
     TradeGoods();
-    LoginProps("total");
-    DecomposeEquipment("total");
+    if (random(1, 100) > 95)
+    {
+        console.log("5%概率执行，上架后鉴定与分解装备");
+        LoginProps("total");
+        DecomposeEquipment("total");
+    }
+
     console.log("__物品上架结束");
 };
 
