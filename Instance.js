@@ -56,7 +56,7 @@ const {
     DailyQuest,
     LoginProps,
 } = require("./CommonFlow");
-const { UnAutoPotion, DecomposeEquipment } = require("./Backpack");
+const { DecomposeEquipment } = require("./Backpack");
 
 const MapIconColorList = [
     [
@@ -1243,11 +1243,8 @@ const InstanceFlow = () =>
         {
             console.log("每日任务未完成. 优先进行每日任务");
             DailyMission();
-            lastTimeEnterInstance = curTime;
-        } else
-        {
-            lastTimeEnterInstance = curTime;
         }
+        lastTimeEnterInstance = curTime;
     }
 
     if (instance_mode == "hangUpWild")

@@ -138,13 +138,6 @@ const BackpackFlow_HaltMode = () =>
         {
             ExitHaltMode();
         }
-
-
-        if (needWearEquipment())
-        {
-            WearEquipments();
-            StrengthenEquipment();
-        }
         lastTimeClearBackpack_haltMode = new Date().getTime();
         randomTimeToClearBackpack = random(160, 240);
         LoginProps();
@@ -179,12 +172,6 @@ const BackpackFullFlow = (shot) =>
 
             DecomposeEquipment("partial");
         }
-        // else
-        // {
-        //     console.log("退出：连续清理背包时间间隔小于10分钟");
-        //     LoginProps();
-        //     DecomposeEquipment("partial");
-        // }
     }
 };
 
