@@ -392,6 +392,7 @@ const Update = () =>
                 {
                     specialConfig.gameMode = "mainStory";
                 }
+                specialConfig.lastModeChangeTime = new Date()
             }
         }
         sleep(100);

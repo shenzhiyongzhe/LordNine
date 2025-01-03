@@ -238,6 +238,7 @@ const DisconnectionFlow = (shot) =>
             }
 
         }
+        console.log("发现服务器弹窗按钮，重置点击次数");
         clickMainUITimes = 0;
     }
 

@@ -6,6 +6,7 @@ const {
     WaitUntil, WaitUntilFindColor,
     Sleep, SwipeSlowly, SetCountryAndBirth,
     RecycleImgList,
+    StopScript,
 } = require("./utils.js");
 
 const { ListenServerFlow } = require("./ListenServer.js");
@@ -1096,6 +1097,8 @@ const LoginFlow = () =>
         {
             ClickConfirmBtn();
             console.log("装置绑定完成");
+            alert("邮箱接码完成", "接码完成")
+            StopScript()
             break;
         }
         Sleep();
