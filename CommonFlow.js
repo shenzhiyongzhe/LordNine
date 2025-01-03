@@ -221,7 +221,7 @@ const GetActivitiesAward = () =>
     RandomPress([917, 18, 27, 28]);
     if (!WaitUntil(() => HasPopupClose([1145, 63, 36, 36])))
     {
-        console.log("enter failed");
+        console.log("进入活动页面失败，退出");
         return false;
     }
     Sleep(3);
@@ -262,14 +262,14 @@ const GetActivitiesAward = () =>
                 RandomPress([hasBar.x - 100, hasBar.y + 10, 100, 30]);
                 PressBlank();
             }
-            let hasBar_2 = FindTipPoint([1151, 319, 30, 274]);
-            if (hasBar_2)
+            let hasBar_right = FindTipPoint([1151, 319, 30, 274]);
+            if (hasBar_right)
             {
-                RandomPress([hasBar_2.x - 100, hasBar_2.y + 10, 100, 20]);
+                RandomPress([hasBar_right.x - 100, hasBar_right.y + 10, 100, 20]);
                 PressBlank();
             }
             //点击分页
-            if (!hasBar && !hasBar_2)
+            if (!hasBar && !hasBar_right)
             {
                 RandomPress([360, 273, 72, 27])
                 hasBar = FindTipPoint([727, 315, 35, 282]);
@@ -278,10 +278,23 @@ const GetActivitiesAward = () =>
                     RandomPress([hasBar.x - 100, hasBar.y + 10, 100, 30]);
                     PressBlank();
                 }
-                hasBar_2 = FindTipPoint([1151, 319, 30, 274]);
-                if (hasBar_2)
+                hasBar_right = FindTipPoint([1151, 319, 30, 274]);
+                if (hasBar_right)
                 {
-                    RandomPress([hasBar_2.x - 100, hasBar_2.y + 10, 100, 20]);
+                    RandomPress([hasBar_right.x - 100, hasBar_right.y + 10, 100, 20]);
+                    PressBlank();
+                }
+                RandomPress([478, 274, 71, 27])
+                hasBar = FindTipPoint([727, 315, 35, 282]);
+                if (hasBar)
+                {
+                    RandomPress([hasBar.x - 100, hasBar.y + 10, 100, 30]);
+                    PressBlank();
+                }
+                hasBar_right = FindTipPoint([1151, 319, 30, 274]);
+                if (hasBar_right)
+                {
+                    RandomPress([hasBar_right.x - 100, hasBar_right.y + 10, 100, 20]);
                     PressBlank();
                 }
             }
@@ -509,81 +522,91 @@ const LoginProps = (type) =>
 
 const ShopBuy = () =>
 {
-    //buy strengthening stone 
     console.log("开始商城购买");
     let hadDailyShop = false;
-    const hasOpenMenu = HasMenu();
-    if (!hasOpenMenu)
+    for (let i = 0; i < 30; i++)
     {
-        console.log("no menu button");
-        return false;
+        if (HasMenu())
+        {
+            RandomPress([971, 19, 34, 33], 6)
+        }
+        if (FindBlueBtn([540, 445, 201, 63]))
+        {
+            console.log("发现服务器异常弹窗，稍后再试 1");
+            RandomPress([568, 457, 150, 35], 3);
+            hadDailyShop = true;
+            break;
+        }
+        if (HasPageback())
+        {
+            console.log("进入商城页面");
+            break;
+        }
+        ClearPage()
+        Sleep()
     }
-    RandomPress([975, 20, 27, 27]);
-    Sleep();
-    const hasEnterShopPage = WaitUntilPageBack();
-    if (!hasEnterShopPage)
-    {
-        console.log("enter shop page failed!");
-        PageBack();
-        return false;
-    }
-    console.log("已进入商城页面");
-    Sleep(3);
+
     const NotCheckedColorList = [
         ["#303030", [[5, 0, "#303030"], [11, 1, "#303030"], [-2, 7, "#303030"], [7, 7, "#303030"]]]
     ];
+
     const IsNotCheck = (region) => FindMultiColors(NotCheckedColorList, region);
 
     if (FindBlueBtn([44, 641, 192, 69]))
     {
         RandomPress([87, 658, 119, 31], 3);
-        for (let i = 0; i < 20; i++)
-        {
-            if (FindBlueBtn([540, 445, 201, 63]))
-            {
-                console.log("发现服务器异常弹窗，稍后再试");
-                RandomPress([568, 457, 150, 35]);
-            }
-            if (FindBlueBtn([651, 556, 242, 81]))
-            {
-                break;
-            }
-            Sleep();
-        }
+    }
+    if (HasPopupClose([1013, 73, 59, 56]))
+    {
         for (let i = 0; i < 5; i++)
         {
             if (IsNotCheck([234, 144 + i * 85, 56, 62]))
             {
                 RandomPress([250, 162 + i * 85, 21, 22]);
             }
+            Sleep()
         }
-        if (FindBlueBtn([652, 556, 238, 78])) // comfirm button
+        if (FindBlueBtn([652, 556, 238, 78])) // confirm button
         {
             RandomPress([679, 574, 191, 41], 3);
             PressBlank();
+            console.log("购买成功，点击空白");
             hadDailyShop = true;
         }
         else if (FindRedBtn([383, 560, 240, 65]))
         {
+            console.log("点击取消购买");
+            hadDailyShop = true;
             RandomPress([414, 574, 184, 33]); //cancel button
         }
     }
 
     PageBack();
-    for (let i = 0; i < 60; i++)
+
+    for (let i = 0; i < 300; i++)
     {
-        if (FindBlueBtn([540, 445, 201, 63]))
+        if (FindBlueBtn([540, 441, 203, 69]))
         {
-            console.log("发现服务器异常弹窗，稍后再试");
+            console.log("发现服务器异常弹窗，稍后再试 2");
             RandomPress([568, 457, 150, 35]);
+            hadDailyShop = true;
         }
-        if (HasMenu())
+        else if (FindRedBtn([383, 560, 240, 65]))
+        {
+            console.log("点击取消购买 2");
+            hadDailyShop = true;
+            RandomPress([414, 574, 184, 33]); //cancel button
+        }
+        else if (HasMenu())
         {
             break;
         }
+        PageBack()
         Sleep();
     }
+
     console.log("商城购买完毕，是否成功购买: " + hadDailyShop);
+
     if (hadDailyShop)
     {
         const config = ReadConfig();
@@ -593,6 +616,119 @@ const ShopBuy = () =>
     return hadDailyShop;
 };
 
+const ShopExchange = () =>
+{
+    console.log("开始交换活动物品");
+    let haveEnterShopPage = false;
+    for (let i = 0; i < 30; i++)
+    {
+        if (HasMenu())
+        {
+            RandomPress([971, 19, 34, 33], 6)
+        }
+        if (FindBlueBtn([540, 445, 201, 63]))
+        {
+            console.log("发现服务器异常弹窗，稍后再试 1");
+            RandomPress([568, 457, 150, 35], 3);
+            haveEnterShopPage = false;
+            break;
+        }
+        if (HasPageback())
+        {
+            console.log("进入商城页面");
+            haveEnterShopPage = true;
+            break;
+        }
+        ClearPage()
+        Sleep()
+    }
+    if (!haveEnterShopPage)
+    {
+        console.log("未打开商店，退出");
+    }
+    else
+    {
+        console.log("成功打开商店");
+        const sellout = LoadImgList("page/shop/sellout")
+        Sleep(5)
+        RandomPress([198, 77, 59, 24]) //exchange page
+        const itemPos = [
+            [281, 191, 235, 145],
+            [578, 201, 248, 134],
+            [893, 194, 232, 139],
+            [282, 473, 236, 139],
+            [589, 474, 233, 136]
+        ]
+        const selloutRegion = [
+            [344, 300, 112, 65],
+            [662, 303, 72, 54],
+            [958, 302, 84, 62],
+            [353, 581, 93, 56],
+            [657, 582, 84, 54]
+        ]
+        for (let i = 0; i < 5; i++)
+        {
+            if (FindImgInList(sellout, selloutRegion[i]))
+            {
+                console.log("已经售完，下一个");
+                continue;
+            }
+            RandomPress(itemPos[i])
+            if (WaitUntil(() => HasPopupClose([932, 89, 52, 44]), 1000, 10))
+            {
+                if (FindBlueBtn([658, 561, 236, 63]))
+                {
+                    RandomPress([527, 487, 50, 18])
+                    RandomPress([682, 576, 186, 33])
+                    console.log("点击确认购买");
+                }
+            }
+            if (FindBlueBtn([539, 438, 202, 73]))
+            {
+                console.log("发现然后再试的确认弹窗，点击确认");
+                RandomPress([570, 459, 147, 34])
+                break;
+            }
+            else if (HasPopupClose([932, 103, 53, 54]))
+            {
+                RandomPress([947, 118, 30, 28])
+            }
+            else if (HasPopupClose([933, 87, 54, 46]))
+            {
+                RandomPress([933, 87, 54, 46])
+            }
+            else if (FindBlueBtn([656, 538, 236, 65]))
+            {
+                RandomPress([689, 555, 180, 31])
+            }
+            Sleep()
+        }
+        RecycleImgList(sellout)
+        PageBack()
+    }
+
+    for (let i = 0; i < 100; i++)
+    {
+        if (HasMenu())
+        {
+            break;
+        }
+        if (HasPopupClose([932, 103, 53, 54]))
+        {
+            RandomPress([947, 118, 30, 28])
+        }
+        if (HasPopupClose([933, 87, 54, 46]))
+        {
+            RandomPress([933, 87, 54, 46])
+        }
+        if (FindBlueBtn([539, 438, 202, 73]))
+        {
+            console.log("发现然后再试的确认弹窗，点击确认 2");
+            RandomPress([570, 459, 147, 34])
+        }
+        Sleep()
+    }
+}
 
 const IncreaseWeaponFeatures = () =>
 {
@@ -1737,12 +1873,13 @@ const PutOnSale = () =>
     LoginProps();
     DecomposeEquipment("partial");
     TradeGoods();
-    LoginProps("total");
     if (random(1, 100) > 95)
     {
-        console.log("5%概率事件，交易后分解装备");
+        console.log("5%概率执行，上架后鉴定与分解装备");
+        LoginProps("total");
         DecomposeEquipment("total");
     }
+
     console.log("__物品上架结束");
 };
 
@@ -1772,6 +1909,15 @@ const DailyQuest = () =>
     if (!config.daily.dailyShop)
     {
         ShopBuy();
+        const date = new Date()
+        if (date.getMonth() + 1 == 1 && date.getDate() > 8)
+        {
+            console.log("活动已过期，退出");
+        }
+        else
+        {
+            ShopExchange()
+        }
     }
     if (!config.daily.friendshipShop)
     {
@@ -2193,7 +2339,7 @@ const ComprehensiveImprovement_Instance = () =>
     console.log("副本模式下综合提升");
 
     //降低执行频率
-    if (config.game.tradingTimes == 1 && date.getDay() == config.randomDayOfTheWeek)
+    if (date.getDay() == config.randomDayOfTheWeek)
     {
         console.log("@每周随机一天执行。");
         UpgradeHolyRelics();
