@@ -6,7 +6,6 @@ const { MainStoryFlow } = require("./MainStory.js");
 const { InstanceFlow } = require("./Instance.js");
 
 const version = `${app.versionName}`
-// console.log("version：" + app.versionName)
 
 const versionColor = "#7FFFD4";
 let mainThread = null;
@@ -68,26 +67,7 @@ function Init()
         config.game.vm = account[3];
         config.googleAccount = account[0];
         config.googlePassword = account[1]
-
         needRewrite = true;
-
-        try
-        {
-            const postData = {
-                vm: config.game.vm,
-                config
-            }
-            console.log("发送数据给后台");
-            const res = http.post("http://47.76.112.107:8001/devices", postData);
-            // const res = http.post("http://10.6.130.129:8001/devices", postData);
-            if (res.statusCode == 200)
-            {
-                console.log("发送数据成功");
-            }
-        } catch (error)
-        {
-            console.log(error);
-        }
     }
 
     if (needRewrite)
@@ -106,10 +86,8 @@ function Init()
         specialConfig.initGameMode = "mainStory"
     }
 
-
     gameMode = config.gameMode;
 }
-
 
 const GetCaptureScreenPermission = () =>
 {
@@ -128,9 +106,6 @@ const GetCaptureScreenPermission = () =>
         }
     });
 };
-
-// const StopScript = () => engines.stopAllAndToast();
-
 
 const DownLoadApk = (downloadUrl, savePath) =>
 {
@@ -178,164 +153,6 @@ const DownLoadApk = (downloadUrl, savePath) =>
 
 const UpdateScript = () => DownLoadApk("LordNine.apk", "LordNine/LordNine.apk");
 const DownloadAutoJs = () => DownLoadApk("AutoJs.apk", "AutoJs.apk");
-
-const ChangeVPNSetting = () =>
-{
-    app.launch("fun.kitsunebi.kitsunebi4android");
-
-    let disallowListConfig = {
-        "autoJs": false,
-        "lordnine": false,
-    };
-    threads.start(function ()
-    {
-        for (let i = 0; i < 10; i++)
-        {
-            let hasRefreshBtn_0 = desc("Measure Latency").findOne(20);
-            if (hasRefreshBtn_0)
-            {
-                let add_btn = id("add_btn").findOne(20);
-                if (add_btn)
-                {
-                    add_btn.click();
-                }
-            }
-            let has_AddEndpointGroup = text("Add Endpoint Group").findOne(20);
-            if (has_AddEndpointGroup)
-            {
-                let settings = text("Settings").findOne(20);
-                if (settings)
-                {
-                    click(settings.bounds().centerX(), settings.bounds().centerY());
-                }
-            }
-
-            let per_app_vpn = text("Configure Per-App VPN.").findOne(20);
-            if (per_app_vpn)
-            {
-                if (text("Settings").findOne(20))
-                {
-                    click(per_app_vpn.bounds().centerX(), per_app_vpn.bounds().centerY());
-                }
-            }
-            let enabled_per_app_vpn = text("Enable Per-App VPN").findOne(20);
-            if (enabled_per_app_vpn)
-            {
-                let enabled_per_app_vpn_switch = enabled_per_app_vpn.parent().parent().children()[1].children()[0];
-                let isOpen = enabled_per_app_vpn_switch.checked();
-                console.log("分应用代理是否打开：" + isOpen);
-                if (!isOpen)
-                {
-
-                    console.log("点击打开: " + enabled_per_app_vpn.parent().parent().click());
-                }
-            }
-            let current_list = textMatches(/(.*You may either use the allowed list.*)/).findOne(20);
-            if (current_list)
-            {
-                let hasAllowedList = textMatches(/(.*current Allowed List.*)/).findOne(20);
-                if (hasAllowedList)
-                {
-                    console.log("当前是允许列表，需要改动");
-                    click(hasAllowedList.bounds().centerX(), hasAllowedList.bounds().centerY());
-
-                    let has_per_app_mode = id("alertTitle").findOne(1000);
-                    if (has_per_app_mode)
-                    {
-                        let hasMode_disallowedList = text("Disallowed List").findOne(1000);
-                        if (hasMode_disallowedList)
-                        {
-                            hasMode_disallowedList.click();
-                        }
-                    }
-                    let DisallowedList = text("Selected apps are disallowed to use the VPN tunnel, others will be allowed.").findOne(2000);
-                    if (DisallowedList)
-                    {
-                        click(DisallowedList.bounds().centerX(), DisallowedList.bounds().centerY());
-                    }
-                }
-                let hasDisallowedList = textMatches(/(.*current Disallowed List.*)/).findOne(20);
-                if (hasDisallowedList)
-                {
-                    console.log("当前已经是不允许列表，不需要改动");
-                }
-            }
-            let select_disallowedList = textMatches(/(.*Selected apps are disallowed.*)/).findOne(20);
-            if (select_disallowedList)
-            {
-                click(select_disallowedList.bounds().centerX(), select_disallowedList.bounds().centerY());
-            }
-            //确保当前页面为不允许列表
-            if (desc("위로 이동").findOne(20) && text("Disallowed List").findOne(20) && id("add_btn").findOne(20))
-            {
-                let lordnine = text("com.lordnine").findOne(20);
-                if (lordnine)
-                {
-                    let is_lordnine_on = lordnine.parent().children()[3];
-                    if (is_lordnine_on.checked() == true)
-                    {
-                        console.log("已经打开，不需要操作");
-                        disallowListConfig.lordnine = true;
-                    }
-                    else if (is_lordnine_on.checked() == false)
-                    {
-                        console.log("autoJs 未打开不允许列表，点击打开");
-                        lordnine.parent().click();
-                    }
-                    let autoJs = text("org.autojs.autoxjs.v6").findOne(20);
-                    if (autoJs)
-                    {
-                        let is_autoJs_on = autoJs.parent().children()[3];
-                        if (is_autoJs_on.checked() == true)
-                        {
-                            console.log("已经打开，不需要操作");
-                            disallowListConfig.autoJs = true;
-                        }
-                        else if (is_autoJs_on.checked() == false)
-                        {
-                            console.log("autoJs 未打开不允许列表，点击打开");
-                            autoJs.parent().click();
-                        }
-                    }
-                    else
-                    {
-                        console.log("没有发现auto js 默认跳过");
-                        disallowListConfig.autoJs = true;
-                    }
-                }
-                else
-                {
-                    console.log("滚动当前页面");
-                    scrollForward();
-                }
-                if (disallowListConfig.lordnine == true && disallowListConfig.autoJs == true)
-                {
-                    console.log("已设置完毕，返回到主页面");
-                    break;
-                }
-            }
-
-            Sleep(1);
-        }
-        for (let i = 0; i < 10; i++)
-        {
-            let backBtn = desc("위로 이동").findOne(20);
-            if (backBtn)
-            {
-                backBtn.click();
-            }
-            let refreshBtn = desc("Measure Latency").findOne(20);
-            if (refreshBtn)
-            {
-                refreshBtn.click();
-                break;
-            }
-            Sleep(0.5);
-        }
-    });
-
-    console.log("设置完毕");
-};
 
 const FormatConfig = () =>
 {

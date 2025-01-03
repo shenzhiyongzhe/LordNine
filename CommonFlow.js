@@ -1318,7 +1318,6 @@ const GuildDonation = () =>
             }
             Sleep();
         }
-
         RecycleImgList(donationTimesOverImgList);
     };
     if (FindBlueBtn([182, 650, 165, 57]))
@@ -1381,7 +1380,6 @@ const FriendshipDonation = () =>
                     PressConfirmBtn();
                     haveDonated = true;
                 }
-
             }
             if (FindImgInList(stage_1, [117, 485, 44, 52]))
             {
@@ -1405,7 +1403,6 @@ const FriendshipDonation = () =>
                     PressConfirmBtn();
                     haveDonated = true;
                 }
-
             }
             if (FindImgInList(stage_1, [117, 485, 44, 52]))
             {
