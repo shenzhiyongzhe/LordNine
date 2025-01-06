@@ -166,9 +166,12 @@ const FormatConfig = () =>
     {
         formattedConfig.gameMode = config.gameMode;
         formattedConfig.delayTime = config.delayTime ? config.delayTime : random(0, 600);
+        formattedConfig.resetHour = config.resetHour ? config.resetHour : random(4, 12);
+        formattedConfig.randomDayOfTheWeek = config.randomDayOfTheWeek ? config.randomDayOfTheWeek : random(1, 7);
         formattedConfig.unlockTrade = config.unlockTrade ? config.unlockTrade : false;
         formattedConfig.accountSuspended = config.accountSuspended ? config.accountSuspended : false;
         formattedConfig.totalDeathTimes = config.totalDeathTimes ? config.totalDeathTimes : 0;
+        formattedConfig.manufacture = config.manufacture ? config.manufacture : [random(1, 15), random(16, 30)];
 
         formattedConfig.game.today = config.game.today;
         formattedConfig.game.deathTime = config.game.deathTime;

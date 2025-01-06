@@ -465,6 +465,16 @@ const StovePopup = () =>
     if (hasLimitAccount)
     {
         console.log("检测到账号被封，关闭脚本");
+        const config = ReadConfig()
+        try
+        {
+            http.post(`http://47.76.112.107:8001/devices/${config.game.vm}/off`)
+
+        }
+        catch (error)
+        {
+            console.log(error);
+        }
         alert("游戏账户被封禁，", "检测到游戏账号被封禁")
         StopScript()
     }

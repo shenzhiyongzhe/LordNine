@@ -51,11 +51,7 @@ const {
     SwipeLeft,
     SwipeRight,
 } = require("./utils");
-const {
-    ComprehensiveImprovement_Instance,
-    DailyQuest,
-    LoginProps,
-} = require("./CommonFlow");
+const { ComprehensiveImprovement_Instance, DailyQuest, LoginProps } = require("./CommonFlow");
 const { DecomposeEquipment } = require("./Backpack");
 
 const MapIconColorList = [
@@ -252,6 +248,11 @@ const HangUpInstance = () =>
             console.log("该副本已结束");
             continue;
         }
+        if (i != 1 && random(1, 100) > 80)
+        {
+            console.log("副本鉴定失败，暂不进入该副本");
+            continue;
+        }
         RandomPress(instancePos[i]);
         let canEnterInstance = CanEnterInstance();
         let requireCombatPower = FindNumber("combatPower", [1171, 494, 81, 39]);
@@ -314,31 +315,22 @@ const AcceptDailyMission = () =>
         RewriteConfig(config);
     }
 
-    const dailyMissionItem = LoadImgList(
-        "icon/font/dailyMission/dailyMissionItem"
-    );
-    const weeklyMissionItem = LoadImgList(
-        "icon/font/dailyMission/weeklyMissionItem"
-    );
+    const dailyMissionItem = LoadImgList("icon/font/dailyMission/dailyMissionItem");
+    const weeklyMissionItem = LoadImgList("icon/font/dailyMission/weeklyMissionItem");
 
     const inProgressImgList = LoadImgList("icon/font/dailyMission/inProgress");
     const isCompleteImgList = LoadImgList("icon/font/dailyMission/complete");
     const acceptMaxImgList = LoadImgList("icon/font/dailyMission/accepteMax");
 
-    const missionAwardImgList = LoadImgList(
-        "icon/font/dailyMission/missionCompleteAward"
-    );
-    const weeklyMissionGoalImgList = LoadImgList(
-        "icon/font/dailyMission/weeklyMissionGoal"
-    );
+    const missionAwardImgList = LoadImgList("icon/font/dailyMission/missionCompleteAward");
+    const weeklyMissionGoalImgList = LoadImgList("icon/font/dailyMission/weeklyMissionGoal");
 
-    const weeklyMissionIconImgList = LoadImgList(
-        "icon/font/dailyMission/weeklyMissionIcon"
-    );
+    const weeklyMissionIconImgList = LoadImgList("icon/font/dailyMission/weeklyMissionIcon");
     let dailyMissionItemPoints;
 
     let haveAcceptMax = false;
-
+    let acceptNum = 0;
+    const randomAcceptNum = random(3, 10)
     out: for (let i = 0; i < 10; i++)
     {
         for (let n = 0; n < 2; n++)
@@ -349,32 +341,16 @@ const AcceptDailyMission = () =>
                 haveAcceptMax = true;
                 break out;
             }
+
             for (let k = 0; k < 5; k++)
             {
-                dailyMissionItemPoints = MatchTemplateList(
-                    dailyMissionItem,
-                    [331, 101, 82, 549]
-                );
+                dailyMissionItemPoints = MatchTemplateList(dailyMissionItem, [335, 130, 100, 520]);
                 for (let j = 0; j < dailyMissionItemPoints.length; j++)
                 {
-                    if (
-                        FindImgInList(inProgressImgList, [
-                            680,
-                            dailyMissionItemPoints[j].y - 12,
-                            70,
-                            30,
-                        ])
-                    )
+                    if (FindImgInList(inProgressImgList, [680, dailyMissionItemPoints[j].y - 12, 100, 30]))
                     {
                         console.log("正在进行中...");
-                    } else if (
-                        FindImgInList(isCompleteImgList, [
-                            700,
-                            dailyMissionItemPoints[j].y - 15,
-                            40,
-                            25,
-                        ])
-                    )
+                    } else if (FindImgInList(isCompleteImgList, [700, dailyMissionItemPoints[j].y - 15, 40, 25]))
                     {
                         console.log("已完成");
                     } else
@@ -384,6 +360,13 @@ const AcceptDailyMission = () =>
                         {
                             console.log("接受此任务");
                             RandomPress([1091, 661, 164, 28]);
+                            acceptNum++;
+                            if (acceptNum >= randomAcceptNum)
+                            {
+                                console.log("随机接受的每日任务数量为：" + randomAcceptNum);
+                                haveAcceptMax = true;
+                                break out;
+                            }
                             break;
                         }
                     }
@@ -427,31 +410,14 @@ const AcceptDailyMission = () =>
             console.log("已检查周任务，已接受，返回");
             break;
         }
-        let weeklyMissionItemPoints = MatchTemplateList(
-            weeklyMissionItem,
-            [282, 122, 118, 518]
-        );
+        let weeklyMissionItemPoints = MatchTemplateList(weeklyMissionItem, [282, 122, 118, 518]);
         for (let j = 0; j < weeklyMissionItemPoints.length; j++)
         {
-            if (
-                FindImgInList(inProgressImgList, [
-                    675,
-                    weeklyMissionItemPoints[j].y - 15,
-                    80,
-                    30,
-                ])
-            )
+            if (FindImgInList(inProgressImgList, [675, weeklyMissionItemPoints[j].y - 15, 80, 30]))
             {
                 console.log("正在进行中");
                 isCorrectNum++;
-            } else if (
-                FindImgInList(isCompleteImgList, [
-                    690,
-                    weeklyMissionItemPoints[j].y - 15,
-                    80,
-                    30,
-                ])
-            )
+            } else if (FindImgInList(isCompleteImgList, [690, weeklyMissionItemPoints[j].y - 15, 80, 30]))
             {
                 console.log("已完成");
                 isCorrectNum++;
@@ -467,20 +433,10 @@ const AcceptDailyMission = () =>
             }
         }
         //纠错，防止接受错误周任务
-        let inProgressPoints = MatchTemplateList(
-            inProgressImgList,
-            [677, 113, 96, 530]
-        );
+        let inProgressPoints = MatchTemplateList(inProgressImgList, [677, 113, 96, 530]);
         for (let k = 0; k < inProgressPoints.length; k++)
         {
-            if (
-                FindImgInList(weeklyMissionItem, [
-                    285,
-                    inProgressPoints[k].y + 5,
-                    100,
-                    30,
-                ])
-            )
+            if (FindImgInList(weeklyMissionItem, [285, inProgressPoints[k].y + 5, 100, 30]))
             {
                 console.log("检查周任务：正确");
             } else
@@ -626,24 +582,6 @@ const DailyMission = () =>
     ClickDailyMission();
 };
 
-const CollectMonsterCollection = () =>
-{
-    console.log("开始怪物图鉴");
-    if (monsterMapList == null)
-    {
-        const config = ReadConfig();
-        monsterMapList = config.ui.monsterMapList;
-    }
-    const hadOpenMap = OpenMap();
-    for (let i = 0; i < monsterMapList.length; i++)
-    {
-        let monsterMap = monsterMapList[i];
-        if (monsterMap)
-        {
-            let bigMap = monsterMap.split();
-        }
-    }
-};
 
 const OpenMap = () =>
 {
@@ -685,7 +623,7 @@ const EnterMap = (mapName) =>
 
     if (randomIndex > 50)
     {
-        console.log('۞快速移动鉴定成功,直接传送');
+        console.log("۞快速移动鉴定成功,直接传送");
         if (FindBlueBtn([1066, 647, 162, 67]))
         {
             RandomPress([1086, 664, 120, 30], random(2, 5));
@@ -704,17 +642,16 @@ const EnterMap = (mapName) =>
             PageBack();
             hasMoved = true;
         }
-    }
-    else
+    } else
     {
-        console.log('۞快速移动鉴定失败，开始走路过去。');
+        console.log("۞快速移动鉴定失败，开始走路过去。");
         if (FindBlueBtn([911, 655, 155, 52]))
         {
-            RandomPress([937, 665, 109, 30])
-            console.log('点击自动移动');
-            PageBack()
+            RandomPress([937, 665, 109, 30]);
+            console.log("点击自动移动");
+            PageBack();
             console.log("等待10秒");
-            Sleep(10)
+            Sleep(10);
             console.log("等待停止移动");
             for (let i = 0; i < 120; i++)
             {
@@ -724,11 +661,9 @@ const EnterMap = (mapName) =>
                     hasMoved = true;
                     break;
                 }
-                sleep(5000)
+                sleep(5000);
             }
-
-        }
-        else
+        } else
         {
             return false;
         }
@@ -798,64 +733,61 @@ const HangUpSecretLab = () =>
         }
     }
 };
-const upArrow = LoadImgList('page/map/arrow/up')
-const downArrow = LoadImgList("page/map/arrow/down")
+const upArrow = LoadImgList("page/map/arrow/up");
+const downArrow = LoadImgList("page/map/arrow/down");
 
 const randomMoveOperation = () =>
 {
-    console.log('@开始一些随机操作');
+    console.log("@开始一些随机操作");
     const randomClick = () =>
     {
         const clickPosArr = [
             [338, 127, 223, 149],
             [147, 314, 360, 167],
-            [728, 296, 263, 203]
-        ]
+            [728, 296, 263, 203],
+        ];
         let clickProbability = 1;
-        let clickPosIndex = random(0, clickPosArr.length - 1)
+        let clickPosIndex = random(0, clickPosArr.length - 1);
         for (let i = 0; i < 10; i++)
         {
             if (clickProbability >= 50)
             {
-                RandomPress(clickPosArr[clickPosIndex], 2)
+                RandomPress(clickPosArr[clickPosIndex], 2);
                 console.log("随机点击一个位置: " + clickPosArr[clickPosIndex]);
             }
-            clickProbability = random(1, 100)
+            clickProbability = random(1, 100);
         }
-    }
+    };
     const continueSwipe = (fn, arr) =>
     {
         for (let i = 0; i < arr.length; i++)
         {
-            fn(arr[i])
+            fn(arr[i]);
         }
-    }
+    };
     const randomSwipe = () =>
     {
         console.log("随机移动");
-        swipeDirectionIndex = random(0, 4)
-        const moveTime = [random(5, 50), random(5, 50), random(5, 50)]
+        swipeDirectionIndex = random(0, 4);
+        const moveTime = [random(5, 50), random(5, 50), random(5, 50)];
         if (swipeDirectionIndex == 0)
         {
             console.log("随机向上移动");
-            continueSwipe(SwipeUp, moveTime)
-        }
-        else if (swipeDirectionIndex == 1)
+            continueSwipe(SwipeUp, moveTime);
+        } else if (swipeDirectionIndex == 1)
         {
             console.log("随机向下移动");
-            continueSwipe(SwipeDown, moveTime)
-        }
-        else if (swipeDirectionIndex == 2)
+            continueSwipe(SwipeDown, moveTime);
+        } else if (swipeDirectionIndex == 2)
         {
             console.log("随机向左移动");
-            continueSwipe(SwipeLeft, moveTime)
-        }
-        else if (swipeDirectionIndex == 3)
+            continueSwipe(SwipeLeft, moveTime);
+        } else if (swipeDirectionIndex == 3)
         {
             console.log("随机向右移动");
-            continueSwipe(SwipeRight, moveTime)
+            continueSwipe(SwipeRight, moveTime);
         }
-    }
+    };
     const randomIllustrations = () =>
     {
         console.log("随机选择怪物移动过去");
@@ -864,11 +796,11 @@ const randomMoveOperation = () =>
             console.log("打开背包失败");
             return false;
         }
-        RandomPress([1240, 211, 31, 35])
-        RandomPress([967, 130, 226, 456], 3)
+        RandomPress([1240, 211, 31, 35]);
+        RandomPress([967, 130, 226, 456], 3);
 
-        const shot = captureScreen()
-        const haveUpArrow = FindImgInList(upArrow, [1152, 111, 72, 553], shot)
+        const shot = captureScreen();
+        const haveUpArrow = FindImgInList(upArrow, [1152, 111, 72, 553], shot);
         if (!haveUpArrow)
         {
             console.log("未发现向上箭头，退出");
@@ -878,22 +810,25 @@ const randomMoveOperation = () =>
         console.log("发现向上的箭头，寻找向下的箭头:" + haveUpArrow);
         for (let i = 0; i < 9; i++)
         {
-            let haveDownArrow = FindImgInList(downArrow, [1160, haveUpArrow.y + 50 + i * 53 >= 720 ? 670 : haveUpArrow.y + 50 + i * 53, 50, 40], shot)
-            let clickableRange = []
+            let haveDownArrow = FindImgInList(
+                downArrow,
+                [1160, haveUpArrow.y + 50 + i * 53 >= 720 ? 670 : haveUpArrow.y + 50 + i * 53, 50, 40],
+                shot
+            );
+            let clickableRange = [];
             if (haveDownArrow)
             {
                 console.log("发现向下箭头:" + haveDownArrow);
-                clickableRange = [980, haveUpArrow.y + 50, 200, haveDownArrow.y - 40 - haveUpArrow.y + 30]
-                console.log('可点击区域为：' + clickableRange);
-                RandomPress(clickableRange)
+                clickableRange = [980, haveUpArrow.y + 50, 200, haveDownArrow.y - 40 - haveUpArrow.y + 30];
+                console.log("可点击区域为：" + clickableRange);
+                RandomPress(clickableRange);
                 break;
-            }
-            else if (i == 8)
+            } else if (i == 8)
             {
                 console.log("循环结束：未发现向下箭头");
-                clickableRange = [980, haveUpArrow.y + 60, 200, 660 - haveUpArrow.y]
-                console.log('可点击区域为：' + clickableRange);
-                RandomPress(clickableRange)
+                clickableRange = [980, haveUpArrow.y + 60, 200, 660 - haveUpArrow.y];
+                console.log("可点击区域为：" + clickableRange);
+                RandomPress(clickableRange);
             }
         }
         let canAutoMove = false;
@@ -913,33 +848,29 @@ const randomMoveOperation = () =>
         {
             if (random(1, 100))
             {
-                console.log('随机：点击自动移动');
-                RandomPress([590, 616, 114, 32])
-            }
-            else
+                console.log("随机：点击自动移动");
+                RandomPress([590, 616, 114, 32]);
+            } else
             {
-                console.log('随机：点击快速移动');
-                RandomPress([755, 618, 118, 29])
+                console.log("随机：点击快速移动");
+                RandomPress([755, 618, 118, 29]);
             }
-        }
-        else if (canAutoMove)
+        } else if (canAutoMove)
         {
             console.log("只能自动移动");
-            RandomPress([590, 616, 114, 32])
-        }
-        else if (canQuickMove)
+            RandomPress([590, 616, 114, 32]);
+        } else if (canQuickMove)
         {
             console.log("可以快速移动。");
-            RandomPress([755, 618, 118, 29])
+            RandomPress([755, 618, 118, 29]);
         }
-        PageBack()
-    }
-    const operationFunc = [randomClick, randomSwipe, randomIllustrations]
-    const randomIndex = Math.floor(Math.random() * operationFunc.length)
+        PageBack();
+    };
+    const operationFunc = [randomClick, randomSwipe, randomIllustrations];
+    const randomIndex = Math.floor(Math.random() * operationFunc.length);
     console.log("随机索引为：" + randomIndex);
-    operationFunc[randomIndex]()
-
-}
+    operationFunc[randomIndex]();
+};
 const HangUpWild = () =>
 {
     console.log("fn: 去野外挂机");
@@ -998,7 +929,7 @@ const HangUpWild = () =>
 
     console.log("等待传送到目的地...");
     WaitUntilMenu();
-    randomMoveOperation()
+    randomMoveOperation();
     if (IsAuto_inactive())
     {
         PressToAuto();
@@ -1041,9 +972,7 @@ const InstanceExceptionCheck = () =>
         if (deathBtn)
         {
             RandomPress([deathBtn.x - 50, deathBtn.y, 150, 20], random(10, 30));
-            config.totalDeathTimes = config.totalDeathTimes
-                ? config.totalDeathTimes
-                : 0;
+            config.totalDeathTimes = config.totalDeathTimes ? config.totalDeathTimes : 0;
             config.totalDeathTimes++;
             RewriteConfig(config);
         }
@@ -1134,10 +1063,7 @@ const InstanceExceptionCheck = () =>
                 }
             }
 
-            if (
-                (instance_mode == "hangUpInstance" || instance_mode == "hangUpWild") &&
-                !IsInCity()
-            )
+            if ((instance_mode == "hangUpInstance" || instance_mode == "hangUpWild") && !IsInCity())
             {
                 if (!IsHaltMode())
                 {
@@ -1210,8 +1136,7 @@ const IsTimeToComprehensive = () =>
         }
     });
 
-    const interval =
-        (curTime.getTime() - lastTimeComprehensiveImprovement) / 3600000;
+    const interval = (curTime.getTime() - lastTimeComprehensiveImprovement) / 3600000;
     if (interval > 8 && isTimeToComprehensive)
     {
         lastTimeComprehensiveImprovement = curTime.getTime();
@@ -1237,23 +1162,6 @@ const InstanceFlow = () =>
 
     let curTime = new Date().getTime();
 
-    if ((curTime - lastTimeEnterInstance) / 3600000 > 1)
-    {
-        console.log("》》》 一小时检查");
-        let config = ReadConfig();
-
-        if (!config.daily.dailyInstance)
-        {
-            console.log("今日副本暂未完成，优先进副本");
-            HangUpInstance();
-        } else if (!config.daily.acceptDailyMission)
-        {
-            console.log("每日任务未完成. 优先进行每日任务");
-            DailyMission();
-        }
-        lastTimeEnterInstance = curTime;
-    }
-
     if (instance_mode == "hangUpWild")
     {
         if ((curTime - lastHangUpWildTime) / 3600000 >= switchMapTime)
@@ -1276,9 +1184,6 @@ const InstanceFlow = () =>
             lastTimeClickDailyMission = curTime;
         }
     }
-
 };
 
 module.exports = { InstanceFlow };
-
-
