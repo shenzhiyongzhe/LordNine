@@ -823,30 +823,37 @@ const randomMoveOperation = () =>
             clickProbability = random(1, 100)
         }
     }
+    const continueSwipe = (fn, arr) =>
+    {
+        for (let i = 0; i < arr.length; i++)
+        {
+            fn(arr[i])
+        }
+    }
     const randomSwipe = () =>
     {
         console.log("随机移动");
         swipeDirectionIndex = random(0, 4)
-        const moveTime = random(10, 100)
+        const moveTime = [random(5, 50), random(5, 50), random(5, 50)]
         if (swipeDirectionIndex == 0)
         {
             console.log("随机向上移动");
-            SwipeUp(moveTime)
+            continueSwipe(SwipeUp, moveTime)
         }
         else if (swipeDirectionIndex == 1)
         {
             console.log("随机向下移动");
-            SwipeDown(moveTime)
+            continueSwipe(SwipeDown, moveTime)
         }
         else if (swipeDirectionIndex == 2)
         {
             console.log("随机向左移动");
-            SwipeLeft(moveTime)
+            continueSwipe(SwipeLeft, moveTime)
         }
         else if (swipeDirectionIndex == 3)
         {
             console.log("随机向右移动");
-            SwipeRight(moveTime)
+            continueSwipe(SwipeRight, moveTime)
         }
     }
     const randomIllustrations = () =>
@@ -1275,4 +1282,3 @@ const InstanceFlow = () =>
 module.exports = { InstanceFlow };
 
 
-// HangUpInstance()

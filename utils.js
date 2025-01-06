@@ -60,7 +60,9 @@ let specialConfig = {
     initGameMode: null,
     lastModeChangeTime: new Date(),
 };
-
+const globalTimePlay = {
+    lastTimeClearBackpack_haltMode: 1726208812345
+}
 const configFile = "/sdcard/LordNine/config.json";
 
 
@@ -2008,7 +2010,7 @@ const SwipeLeft = (sec) => gesture(sec * 1000, [180, 590], [80, 590]);
 const SwipeRight = (sec) => gesture(sec * 1000, [210, 590], [310, 590]);
 
 module.exports = {
-    specialConfig,
+    specialConfig, globalTimePlay,
     BuySkillBook,
     CloseBackpack, CloseMenu, ClickSkip, ChangeHaltModeTime, ChangeRecoverPotionPercentToMax, ChangeRecoverPotionPercentToNormal, ClearPage, ChangeGameSetting, ClickAuto,
     DeathCheck,

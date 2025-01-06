@@ -115,7 +115,6 @@ const IsContinuouslyChallengeBoss = () =>
     }
 };
 
-
 const HasNext = (shot) => { shot = shot || captureScreen(); return FindMultiColors(NextColorList, [1219, 670, 31, 31], shot); };
 const ClickNext = (shot) => RandomPress([1152, 678, 53, 14], shot);
 const HasTalkBubble = (shot) =>
@@ -148,10 +147,19 @@ const ClickMainStory = () =>
     {
         return true;
     }
-    if (!HasMenu() && !HaveMainStoryIcon())
+
+    if (!HasMenu() && HaveMainStoryIcon() && !IsInQuest())
     {
+        console.log("新手阶段，点击主线，等待10秒");
+        TapMainStory()
+        Sleep(random(5, 10))
+    }
+    else if (!HasMenu() && !HaveMainStoryIcon())
+    {
+        console.log("没有菜单，没有主线图标，返回false");
         return false;
     }
+
     if (IsMoving())
     {
         return true;
@@ -432,7 +440,7 @@ const AttackingBossFlow = (number) =>
     let swithEnemyToBossTimes = 0;
     let hadInstanceEnemy = false;
     let hadEliminateUnderlings = false;
-    let escapteTimes = 0;
+    let escapeTimes = 0;
 
     const BossLowHPImgList = LoadImgList("icon/bossLowHP");
     const TapSwitchEnemy = () =>
@@ -643,8 +651,8 @@ const AttackingBossFlow = (number) =>
                 Sleep(3);
                 if (IsBossLowHP())
                 {
-                    escapteTimes++;
-                    if (escapteTimes < 2)
+                    escapeTimes++;
+                    if (escapeTimes < 2)
                     {
                         console.log("boss当前血量较低，即将发绝招，需躲避,向左移动15秒");
                         SwipeLeft(15);
@@ -654,8 +662,8 @@ const AttackingBossFlow = (number) =>
                 Sleep(3);
                 if (IsBossLowHP())
                 {
-                    escapteTimes++;
-                    if (escapteTimes < 2)
+                    escapeTimes++;
+                    if (escapeTimes < 2)
                     {
                         console.log("boss当前血量较低，即将发绝招，需躲避,向下移动15秒");
                         SwipeDown(15);
@@ -666,8 +674,8 @@ const AttackingBossFlow = (number) =>
                 Sleep(3);
                 if (IsBossLowHP())
                 {
-                    escapteTimes++;
-                    if (escapteTimes < 2)
+                    escapeTimes++;
+                    if (escapeTimes < 2)
                     {
                         console.log("boss当前血量较低，即将发绝招，需躲避，向右移动15秒");
                         SwipeRight(15);
@@ -678,7 +686,7 @@ const AttackingBossFlow = (number) =>
                 Sleep(3);
                 if (IsBossLowHP())
                 {
-                    escapteTimes++;
+                    escapeTimes++;
                     if (escapteTimes < 2)
                     {
                         console.log("boss当前血量较低，即将发绝招，需躲避，向上移动15秒");
@@ -1464,3 +1472,4 @@ const MainStoryFlow = () =>
 
 module.exports = { MainStoryFlow };
 
+// ClickMainStory()

@@ -1,6 +1,7 @@
 
 
 const {
+    globalTimePlay,
     ClickSkip, ChangeHaltModeTime, ClearPage,
     ExitHaltMode,
     FindImg, FindMultiColors, FindRedBtn, FindImgInList, FindBlueBtn, FindGoldBtn,
@@ -18,8 +19,6 @@ const {
     TapTip,
     SetCountryAndBirth,
     StopScript,
-
-
 } = require("./utils.js");
 
 const { WearEquipments, StrengthenEquipment, DecomposeEquipment, BuyPotion } = require("./Backpack.js");
@@ -30,11 +29,8 @@ const { LordNineWordColorList, WhiteAvatarColorList, StartBtnSettingColorList } 
 const { TipColorList } = require("./Color/MainStoryColorList.js");
 
 let lastTimeOfBuyingPotion = 1726208812345;
-let lastTimeClearBackpack = 1726208812345;
-let lastTimeClearBackpack_haltMode = new Date().getTime();
+
 let randomTimeToClearBackpack = random(150, 200);
-
-
 
 const ExceptionImgList = {
     disconnection: LoadImgList("special/disconnection"),
@@ -83,7 +79,7 @@ const NoPotionFlow = (shot) =>
         Sleep(delayTime);
         if (IsBackpackFull())
         {
-            lastTimeClearBackpack = new Date().getTime();
+            globalTimePlay.lastTimeClearBackpack_haltMode = new Date().getTime();
             LoginProps();
             DecomposeEquipment("partial");
         }
@@ -131,15 +127,15 @@ const NoPotionFlow_HaltMode = (shot) =>
 
 const BackpackFlow_HaltMode = () =>
 {
-    if ((new Date().getTime() - lastTimeClearBackpack_haltMode) / 60000 > randomTimeToClearBackpack)
+    if ((new Date().getTime() - globalTimePlay.lastTimeClearBackpack_haltMode) / 60000 > randomTimeToClearBackpack)
     {
         console.log("到达随机清理背包时间。");
         if (IsHaltMode())
         {
             ExitHaltMode();
         }
-        lastTimeClearBackpack_haltMode = new Date().getTime();
-        randomTimeToClearBackpack = random(160, 240);
+        globalTimePlay.lastTimeClearBackpack_haltMode = new Date().getTime();
+        randomTimeToClearBackpack = random(300, 240);
         LoginProps();
         DecomposeEquipment("partial");
     }
@@ -151,9 +147,9 @@ const BackpackFullFlow = (shot) =>
     if (isBackpackFull)
     {
         console.log("背包已满，开始清理背包");
-        if ((new Date().getTime() - lastTimeClearBackpack) / 60000 > 10)
+        if ((new Date().getTime() - globalTimePlay.lastTimeClearBackpack_haltMode) / 60000 > 10)
         {
-            lastTimeClearBackpack = new Date().getTime();
+            globalTimePlay.lastTimeClearBackpack_haltMode = new Date().getTime();
             const config = ReadConfig()
             if (!config.unlockTrade)
             {
@@ -675,6 +671,7 @@ const ExceptionFlow = () =>
 };
 
 module.exports = { ExceptionFlow };
+
 
 
 

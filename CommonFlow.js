@@ -1,6 +1,6 @@
 
 const {
-    specialConfig,
+    specialConfig, globalTimePlay,
     ClickSkip, CloseMenu, CloseBackpack, ClearPage,
     EnterMenuItemPage, ExitHaltMode,
     FindBlueBtn, FindTipPoint, FindCheckMark, FindRedBtn, FindGoldBtn, FindGreenBtn, FindNumber, FindImgInList, FindFloatNumber, FindImg,
@@ -1876,6 +1876,7 @@ const PutOnSale = () =>
         LoginProps("total");
         DecomposeEquipment("total");
     }
+    globalTimePlay.lastTimeClearBackpack_haltMode = new Date().getTime()
 
     console.log("__物品上架结束");
 };

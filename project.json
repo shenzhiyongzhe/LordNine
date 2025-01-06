@@ -13,7 +13,7 @@
     "build_time": 0
   },
   "useFeatures": [],
-  "icon": "res/logo.png",
+  "icon": "res/logo_1.png",
   "ignoredDirs": ["build", ".vscode",".git"],
   "encrypt-code": false,
   "launchConfig": {
@@ -46,5 +46,5 @@
   },
   "sourcePath": "/storage/emulated/0/脚本/LordNine/main.js",
   "versionCode": 28,
-  "versionName": "1.3.3"
+  "versionName": "1.6.1"
 }
