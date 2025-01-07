@@ -120,27 +120,6 @@ const MapIconColorList = [
     ],
 ];
 
-const InInstanceColorList = [
-    [
-        "#ffffff",
-        [
-            [7, -6, "#ffffff"],
-            [7, -4, "#ffffff"],
-            [14, -1, "#fcfcfc"],
-            [13, 12, "#e6e6e5"],
-        ],
-    ],
-    [
-        "#ffffff",
-        [
-            [-6, 3, "#fefefd"],
-            [-5, 15, "#e3e3e3"],
-            [7, 2, "#ededed"],
-            [5, 16, "#e6e6e5"],
-        ],
-    ],
-];
-
 const FirstLevel = [
     [20, 181, 31, 40],
     [20, 247, 31, 40],
@@ -160,17 +139,16 @@ for (let i = 0; i < 8; i++)
     ThirdLevel.push([950, 130 + i * 53, 200, 30]);
 }
 
-let instance_mode = "hangUpInstance";
+let instance_mode = "hangUpWild";
 let lastHangUpWildTime = new Date().getTime();
-let lastTimeEnterHaltMode = new Date().getTime();
-let lastTimeEnterInstance = 1726208812345;
-let lastTimeClickDailyMission = 1726208812345;
+let lastTimeEnterHaltMode = lastHangUpWildTime
+let lastTimeClickDailyMission = lastHangUpWildTime;
+let enterSecreteLabTime = lastHangUpWildTime;
 let lastTimeComprehensiveImprovement = 1726208812345;
 let clickDailyMissionAwardsTimes = 0;
 
 let tradingHours = null;
 let mapName = null;
-let monsterMapList = null;
 
 const death_haltMode = LoadImgList("special/death_haltmode");
 
@@ -191,10 +169,8 @@ const HangUpInstance = () =>
     }
     if (!HasMenu() && !HasMenuClose())
     {
-        console.log("fn: 副本，没有菜单，退出");
         return false;
     }
-
     DailyQuest();
     const config = ReadConfig();
 
@@ -210,10 +186,10 @@ const HangUpInstance = () =>
         if (IsLocked([873, 309, 27, 31]))
         {
             console.log("副本暂未解锁，跳过副本");
-
             config.daily.dailyInstance = true;
+            config.daily.acceptDailyMission = true;
             RewriteConfig(config);
-            instance_mode = "dailyMission";
+            instance_mode = "hangUpWild";
         }
         return false;
     }
@@ -267,7 +243,6 @@ const HangUpInstance = () =>
             console.log(curCombatPower + "  >>>  " + requireCombatPower);
             PressEnterInstanceBtn();
             lastTimeEnterInstance = new Date().getTime();
-            instance_mode = "hangUpInstance";
             haveAvailableInstance = true;
             break;
         }
@@ -299,7 +274,7 @@ const HangUpInstance = () =>
     }
     config.game.combatPower = curCombatPower;
     RewriteConfig(config);
-
+    enterSecreteLabTime = new Date().getTime()
     return false;
 };
 //接受任务
@@ -524,6 +499,7 @@ const ClickDailyMission = () =>
         }
     }
 };
+
 const DailyMission = () =>
 {
     console.log("fn: 每日任务流程");
@@ -533,7 +509,7 @@ const DailyMission = () =>
         console.log("已接受每日任务");
     } else
     {
-        console.log("开始每日任务");
+        console.log("开始接受每日任务");
         if (IsHaltMode())
         {
             ExitHaltMode();
@@ -547,7 +523,7 @@ const DailyMission = () =>
                 console.log("每日任务暂未解锁，跳过daily mission");
 
                 config.daily.acceptDailyMission = true;
-
+                config.daily.dailyInstance = true;
                 config.gameMode = "mainStory";
                 specialConfig.gameMode = "instance";
                 specialConfig.initGameMode = "mainStory";
@@ -568,7 +544,7 @@ const DailyMission = () =>
             {
                 console.log("地图未解锁，主线错误");
                 config.daily.acceptDailyMission = true;
-
+                config.daily.dailyInstance = true;
                 config.gameMode = "mainStory";
                 specialConfig.gameMode = "instance";
                 specialConfig.initGameMode = "mainStory";
@@ -692,7 +668,6 @@ const HangUpSecretLab = () =>
         return false;
     }
     const randomIndex = random(1, 4);
-    // RandomPress(FirstLevel[0]);
     RandomPress(SecondLevel[4]);
     RandomPress(ThirdLevel[randomIndex]);
 
@@ -723,12 +698,12 @@ const HangUpSecretLab = () =>
             if (typeof config.daily.hangUpSecretLab != "number")
             {
                 config.daily.hangUpSecretLab == 1;
-                RewriteConfig(config);
             } else
             {
                 config.daily.hangUpSecretLab += 1;
             }
             console.log("今日进入秘密实验室次数为：" + config.daily.hangUpSecretLab);
+            enterSecreteLabTime = new Date().getTime()
             RewriteConfig(config);
         }
     }
@@ -871,6 +846,7 @@ const randomMoveOperation = () =>
     console.log("随机索引为：" + randomIndex);
     operationFunc[randomIndex]();
 };
+
 const HangUpWild = () =>
 {
     console.log("fn: 去野外挂机");
@@ -878,15 +854,20 @@ const HangUpWild = () =>
     lastHangUpWildTime = new Date().getTime();
 
     const config = ReadConfig();
-
-    // if (config.unlockTrade)
-    // {
-    //     if (config.daily.hangUpSecretLab < 3)
-    //     {
-    //         HangUpSecretLab();
-    //         return true;
-    //     }
-    // }
+    if (!config.daily.dailyInstance)
+    {
+        console.log("今日副本未完成，开始刷副本");
+        HangUpInstance()
+        return true;
+    }
+    if (config.unlockTrade)
+    {
+        if (config.daily.hangUpSecretLab < 5 && (new Date().getTime() - enterSecreteLabTime) / 3600000 < random(10, 15))
+        {
+            HangUpSecretLab();
+            return true;
+        }
+    }
 
     if (mapName == null)
     {
@@ -980,39 +961,30 @@ const InstanceExceptionCheck = () =>
         if (IsInCity() && !IsMoving())
         {
             console.log("在主城, 未移动，挂机模式为" + instance_mode);
-            if (instance_mode == "hangUpInstance")
+
+            if (!config.daily.dailyInstance)
             {
-                if (!config.daily.dailyInstance)
-                {
-                    HangUpInstance();
-                } else
-                {
-                    instance_mode = "dailyMission";
-                }
-            } else if (instance_mode == "dailyMission")
+                HangUpInstance();
+            }
+            else if (!config.daily.acceptDailyMission)
             {
-                if (!config.daily.acceptDailyMission)
-                {
-                    DailyMission();
-                } else
-                {
-                    ClickDailyMission();
-                }
-            } else if (instance_mode == "hangUpWild")
+                DailyMission();
+            }
+            else 
             {
                 HangUpWild();
             }
         }
         if (HasMenu())
         {
-            if (instance_mode == "hangUpInstance" || instance_mode == "hangUpWild")
+            if (instance_mode != "dailyMission")
             {
                 if (!IsAuto_active() && IsAuto_inactive())
                 {
                     console.log("instance check: 没有自动攻击，点击自动攻击");
                     PressToAuto();
                 }
-            } else if (instance_mode == "dailyMission")
+            } else
             {
                 if (IsAuto_active())
                 {
@@ -1063,7 +1035,7 @@ const InstanceExceptionCheck = () =>
                 }
             }
 
-            if ((instance_mode == "hangUpInstance" || instance_mode == "hangUpWild") && !IsInCity())
+            if (instance_mode != "dailyMission" && !IsInCity())
             {
                 if (!IsHaltMode())
                 {
@@ -1147,8 +1119,8 @@ const IsTimeToComprehensive = () =>
     }
 };
 
-let switchMapTime = parseFloat((Math.random() + 4).toFixed(2));
-
+let switchMapTime = parseFloat((Math.random() + 10).toFixed(2));
+let oneHourCheck = new Date().getTime()
 const InstanceFlow = () =>
 {
     InstanceExceptionCheck();
@@ -1161,29 +1133,35 @@ const InstanceFlow = () =>
     }
 
     let curTime = new Date().getTime();
-
-    if (instance_mode == "hangUpWild")
+    if ((curTime - oneHourCheck) / 3600000 > 1)
     {
-        if ((curTime - lastHangUpWildTime) / 3600000 >= switchMapTime)
+        oneHourCheck = curTime;
+        const config = ReadConfig()
+        if (!config.daily.dailyInstance)
         {
-            switchMapTime = parseFloat((Math.random() + 4).toFixed(2));
-            console.log(`@${switchMapTime}小时，切换地图`);
-            HangUpWild();
+            HangUpInstance()
         }
-    } else if (instance_mode == "dailyMission")
-    {
-        if ((curTime - lastTimeClickDailyMission) / 60000 > 30)
+        else if (!config.daily.acceptDailyMission)
         {
-            console.log("30min 点击每日任务");
-            if (IsHaltMode())
+            DailyMission()
+            if ((curTime - lastTimeClickDailyMission) / 60000 > 30)
             {
-                ExitHaltMode();
+                console.log("30min 点击每日任务");
+                DailyMission();
+                lastTimeClickDailyMission = curTime;
             }
-
-            DailyMission();
-            lastTimeClickDailyMission = curTime;
+        }
+        else
+        {
+            if ((curTime - lastHangUpWildTime) / 3600000 >= switchMapTime)
+            {
+                switchMapTime = parseFloat((Math.random() + 10).toFixed(2));
+                console.log(`@${switchMapTime}小时，切换地图`);
+                HangUpWild();
+            }
         }
     }
+
 };
 
 module.exports = { InstanceFlow };

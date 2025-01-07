@@ -33,7 +33,7 @@ let lastComprehensiveImproveTime = 1726208812345;
 
 const GetEmail = () =>
 {
-    console.log("开始领取邮件");
+    console.log("领取邮件");
     let hasOpenMenu = OpenMenu();
     const hasEmailPoint = FindTipPoint([1054, 520, 25, 27]);
     if (!hasOpenMenu)
@@ -57,7 +57,6 @@ const GetEmail = () =>
         console.log("进入邮件页面失败，退出");
         return false;
     }
-    console.log("已进入邮件页面，点击全部领取");
     Sleep();
     let shot = captureScreen();
     let hasTipPoint;
@@ -97,14 +96,12 @@ const GetEmail = () =>
         ClearPage();
         Sleep();
     }
-
-    console.log("邮件领取完毕");
     return true;
 };
 
 const GetAchievement = () =>
 {
-    console.log("开始领取成就奖励");
+    console.log("领取成就奖励");
     const hasOpenMenu = OpenMenu();
     if (!hasOpenMenu)
     {
@@ -124,7 +121,6 @@ const GetAchievement = () =>
         console.log("进入成就界面失败，退出");
         return false;
     }
-    console.log("已经进入领取成就奖励页面");
     let hasTipPoint;
     hasTipPoint = FindTipPoint([114, 63, 31, 26]);
 
@@ -148,7 +144,6 @@ const GetAchievement = () =>
             Sleep();
         }
     }
-    console.log("领取成就奖励完毕");
     PageBack();
     return true;
 };

@@ -7,7 +7,7 @@ const { InstanceFlow } = require("./Instance.js");
 
 const version = `${app.versionName}`
 
-const versionColor = "#7FFFD4";
+const versionColor = "#16C47F";
 let mainThread = null;
 let serverName = null;
 
@@ -96,7 +96,6 @@ const GetCaptureScreenPermission = () =>
         auto();
         images.requestScreenCapture(true);
     });
-
     threads.start(function ()
     {
         let hasOpen = textMatches(/(.*시작하기.*|.*立即开始.*)/).findOne(10000);
@@ -106,53 +105,6 @@ const GetCaptureScreenPermission = () =>
         }
     });
 };
-
-const DownLoadApk = (downloadUrl, savePath) =>
-{
-    threads.start(function ()
-    {
-        let url = null;
-        const config = ReadConfig()
-
-        if (config.game.vm.startsWith("INS"))
-        {
-            url = `http://10.16.1.117:82/${downloadUrl}`;
-        }
-        else if (config.game.vm.startsWith("VM"))
-        {
-            url = `http://10.6.130.129:82/${downloadUrl}`;
-        }
-        const fullSavePath = `/sdcard/${savePath}`;
-
-        let r = http.client().newCall(
-            http.buildRequest(url, {
-                method: "GET",
-            })
-        ).execute();
-
-        let fs = new java.io.FileOutputStream(fullSavePath);
-
-        let is = r.body().byteStream();
-        const buffer = util.java.array("byte", 1024);
-        let byteRead; //每次读取的byte数
-        while ((byteRead = is.read(buffer)) != -1)
-        {
-            fs.write(buffer, 0, byteRead); //读取
-        }
-        if (files.exists(fullSavePath))
-        {
-            app.viewFile(fullSavePath);
-        }
-        else
-        {
-            alert('下载失败');
-        }
-    }
-    );
-};
-
-const UpdateScript = () => DownLoadApk("LordNine.apk", "LordNine/LordNine.apk");
-const DownloadAutoJs = () => DownLoadApk("AutoJs.apk", "AutoJs.apk");
 
 const FormatConfig = () =>
 {
@@ -215,11 +167,10 @@ const uiFloaty = () =>
         <card gravity="center|top" alpha="1" cardBackgroundColor="#71c9ce" cardCornerRadius="10">
             <text id="stop" color="#ffffff" w="30" h="30" bg="#71c9ce" marginLeft="85">✕</text>
             <vertical gravity="center|top" >
-                <button id="start" h="40" w="120" color="#ffffff" bg="#a6e3e9" marginTop="20" >开始</button>
-                <text id="delayTime" h='0' gravity="center" color="#ffffff" textSize="40sp"></text>
-                <text id="more" textSize="20" h="25" gravity="center">✡</text>
+                <text id="delayTime" h='0' gravity="center" color="#ffffff" textSize="40sp" ></text>
+                <button id="start" h="40" w="120" color="#ffffff" bg="#a6e3e9" marginTop="20">开始</button>
+                <text id="more" textSize="20" h="25" gravity="center" marginTop="10">﹀</text>
                 <vertical id="more_container" gravity="center" h="0" marginTop="10">
-                    <button id="update" color="#ffffff" w="120" h="40" bg="#a6e3e9">更新</button>
                     <radiogroup orientation="horizontal" gravity="center" color="#ffffff">
                         <radio id="mainStory" text="主线" textSize="10" checked="{{gameMode == 'mainStory' ? true : false}}" />
                         <radio id="instance" text="挂机" textSize="10" checked="{{gameMode == 'instance' ? true : false}}" />
@@ -230,11 +181,9 @@ const uiFloaty = () =>
                     </horizontal>
                     <linear orientation="horizontal" gravity="center" >
                         <text id="loginGoogle" w="60" textSize="12" color="#ffffff" >谷歌登录</text>
-                        <text id="downloadAutoJs" textSize="10">下载autojs</text>
                     </linear>
                 </vertical>
             </vertical>
-
         </card>
     );
 
@@ -243,13 +192,6 @@ const uiFloaty = () =>
 
     const config = ReadConfig()
 
-    const startBtnEvent = () =>
-    {
-
-    }
-
-
-    let defaultAutoStartTime = 10;
     const uiInterval = setInterval(() =>
     {
         // defaultAutoStartTime--
@@ -260,6 +202,38 @@ const uiFloaty = () =>
         // }
     }, 1000);
 
+    floatyWindow.start.click(() =>
+    {
+        const totalDelayTime = config.delayTime + loginGoogleDelay + createCharacterDelay;
+        let count = totalDelayTime
+        floatyWindow.delayTime.attr("h", 60);
+        floatyWindow.start.attr("h", 0);
+        floatyWindow.delayTime.setText(`${count}s`);
+        console.log(`游戏延迟${totalDelayTime}s,等待启动中...`);
+        const delayInterval = setInterval(() =>
+        {
+            ui.run(() =>
+            {
+                floatyWindow.delayTime.setText(`${count}s`);
+            });
+            count--;
+            if (count <= 0)
+            {
+                clearInterval(delayInterval);
+                floatyWindow.close()
+            }
+        }, 1000);
+
+        GetCaptureScreenPermission();
+
+        setTimeout(() =>
+        {
+            console.log("《《《 游戏开始 》》》");
+            console.log("游戏模式为：" + specialConfig.gameMode);
+            mainThread = threads.start(MainFlow);
+            clearInterval(uiInterval);
+        }, (totalDelayTime + 1) * 1000);
+    });
 
     floatyWindow.createCharacter.click(() =>
     {
@@ -288,55 +262,22 @@ const uiFloaty = () =>
         });
     });
 
-    floatyWindow.start.click(() =>
-    {
-        const totalDelayTime = config.delayTime + loginGoogleDelay + createCharacterDelay;
-        let count = totalDelayTime
-        floatyWindow.delayTime.attr("h", 100);
-        floatyWindow.start.attr("h", 0);
-        floatyWindow.delayTime.setText(`${count}s`);
-        console.log("游戏延迟启动中...");
-        const delayInterval = setInterval(() =>
-        {
-            ui.run(() =>
-            {
-                floatyWindow.delayTime.setText(`${count}s`);
-            });
-            count--;
-            if (count <= 0)
-            {
-                clearInterval(delayInterval);
-                floatyWindow.close()
-            }
-        }, 1000);
-
-        GetCaptureScreenPermission();
-
-        setTimeout(() =>
-        {
-            console.log("《《《 游戏开始 》》》");
-            console.log("游戏模式为：" + specialConfig.gameMode);
-            mainThread = threads.start(MainFlow);
-            clearInterval(uiInterval);
-        }, (totalDelayTime + 1) * 1000);
-    });
-
     floatyWindow.more.click(() =>
     {
-        floatyWindow.setSize(400, 520);
-        floatyWindow.more_container.attr("h", 180);
+        floatyWindow.setSize(400, 400);
+        floatyWindow.more_container.attr("h", 80);
         floatyWindow.more.attr("h", 0);
     });
 
-    floatyWindow.update.click(UpdateScript);
     floatyWindow.stop.click(StopScript);
+
     floatyWindow.mainStory.click(() =>
     {
         gameMode = "mainStory";
         config.gameMode = "mainStory";
+        config.unlockTrade = false;
         console.log("悬浮窗点击事件：更改模式为主线")
         RewriteConfig(config);
-
     });
 
     floatyWindow.instance.click(() =>
@@ -344,14 +285,14 @@ const uiFloaty = () =>
         gameMode = "instance";
         config.gameMode = "instance";
         console.log("悬浮窗点击事件：更改模式为挂机")
+        config.unlockTrade = true;
         RewriteConfig(config);
 
     });
-    floatyWindow.downloadAutoJs.click(DownloadAutoJs);
 };
 
 console.setGlobalLogConfig({
-    "file": `/sdcard/LordNine/${new Date().toJSON().slice(0, 10)}.log`,
+    "file": `/sdcard/LordNine/log/${new Date().toJSON().slice(0, 10)}.log`,
     "filePattern": "%d{dd日}%m%n"
 });
 
@@ -405,7 +346,6 @@ const Update = () =>
 const MainFlow = () =>
 {
     stateFloaty();
-
     LaunchGame();
     if (serverName != null)
     {

@@ -213,6 +213,7 @@ const DisconnectionFlow = (shot) =>
                 console.log("vpn is time out");
                 alert("time out", "需要更换ip");
             }
+            CountDownFloaty(delayTime)
             Sleep(delayTime);
             LaunchGame();
             const config = ReadConfig();
@@ -227,10 +228,10 @@ const DisconnectionFlow = (shot) =>
             }
             console.log("今日重连次数: " + config.game.reconnectionTime);
             RewriteConfig(config);
-            if (config.game.reconnectionTime >= 100)
+            if (config.game.reconnectionTime >= 10)
             {
                 console.log("重连次数超过100次，退出游戏");
-                alert("Disconnection", "重连次数超过100次，退出游戏");
+                alert("Disconnection", "重连次数超过10次，退出游戏");
             }
 
         }

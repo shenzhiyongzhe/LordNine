@@ -156,7 +156,6 @@ const ClickMainStory = () =>
     }
     else if (!HasMenu() && !HaveMainStoryIcon())
     {
-        console.log("没有菜单，没有主线图标，返回false");
         return false;
     }
 
@@ -178,7 +177,7 @@ const ClickMainStory = () =>
         {
             TapMainStory();
         }
-        Sleep(random(3, 10));
+        Sleep(random(3, 30));
         console.log("点击主线,并等待随机时间");
     }
     else
@@ -437,7 +436,7 @@ const AttackingBossFlow = (number) =>
     console.log("开始挑战boss流程...");
 
     let lostTitleCount = 0;
-    let swithEnemyToBossTimes = 0;
+    let switchEnemyToBossTimes = 0;
     let hadInstanceEnemy = false;
     let hadEliminateUnderlings = false;
     let escapeTimes = 0;
@@ -469,9 +468,9 @@ const AttackingBossFlow = (number) =>
                 }
                 if (hadInstanceEnemy && isAimToBoss)
                 {
-                    swithEnemyToBossTimes++;
+                    switchEnemyToBossTimes++;
                 }
-                if (swithEnemyToBossTimes > 10)
+                if (switchEnemyToBossTimes > 10)
                 {
                     console.log("小兵已经消灭");
                     hadEliminateUnderlings = true;
@@ -687,7 +686,7 @@ const AttackingBossFlow = (number) =>
                 if (IsBossLowHP())
                 {
                     escapeTimes++;
-                    if (escapteTimes < 2)
+                    if (escapeTimes < 2)
                     {
                         console.log("boss当前血量较低，即将发绝招，需躲避，向上移动15秒");
                         SwipeUp(15);
@@ -1002,7 +1001,7 @@ const MainStoryException = () =>
             if (IsAttackBoss())
             {
                 isDetectTime++;
-                console.log("isdetect time:" + isDetectTime);
+                console.log("isDetectTime :" + isDetectTime);
             }
             if (isDetectTime > 3)
             {
