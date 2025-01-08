@@ -140,10 +140,9 @@ for (let i = 0; i < 8; i++)
 }
 
 let instance_mode = "hangUpWild";
-let lastHangUpWildTime = new Date().getTime();
+let lastHangUpWildTime = new Date().getTime()
 let lastTimeEnterHaltMode = lastHangUpWildTime
-let lastTimeClickDailyMission = lastHangUpWildTime;
-let enterSecreteLabTime = lastHangUpWildTime;
+
 let lastTimeComprehensiveImprovement = 1726208812345;
 let clickDailyMissionAwardsTimes = 0;
 
@@ -274,7 +273,6 @@ const HangUpInstance = () =>
     }
     config.game.combatPower = curCombatPower;
     RewriteConfig(config);
-    enterSecreteLabTime = new Date().getTime()
     return false;
 };
 //接受任务
@@ -695,16 +693,6 @@ const HangUpSecretLab = () =>
 
             Sleep(secretLabMoveTime);
             PressToAuto();
-            if (typeof config.daily.hangUpSecretLab != "number")
-            {
-                config.daily.hangUpSecretLab == 1;
-            } else
-            {
-                config.daily.hangUpSecretLab += 1;
-            }
-            console.log("今日进入秘密实验室次数为：" + config.daily.hangUpSecretLab);
-            enterSecreteLabTime = new Date().getTime()
-            RewriteConfig(config);
         }
     }
 };
@@ -851,24 +839,6 @@ const HangUpWild = () =>
 {
     console.log("fn: 去野外挂机");
 
-    lastHangUpWildTime = new Date().getTime();
-
-    const config = ReadConfig();
-    if (!config.daily.dailyInstance)
-    {
-        console.log("今日副本未完成，开始刷副本");
-        HangUpInstance()
-        return true;
-    }
-    if (config.unlockTrade)
-    {
-        if (config.daily.hangUpSecretLab < 5 && (new Date().getTime() - enterSecreteLabTime) / 3600000 < random(10, 15))
-        {
-            HangUpSecretLab();
-            return true;
-        }
-    }
-
     if (mapName == null)
     {
         const combatPower = config.game.combatPower;
@@ -938,10 +908,11 @@ const InstanceExceptionCheck = () =>
         {
             console.log("@没有经验增加");
             ExitHaltMode();
-            ReturnHome();
+            HangUpWild()
         }
         if (instance_mode == "dailyMission")
         {
+            console.log("每日任务，取消省电模式");
             ExitHaltMode();
         }
         DeathCheck_HaltMode();
@@ -960,20 +931,8 @@ const InstanceExceptionCheck = () =>
 
         if (IsInCity() && !IsMoving())
         {
-            console.log("在主城, 未移动，挂机模式为" + instance_mode);
-
-            if (!config.daily.dailyInstance)
-            {
-                HangUpInstance();
-            }
-            else if (!config.daily.acceptDailyMission)
-            {
-                DailyMission();
-            }
-            else 
-            {
-                HangUpWild();
-            }
+            console.log("异常检测：在主城, 未移动");
+            InstanceBranchManager()
         }
         if (HasMenu())
         {
@@ -1007,7 +966,7 @@ const InstanceExceptionCheck = () =>
                 let haveFinished = HaveFinished([1119, 99, 73, 274]);
                 if (haveFinished)
                 {
-                    const delayClick = random(10, 120);
+                    const delayClick = random(3, 60);
                     console.log("完成任务，延迟点击:" + delayClick + "s");
                     Sleep(delayClick);
                     RandomPress([haveFinished.x - 100, haveFinished.y, 100, 20], 2);
@@ -1019,18 +978,6 @@ const InstanceExceptionCheck = () =>
                         LoginProps();
                         DecomposeEquipment();
                         clickDailyMissionAwardsTimes = 0;
-                    }
-                }
-                if (!HaveDailyMissionIcon())
-                {
-                    if (config.daily.acceptDailyMission)
-                    {
-                        instance_mode == "hangUpWild";
-                        console.log("今日每日任务已做完，切换模式为：野外挂机");
-                        clickDailyMissionAwardsTimes = 0;
-                    } else
-                    {
-                        DailyMission();
                     }
                 }
             }
@@ -1052,40 +999,20 @@ const InstanceExceptionCheck = () =>
             }
         }
     }
-    if (HasPopupClose([25, 1, 55, 54]))
-    {
-        RandomPress([42, 684, 23, 27]); //setting
-        let shot = captureScreen();
-        for (let i = 0; i < 12; i++)
-        {
-            let haveCheckMark = FindCheckMark([404, 294, 385, 220], shot);
-            if (haveCheckMark)
-            {
-                RandomPress([haveCheckMark.x, haveCheckMark.y, 30, 5]);
-                shot = captureScreen();
-            }
-        }
-        RandomPress([853, 207, 24, 24]);
-        RandomPress([166, 19, 739, 259]);
-        RandomPress([42, 17, 23, 28]);
-    }
 };
 
-const IsTimeToComprehensive = () =>
+const TimeToTrade = () =>
 {
     if (tradingHours == null)
     {
         const config = ReadConfig();
-        if (!config.dailyTradingHours)
+        if (!config.dailyTradingHours || config.dailyTradingHours.length != 3)
         {
-            console.log("随机生成交易时间");
+            console.log("生成随机交易时间");
             tradingHours = [
-                [random(0, 3), random(0, 59)],
-                [random(4, 7), random(0, 59)],
-                [random(8, 11), random(0, 59)],
-                [random(12, 15), random(0, 59)],
-                [random(16, 19), random(0, 59)],
-                [random(20, 23), random(0, 59)],
+                `${random(8, 12).toString().padStart(2, 0)}:${random(0, 59).toString().padStart(2, 0)}`,
+                `${random(13, 17).toString().padStart(2, 0)}:${random(0, 59).toString().padStart(2, 0)}`,
+                `${random(18, 22).toString().padStart(2, 0)}:${random(0, 59).toString().padStart(2, 0)}`,
             ];
             config.dailyTradingHours = tradingHours;
             RewriteConfig(config);
@@ -1094,74 +1021,157 @@ const IsTimeToComprehensive = () =>
             tradingHours = config.dailyTradingHours;
         }
     }
-    const curTime = new Date();
-    const hours = curTime.getHours();
-    const minute = curTime.getMinutes();
-    let isTimeToComprehensive = false;
-    tradingHours.forEach((time) =>
+    const currentTimeString = new Date().toJSON().slice(11, 16)
+    tradingHours.map((time) =>
     {
-        if (time[0] == hours && time[1] == minute)
+        if (currentTimeString == time)
         {
-            isTimeToComprehensive = true;
-            console.log("当前时间：" + hours + ":" + minute);
-            console.log("综合提升时间为：" + time[0] + "时" + time[1] + "分");
+            console.log("到达随机交易时间");
+            return true;
         }
     });
-
-    const interval = (curTime.getTime() - lastTimeComprehensiveImprovement) / 3600000;
-    if (interval > 8 && isTimeToComprehensive)
-    {
-        lastTimeComprehensiveImprovement = curTime.getTime();
-        return true;
-    } else
-    {
-        return false;
-    }
+    return false;
 };
 
-let switchMapTime = parseFloat((Math.random() + 10).toFixed(2));
+let switchMapTime = parseFloat((Math.random() * 5 + 5).toFixed(2));
+
 let oneHourCheck = new Date().getTime()
-const InstanceFlow = () =>
+let checkCycle = parseFloat((Math.random() + 10).toFixed(2));
+
+const TimeChecker = () =>
 {
-    InstanceExceptionCheck();
-
-    if (IsTimeToComprehensive())
-    {
-        console.log("到达随机提升时间，开始提升。");
-
-        ComprehensiveImprovement_Instance();
-    }
-
     let curTime = new Date().getTime();
-    if ((curTime - oneHourCheck) / 3600000 > 1)
+    if ((curTime - oneHourCheck) / 36000000 < checkCycle)
     {
-        oneHourCheck = curTime;
-        const config = ReadConfig()
-        if (!config.daily.dailyInstance)
-        {
-            HangUpInstance()
-        }
-        else if (!config.daily.acceptDailyMission)
+        return;
+    }
+    console.log('--- 一小时检查 ---');
+    oneHourCheck = curTime;
+    checkCycle = parseFloat((Math.random() + 1).toFixed(2));
+    InstanceBranchManager()
+}
+
+const InstanceBranchManager = () =>
+{
+    const config = ReadConfig()
+    if (!config.daily.dailyInstance)
+    {
+        console.log("今日副本未完成，开始刷副本");
+        HangUpInstance()
+        return true;
+    }
+    let curTime = new Date().getTime();
+    const randomIndex = random(1, 100)
+    console.log(`副本分支索引为：${{ randomIndex }}`);
+
+    if (randomIndex < 33)
+    {
+        console.log("随机到{每日任务分支}");
+        if (!config.daily.acceptDailyMission)
         {
             DailyMission()
-            if ((curTime - lastTimeClickDailyMission) / 60000 > 30)
+        }
+        else
+        {
+            if (random(1, 100) < 50)
             {
-                console.log("30min 点击每日任务");
-                DailyMission();
-                lastTimeClickDailyMission = curTime;
+                console.log("随机到{秘密实验室分支}");
+
+                if (config.unlockTrade)
+                {
+                    if ((curTime - lastHangUpWildTime) / 3600000 >= switchMapTime)
+                    {
+                        console.log(`@${switchMapTime}小时，切换地图`);
+                        switchMapTime = parseFloat((Math.random() * 10 + 5).toFixed(2));
+                        lastHangUpWildTime = curTime
+                        HangUpSecretLab()
+                        return true;
+                    }
+                    else
+                    {
+                        console.log("未到切换地图时间");
+                    }
+                }
+                else
+                {
+                    console.log("为解开交易所,去野外挂机");
+                    console.log(`@${switchMapTime}小时，切换地图`);
+                    switchMapTime = parseFloat((Math.random() * 5 + 5).toFixed(2));
+                    lastHangUpWildTime = curTime
+                    HangUpWild()
+                }
+            }
+            else
+            {
+                console.log("随机到{野外挂机分支}");
+                if ((curTime - lastHangUpWildTime) / 3600000 >= switchMapTime)
+                {
+                    console.log(`@${switchMapTime}小时，切换地图`);
+                    switchMapTime = parseFloat((Math.random() * 5 + 5).toFixed(2));
+                    lastHangUpWildTime = curTime
+                    HangUpSecretLab()
+                    return true;
+                }
+                else
+                {
+                    console.log("未到切换地图时间");
+                }
+            }
+        }
+    }
+    else if (randomIndex >= 33 && randomIndex < 66)
+    {
+        console.log("随机到{秘密实验室分支}");
+
+        if (config.unlockTrade)
+        {
+            if ((curTime - lastHangUpWildTime) / 3600000 >= switchMapTime)
+            {
+                console.log(`@${switchMapTime}小时，切换地图`);
+                switchMapTime = parseFloat((Math.random() * 10 + 5).toFixed(2));
+                lastHangUpWildTime = curTime
+                HangUpSecretLab()
+                return true;
+            }
+            else
+            {
+                console.log("未到切换地图时间");
             }
         }
         else
         {
-            if ((curTime - lastHangUpWildTime) / 3600000 >= switchMapTime)
-            {
-                switchMapTime = parseFloat((Math.random() + 10).toFixed(2));
-                console.log(`@${switchMapTime}小时，切换地图`);
-                HangUpWild();
-            }
+            console.log("为解开交易所,去野外挂机");
+            console.log(`@${switchMapTime}小时，切换地图`);
+            switchMapTime = parseFloat((Math.random() * 5 + 5).toFixed(2));
+            lastHangUpWildTime = curTime
+            HangUpWild()
         }
     }
-
+    else
+    {
+        console.log("随机到{野外挂机分支}");
+        if ((curTime - lastHangUpWildTime) / 3600000 >= switchMapTime)
+        {
+            console.log(`@${switchMapTime}小时，切换地图`);
+            switchMapTime = parseFloat((Math.random() * 5 + 5).toFixed(2));
+            lastHangUpWildTime = curTime
+            HangUpSecretLab()
+            return true;
+        }
+        else
+        {
+            console.log("未到切换地图时间");
+        }
+    }
+}
+const InstanceFlow = () =>
+{
+    InstanceExceptionCheck();
+    TimeChecker();
+    if (TimeToTrade())
+    {
+        ComprehensiveImprovement_Instance();
+    }
 };
 
 module.exports = { InstanceFlow };

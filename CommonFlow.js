@@ -1194,8 +1194,6 @@ const IsExchangeUnLock = () =>
         specialConfig.initGameMode = "instance"
         RewriteConfig(config);
         GetSettlement()
-        // alert("成号", "交易所已解开");
-        // java.lang.System.exit(0);
     }
     else
     {
@@ -1274,6 +1272,7 @@ const JoinGuild = () =>
     RightOnJoinGuildImg.recycle();
     RecycleImgList(applyToJoinImgList);
     console.log("加入公会流程结束");
+    return isSuccess;
 };
 const GuildDonation = () =>
 {

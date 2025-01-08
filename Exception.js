@@ -376,6 +376,7 @@ const PickUpAbilityPoint = () =>
     RecycleImgList(lostEquipmentImgList);
     RecycleImgList(lostAbilityPointImgList);
 };
+
 let lastTimeOfResettingConfig = 1726208812345;
 
 let haveResetDailyConfig = false;
@@ -423,12 +424,9 @@ const ResetConfig = () =>
             {
                 console.log("每周一，重置周事件")
                 config.dailyTradingHours = [
-                    [random(0, 3), random(0, 59)],
-                    [random(4, 7), random(0, 59)],
-                    [random(8, 11), random(0, 59)],
-                    [random(12, 15), random(0, 59)],
-                    [random(16, 19), random(0, 59)],
-                    [random(20, 23), random(0, 59)],
+                    `${random(8, 12).toString().padStart(2, 0)}:${random(0, 59).toString().padStart(2, 0)}`,
+                    `${random(13, 17).toString().padStart(2, 0)}:${random(0, 59).toString().padStart(2, 0)}`,
+                    `${random(18, 22).toString().padStart(2, 0)}:${random(0, 59).toString().padStart(2, 0)}`,
                 ];
             }
             console.log("reset config")
