@@ -64,25 +64,27 @@ const NoPotionFlow = (shot) =>
         {
             if (FindBlueBtn([524, 581, 245, 94])) 
             {
-                Sleep(3);
+                Sleep(random(2, 100));
                 RandomPress([572, 611, 141, 29], 10);
                 console.log("死亡流程: 确认死亡");
             }
             if (FindBlueBtn([536, 415, 204, 77]))
             {
-                Sleep(3);
+                Sleep(random(2, 100));
                 RandomPress([568, 437, 151, 30], 10);
                 console.log("死亡流程: 确认死亡");
             }
         }
 
-        Sleep(delayTime);
+        Sleep(Sleep(random(3, 100)));
+
         if (IsBackpackFull())
         {
             globalTimePlay.lastTimeClearBackpack_haltMode = new Date().getTime();
             LoginProps();
             DecomposeEquipment("partial");
         }
+
         const buyPotionInterval = (new Date().getTime() - lastTimeOfBuyingPotion) / 60000;
         if (buyPotionInterval < 10) 
         {
@@ -92,7 +94,7 @@ const NoPotionFlow = (shot) =>
         else
         {
             console.log("回家买药水...");
-            const delayTime = random(0, 32);
+            const delayTime = random(1, 500);
             console.log("角色当前没有药水了 延迟" + delayTime + "s");
             BuyPotion();
             lastTimeOfBuyingPotion = new Date().getTime();
@@ -104,6 +106,7 @@ const NoPotionFlow_HaltMode = (shot) =>
     if (IsNoPotion(shot, [1145, 633, 51, 78]))
     {
         console.log("省电模式：没有药水");
+        Sleep(random(1, 500))
         ExitHaltMode();
         const deathBtn = DeathCheck();
         if (deathBtn)
@@ -400,7 +403,7 @@ const ResetConfig = () =>
             console.log(`早上${config.resetHour}:${minutes}点，重置每日事项`);
             config.game.today = today
 
-            config.resetHour = random(4, 12)
+            config.resetHour = random(8, 23)
 
             haveResetDailyConfig = true;
             haveResetDailyDiamond = false;
@@ -433,8 +436,6 @@ const ResetConfig = () =>
             RewriteConfig(config);
         }
     }
-
-
 };
 
 // *******************************************************************  确保在游戏中 *********************************************************************
@@ -467,14 +468,13 @@ const StovePopup = () =>
         const config = ReadConfig()
         try
         {
-            http.post(`http://47.76.112.107:8001/devices/${config.game.vm}/off`)
-
+            http.post(`http://47.76.112.107:8001/devices/${config.game.vm}/off`, {})
         }
         catch (error)
         {
             console.log(error);
         }
-        alert("游戏账户被封禁，", "检测到游戏账号被封禁")
+        alert("游戏账户被封禁，", "账号数据已删除")
         StopScript()
     }
     const agreeAllToContinue = text("全部同意後繼續（包含可選項目）").findOne(20);

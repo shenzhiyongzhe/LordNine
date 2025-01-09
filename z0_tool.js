@@ -23,6 +23,15 @@ const GetCaptureScreenPermission = () =>
 
 GetCaptureScreenPermission();
 
+const CopyApk = () =>
+{
+    const version = '1.9.3'
+    const originPath = `/sdcard/脚本/LordNine/build/lordnine_v${version}.apk`
+    const destinationPath = `/mnt/shared/Pictures/lordnine_v${version}.apk`
+    files.copy(originPath, destinationPath)
+}
+
+// CopyApk()
 
 // engines.stopAllAndToast();
 // java.lang.System.exit(0);

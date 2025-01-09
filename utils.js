@@ -1238,11 +1238,17 @@ const OpenBackpack = (type, sort) =>
         return false;
     }
     BackpackExceptionCheck();
-    sort = sort || false;
     if (FindMultiColors(BackpackDetailOnColorList, [1121, 98, 76, 41]))
     {
         console.log("背包整理打开了，点击关闭");
         RandomPress([1138, 113, 46, 14]);
+    }
+    sort = sort || false;
+
+    if (sort)
+    {
+        console.log("点击整理");
+        RandomPress([1097, 667, 16, 19]);
     }
     if (type == undefined)
     {
@@ -1285,11 +1291,7 @@ const OpenBackpack = (type, sort) =>
             RandomPress([1217, 450, 19, 19]);
         }
     }
-    if (sort)
-    {
-        console.log("点击整理");
-        RandomPress([1097, 667, 16, 19]);
-    }
+
     return true;
 };
 const OpenBackpackMenu = (type) =>

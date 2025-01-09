@@ -170,7 +170,10 @@ const HangUpInstance = () =>
     {
         return false;
     }
-    DailyQuest();
+    if (random(1, 100) < 10)
+    {
+        DailyQuest();
+    }
     const config = ReadConfig();
 
     if (!config.game.changeGameSetting)
@@ -556,7 +559,6 @@ const DailyMission = () =>
     ClickDailyMission();
 };
 
-
 const OpenMap = () =>
 {
     console.log("打开地图");
@@ -838,7 +840,11 @@ const randomMoveOperation = () =>
 const HangUpWild = () =>
 {
     console.log("fn: 去野外挂机");
-
+    if (random(1, 100) < 10)
+    {
+        DailyQuest();
+    }
+    const config = ReadConfig()
     if (mapName == null)
     {
         const combatPower = config.game.combatPower;
@@ -1062,7 +1068,7 @@ const InstanceBranchManager = () =>
     }
     let curTime = new Date().getTime();
     const randomIndex = random(1, 100)
-    console.log(`副本分支索引为：${{ randomIndex }}`);
+    console.log(`副本分支索引为：${JSON.stringify({ randomIndex })}`);
 
     if (randomIndex < 33)
     {
@@ -1077,34 +1083,23 @@ const InstanceBranchManager = () =>
             {
                 console.log("随机到{秘密实验室分支}");
 
-                if (config.unlockTrade)
+                if ((curTime - lastHangUpWildTime) / 3600000 >= switchMapTime || IsInCity())
                 {
-                    if ((curTime - lastHangUpWildTime) / 3600000 >= switchMapTime)
-                    {
-                        console.log(`@${switchMapTime}小时，切换地图`);
-                        switchMapTime = parseFloat((Math.random() * 10 + 5).toFixed(2));
-                        lastHangUpWildTime = curTime
-                        HangUpSecretLab()
-                        return true;
-                    }
-                    else
-                    {
-                        console.log("未到切换地图时间");
-                    }
+                    console.log(`@${switchMapTime}小时，切换地图`);
+                    switchMapTime = parseFloat((Math.random() * 10 + 5).toFixed(2));
+                    lastHangUpWildTime = curTime
+                    HangUpSecretLab()
+                    return true;
                 }
                 else
                 {
-                    console.log("为解开交易所,去野外挂机");
-                    console.log(`@${switchMapTime}小时，切换地图`);
-                    switchMapTime = parseFloat((Math.random() * 5 + 5).toFixed(2));
-                    lastHangUpWildTime = curTime
-                    HangUpWild()
+                    console.log("未到切换地图时间");
                 }
             }
             else
             {
                 console.log("随机到{野外挂机分支}");
-                if ((curTime - lastHangUpWildTime) / 3600000 >= switchMapTime)
+                if ((curTime - lastHangUpWildTime) / 3600000 >= switchMapTime || IsInCity())
                 {
                     console.log(`@${switchMapTime}小时，切换地图`);
                     switchMapTime = parseFloat((Math.random() * 5 + 5).toFixed(2));
@@ -1122,35 +1117,23 @@ const InstanceBranchManager = () =>
     else if (randomIndex >= 33 && randomIndex < 66)
     {
         console.log("随机到{秘密实验室分支}");
-
-        if (config.unlockTrade)
+        if ((curTime - lastHangUpWildTime) / 3600000 >= switchMapTime || IsInCity())
         {
-            if ((curTime - lastHangUpWildTime) / 3600000 >= switchMapTime)
-            {
-                console.log(`@${switchMapTime}小时，切换地图`);
-                switchMapTime = parseFloat((Math.random() * 10 + 5).toFixed(2));
-                lastHangUpWildTime = curTime
-                HangUpSecretLab()
-                return true;
-            }
-            else
-            {
-                console.log("未到切换地图时间");
-            }
+            console.log(`@${switchMapTime}小时，切换地图`);
+            switchMapTime = parseFloat((Math.random() * 10 + 5).toFixed(2));
+            lastHangUpWildTime = curTime
+            HangUpSecretLab()
+            return true;
         }
         else
         {
-            console.log("为解开交易所,去野外挂机");
-            console.log(`@${switchMapTime}小时，切换地图`);
-            switchMapTime = parseFloat((Math.random() * 5 + 5).toFixed(2));
-            lastHangUpWildTime = curTime
-            HangUpWild()
+            console.log("未到切换地图时间");
         }
     }
     else
     {
         console.log("随机到{野外挂机分支}");
-        if ((curTime - lastHangUpWildTime) / 3600000 >= switchMapTime)
+        if ((curTime - lastHangUpWildTime) / 3600000 >= switchMapTime || IsInCity())
         {
             console.log(`@${switchMapTime}小时，切换地图`);
             switchMapTime = parseFloat((Math.random() * 5 + 5).toFixed(2));

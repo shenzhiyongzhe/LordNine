@@ -1351,51 +1351,7 @@ const DecomposeEquipment = (type) =>
         }
 
     }
-    else if (type == "partial")
-    {
-        const weaponPageImgList = LoadImgList("backpack/equipmentPage/weapon");
-        console.log("取消武器分解");
-        for (let i = 0; i < 5; i++)
-        {
-            RandomPress([1091, 154, 39, 44]); // 武器页
-            if (FindImgInList(weaponPageImgList, [891, 34, 58, 42]))
-            {
-                break;
-            }
-        }
-        // 网格横纵间隔为57像素
-        const weaponPageShot = captureScreen();
-        out: for (let i = 0; i < 3; i++)
-        {
-            for (let j = 0; j < 4; j++)
-            {
-                if (IsEmpty([845 + j * 57, 80 + i * 57, 55, 55]))
-                {
-                    break out;
-                }
-                if (FindImgInList(selectedMarkImgList, [873 + j * 57, 75 + i * 57, 39, 30], weaponPageShot))
-                {
-                    RandomPress([857 + j * 57, 92 + i * 57, 34, 31]);
-                }
-            }
-        }
-        if (FindBlueBtn([376, 560, 233, 77]))
-        {
-            RandomPress([408, 581, 172, 37], 3);
-            for (let i = 0; i < 5; i++)
-            {
-                PressBlank();
-                if (HasBackpackMenuClose())
-                {
-                    break;
-                }
-                Sleep();
-            }
-            CloseBackpack();
-            console.log("分解部分装备结束");
-        }
-        RecycleImgList(weaponPageImgList);
-    }
+
     RecycleImgList(selectedMarkImgList);
 
     for (let i = 0; i < 10; i++)
@@ -1648,7 +1604,7 @@ const BuyPotion = () =>
 
 module.exports = {
     BuyCloak,
-    IsEmpty,
+    IsEmpty, getItemColor,
     OpenAllBox,
     OpenSkillBook, AutoReleaseSkill, CheckSkillAutoRelease,
     WearEquipments, StrengthenEquipment, DecomposeEquipment,

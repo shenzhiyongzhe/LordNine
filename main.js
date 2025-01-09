@@ -304,7 +304,7 @@ const stateFloaty = () =>
         </frame>
     );
     floaty_window.setPosition(0, 682);
-    floaty_window.switch.click(() => threads.shutDownAll());
+    floaty_window.switch.click(StopScript);
 };
 
 const Update = () =>

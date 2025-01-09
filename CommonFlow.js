@@ -27,7 +27,7 @@ const {
 
 } = require("./utils.js");
 
-const { IsEmpty, WearEquipments, StrengthenEquipment, OpenAllBox, UseHolyGrail, DecomposeEquipment, WearBestSuit, CheckSkillAutoRelease, BuyCloak, UnAutoPotion } = require("./Backpack.js");
+const { IsEmpty, WearEquipments, StrengthenEquipment, OpenAllBox, UseHolyGrail, DecomposeEquipment, WearBestSuit, CheckSkillAutoRelease, BuyCloak, UnAutoPotion, getItemColor } = require("./Backpack.js");
 
 let lastComprehensiveImproveTime = 1726208812345;
 
@@ -173,8 +173,6 @@ const GetMonsterKnowledgeAward = () =>
         Sleep(3);
     }
     PageBack();
-    console.log("领取怪物图鉴奖励完毕");
-
 };
 const GetPassAward = () =>
 {
@@ -479,11 +477,6 @@ const LoginProps = (type) =>
     else
     {
         console.log("可记录道具数量：" + hasItemToLogin);
-    }
-
-    if (type == "partial")
-    {
-        SetLoginSetting();
     }
 
     out: for (let i = 0; i < 15; i++)
@@ -1171,6 +1164,7 @@ const AddAttributePoint = () =>
     }
     RecycleImgList(abilityPointPlus);
 };
+
 const IsExchangeUnLock = () =>
 {
     console.log("检查交易所是否解开");
@@ -1512,9 +1506,10 @@ const FriendShipShop = () =>
     RewriteConfig(config);
     console.log("友好度商人购买结束");
 };
-const GetCurrentDiamond = () =>
+const GetCurrentDiamond = (sort) =>
 {
-    if (!OpenBackpack("gold"))
+    sort = sort || false;
+    if (!OpenBackpack("gold", sort))
     {
         console.log("打开背包失败，返回0");
         return 0;
@@ -1532,7 +1527,7 @@ const getOriginDate = () =>
 const GetSettlement = () =>
 {
     console.log("fn: 开始结算");
-    const beforeSettleDiamond = GetCurrentDiamond();
+    const beforeSettleDiamond = GetCurrentDiamond(true);
     let hadSettled = false;
     if (OpenMenu())
     {
@@ -1748,7 +1743,7 @@ const TradeGoods = () =>
 
     const sellText = LoadImgList("icon/font/trade/sell");
     const shelfMaxImgList = LoadImgList("icon/font/trade/shelfMax");
-
+    const tradableImgList = LoadImgList("page/trade/tradable")
     let isShelfMax = false;
     let loginCount = 0;
     Sleep();
@@ -1762,10 +1757,54 @@ const TradeGoods = () =>
         }
     };
 
-    const LoginItems = (directlySell) =>
+    const LoginMaterial = () =>
     {
-        directlySell = directlySell || false;
         let hasSellText;
+        for (let i = 0; i < tradableImgList.length; i++)
+        {
+            CloseSellPopup();
+            let haveTradable = FindImg(tradableImgList[i], [995, 147, 280, 288])
+            if (haveTradable)
+            {
+                RandomPress([haveTradable.x, haveTradable.y, 30, 30]);
+                hasSellText = FindImgInList(sellText, [930, 584, 80, 61]);
+                if (hasSellText)
+                {
+                    RandomPress([915, 599, 115, 28]); //贩售按钮
+                    WaitUntil(() => FindBlueBtn([549, 467, 182, 57]));
+
+                    if (FindNumber("sellPrice", [916, 254, 50, 35]) <= 10)
+                    {
+                        console.log("<<< 10");
+                        CloseSellPopup();
+                        continue;
+                    }
+
+                    RandomPress([577, 481, 126, 29]);
+                    if (WaitUntil(() => FindBlueBtn([547, 525, 186, 62])))
+                    {
+                        RandomPress([573, 542, 132, 27]);
+                        if (FindImgInList(shelfMaxImgList, [536, 96, 188, 55]))
+                        {
+                            console.log("上架数量已满");
+                            isShelfMax = true;
+                            return false;
+                        }
+                        else
+                        {
+                            console.log("上架物品成功");
+                            loginCount++;
+                        }
+                    }
+                }
+            }
+
+        }
+    };
+    const LoginEquipment = () =>
+    {
+        let hasSellText;
+        let currentColor = 'blue'
         for (let i = 0; i < 3; i++)
         {
             for (let j = 0; j < 4; j++)
@@ -1778,28 +1817,21 @@ const TradeGoods = () =>
                         return true;
                     }
                     CloseSellPopup();
-                    RandomPress([1016 + j * 66, 175 + i * 66, 38, 36]);
-                    hasSellText = FindImgInList(sellText, [930, 584, 80, 61]);
-                    if (hasSellText)
+                    if (currentColor == "blue")
                     {
-                        RandomPress([915, 599, 115, 28]); //贩售按钮
-                        WaitUntil(() => FindBlueBtn([549, 467, 182, 57]));
-                        let canSell = false;
-                        if (!directlySell)
+                        RandomPress([1016 + j * 66, 175 + i * 66, 38, 36]);
+                        currentColor = getItemColor([750, 162, 142, 93])
+                    }
+
+                    if (currentColor == "blue" || random(1, 100) < 4)
+                    {
+
+                        hasSellText = FindImgInList(sellText, [930, 584, 80, 61]);
+                        if (hasSellText)
                         {
-                            if (FindNumber("sellPrice", [916, 254, 50, 35]) <= 10)
-                            {
-                                console.log("<<< 10");
-                                CloseSellPopup();
-                                break;
-                            }
-                            else
-                            {
-                                canSell = true;
-                            }
-                        }
-                        if (directlySell || canSell)
-                        {
+                            RandomPress([915, 599, 115, 28]); //贩售按钮
+                            WaitUntil(() => FindBlueBtn([549, 467, 182, 57]));
+
                             RandomPress([577, 481, 126, 29]);
                             if (WaitUntil(() => FindBlueBtn([547, 525, 186, 62])))
                             {
@@ -1817,7 +1849,16 @@ const TradeGoods = () =>
                                 }
                             }
                         }
-
+                    }
+                    else 
+                    {
+                        console.log("鉴定失败：下一个");
+                        CloseSellPopup();
+                        if (HasPopupClose([1000, 111, 49, 44]))
+                        {
+                            RandomPress([1015, 121, 21, 25])
+                        }
+                        break
                     }
                 }
             }
@@ -1825,12 +1866,12 @@ const TradeGoods = () =>
     };
     //先上架材料
     RandomPress([1192, 121, 55, 27]);
-    LoginItems(false);
+    LoginMaterial();
     //然后上架武器
     if (!isShelfMax)
     {
         RandomPress([1106, 120, 51, 28]);
-        LoginItems(true);
+        LoginEquipment();
     }
     PageBack();
     for (let i = 0; i < 10; i++)
@@ -1850,6 +1891,7 @@ const TradeGoods = () =>
     RecycleImgList(sellText);
     RecycleImgList(shelfMaxImgList);
     RecycleImgList(lockImgList);
+    RecycleImgList(tradableImgList)
     return loginCount;
 };
 const PutOnSale = () =>
@@ -1861,14 +1903,28 @@ const PutOnSale = () =>
         return false;
     }
     GetSettlement();//结算过期上架物品
-    LoginProps();
-    DecomposeEquipment("partial");
+    if (random(1, 100) > 50)
+    {
+        LoginProps();
+    }
+    else
+    {
+        console.log("鉴定失败，不图鉴装备");
+    }
+    if (random(1, 100) > 50)
+    {
+        DecomposeEquipment("partial");
+    }
+    else
+    {
+        console.log("鉴定失败，不分解装备");
+    }
+
     TradeGoods();
-    if (random(1, 100) > 95)
+    if (random(1, 100) > 99)
     {
         console.log("5%概率执行，上架后鉴定与分解装备");
         LoginProps("total");
-        DecomposeEquipment("total");
     }
     globalTimePlay.lastTimeClearBackpack_haltMode = new Date().getTime()
 
@@ -1878,11 +1934,15 @@ const PutOnSale = () =>
 const GetCommonAward = () =>
 {
     GetEmail();
-    GetPassAward();
-    GetActivitiesAward();
-    GetMonsterKnowledgeAward();
-    GetTravelLogAward();
-    GetAchievement();
+    if (random(1, 100) > 50)
+    {
+        console.log("领取奖励鉴定成功");
+        GetPassAward();
+        GetActivitiesAward();
+        GetMonsterKnowledgeAward();
+        GetTravelLogAward();
+        GetAchievement();
+    }
 };
 const DailyQuest = () =>
 {
@@ -1890,19 +1950,19 @@ const DailyQuest = () =>
     GetCommonAward();
     const config = ReadConfig();
 
-    if (!config.daily.guildDonation)
+    if (random(1, 100) > 50 && !config.daily.guildDonation)
     {
         GuildDonation();
     }
-    if (!config.daily.friendshipDonation)
+    if (random(1, 100) > 50 && !config.daily.friendshipDonation)
     {
         FriendshipDonation();
     }
-    if (!config.daily.dailyShop)
+    if (random(1, 100) > 50 && !config.daily.dailyShop)
     {
         ShopBuy();
         const date = new Date()
-        if (date.getMonth() + 1 == 1 && date.getDate() > 8)
+        if (date.getMonth() + 1 == 1 && date.getDate() >= 8)
         {
             console.log("活动已过期，退出");
         }
@@ -1911,7 +1971,7 @@ const DailyQuest = () =>
             ShopExchange()
         }
     }
-    if (!config.daily.friendshipShop)
+    if (random(1, 100) > 50 && !config.daily.friendshipShop)
     {
         FriendShipShop();
     }
@@ -2220,12 +2280,11 @@ const needBuyCloak = () =>
         return false;
     }
 }
-
 const ComprehensiveImprovement = () =>
 {
     console.log("开始综合提升");
 
-    if ((new Date().getTime() - lastComprehensiveImproveTime) / 3600000 < 3)
+    if ((new Date().getTime() - lastComprehensiveImproveTime) / 3600000 < 1)
     {
         console.log("提升结束: 两次提升间隔较短，暂不操作");
         return true;
@@ -2279,49 +2338,56 @@ const ComprehensiveImprovement_Instance = () =>
 {
     const config = ReadConfig();
 
-    if (config.game.tradingTimes >= 2)
+    if (config.game.tradingTimes >= 1)
     {
-        console.log("今日已经提升两次，暂不提升");
-        return true;
+        if (random(1, 100) < 50)
+        {
+            console.log("鉴定失败，暂不提升");
+            return true;
+        }
     }
 
     if (IsHaltMode())
     {
         ExitHaltMode();
     }
-
+    if (random(1, 100) < 10)
+    {
+        DailyQuest();
+    }
     const isBackpackFull = IsBackpackFull(captureScreen());
     if (isBackpackFull)
     {
         console.log("副本提升：背包是满的，需要先清理背包");
-        LoginProps();
+        if (random(1, 100) > 50)
+        {
+            LoginProps();
+        }
         DecomposeEquipment();
     }
     const date = new Date();
     const today = date.getDate();
 
-    if ((today == config.manufacture[0] || today == config.manufacture[1]) && config.game.tradingTimes == 2)
+    if ((today == config.manufacture[0] || today == config.manufacture[1]) && config.game.tradingTimes == 1)
     {
         console.log("半月制作一次");
         IncreaseWeaponFeatures();
         MakeMaterial();
-        console.log("半月，切换模式为主线。")
-        // specialConfig.gameMode = "mainStory"
+        // console.log("半月，切换模式为主线。")
         ChangeGameSetting()
     }
 
-    const haveOpenedBox = OpenAllBox();
-    let needWearEquipment = false;
+    OpenAllBox();
     if (needBuyCloak())
     {
         WearEquipments()
         if (needBuyCloak())
         {
             BuyCloak()
-            needWearEquipment = true;
+            haveOpenedBox = true;
         }
     }
-    if (haveOpenedBox || needWearEquipment)
+    if (needWearEquipment())
     {
         WearEquipments()
         StrengthenEquipment()
@@ -2368,3 +2434,4 @@ module.exports = {
     ChangeAbility, GetEmail, GetAchievement, GetMonsterKnowledgeAward, LoginProps, DailyQuest, needWearEquipment,
     ShopBuy, ComprehensiveImprovement, ComprehensiveImprovement_Instance, StrengthenHorseEquipment, IncreaseWeaponFeatures, GuildDonation,
 };
+
