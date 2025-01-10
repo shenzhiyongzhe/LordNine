@@ -27,7 +27,7 @@ const {
 
 } = require("./utils.js");
 
-const { IsEmpty, WearEquipments, StrengthenEquipment, OpenAllBox, UseHolyGrail, DecomposeEquipment, WearBestSuit, CheckSkillAutoRelease, BuyCloak, UnAutoPotion, getItemColor } = require("./Backpack.js");
+const { IsEmpty, WearEquipments, StrengthenEquipment, OpenAllBox, UseHolyGrail, DecomposeEquipment, WearBestSuit, CheckSkillAutoRelease, BuyCloak, UnAutoPotion, getItemColor, AutoPotion } = require("./Backpack.js");
 
 let lastComprehensiveImproveTime = 1726208812345;
 
@@ -1518,6 +1518,7 @@ const GetCurrentDiamond = (sort) =>
     CloseBackpack();
     return diamond;
 };
+
 const getOriginDate = () =>
 {
     const arr = new Date().toJSON().split('T');
@@ -1707,7 +1708,6 @@ const GetSettlement = () =>
     {
         console.log(error);
     }
-    console.log(JSON.stringify(config))
     RewriteConfig(config);
 
 };
@@ -1743,7 +1743,7 @@ const TradeGoods = () =>
 
     const sellText = LoadImgList("icon/font/trade/sell");
     const shelfMaxImgList = LoadImgList("icon/font/trade/shelfMax");
-    const tradableImgList = LoadImgList("page/trade/tradable")
+    const tradableImgList_100p = LoadImgList("page/trade/tradable_100p")
     let isShelfMax = false;
     let loginCount = 0;
     Sleep();
@@ -1757,47 +1757,50 @@ const TradeGoods = () =>
         }
     };
 
-    const LoginMaterial = () =>
+    const LoginMaterial = (imgList, probability) =>
     {
         let hasSellText;
-        for (let i = 0; i < tradableImgList.length; i++)
+        for (let i = 0; i < imgList.length; i++)
         {
             CloseSellPopup();
-            let haveTradable = FindImg(tradableImgList[i], [995, 147, 280, 288])
-            if (haveTradable)
+            if (random(1, 100) > probability)
             {
-                RandomPress([haveTradable.x, haveTradable.y, 30, 30]);
-                hasSellText = FindImgInList(sellText, [930, 584, 80, 61]);
-                if (hasSellText)
+                let haveTradable = FindImg(imgList[i], [995, 147, 280, 288])
+                if (haveTradable)
                 {
-                    RandomPress([915, 599, 115, 28]); //贩售按钮
-                    WaitUntil(() => FindBlueBtn([549, 467, 182, 57]));
-
-                    if (FindNumber("sellPrice", [916, 254, 50, 35]) <= 10)
+                    RandomPress([haveTradable.x, haveTradable.y, 30, 30]);
+                    hasSellText = FindImgInList(sellText, [930, 584, 80, 61]);
+                    if (hasSellText)
                     {
-                        console.log("<<< 10");
-                        CloseSellPopup();
-                        continue;
-                    }
+                        RandomPress([915, 599, 115, 28]); //贩售按钮
+                        WaitUntil(() => FindBlueBtn([549, 467, 182, 57]));
 
-                    RandomPress([577, 481, 126, 29]);
-                    if (WaitUntil(() => FindBlueBtn([547, 525, 186, 62])))
-                    {
-                        RandomPress([573, 542, 132, 27]);
-                        if (FindImgInList(shelfMaxImgList, [536, 96, 188, 55]))
+                        if (FindNumber("sellPrice", [916, 254, 50, 35]) <= 10)
                         {
-                            console.log("上架数量已满");
-                            isShelfMax = true;
-                            return false;
+                            CloseSellPopup();
+                            continue;
                         }
-                        else
+
+                        RandomPress([577, 481, 126, 29]);
+                        if (WaitUntil(() => FindBlueBtn([547, 525, 186, 62])))
                         {
-                            console.log("上架物品成功");
-                            loginCount++;
+                            RandomPress([573, 542, 132, 27]);
+                            if (FindImgInList(shelfMaxImgList, [536, 96, 188, 55]))
+                            {
+                                console.log("上架数量已满");
+                                isShelfMax = true;
+                                return false;
+                            }
+                            else
+                            {
+                                console.log("上架物品成功");
+                                loginCount++;
+                            }
                         }
                     }
                 }
             }
+
 
         }
     };
@@ -1866,7 +1869,8 @@ const TradeGoods = () =>
     };
     //先上架材料
     RandomPress([1192, 121, 55, 27]);
-    LoginMaterial();
+
+    LoginMaterial(tradableImgList_100p, 100);
     //然后上架武器
     if (!isShelfMax)
     {
@@ -1891,7 +1895,7 @@ const TradeGoods = () =>
     RecycleImgList(sellText);
     RecycleImgList(shelfMaxImgList);
     RecycleImgList(lockImgList);
-    RecycleImgList(tradableImgList)
+    RecycleImgList(tradableImgList_100p)
     return loginCount;
 };
 const PutOnSale = () =>
@@ -1914,6 +1918,7 @@ const PutOnSale = () =>
     if (random(1, 100) > 50)
     {
         DecomposeEquipment("partial");
+        globalTimePlay.lastTimeClearBackpack_haltMode = new Date().getTime()
     }
     else
     {
@@ -1921,12 +1926,6 @@ const PutOnSale = () =>
     }
 
     TradeGoods();
-    if (random(1, 100) > 99)
-    {
-        console.log("5%概率执行，上架后鉴定与分解装备");
-        LoginProps("total");
-    }
-    globalTimePlay.lastTimeClearBackpack_haltMode = new Date().getTime()
 
     console.log("__物品上架结束");
 };
@@ -2338,11 +2337,11 @@ const ComprehensiveImprovement_Instance = () =>
 {
     const config = ReadConfig();
 
-    if (config.game.tradingTimes >= 1)
+    if (config.game.tradingTimes >= 2)
     {
         if (random(1, 100) < 50)
         {
-            console.log("鉴定失败，暂不提升");
+            console.log("鉴定失败，暂不交易");
             return true;
         }
     }
@@ -2368,52 +2367,53 @@ const ComprehensiveImprovement_Instance = () =>
     const date = new Date();
     const today = date.getDate();
 
-    if ((today == config.manufacture[0] || today == config.manufacture[1]) && config.game.tradingTimes == 1)
+    if ((today == config.manufacture[0] || today == config.manufacture[1]) && config.game.tradingTimes == 0)
     {
         console.log("半月制作一次");
         IncreaseWeaponFeatures();
         MakeMaterial();
-        // console.log("半月，切换模式为主线。")
-        ChangeGameSetting()
     }
-
-    OpenAllBox();
-    if (needBuyCloak())
+    if (random(1, 100) > 50)
     {
-        WearEquipments()
+        console.log("打开背包鉴定成功");
+        OpenAllBox();
         if (needBuyCloak())
         {
-            BuyCloak()
-            haveOpenedBox = true;
+            WearEquipments()
+            if (needBuyCloak())
+            {
+                BuyCloak()
+                haveOpenedBox = true;
+            }
         }
-    }
-    if (needWearEquipment())
-    {
-        WearEquipments()
-        StrengthenEquipment()
+        if (needWearEquipment())
+        {
+            WearEquipments()
+            StrengthenEquipment()
+        }
     }
 
     PutOnSale();
+
     console.log("副本模式下综合提升");
 
+    if (config.game.combatPower < 22500 && config.game.tradingTimes == 0)
+    {
+        UpgradeHolyRelics();
+    }
     //降低执行频率
-    if (date.getDay() == config.randomDayOfTheWeek)
+    if (date.getDay() == config.randomDayOfTheWeek && config.game.tradingTimes == 0)
     {
         console.log("@每周随机一天执行。");
+        ChangeGameSetting()
         UpgradeHolyRelics();
         StrengthenHorseEquipment();
         FusionSuit();
         WearBestSuit();
-        ChangeRecoverPotionPercentToNormal()
         UpgradeAbilityLevel()
-        ChangeRecoverPotionPercentToNormal();
-        let isSuccess = UnAutoPotion();
-        if (isSuccess)
-        {
-            console.log("关闭自动使用药水成功");
-            config.game.autoPotion = false;
-            RewriteConfig(config);
-        }
+
+        AutoPotion();
+
     }
 
     AddAttributePoint();

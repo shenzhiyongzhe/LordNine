@@ -25,6 +25,7 @@ const defaultConfig = {
         "name": '',
         "lv": 0,
         "autoPotion": false,
+        "normalPotionPercent": true,
         "diamond": 0,
         "monthlyIncome": 0,
         "dailyDiamond": 0,
@@ -210,6 +211,9 @@ const ChangeRecoverPotionPercentToMax = () =>
         swipe(360, 455, 470 + random(0, 30), 455, 200);
         Sleep();
         RandomPress([537, 327, 19, 24]);
+        const config = ReadConfig()
+        config.game.normalPotionPercent = false;
+        RewriteConfig(config)
         return true;
     }
     return false;
@@ -228,6 +232,9 @@ const ChangeRecoverPotionPercentToNormal = () =>
     {
         RandomPress([390, 450, 20, 10]);
         RandomPress([537, 327, 19, 24]);
+        const config = ReadConfig()
+        config.game.normalPotionPercent = true;
+        RewriteConfig(config)
         return true;
     }
     return false;
@@ -1064,7 +1071,8 @@ const IsMoving = () =>
     return isMoving;
 
 };
-const IsBackpackFull = (shot) => { shot = shot || captureScreen(); return FindMultiColors(BackpackFullColorList, [1144, 35, 39, 27], shot); };
+const backpackFullImgList = LoadImgList('backpack/backpackFull')
+const IsBackpackFull = (shot) => { shot = shot || captureScreen(); return FindImgInList(backpackFullImgList, [1145, 50, 35, 15], shot); };
 
 const noPotionImgList = LoadImgList("special/noPotion");
 const IsNoPotion = (shot, region) =>

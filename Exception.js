@@ -2,7 +2,7 @@
 
 const {
     globalTimePlay,
-    ClickSkip, ChangeHaltModeTime, ClearPage,
+    ClickSkip, ChangeHaltModeTime, ClearPage, CountDownFloaty,
     ExitHaltMode,
     FindImg, FindMultiColors, FindRedBtn, FindImgInList, FindBlueBtn, FindGoldBtn,
     GetVerificationCode,
@@ -64,19 +64,19 @@ const NoPotionFlow = (shot) =>
         {
             if (FindBlueBtn([524, 581, 245, 94])) 
             {
-                Sleep(random(2, 100));
+                Sleep(random(2, 300));
                 RandomPress([572, 611, 141, 29], 10);
                 console.log("死亡流程: 确认死亡");
             }
             if (FindBlueBtn([536, 415, 204, 77]))
             {
-                Sleep(random(2, 100));
+                Sleep(random(2, 300));
                 RandomPress([568, 437, 151, 30], 10);
                 console.log("死亡流程: 确认死亡");
             }
         }
 
-        Sleep(Sleep(random(3, 100)));
+        Sleep(Sleep(random(3, 500)));
 
         if (IsBackpackFull())
         {
@@ -88,7 +88,7 @@ const NoPotionFlow = (shot) =>
         const buyPotionInterval = (new Date().getTime() - lastTimeOfBuyingPotion) / 60000;
         if (buyPotionInterval < 10) 
         {
-            console.log("连续购买药水时间间隔小于10分钟，不重复购买");
+            console.log("不操作：连续购买药水时间间隔小于10分钟，不重复购买");
             return false;
         }
         else
@@ -130,15 +130,22 @@ const NoPotionFlow_HaltMode = (shot) =>
 
 const BackpackFlow_HaltMode = () =>
 {
-    if ((new Date().getTime() - globalTimePlay.lastTimeClearBackpack_haltMode) / 60000 > randomTimeToClearBackpack)
+    const date = new Date()
+    if ((date.getTime() - globalTimePlay.lastTimeClearBackpack_haltMode) / 60000 > randomTimeToClearBackpack)
     {
         console.log("到达随机清理背包时间。");
+        globalTimePlay.lastTimeClearBackpack_haltMode = date.getTime();
+        randomTimeToClearBackpack = random(160, 360);
+        if (date.getHours() < 7)
+        {
+            console.log("不在活动时间，不操作清理背包");
+            return true;
+        }
+
         if (IsHaltMode())
         {
             ExitHaltMode();
         }
-        globalTimePlay.lastTimeClearBackpack_haltMode = new Date().getTime();
-        randomTimeToClearBackpack = random(300, 240);
         LoginProps();
         DecomposeEquipment("partial");
     }
@@ -150,29 +157,35 @@ const BackpackFullFlow = (shot) =>
     if (isBackpackFull)
     {
         console.log("背包已满，开始清理背包");
-        if ((new Date().getTime() - globalTimePlay.lastTimeClearBackpack_haltMode) / 60000 > 10)
+        if (new Date().getHours() < 7)
         {
-            globalTimePlay.lastTimeClearBackpack_haltMode = new Date().getTime();
-            const config = ReadConfig()
-            if (!config.unlockTrade)
-            {
-                console.log("未完成主线，穿戴装备");
-                WearEquipments();
-                StrengthenEquipment();
-                LoginProps();
-            }
-            else
-            {
-                if (random(1, 100) > 70)
-                {
-                    LoginProps();
-                }
-            }
-
-            DecomposeEquipment("partial");
+            console.log("不在活动时间，不操作清理背包");
+            return true;
         }
     }
-};
+    if ((new Date().getTime() - globalTimePlay.lastTimeClearBackpack_haltMode) / 60000 > 10)
+    {
+        globalTimePlay.lastTimeClearBackpack_haltMode = new Date().getTime();
+        const config = ReadConfig()
+        if (!config.unlockTrade)
+        {
+            console.log("未完成主线，穿戴装备");
+            WearEquipments();
+            StrengthenEquipment();
+            LoginProps();
+        }
+        else
+        {
+            if (random(1, 100) > 70)
+            {
+                LoginProps();
+            }
+        }
+
+        DecomposeEquipment("partial");
+    }
+}
+
 
 const IsTimeout = () =>
 {
@@ -382,7 +395,7 @@ const PickUpAbilityPoint = () =>
 
 let lastTimeOfResettingConfig = 1726208812345;
 
-let haveResetDailyConfig = false;
+
 
 const ResetConfig = () =>
 {
@@ -403,7 +416,7 @@ const ResetConfig = () =>
             console.log(`早上${config.resetHour}:${minutes}点，重置每日事项`);
             config.game.today = today
 
-            config.resetHour = random(8, 23)
+            config.resetHour = random(8, 22)
 
             haveResetDailyConfig = true;
             haveResetDailyDiamond = false;

@@ -1332,26 +1332,24 @@ const DecomposeEquipment = (type) =>
                 }
             }
         }
-        if (FindBlueBtn([379, 562, 230, 79]))
+    }
+    if (FindBlueBtn([379, 562, 230, 79]))
+    {
+        RandomPress([415, 582, 137, 36], 3);
+
+        for (let i = 0; i < 5; i++)
         {
-            RandomPress([415, 582, 137, 36], 3);
-
-            for (let i = 0; i < 5; i++)
+            PressBlank();
+            if (HasBackpackMenuClose())
             {
-                PressBlank();
-                if (HasBackpackMenuClose())
-                {
-                    break;
-                }
-                Sleep();
+                break;
             }
-            CloseBackpack();
-            console.log("分解装备结束");
-
+            Sleep();
         }
+        CloseBackpack();
+        console.log("分解装备结束");
 
     }
-
     RecycleImgList(selectedMarkImgList);
 
     for (let i = 0; i < 10; i++)
@@ -1492,6 +1490,12 @@ const AutoPotion = () =>
     }
     RecycleImgList(autoPotionImgList);
     CloseBackpack();
+    if (isSuccess)
+    {
+        const config = ReadConfig()
+        config.game.autoPotion = true;
+        RewriteConfig(config)
+    }
     return isSuccess;
 };
 const UnAutoPotion = () =>
@@ -1525,6 +1529,12 @@ const UnAutoPotion = () =>
     }
     RecycleImgList(unAutoPotionImgList);
     CloseBackpack();
+    if (isSuccess)
+    {
+        const config = ReadConfig()
+        config.game.autoPotion = false;
+        RewriteConfig(config)
+    }
     return isSuccess;
 };
 const BuyPotion = () =>

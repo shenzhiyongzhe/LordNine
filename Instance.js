@@ -50,6 +50,7 @@ const {
     SwipeDown,
     SwipeLeft,
     SwipeRight,
+    ChangeRecoverPotionPercentToNormal,
 } = require("./utils");
 const { ComprehensiveImprovement_Instance, DailyQuest, LoginProps } = require("./CommonFlow");
 const { DecomposeEquipment } = require("./Backpack");
@@ -178,9 +179,14 @@ const HangUpInstance = () =>
 
     if (!config.game.changeGameSetting)
     {
+        console.log("没有修改设置");
         ChangeGameSetting();
     }
-
+    if (!config.game["normalPotionPercent"])
+    {
+        console.log("没有修改正常的药水使用百分比。");
+        ChangeRecoverPotionPercentToNormal()
+    }
     const hasEnterInstancePage = EnterMenuItemPage("instance");
     if (!hasEnterInstancePage)
     {
@@ -368,70 +374,74 @@ const AcceptDailyMission = () =>
             break;
         }
     }
-
-    console.log("接受周任务");
-
-    for (let i = 0; i < 5; i++)
+    const acceptWeeklyMissionProbability = 30;
+    if (random(1, 100) < acceptWeeklyMissionProbability)
     {
-        if (!FindImgInList(weeklyMissionIconImgList, [243, 119, 47, 187]))
+        console.log("接受周任务");
+
+        for (let i = 0; i < 5; i++)
         {
-            RandomPress([194, 78, 63, 16], 3);
-        }
-    }
-    let isCorrectNum = 0;
-    for (let i = 0; i < 3; i++)
-    {
-        if (isCorrectNum >= 3)
-        {
-            console.log("已检查周任务，已接受，返回");
-            break;
-        }
-        let weeklyMissionItemPoints = MatchTemplateList(weeklyMissionItem, [282, 122, 118, 518]);
-        for (let j = 0; j < weeklyMissionItemPoints.length; j++)
-        {
-            if (FindImgInList(inProgressImgList, [675, weeklyMissionItemPoints[j].y - 15, 80, 30]))
+            if (!FindImgInList(weeklyMissionIconImgList, [243, 119, 47, 187]))
             {
-                console.log("正在进行中");
-                isCorrectNum++;
-            } else if (FindImgInList(isCompleteImgList, [690, weeklyMissionItemPoints[j].y - 15, 80, 30]))
-            {
-                console.log("已完成");
-                isCorrectNum++;
-            } else
-            {
-                RandomPress([350, weeklyMissionItemPoints[j].y - 15, 300, 30]);
-                if (FindBlueBtn([1069, 645, 210, 62]))
-                {
-                    console.log("接受此周任务");
-                    RandomPress([1101, 661, 153, 31]);
-                    isCorrectNum++;
-                }
+                RandomPress([194, 78, 63, 16], 3);
             }
         }
-        //纠错，防止接受错误周任务
-        let inProgressPoints = MatchTemplateList(inProgressImgList, [677, 113, 96, 530]);
-        for (let k = 0; k < inProgressPoints.length; k++)
+        let isCorrectNum = 0;
+        for (let i = 0; i < 3; i++)
         {
-            if (FindImgInList(weeklyMissionItem, [285, inProgressPoints[k].y + 5, 100, 30]))
+            if (isCorrectNum >= 3)
             {
-                console.log("检查周任务：正确");
-            } else
+                console.log("已检查周任务，已接受，返回");
+                break;
+            }
+            let weeklyMissionItemPoints = MatchTemplateList(weeklyMissionItem, [282, 122, 118, 518]);
+            for (let j = 0; j < weeklyMissionItemPoints.length; j++)
             {
-                console.log("接受错误周任务");
-                RandomPress([285, inProgressPoints[k].y - 10, 300, 30]);
-                if (FindImgInList(weeklyMissionGoalImgList, [781, 249, 248, 62]))
+                if (FindImgInList(inProgressImgList, [675, weeklyMissionItemPoints[j].y - 15, 80, 30]))
                 {
-                    console.log("是周任务，不需要放弃");
+                    console.log("正在进行中");
                     isCorrectNum++;
-                } else if (FindRedBtn([1072, 647, 202, 59]))
+                } else if (FindImgInList(isCompleteImgList, [690, weeklyMissionItemPoints[j].y - 15, 80, 30]))
                 {
-                    console.log("点击放弃");
-                    RandomPress([1097, 659, 158, 32]);
+                    console.log("已完成");
+                    isCorrectNum++;
+                } else
+                {
+                    RandomPress([350, weeklyMissionItemPoints[j].y - 15, 300, 30]);
+                    if (FindBlueBtn([1069, 645, 210, 62]))
+                    {
+                        console.log("接受此周任务");
+                        RandomPress([1101, 661, 153, 31]);
+                        isCorrectNum++;
+                    }
                 }
             }
+            //纠错，防止接受错误周任务
+            let inProgressPoints = MatchTemplateList(inProgressImgList, [677, 113, 96, 530]);
+            for (let k = 0; k < inProgressPoints.length; k++)
+            {
+                if (FindImgInList(weeklyMissionItem, [285, inProgressPoints[k].y + 5, 100, 30]))
+                {
+                    console.log("检查周任务：正确");
+                } else
+                {
+                    console.log("接受错误周任务");
+                    RandomPress([285, inProgressPoints[k].y - 10, 300, 30]);
+                    if (FindImgInList(weeklyMissionGoalImgList, [781, 249, 248, 62]))
+                    {
+                        console.log("是周任务，不需要放弃");
+                        isCorrectNum++;
+                    } else if (FindRedBtn([1072, 647, 202, 59]))
+                    {
+                        console.log("点击放弃");
+                        RandomPress([1097, 659, 158, 32]);
+                    }
+                }
+            }
+            SwipeSlowly([450, 500, 10, 10], [450, 300, 10, 10], 2);
         }
-        SwipeSlowly([450, 500, 10, 10], [450, 300, 10, 10], 2);
     }
+
 
     RecycleImgList(dailyMissionItem);
     RecycleImgList(weeklyMissionItem);
@@ -891,6 +901,11 @@ const HangUpWild = () =>
     {
         PressToAuto();
         console.log("去野外挂机成功");
+        if (!config.game["normalPotionPercent"])
+        {
+            console.log("没有修改正常的药水使用百分比。");
+            ChangeRecoverPotionPercentToNormal()
+        }
         EnterHaltMode();
         return true;
     } else
@@ -1042,7 +1057,7 @@ const TimeToTrade = () =>
 let switchMapTime = parseFloat((Math.random() * 5 + 5).toFixed(2));
 
 let oneHourCheck = new Date().getTime()
-let checkCycle = parseFloat((Math.random() + 10).toFixed(2));
+let checkCycle = parseFloat((Math.random() + 1).toFixed(2));
 
 const TimeChecker = () =>
 {
@@ -1051,7 +1066,7 @@ const TimeChecker = () =>
     {
         return;
     }
-    console.log('--- 一小时检查 ---');
+    console.log(`--- 一小时检查,检查间隔为:${checkCycle} ---`);
     oneHourCheck = curTime;
     checkCycle = parseFloat((Math.random() + 1).toFixed(2));
     InstanceBranchManager()
@@ -1083,7 +1098,7 @@ const InstanceBranchManager = () =>
             {
                 console.log("随机到{秘密实验室分支}");
 
-                if ((curTime - lastHangUpWildTime) / 3600000 >= switchMapTime || IsInCity())
+                if (((curTime - lastHangUpWildTime) / 3600000 >= switchMapTime && new Date().getHours() > 7) || IsInCity())
                 {
                     console.log(`@${switchMapTime}小时，切换地图`);
                     switchMapTime = parseFloat((Math.random() * 10 + 5).toFixed(2));
@@ -1099,7 +1114,7 @@ const InstanceBranchManager = () =>
             else
             {
                 console.log("随机到{野外挂机分支}");
-                if ((curTime - lastHangUpWildTime) / 3600000 >= switchMapTime || IsInCity())
+                if (((curTime - lastHangUpWildTime) / 3600000 >= switchMapTime && new Date().getHours() > 7) || IsInCity())
                 {
                     console.log(`@${switchMapTime}小时，切换地图`);
                     switchMapTime = parseFloat((Math.random() * 5 + 5).toFixed(2));
@@ -1117,7 +1132,7 @@ const InstanceBranchManager = () =>
     else if (randomIndex >= 33 && randomIndex < 66)
     {
         console.log("随机到{秘密实验室分支}");
-        if ((curTime - lastHangUpWildTime) / 3600000 >= switchMapTime || IsInCity())
+        if (((curTime - lastHangUpWildTime) / 3600000 >= switchMapTime && new Date().getHours() > 7) || IsInCity())
         {
             console.log(`@${switchMapTime}小时，切换地图`);
             switchMapTime = parseFloat((Math.random() * 10 + 5).toFixed(2));
@@ -1133,7 +1148,7 @@ const InstanceBranchManager = () =>
     else
     {
         console.log("随机到{野外挂机分支}");
-        if ((curTime - lastHangUpWildTime) / 3600000 >= switchMapTime || IsInCity())
+        if (((curTime - lastHangUpWildTime) / 3600000 >= switchMapTime && new Date().getHours() > 7) || IsInCity())
         {
             console.log(`@${switchMapTime}小时，切换地图`);
             switchMapTime = parseFloat((Math.random() * 5 + 5).toFixed(2));
@@ -1158,3 +1173,4 @@ const InstanceFlow = () =>
 };
 
 module.exports = { InstanceFlow };
+
