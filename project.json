@@ -13,7 +13,7 @@
         "build_time": 0
     },
     "useFeatures": [],
-    "icon": "res/logo_2.png",
+    "icon": "res/logo.ico",
     "ignoredDirs": ["build", ".git", ".vscode", ".keyStore"],
     "encrypt-code": false,
     "launchConfig": {
@@ -30,8 +30,8 @@
     },
     "libs": ["libopencv_java4.so", "libc++_shared.so", "libjackpal-androidterm5.so", "libjackpal-termexec2.so"],
     "main": "main.js",
-    "name": "lordnine",
-    "outputPath": "/storage/emulated/0/脚本/LordNine/build",
+    "name": "LN",
+    "outputPath": "/mnt/shared/Pictures/LordNine/",
     "packageName": "com.lordnine",
     "projectDirectory": "/storage/emulated/0/脚本/LordNine",
     "scripts": {},
@@ -41,5 +41,5 @@
     },
     "sourcePath": "/storage/emulated/0/脚本/LordNine/main.js",
     "versionCode": 28,
-    "versionName": "1.10.2"
+    "versionName": "1.13.1"
 }

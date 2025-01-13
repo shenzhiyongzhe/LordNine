@@ -98,7 +98,7 @@ const GetCaptureScreenPermission = () =>
     });
     threads.start(function ()
     {
-        let hasOpen = textMatches(/(.*시작하기.*|.*立即开始.*)/).findOne(10000);
+        let hasOpen = textMatches(/(.*시작하기.*|.*立即开始.*)/).findOne(600000);
         if (hasOpen)
         {
             hasOpen.click();

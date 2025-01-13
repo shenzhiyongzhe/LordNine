@@ -1377,13 +1377,13 @@ const RecycleImgList = (list) => list.forEach(img => img.recycle());
 /**
  * 
  * @param {*} func 执行函数
- * @param {*} frequence 执行频率，单位毫秒 默认1500
+ * @param {*} frequency 执行频率，单位毫秒 默认1500
  * @param {*} loopTime  循环次数 默认20次
  * @returns 
  */
-const WaitUntil = (func, frequence, loopTime) =>
+const WaitUntil = (func, frequency, loopTime) =>
 {
-    frequence = frequence || 1500;
+    frequency = frequency || 1500;
     loopTime = loopTime || 20;
     for (let i = 0; i < loopTime; i++)
     {
@@ -1391,7 +1391,7 @@ const WaitUntil = (func, frequence, loopTime) =>
         {
             return true;
         }
-        sleep(frequence);
+        sleep(frequency);
     }
     return false;
 };

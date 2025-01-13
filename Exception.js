@@ -186,7 +186,6 @@ const BackpackFullFlow = (shot) =>
     }
 }
 
-
 const IsTimeout = () =>
 {
     app.launch("fun.kitsunebi.kitsunebi4android");
@@ -229,7 +228,7 @@ const DisconnectionFlow = (shot) =>
                 console.log("vpn is time out");
                 alert("time out", "需要更换ip");
             }
-            CountDownFloaty(delayTime)
+            threads.start(() => CountDownFloaty(delayTime))
             Sleep(delayTime);
             LaunchGame();
             const config = ReadConfig();
@@ -435,7 +434,11 @@ const ResetConfig = () =>
             config.daily.friendshipDonation = false;
             config.daily.dailyShop = false;
             config.daily.friendshipShop = false;
-
+            config.dailyTradingHours = [
+                `${random(8, 12).toString().padStart(2, 0)}:${random(0, 59).toString().padStart(2, 0)}`,
+                `${random(13, 17).toString().padStart(2, 0)}:${random(0, 59).toString().padStart(2, 0)}`,
+                `${random(18, 22).toString().padStart(2, 0)}:${random(0, 59).toString().padStart(2, 0)}`,
+            ];
             if (date.getDay() == 1)
             {
                 console.log("每周一，重置周事件")

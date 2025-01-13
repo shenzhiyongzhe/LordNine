@@ -259,7 +259,7 @@ const HangUpInstance = () =>
     {
         config.daily.dailyInstance = true;
         instance_mode = "dailyMission";
-        console.log("没有副本可以进入，开始每日任务");
+        console.log("没有副本可以进入，更新配置：每日副本完成。开始每日任务");
         PageBack();
         for (let i = 0; i < 10; i++)
         {
@@ -1069,6 +1069,9 @@ const TimeChecker = () =>
     console.log(`--- 一小时检查,检查间隔为:${checkCycle} ---`);
     oneHourCheck = curTime;
     checkCycle = parseFloat((Math.random() + 1).toFixed(2));
+    const config = ReadConfig()
+    tradingHours = config.dailyTradingHours;
+
     InstanceBranchManager()
 }
 

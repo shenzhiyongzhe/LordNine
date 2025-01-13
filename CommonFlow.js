@@ -23,8 +23,6 @@ const {
     UpdateTradeRecord,
     ChangeRecoverPotionPercentToNormal,
     ChangeGameSetting,
-
-
 } = require("./utils.js");
 
 const { IsEmpty, WearEquipments, StrengthenEquipment, OpenAllBox, UseHolyGrail, DecomposeEquipment, WearBestSuit, CheckSkillAutoRelease, BuyCloak, UnAutoPotion, getItemColor, AutoPotion } = require("./Backpack.js");
@@ -190,13 +188,32 @@ const GetPassAward = () =>
         PageBack();
         return false;
     }
+    else
+    {
+        console.log("已进入通行证页面");
+    }
     if (FindBlueBtn([749, 244, 202, 72]))
     {
         RandomPress([770, 265, 158, 31], 5);
         PressBlank();
-        PageBack();
-        console.log("领取通行证奖励结束");
-        return true;
+    }
+    if (FindTipPoint([445, 75, 28, 27]))
+    {
+        RandomPress([282, 86, 172, 33])
+        if (FindBlueBtn([749, 244, 202, 72]))
+        {
+            RandomPress([770, 265, 158, 31], 5);
+            PressBlank();
+        }
+    }
+    if (random(1, 100) > 70)
+    {
+        RandomPress([520, 84, 171, 33])
+        if (FindBlueBtn([749, 244, 202, 72]))
+        {
+            RandomPress([770, 265, 158, 31], 5);
+            PressBlank();
+        }
     }
     PageBack();
     return false;
@@ -1933,15 +1950,18 @@ const PutOnSale = () =>
 const GetCommonAward = () =>
 {
     GetEmail();
-    if (random(1, 100) > 50)
+    GetActivitiesAward();
+    const commonAwardQuest = [GetPassAward, GetAchievement, GetMonsterKnowledgeAward, GetTravelLogAward,]
+    for (let i = 0; i < commonAwardQuest.length; i++)
     {
-        console.log("领取奖励鉴定成功");
-        GetPassAward();
-        GetActivitiesAward();
-        GetMonsterKnowledgeAward();
-        GetTravelLogAward();
-        GetAchievement();
+        let rand = random(1, 100)
+        if (rand > 50)
+        {
+            console.log("领取奖励鉴定成功");
+            commonAwardQuest[i]()
+        }
     }
+
 };
 const DailyQuest = () =>
 {
@@ -1960,15 +1980,6 @@ const DailyQuest = () =>
     if (random(1, 100) > 50 && !config.daily.dailyShop)
     {
         ShopBuy();
-        const date = new Date()
-        if (date.getMonth() + 1 == 1 && date.getDate() >= 8)
-        {
-            console.log("活动已过期，退出");
-        }
-        else
-        {
-            ShopExchange()
-        }
     }
     if (random(1, 100) > 50 && !config.daily.friendshipShop)
     {
@@ -2352,6 +2363,7 @@ const ComprehensiveImprovement_Instance = () =>
     }
     if (random(1, 100) < 10)
     {
+        console.log("@鉴定成功：每日领取");
         DailyQuest();
     }
     const isBackpackFull = IsBackpackFull(captureScreen());
@@ -2375,7 +2387,7 @@ const ComprehensiveImprovement_Instance = () =>
     }
     if (random(1, 100) > 50)
     {
-        console.log("打开背包鉴定成功");
+        console.log("@鉴定成功:开箱子");
         OpenAllBox();
         if (needBuyCloak())
         {
@@ -2434,4 +2446,3 @@ module.exports = {
     ChangeAbility, GetEmail, GetAchievement, GetMonsterKnowledgeAward, LoginProps, DailyQuest, needWearEquipment,
     ShopBuy, ComprehensiveImprovement, ComprehensiveImprovement_Instance, StrengthenHorseEquipment, IncreaseWeaponFeatures, GuildDonation,
 };
-

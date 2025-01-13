@@ -474,21 +474,48 @@ const WearBestSuit = () =>
         ["#2f425b", [[-2, 17, "#3d5273"], [-4, 29, "#334662"], [71, -2, "#243348"], [77, 18, "#344763"]]],
         ["#2f405b", [[-2, 11, "#31455f"], [-4, 21, "#364a69"], [64, -7, "#1f2c40"], [75, 17, "#394f6e"]]]
     ];
+
     Sleep();
     if (FindBlueBtn([1037, 656, 185, 61]))
     {
         console.log("点击穿戴");
         RandomPress([1063, 671, 134, 29]);
     }
+
     const HasBlueSuit = (region, shot) => FindMultiColors(BlueSuitColorList, region, shot);
     const shot = captureScreen();
-    let currentDefense = FindNumber("combatPower", [67, 236, 54, 37]);
-
-    out: for (let i = 0; i < 3; i++)
+    let currentDefense = FindNumber("combatPower", [67, 236, 54, 37], shot);
+    const config = ReadConfig()
+    const epicSuit = LoadImgList("page/suit/epic")
+    if (config.game.lv >= 57)
     {
+        console.log("等级大于57，查看是否有紫装");
+        for (let i = 0; i < 2; i++)
+        {
+            RandomPress([1003 + i * 107, 209, 72, 84], 2)
+            if (FindImgInList(epicSuit, [61, 107, 55, 51]))
+            {
+                console.log("$$$ 发现紫色时装，点击穿戴。$$$");
+                let defense = FindNumber("combatPower", [67, 236, 54, 37]);
+                console.log("防御力加成为：" + defense);
+                if (currentDefense >= 0 && defense >= currentDefense)
+                {
+                    if (FindBlueBtn([1037, 656, 185, 61]))
+                    {
+                        console.log("此时装品质更好，点击穿戴");
+                        RandomPress([1063, 671, 134, 29]);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    else
+    {
+        console.log("等级小于57级");
         for (let j = 0; j < 3; j++)
         {
-            let hasBlueSuit = HasBlueSuit([875 + j * 107, 160 + i * 178, 110, 100], shot);
+            let hasBlueSuit = HasBlueSuit([875 + j * 107, 160, 110, 100], shot);
             if (hasBlueSuit)
             {
                 RandomPress([hasBlueSuit.x, hasBlueSuit.y, 60, 60]);
@@ -500,13 +527,13 @@ const WearBestSuit = () =>
                     {
                         console.log("此时装品质更好，点击穿戴");
                         RandomPress([1063, 671, 134, 29]);
-                        break out;
+                        break;
                     }
                 }
-
             }
         }
     }
+    RecycleImgList(epicSuit)
 
     PageBack();
     for (let i = 0; i < 10; i++)
@@ -1612,12 +1639,13 @@ const BuyPotion = () =>
 
 };
 
-module.exports = {
-    BuyCloak,
-    IsEmpty, getItemColor,
-    OpenAllBox,
-    OpenSkillBook, AutoReleaseSkill, CheckSkillAutoRelease,
-    WearEquipments, StrengthenEquipment, DecomposeEquipment,
-    UseHolyGrail, WearBestSuit,
-    AutoPotion, UnAutoPotion, BuyPotion,
-};
+// module.exports = {
+//     BuyCloak,
+//     IsEmpty, getItemColor,
+//     OpenAllBox,
+//     OpenSkillBook, AutoReleaseSkill, CheckSkillAutoRelease,
+//     WearEquipments, StrengthenEquipment, DecomposeEquipment,
+//     UseHolyGrail, WearBestSuit,
+//     AutoPotion, UnAutoPotion, BuyPotion,
+// };
+OpenAllBox()
