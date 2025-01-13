@@ -7,6 +7,7 @@ const {
     Sleep, SwipeSlowly, SetCountryAndBirth,
     RecycleImgList,
     StopScript,
+    StopGame,
 } = require("./utils.js");
 
 const { ListenServerFlow } = require("./ListenServer.js");
@@ -1097,6 +1098,7 @@ const LoginFlow = () =>
         {
             ClickConfirmBtn();
             console.log("装置绑定完成");
+            StopGame()
             alert("邮箱接码完成", "接码完成")
             StopScript()
             break;

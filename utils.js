@@ -1126,7 +1126,6 @@ const ExitHaltMode = () =>
     console.log("退出节电模式失败");
     return false;
 };
-const LaunchGame = () => app.launch("com.smilegate.lordnine.stove.google");
 
 const HaveToTapBlank = (region, shot) => { shot = shot || captureScreen(); return FindImgInList(tapBlankImgList, region); };
 const TapBlankToContinue = (shot) =>
@@ -1597,11 +1596,11 @@ const RewriteConfig = (config) =>
     mirrorConfig = config;
     files.write(configFile, JSON.stringify(config, null, 2));
 };
-const RestartGame = (packageName, time) =>
+const gamePackageName = "com.smilegate.lordnine.stove.google"
+const StopGame = () =>
 {
-    log("强制停止:" + packageName);
-    const appName = app.getAppName(packageName);
-    app.openAppSetting(packageName);
+    const appName = app.getAppName(gamePackageName);
+    app.openAppSetting(gamePackageName);
     text(appName).waitFor();
     let is_sure = textMatches(/.*강.*|.*종.*|.*료.*|.*FORCE.*|.*STOP.*|.*强.*|.*止.*|.*结.*|.*行.*/).findOne();
     if (is_sure.enabled())
@@ -1613,13 +1612,17 @@ const RestartGame = (packageName, time) =>
         back();
     }
     home();
+}
+const LaunchGame = () => app.launch(gamePackageName);
+
+const RestartGame = (time) =>
+{
+    StopGame()
     time = time || random(60, 300);
     console.log("强制停止后的延迟启动时间：" + time);
     Sleep(time);
-    app.launch(packageName);
+    LaunchGame()
 };
-
-
 
 const ChangeHaltModeTime = () =>
 {
@@ -2065,7 +2068,7 @@ module.exports = {
     PageBack, PressBlank, PullDownSkill, PressToAuto,
     RandomPress, ReadImg, ReturnHome, RestartGame, RecycleImgList, ReadConfig, RewriteConfig, ReadDealRecord, ReadAccountFile, ReadDailyDiamondRecord, ReadTradeRecord,
     UpdateTradeRecord,
-    Sleep, SwipeSlowly, StopScript, SetCountryAndBirth, SwipeUp, SwipeDown, SwipeLeft, SwipeRight,
+    Sleep, SwipeSlowly, StopScript, SetCountryAndBirth, SwipeUp, SwipeDown, SwipeLeft, SwipeRight, StopGame,
     WaitUntil, WaitUntilMenu, WaitUntilPageBack, WaitUntilFindColor,
 };
 

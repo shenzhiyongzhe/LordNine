@@ -187,7 +187,7 @@ const OpenSuit = () =>
     ];
     const IsJumpAnimation = () => FindMultiColors(JumpAnimationColorList, [12, 657, 49, 54]);
 
-    const suitImgList = LoadImgList("backpack/suit");
+    const suitImgList = LoadImgList("backpack/card/suit");
     const unableToUse = LoadImgList("backpack/unableToUse");
 
     const swipeToConfirmImgList = LoadImgList("icon/font/swipeToConfirm");
@@ -250,7 +250,52 @@ const OpenSuit = () =>
     RecycleImgList(suitImgList)
     return hadOpenSuit;
 };
-
+const OpenRune = () =>
+{
+    console.log("打开符文抽卡");
+    if (!OpenBackpack("props"))
+    {
+        console.log("打开背包失败，退出");
+        return false;
+    }
+    const runeImgList = LoadImgList("backpack/card/rune")
+    for (let i = 0; i < runeImgList.length; i++)
+    {
+        let haveRune = FindImg(runeImgList[i], [924, 274, 268, 334])
+        if (haveRune)
+        {
+            RandomPress([haveRune.x, haveRune.y, 30, 30], 4)
+            RandomPress([haveRune.x, haveRune.y, 30, 30], 4)
+            if (FindBlueBtn([640, 504, 186, 62]))
+            {
+                RandomPress([672, 522, 128, 29], 3)
+            }
+            ClickSkip()
+            if (WaitUntil(() => FindBlueBtn([510, 629, 260, 80])))
+            {
+                RandomPress([538, 650, 210, 38], 3)
+                RandomPress([538, 650, 210, 38], 3)
+            }
+        }
+    }
+    RecycleImgList(runeImgList)
+    for (let i = 0; i < 10; i++)
+    {
+        if (HasMenu())
+        {
+            return true;
+        }
+        else if (FindBlueBtn([647, 506, 174, 58]))
+        {
+            RandomPress([672, 519, 127, 32])
+        }
+        else if (FindBlueBtn([511, 636, 262, 67]))
+        {
+            RandomPress([540, 651, 209, 36])
+        }
+        Sleep()
+    }
+}
 const UseHolyGrail = () =>
 {
     console.log("开始使用圣杯");
@@ -277,7 +322,58 @@ const UseHolyGrail = () =>
     RecycleImgList(holyGrailImgList);
     return hasUsedHolyGrail;
 };
+const OpenActivityBox = () =>
+{
+    console.log("fn: 打开道具箱子");
+    if (!OpenBackpack("props"))
+    {
+        return false;
+    }
+    const PropsImgList = LoadImgList('backpack/box/activityBox', 30);
+    const openBoxPopupImgList = LoadImgList("backpack/box/font/openBoxPopup");
 
+    let hasOpenPropsBox = false;
+    let hasPropsBox = null;
+    let shot = captureScreen();
+    for (let i = 0; i < 5; i++)
+    {
+        hasPropsBox = FindImgInList(PropsImgList, [926, 150, 265, 454], shot);
+        if (hasPropsBox)
+        {
+            RandomPress([hasPropsBox.x, hasPropsBox.y, 30, 30]);
+            RandomPress([hasPropsBox.x, hasPropsBox.y, 30, 30]);
+            if (IsMultipleBox())
+            {
+                RandomPress([666, 520, 138, 30]);
+            }
+            console.log("等待弹窗出现。");
+            if (WaitUntil(() => FindImgInList(openBoxPopupImgList, [552, 150, 171, 94])))
+            {
+                RandomPress([479, 357, 303, 192], 2);//press blank
+                console.log("open successfully");
+                hasOpenPropsBox = true;
+                shot = captureScreen();
+            }
+        }
+        else
+        {
+            hasOpenPropsBox = false;
+        }
+        if (!hasOpenPropsBox)
+        {
+            break;
+        }
+        Sleep();
+    }
+
+    RecycleImgList(PropsImgList);
+    RecycleImgList(openBoxPopupImgList);
+    if (IsMultipleBox())
+    {
+        RandomPress([666, 520, 138, 30]);
+    }
+    return hasOpenPropsBox;
+};
 const OpenNoOptionBox = () =>
 {
     console.log("fn: 打开道具箱子");
@@ -310,7 +406,6 @@ const OpenNoOptionBox = () =>
                 hasOpenPropsBox = true;
                 shot = captureScreen();
             }
-
         }
         else
         {
@@ -432,13 +527,17 @@ const OpenAllBox = () =>
         return false;
     }
     Sleep();
-
+    OpenActivityBox()
     const haveOpenProps = OpenNoOptionBox();
     const haveOpenOptionalBox = OpenOptionalBox();
     const hasOpenSkill = OpenSkillBook();
     const hasOpenSuit = OpenSuit();
 
     UseHolyGrail();
+    if (random(1, 100) > 70)
+    {
+        OpenRune()
+    }
     Sleep();
     console.log("结束：已打开所有箱子");
 
@@ -1639,13 +1738,12 @@ const BuyPotion = () =>
 
 };
 
-// module.exports = {
-//     BuyCloak,
-//     IsEmpty, getItemColor,
-//     OpenAllBox,
-//     OpenSkillBook, AutoReleaseSkill, CheckSkillAutoRelease,
-//     WearEquipments, StrengthenEquipment, DecomposeEquipment,
-//     UseHolyGrail, WearBestSuit,
-//     AutoPotion, UnAutoPotion, BuyPotion,
-// };
-OpenAllBox()
+module.exports = {
+    BuyCloak,
+    IsEmpty, getItemColor,
+    OpenAllBox,
+    OpenSkillBook, AutoReleaseSkill, CheckSkillAutoRelease,
+    WearEquipments, StrengthenEquipment, DecomposeEquipment,
+    UseHolyGrail, WearBestSuit,
+    AutoPotion, UnAutoPotion, BuyPotion,
+};

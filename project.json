@@ -31,7 +31,7 @@
     "libs": ["libopencv_java4.so", "libc++_shared.so", "libjackpal-androidterm5.so", "libjackpal-termexec2.so"],
     "main": "main.js",
     "name": "LN",
-    "outputPath": "/mnt/shared/Pictures/LordNine/",
+    "outputPath": "/storage/emulated/0/脚本/LordNine/build",
     "packageName": "com.lordnine",
     "projectDirectory": "/storage/emulated/0/脚本/LordNine",
     "scripts": {},
@@ -41,5 +41,5 @@
     },
     "sourcePath": "/storage/emulated/0/脚本/LordNine/main.js",
     "versionCode": 28,
-    "versionName": "1.13.1"
+    "versionName": "1.13.3"
 }

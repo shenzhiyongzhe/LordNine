@@ -25,12 +25,12 @@ GetCaptureScreenPermission();
 
 const CopyApk = () =>
 {
-    const version = '1.10.3'
-    const originPath = `/sdcard/脚本/LordNine/build/lordnine_v${version}.apk`
-    const destinationPath = `/mnt/shared/Pictures/lordnine_v${version}.apk`
+    const version = '1.13.3'
+    const originPath = `/sdcard/脚本/LordNine/build/LN_v${version}.apk`
+    const destinationPath = `/mnt/shared/Pictures/LN_v${version}.apk`
     files.copy(originPath, destinationPath)
 }
-
+// CopyApk()
 // engines.stopAllAndToast();
 // java.lang.System.exit(0);
 //com.smilegate.lordnine.stove.google

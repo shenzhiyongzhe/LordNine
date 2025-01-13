@@ -278,7 +278,7 @@ const DisconnectionFlow = (shot) =>
         if (needRestartGame)
         {
             console.log("加载时间过长，开始重启游戏");
-            RestartGame("com.smilegate.lordnine.stove.google");
+            RestartGame();
         }
     }
     if (FindBlueBtn([650, 428, 173, 59], shot))
