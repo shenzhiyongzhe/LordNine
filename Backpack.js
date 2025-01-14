@@ -1363,12 +1363,11 @@ const DecomposeEquipment = (type) =>
     }
     else
     {
-        console.log("开始分解除去武器的所有装备，不包括蓝装");
+        console.log("开始分解除部分装备（不包括蓝装）");
     }
     let hasOpen = OpenBackpack();
     if (hasOpen)
     {
-        ExpandBackpackCapacity();
         RandomPress([1043, 665, 23, 26]);
     }
     if (!WaitUntilEnterBackpackMenu())
@@ -1462,7 +1461,6 @@ const DecomposeEquipment = (type) =>
     if (FindBlueBtn([379, 562, 230, 79]))
     {
         RandomPress([415, 582, 137, 36], 3);
-
         for (let i = 0; i < 5; i++)
         {
             PressBlank();
@@ -1474,7 +1472,6 @@ const DecomposeEquipment = (type) =>
         }
         CloseBackpack();
         console.log("分解装备结束");
-
     }
     RecycleImgList(selectedMarkImgList);
 
@@ -1500,80 +1497,42 @@ const DecomposeEquipment = (type) =>
         RandomPress([1102, 40, 21, 22]);
         Sleep();
     }
-
 };
 
 const ExpandBackpackCapacity = () =>
 {
-    console.log("expand backpack capacity");
+    console.log("开始扩充背包！");
     if (!OpenBackpack())
     {
-        return console.log("open backpack failed");
+        return console.log("打开背包失败，退出");
     }
-    const GetCapacity = () =>
-    {
-        const c_100 = LoadImgList("backpack/capacity/c100");
-        const c_200 = LoadImgList("backpack/capacity/c200");
-        const full = LoadImgList("backpack/capacity/full");
-        let capacity = null;
-        const region = [1130, 654, 93, 45];
-        if (FindImgInList(c_100, region))
-        {
-            console.log("当前背包容量是100，扩充至200");
-        }
-        else if (FindImgInList(c_200, region))
-        {
-            console.log("背包容量是200，不需要再扩充");
-            capacity = 200;
-        }
-        else if (FindImgInList(full, region))
-        {
-            console.log("背包容量已满，需要扩充");
-            capacity = "full";
-        }
-        RecycleImgList(c_100);
-        RecycleImgList(c_200);
-        RecycleImgList(full);
-        return capacity;
-    };
+
     const HasConfirmBtn = () => FindBlueBtn([644, 544, 163, 59]);
 
-    const ExpandCapacity = () =>
+
+    console.log("开始扩充操作");
+    let isSuccess = false;
+    RandomPress([1145, 668, 96, 15]);
+    if (WaitUntil(HasConfirmBtn))
     {
-        console.log("开始扩充操作");
-        let isSuccess = false;
-        RandomPress([1145, 668, 96, 15]);
-        if (WaitUntil(HasConfirmBtn))
+        console.log("点击+100");
+        RandomPress([610, 415, 65, 27]);
+        if (HasConfirmBtn())
         {
-            console.log("点击+100");
-            RandomPress([610, 415, 65, 27]);
-            if (HasConfirmBtn())
+            RandomPress([665, 560, 123, 28]);
+            console.log("点击确定");
+            if (!HasConfirmBtn())
             {
-                RandomPress([665, 560, 123, 28]);
-                console.log("点击确定");
-                if (!HasConfirmBtn())
-                {
-                    console.log("扩充成功");
-                    isSuccess = true;
-                }
-                else
-                {
-                    console.log("扩充失败");
-                }
+                console.log("扩充成功");
+                isSuccess = true;
+            }
+            else
+            {
+                console.log("扩充失败");
             }
         }
-        return isSuccess;
-    };
+    }
 
-    const currentCapacity = GetCapacity();
-    if (currentCapacity == "full")
-    {
-        ExpandCapacity();
-    }
-    else
-    {
-        console.log("不满足扩充条件： currentCapacity:" + currentCapacity);
-    }
     if (HasConfirmBtn())
     {
         RandomPress([497, 559, 117, 28]);

@@ -2292,11 +2292,11 @@ const needBuyCloak = () =>
 }
 const ComprehensiveImprovement = () =>
 {
-    console.log("开始综合提升");
+    console.log("开始主线阶段的综合提升");
 
-    if ((new Date().getTime() - lastComprehensiveImproveTime) / 3600000 < 1)
+    if ((new Date().getTime() - lastComprehensiveImproveTime) / 60000 < 20)
     {
-        console.log("提升结束: 两次提升间隔较短，暂不操作");
+        console.log("暂不操作: 两次提升间隔较短，");
         return true;
     }
 
@@ -2324,13 +2324,23 @@ const ComprehensiveImprovement = () =>
     }
 
     IncreaseWeaponFeatures();
-    UpgradeHolyRelics();
-    StrengthenHorseEquipment();
+    if (random(1, 100) > 50)
+    {
+        UpgradeHolyRelics();
+    }
+    if (random(1, 100) > 50)
+    {
+        StrengthenHorseEquipment();
+    }
     const config = ReadConfig();
     if (config.game.lv <= 40 || config.game.lv == null)
     {
-        console.log(`角色等级为${config.game.lv}，改变符文配置`);
-        ChangeAbility();
+        if (random(1, 100) > 60)
+        {
+            console.log(`角色等级为${config.game.lv}，改变符文配置`);
+            ChangeAbility();
+        }
+
     }
 
     UpgradeAbilityLevel();

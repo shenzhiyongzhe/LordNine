@@ -59,9 +59,11 @@ const NoPotionFlow = (shot) =>
 {
     if (IsNoPotion(shot))
     {
+        console.log("noPotionFlow：发现没有药水了");
         const deathBtn = DeathCheck();
         if (deathBtn)
         {
+            console.log("DeathCheck:发现死亡弹窗。");
             if (FindBlueBtn([524, 581, 245, 94])) 
             {
                 Sleep(random(2, 300));
@@ -80,6 +82,7 @@ const NoPotionFlow = (shot) =>
 
         if (IsBackpackFull())
         {
+            console.log("IsBackpackFull：买药水前，背包是满的，优先清理背包");
             globalTimePlay.lastTimeClearBackpack_haltMode = new Date().getTime();
             LoginProps();
             DecomposeEquipment("partial");
@@ -94,8 +97,13 @@ const NoPotionFlow = (shot) =>
         else
         {
             console.log("回家买药水...");
-            const delayTime = random(1, 500);
-            console.log("角色当前没有药水了 延迟" + delayTime + "s");
+            if (!IsInCity())
+            {
+                const delayTime = random(1, 500);
+                console.log("角色当前没有药水了 延迟" + delayTime + "s");
+                Sleep(delayTime)
+            }
+
             BuyPotion();
             lastTimeOfBuyingPotion = new Date().getTime();
         }
@@ -162,28 +170,28 @@ const BackpackFullFlow = (shot) =>
             console.log("不在活动时间，不操作清理背包");
             return true;
         }
-    }
-    if ((new Date().getTime() - globalTimePlay.lastTimeClearBackpack_haltMode) / 60000 > 10)
-    {
-        globalTimePlay.lastTimeClearBackpack_haltMode = new Date().getTime();
-        const config = ReadConfig()
-        if (!config.unlockTrade)
+        if ((new Date().getTime() - globalTimePlay.lastTimeClearBackpack_haltMode) / 60000 > 10)
         {
-            console.log("未完成主线，穿戴装备");
-            WearEquipments();
-            StrengthenEquipment();
-            LoginProps();
-        }
-        else
-        {
-            if (random(1, 100) > 70)
+            globalTimePlay.lastTimeClearBackpack_haltMode = new Date().getTime();
+            const config = ReadConfig()
+            if (!config.unlockTrade)
             {
+                console.log("未完成主线，穿戴装备");
+                WearEquipments();
+                StrengthenEquipment();
                 LoginProps();
             }
+            else
+            {
+                if (random(1, 100) > 70)
+                {
+                    LoginProps();
+                }
+            }
+            DecomposeEquipment("partial");
         }
-
-        DecomposeEquipment("partial");
     }
+
 }
 
 const IsTimeout = () =>
@@ -393,8 +401,6 @@ const PickUpAbilityPoint = () =>
 };
 
 let lastTimeOfResettingConfig = 1726208812345;
-
-
 
 const ResetConfig = () =>
 {

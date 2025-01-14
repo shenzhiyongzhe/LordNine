@@ -93,7 +93,6 @@ const GrowthImgList = {
 };
 // const GrowthMissionTitleImgList = LoadImgList("icon/beginner/growthMission/growthMissionTitle");
 
-
 const IsContinuouslyChallengeBoss = () =>
 {
     console.log("检查是否连续挑战boss");
@@ -152,7 +151,7 @@ const ClickMainStory = () =>
     {
         console.log("新手阶段，点击主线，等待10秒");
         TapMainStory()
-        Sleep(random(5, 10))
+        Sleep(random(5, 15))
     }
     else if (!HasMenu() && !HaveMainStoryIcon())
     {
@@ -297,8 +296,6 @@ const TapDialog = () =>
         RandomPress([916, 419, 97, 31]);
     }
 };
-
-
 
 // ------------------------------------------  main story branch -------------------------------------------
 const weaponSelectColorList = [
@@ -538,7 +535,7 @@ const AttackingBossFlow = (number) =>
             {
                 lostTitleCount++;
                 console.log("失去boss目标次数: " + lostTitleCount);
-                if (lostTitleCount > 10)
+                if (lostTitleCount > 3)
                 {
                     console.log("boss 目标丢失，退出boss 流程");
                     return true;

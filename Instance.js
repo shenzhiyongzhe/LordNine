@@ -896,7 +896,10 @@ const HangUpWild = () =>
 
     console.log("等待传送到目的地...");
     WaitUntilMenu();
-    randomMoveOperation();
+    if (random(1, 100) > 90)
+    {
+        randomMoveOperation();
+    }
     if (IsAuto_inactive())
     {
         PressToAuto();
@@ -1043,15 +1046,16 @@ const TimeToTrade = () =>
         }
     }
     const currentTimeString = new Date().toJSON().slice(11, 16)
+    let isTimeToTrade = false;
     tradingHours.map((time) =>
     {
         if (currentTimeString == time)
         {
             console.log("到达随机交易时间");
-            return true;
+            isTimeToTrade = true;
         }
     });
-    return false;
+    return isTimeToTrade;
 };
 
 let switchMapTime = parseFloat((Math.random() * 5 + 5).toFixed(2));
@@ -1176,4 +1180,5 @@ const InstanceFlow = () =>
 };
 
 module.exports = { InstanceFlow };
+
 

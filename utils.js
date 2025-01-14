@@ -7,7 +7,6 @@ const { PagebackColorList, MenuColorList, MenuCloseColorList, BlueBtnColorList, 
 } = require("./Color/Color.js");
 const { TipColorList, } = require("./Color/MainStoryColorList.js");
 
-
 const defaultConfig = {
     gameMode: "mainStory",
     delayTime: random(0, 600),
@@ -17,6 +16,11 @@ const defaultConfig = {
     accountSuspended: false,
     totalDeathTimes: 0,
     manufacture: [random(1, 15), random(16, 30)],
+    dailyTradingHours: [
+        `${random(8, 12).toString().padStart(2, 0)}:${random(0, 59).toString().padStart(2, 0)}`,
+        `${random(13, 17).toString().padStart(2, 0)}:${random(0, 59).toString().padStart(2, 0)}`,
+        `${random(18, 22).toString().padStart(2, 0)}:${random(0, 59).toString().padStart(2, 0)}`,
+    ],
     game: {
         "today": 0,
         "deathTime": 0,
@@ -1072,7 +1076,22 @@ const IsMoving = () =>
 
 };
 const backpackFullImgList = LoadImgList('backpack/backpackFull')
-const IsBackpackFull = (shot) => { shot = shot || captureScreen(); return FindImgInList(backpackFullImgList, [1145, 50, 35, 15], shot); };
+const IsBackpackFull = (shot) =>
+{
+    shot = shot || captureScreen();
+    if (FindMultiColors(BackpackFullColorList, [1144, 35, 39, 27], shot))
+    {
+        console.log("发现背包已满 ：color");
+        return true;
+    }
+    // else if (FindImgInList(backpackFullImgList, [1150, 52, 25, 4], shot))
+    // {
+    //     console.log("发现背包已满 img");
+    //     return true;
+
+    // }
+    return false;
+};
 
 const noPotionImgList = LoadImgList("special/noPotion");
 const IsNoPotion = (shot, region) =>
@@ -1966,7 +1985,8 @@ const TapArrow = () =>
     return hadFindArrow;
 };
 
-const StopScript = () => java.lang.System.exit(0);
+// const StopScript = () => java.lang.System.exit(0);
+const StopScript = () => threads.shutDownAll()
 
 const SetCountryAndBirth = () =>
 {

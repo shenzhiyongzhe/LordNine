@@ -6,7 +6,7 @@ const { MainStoryFlow } = require("./MainStory.js");
 const { InstanceFlow } = require("./Instance.js");
 
 const version = `${app.versionName}`
-const versionColorList = ["#FF8F7A", "#FFB6C1", "#FF6F61", "#FFD700", "#9370DB", "#1C2331", "#AE445A", "#EB3678"]
+const versionColorList = ["#FF8F7A", "#FFB6C1", "#FF6F61", "#FFD700", "#9370DB", "#1C2331", "#AE445A", "#EB3678", "#EB3678"]
 const versionColor = versionColorList[parseInt(version.split('.')[2])];
 let mainThread = null;
 let serverName = null;
@@ -102,6 +102,10 @@ const GetCaptureScreenPermission = () =>
         if (hasOpen)
         {
             hasOpen.click();
+        }
+        else
+        {
+            throw new Error("获取截图权限失败");
         }
     });
 };
@@ -223,8 +227,15 @@ const uiFloaty = () =>
                 floatyWindow.close()
             }
         }, 1000);
+        try
+        {
+            GetCaptureScreenPermission();
 
-        GetCaptureScreenPermission();
+        }
+        catch (error)
+        {
+            alert("异常", "获取截图权限失败。")
+        }
 
         setTimeout(() =>
         {
