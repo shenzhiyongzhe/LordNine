@@ -1843,7 +1843,7 @@ const TradeGoods = () =>
                         currentColor = getItemColor([750, 162, 142, 93])
                     }
 
-                    if (currentColor == "blue" || random(1, 100) < 4)
+                    if (currentColor == "blue" || random(1, 100) < 10)
                     {
 
                         hasSellText = FindImgInList(sellText, [930, 584, 80, 61]);
@@ -1887,7 +1887,7 @@ const TradeGoods = () =>
     //先上架材料
     RandomPress([1192, 121, 55, 27]);
 
-    LoginMaterial(tradableImgList_100p, 100);
+    LoginMaterial(tradableImgList_100p, 20);
     //然后上架武器
     if (!isShelfMax)
     {
@@ -2358,7 +2358,7 @@ const ComprehensiveImprovement_Instance = () =>
 {
     const config = ReadConfig();
 
-    if (config.game.tradingTimes >= 2)
+    if (config.game.tradingTimes >= 1)
     {
         if (random(1, 100) < 50)
         {
@@ -2371,11 +2371,7 @@ const ComprehensiveImprovement_Instance = () =>
     {
         ExitHaltMode();
     }
-    if (random(1, 100) < 10)
-    {
-        console.log("@鉴定成功：每日领取");
-        DailyQuest();
-    }
+
     const isBackpackFull = IsBackpackFull(captureScreen());
     if (isBackpackFull)
     {
@@ -2385,6 +2381,10 @@ const ComprehensiveImprovement_Instance = () =>
             LoginProps();
         }
         DecomposeEquipment();
+    }
+    if (random(1, 100) < 10)
+    {
+        DailyQuest()
     }
     const date = new Date();
     const today = date.getDate();
@@ -2413,29 +2413,21 @@ const ComprehensiveImprovement_Instance = () =>
             WearEquipments()
             StrengthenEquipment()
         }
+
+        const comprehensiveQuest = [ChangeGameSetting, UpgradeHolyRelics, StrengthenHorseEquipment, FusionSuit, WearBestSuit, UpgradeAbilityLevel, AutoPotion]
+
+        const randomEventIndex = random(0, comprehensiveQuest.length - 1)
+        console.log("随机事件索引为：" + randomEventIndex);
+        comprehensiveQuest[randomEventIndex]()
     }
 
     PutOnSale();
 
     console.log("副本模式下综合提升");
 
-    if (config.game.combatPower < 22500 && config.game.tradingTimes == 0)
+    if (config.game.combatPower < 23000 && config.game.tradingTimes == 1)
     {
         UpgradeHolyRelics();
-    }
-    //降低执行频率
-    if (date.getDay() == config.randomDayOfTheWeek && config.game.tradingTimes == 0)
-    {
-        console.log("@每周随机一天执行。");
-        ChangeGameSetting()
-        UpgradeHolyRelics();
-        StrengthenHorseEquipment();
-        FusionSuit();
-        WearBestSuit();
-        UpgradeAbilityLevel()
-
-        AutoPotion();
-
     }
 
     AddAttributePoint();

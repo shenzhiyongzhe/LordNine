@@ -258,8 +258,7 @@ const HangUpInstance = () =>
     if (!haveAvailableInstance)
     {
         config.daily.dailyInstance = true;
-        instance_mode = "dailyMission";
-        console.log("没有副本可以进入，更新配置：每日副本完成。开始每日任务");
+        console.log("没有副本可以进入，更新配置：每日副本完成。");
         PageBack();
         for (let i = 0; i < 10; i++)
         {
@@ -273,7 +272,9 @@ const HangUpInstance = () =>
             ClearPage();
             Sleep();
         }
-    } else
+        InstanceBranchManager()
+    }
+    else
     {
         if (!IsInCity())
         {
@@ -374,8 +375,8 @@ const AcceptDailyMission = () =>
             break;
         }
     }
-    const acceptWeeklyMissionProbability = 30;
-    if (random(1, 100) < acceptWeeklyMissionProbability)
+    const acceptWeeklyMissionProbability = 60;
+    if (random(1, 100) > acceptWeeklyMissionProbability)
     {
         console.log("接受周任务");
 
@@ -475,10 +476,7 @@ const AcceptDailyMission = () =>
 const ClickDailyMission = () =>
 {
     console.log("fn: 点击每日任务");
-    if (IsHaltMode())
-    {
-        ExitHaltMode();
-    }
+
     if (!HasMenu())
     {
         return false;
@@ -923,7 +921,7 @@ const IsNoExp = () =>
     Sleep(30);
     return FindImg(clip, [90, 610, 140, 15]);
 };
-
+let enterHaltModeSecond = random(300, 900)
 const InstanceExceptionCheck = () =>
 {
     if (IsHaltMode())
@@ -1012,10 +1010,11 @@ const InstanceExceptionCheck = () =>
                 {
                     PressToAuto();
                     const currentTime = new Date().getTime();
-                    if ((currentTime - lastTimeEnterHaltMode) / 60000 > 5)
+                    if ((currentTime - lastTimeEnterHaltMode) / 1000 > enterHaltModeSecond)
                     {
                         console.log("挂机异常检测：不在省电模式");
-                        console.log("不在省电模式，已过五分钟，手动进省电模式");
+                        console.log(`不在省电模式，${enterHaltModeSecond}，手动进省电模式`);
+                        enterHaltModeSecond = random(300, 600)
                         EnterHaltMode();
                         lastTimeEnterHaltMode = currentTime;
                     }
@@ -1045,12 +1044,13 @@ const TimeToTrade = () =>
             tradingHours = config.dailyTradingHours;
         }
     }
-    const currentTimeString = new Date().toJSON().slice(11, 16)
+    const currentTimeString = new Date().toString().slice(16, 21)
     let isTimeToTrade = false;
     tradingHours.map((time) =>
     {
         if (currentTimeString == time)
         {
+            console.log(currentTimeString + " --- " + time);
             console.log("到达随机交易时间");
             isTimeToTrade = true;
         }
@@ -1090,7 +1090,7 @@ const InstanceBranchManager = () =>
     }
     let curTime = new Date().getTime();
     const randomIndex = random(1, 100)
-    console.log(`副本分支索引为：${JSON.stringify({ randomIndex })}`);
+    console.log(`挂机分支索引为：${JSON.stringify({ randomIndex })}`);
 
     if (randomIndex < 33)
     {

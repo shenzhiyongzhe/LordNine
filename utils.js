@@ -36,6 +36,7 @@ const defaultConfig = {
         "combatPower": 1000,
         "tradingTimes": 0,
         "changeGameSetting": false,
+        "decomposeBlueSuit": false,
         "engraving_0": false,
         "engraving_1": false,
     },
@@ -1985,8 +1986,8 @@ const TapArrow = () =>
     return hadFindArrow;
 };
 
-// const StopScript = () => java.lang.System.exit(0);
-const StopScript = () => threads.shutDownAll()
+const StopScript = () => java.lang.System.exit(0);
+// const StopScript = () => engines.stopAllAndToast()
 
 const SetCountryAndBirth = () =>
 {
@@ -2069,6 +2070,8 @@ const SwipeUp = (sec) => gesture(sec * 1000, [195, 575], [195, 475]);
 const SwipeDown = (sec) => gesture(sec * 1000, [195, 605], [195, 705]);
 const SwipeLeft = (sec) => gesture(sec * 1000, [180, 590], [80, 590]);
 const SwipeRight = (sec) => gesture(sec * 1000, [210, 590], [310, 590]);
+
+
 
 module.exports = {
     specialConfig, globalTimePlay,

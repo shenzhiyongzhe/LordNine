@@ -1357,6 +1357,7 @@ const DropSomeItem = () =>
 const DecomposeEquipment = (type) =>
 {
     type = type || "partial";
+    let needDecompose = true;
     if (type == "total")
     {
         console.log("开始分解全部装备包括蓝装");
@@ -1381,7 +1382,11 @@ const DecomposeEquipment = (type) =>
             return false;
         }
     }
-
+    if (IsEmpty([845, 80, 55, 55]))
+    {
+        console.log("背包是空的，退出");
+        needDecompose = false;
+    }
     const isDetailOnColorList = [
         ["#1d5d55", [[4, 0, "#ffffff"], [8, 0, "#ffffff"], [15, 0, "#1d5d55"], [36, 0, "#1d5d55"]]]
     ];
@@ -1391,55 +1396,81 @@ const DecomposeEquipment = (type) =>
         console.log("关闭详细资讯");
     }
     //修改自动登录设置
-
-    if (FindGoldBtn([961, 604, 118, 47]))
+    const SetDecomposeSetting = (type) =>
     {
-        console.log("修改自动登录设置");
-        RandomPress([1099, 616, 30, 26]); //设置图标
-        WaitUntil(() => HasPopupClose([865, 125, 35, 34]));
-        Sleep();
+        if (FindGoldBtn([961, 604, 118, 47]))
+        {
+            console.log("修改自动登录设置");
+            RandomPress([1099, 616, 30, 26]); //设置图标
+            WaitUntil(() => HasPopupClose([865, 125, 35, 34]));
+            Sleep();
+            if (type == "total")
+            {
+                console.log("全部分解");
+                if (!FindCheckMark([651, 234, 64, 38]))
+                {
+                    console.log("分解蓝色装备");
+                    RandomPress([667, 230, 42, 13]);
+                }
+            }
+            else if (type == "partial")
+            {
+                console.log("部分分解");
+                if (FindCheckMark([651, 234, 64, 38]))
+                {
+                    console.log("取消蓝色装备");
+                    RandomPress([667, 230, 42, 13]);
+                }
+                if (FindCheckMark([774, 214, 39, 47]))
+                {
+                    RandomPress([787, 231, 48, 15]);
+                }
+            }
+            if (FindCheckMark([404, 396, 44, 46]))
+            {
+                console.log("不取消可记录装备");
+                RandomPress([442, 409, 67, 18]);
+            }
+            if (FindCheckMark([529, 396, 38, 44]))
+            {
+                console.log("不取消可强化装备");
+                RandomPress([569, 408, 76, 19]);
+            }
+            if (FindGoldBtn([553, 544, 177, 50]))
+            {
+                console.log("自动登录设置完毕");
+                RandomPress([575, 556, 134, 25]);
+            }
+
+        }
+    }
+    let haveSet = false;
+    const config = ReadConfig()
+    if (needDecompose)
+    {
         if (type == "total")
         {
-            console.log("全部分解");
-            if (!FindCheckMark([651, 234, 64, 38]))
+            if (!config.game.decomposeBlueSuit)
             {
-                console.log("分解蓝色装备");
-                RandomPress([667, 230, 42, 13]);
+                SetDecomposeSetting("total")
+                haveSet = true;
+                config.game.decomposeBlueSuit = true;
             }
         }
         else if (type == "partial")
         {
-            console.log("部分分解");
-            if (FindCheckMark([651, 234, 64, 38]))
+            if (config.game.decomposeBlueSuit)
             {
-                console.log("取消蓝色装备");
-                RandomPress([667, 230, 42, 13]);
-            }
-            if (FindCheckMark([774, 214, 39, 47]))
-            {
-                RandomPress([787, 231, 48, 15]);
+                SetDecomposeSetting("partial")
+                haveSet = true;
+                config.game.decomposeBlueSuit = true;
             }
         }
-        if (FindCheckMark([404, 396, 44, 46]))
-        {
-            console.log("不取消可记录装备");
-            RandomPress([442, 409, 67, 18]);
-        }
-        if (FindCheckMark([529, 396, 38, 44]))
-        {
-            console.log("不取消可强化装备");
-            RandomPress([569, 408, 76, 19]);
-        }
-        if (FindGoldBtn([553, 544, 177, 50]))
-        {
-            console.log("自动登录设置完毕");
-            RandomPress([575, 556, 134, 25]);
-        }
-
     }
+
     const selectedMarkImgList = LoadImgList("backpack/selectedMark");
 
-    if (type == "total")
+    if (type == "total" && needDecompose)
     {
         console.log("手动勾选已强化装备");
         const strengthenedShot = captureScreen();
@@ -1458,6 +1489,17 @@ const DecomposeEquipment = (type) =>
             }
         }
     }
+    if (!haveSet && needDecompose)
+    {
+        if (FindGoldBtn([955, 602, 127, 51]))
+        {
+            RandomPress([979, 616, 82, 22])
+        }
+    }
+    else if (haveSet)
+    {
+        RewriteConfig(config)
+    }
     if (FindBlueBtn([379, 562, 230, 79]))
     {
         RandomPress([415, 582, 137, 36], 3);
@@ -1470,11 +1512,10 @@ const DecomposeEquipment = (type) =>
             }
             Sleep();
         }
-        CloseBackpack();
         console.log("分解装备结束");
     }
     RecycleImgList(selectedMarkImgList);
-
+    CloseBackpack();
     for (let i = 0; i < 10; i++)
     {
         if (HasMenu())
@@ -1508,10 +1549,13 @@ const ExpandBackpackCapacity = () =>
     }
 
     const HasConfirmBtn = () => FindBlueBtn([644, 544, 163, 59]);
-
-
+    const c500Img = LoadImgList("backpack/capacity/c500")
+    if (FindImgInList(c500Img, [1182, 652, 51, 49]))
+    {
+        console.log("已经扩充至500，不需要操作");
+        return true;
+    }
     console.log("开始扩充操作");
-    let isSuccess = false;
     RandomPress([1145, 668, 96, 15]);
     if (WaitUntil(HasConfirmBtn))
     {
@@ -1524,7 +1568,6 @@ const ExpandBackpackCapacity = () =>
             if (!HasConfirmBtn())
             {
                 console.log("扩充成功");
-                isSuccess = true;
             }
             else
             {
@@ -1694,7 +1737,6 @@ const BuyPotion = () =>
         console.log("购买失败");
         return false;
     }
-
 };
 
 module.exports = {
@@ -1704,5 +1746,5 @@ module.exports = {
     OpenSkillBook, AutoReleaseSkill, CheckSkillAutoRelease,
     WearEquipments, StrengthenEquipment, DecomposeEquipment,
     UseHolyGrail, WearBestSuit,
-    AutoPotion, UnAutoPotion, BuyPotion,
+    AutoPotion, UnAutoPotion, BuyPotion, ExpandBackpackCapacity
 };

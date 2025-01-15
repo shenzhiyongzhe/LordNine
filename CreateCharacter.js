@@ -644,7 +644,15 @@ const InputEmailUrl = () =>
         {
             console.log("id: 首次打开谷歌浏览器，确认协议.");
             Sleep(3);
-            click(hasFre_bottom_group.bounds().centerX(), hasFre_bottom_group.bounds().centerY());
+            try
+            {
+                hasFre_bottom_group.click()
+                click(hasFre_bottom_group.bounds().centerX(), hasFre_bottom_group.bounds().centerY());
+            }
+            catch (error)
+            {
+                alert("异常", "暂未处理的异常")
+            }
         }
         let hadAggreeConcept = text("동의하고 계속").findOne(20);
         if (hadAggreeConcept)

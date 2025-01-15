@@ -239,6 +239,7 @@ const uiFloaty = () =>
 
         setTimeout(() =>
         {
+            console.log("版本号为：" + version);
             console.log("《《《 游戏开始 》》》");
             console.log("游戏模式为：" + specialConfig.gameMode);
             mainThread = threads.start(MainFlow);
