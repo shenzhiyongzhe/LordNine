@@ -139,6 +139,8 @@ const TransformMainStory = () =>
         Sleep(5);
     }
 };
+const settingIcon = LoadImgList("icon/beginner/settingIcon")
+const IsBeginnerStage = () => FindImgInList(settingIcon, [1197, 6, 75, 65])
 
 const ClickMainStory = () => 
 {
@@ -147,7 +149,7 @@ const ClickMainStory = () =>
         return true;
     }
 
-    if (!HasMenu() && HaveMainStoryIcon() && !IsInQuest())
+    if (IsBeginnerStage() && !IsInQuest())
     {
         console.log("新手阶段，点击主线，等待10秒");
         TapMainStory()
@@ -883,9 +885,7 @@ const MainStoryBranch = () =>
         if (HasMenu())
         {
             console.log("开始开新手箱子...");
-            OpenAllBox();
-            OpenAllBox();
-            WearEquipments();
+            ComprehensiveImprovement()
             AutoReleaseSkill();
             Sleep();
         }

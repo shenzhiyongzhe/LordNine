@@ -1843,7 +1843,7 @@ const TradeGoods = () =>
                         currentColor = getItemColor([750, 162, 142, 93])
                     }
 
-                    if (currentColor == "blue" || random(1, 100) < 10)
+                    if (currentColor == "blue" || random(1, 100) < 30)
                     {
 
                         hasSellText = FindImgInList(sellText, [930, 584, 80, 61]);
@@ -1915,6 +1915,7 @@ const TradeGoods = () =>
     RecycleImgList(tradableImgList_100p)
     return loginCount;
 };
+
 const PutOnSale = () =>
 {
     console.log("开始进行物品上架");
@@ -1932,8 +1933,9 @@ const PutOnSale = () =>
     {
         console.log("鉴定失败，不图鉴装备");
     }
-    if (random(1, 100) > 50)
+    if (random(1, 100) > 90)
     {
+        console.log("鉴定成功，分解装备");
         DecomposeEquipment("partial");
         globalTimePlay.lastTimeClearBackpack_haltMode = new Date().getTime()
     }
@@ -1961,7 +1963,6 @@ const GetCommonAward = () =>
             commonAwardQuest[i]()
         }
     }
-
 };
 const DailyQuest = () =>
 {

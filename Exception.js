@@ -77,8 +77,10 @@ const NoPotionFlow = (shot) =>
                 console.log("死亡流程: 确认死亡");
             }
         }
-
-        Sleep(Sleep(random(3, 500)));
+        if (!IsInCity())
+        {
+            Sleep(random(3, 500));
+        }
 
         if (IsBackpackFull())
         {
