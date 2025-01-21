@@ -110,6 +110,7 @@ const SingleStrengthen = () =>
  * @param {string} type "normalBox" 
  */
 const IsMultipleBox = () => FindBlueBtn([646, 506, 177, 59]);
+const ClickConfigBtn = () => RandomPress([850, 594, 51, 28])
 
 
 const OpenSkillBook = () =>
@@ -204,7 +205,7 @@ const OpenSuit = () =>
                 continue;
             }
             RandomPress([hasOpenedSuit.x, hasOpenedSuit.y, 30, 30]);
-            RandomPress([hasOpenedSuit.x, hasOpenedSuit.y, 30, 30]);
+            ClickConfigBtn()
             for (let i = 0; i < 60; i++)
             {
                 if (HasSkip())
@@ -265,7 +266,7 @@ const OpenRune = () =>
         if (haveRune)
         {
             RandomPress([haveRune.x, haveRune.y, 30, 30], 4)
-            RandomPress([haveRune.x, haveRune.y, 30, 30], 4)
+            ClickConfigBtn()
             if (FindBlueBtn([640, 504, 186, 62]))
             {
                 RandomPress([672, 522, 128, 29], 3)
@@ -306,7 +307,7 @@ const UseHolyGrail = () =>
     if (hasHolyGrail)
     {
         RandomPress([hasHolyGrail.x, hasHolyGrail.y, 15, 25]);
-        RandomPress([hasHolyGrail.x, hasHolyGrail.y, 15, 25]);
+        ClickConfigBtn()
         for (let i = 0; i < 5; i++)
         {
             if (FindBlueBtn([646, 506, 175, 57]))
@@ -341,7 +342,7 @@ const OpenActivityBox = () =>
         if (hasPropsBox)
         {
             RandomPress([hasPropsBox.x, hasPropsBox.y, 30, 30]);
-            RandomPress([hasPropsBox.x, hasPropsBox.y, 30, 30]);
+            ClickConfigBtn()
             if (IsMultipleBox())
             {
                 RandomPress([666, 520, 138, 30]);
@@ -393,7 +394,7 @@ const OpenNoOptionBox = () =>
         if (hasPropsBox)
         {
             RandomPress([hasPropsBox.x, hasPropsBox.y, 30, 30]);
-            RandomPress([hasPropsBox.x, hasPropsBox.y, 30, 30]);
+            ClickConfigBtn()
             if (IsMultipleBox())
             {
                 RandomPress([666, 520, 138, 30]);
@@ -481,7 +482,7 @@ const OpenOptionalBox = () =>
             let type = getOptionalType();
             if (type != -1)
             {
-                RandomPress([849, 596, 51, 24]); //use
+                ClickConfigBtn()
                 if (IsMultipleBox())
                 {
                     RandomPress([666, 520, 138, 30]);
@@ -777,6 +778,7 @@ const BuyCloak = () =>
     PageBack()
     return haveBought;
 };
+
 const WearEquipment = () =>
 {
     console.log("开始穿装备");
@@ -977,7 +979,6 @@ const WearEquipment = () =>
             Sleep();
         }
     };
-
     out: for (let i = 0; i < 6; i++)
     {
         for (let j = 0; j < 4; j++)
@@ -1012,7 +1013,7 @@ const WearEquipment = () =>
                             IdentifyEquipment();
                             OpenBackpack("equipment", true);
                             RandomPress([955 + j * 62, 179 + i * 62, 24, 26]);
-                            RandomPress([955 + j * 62, 179 + i * 62, 24, 26]);
+                            ClickConfigBtn()
                             Sleep();
                         }
                         hasWornEquipment = true;
@@ -1047,21 +1048,18 @@ const WearEquipment = () =>
                     continue;
                 }
                 console.log("点击穿戴");
-                RandomPress([955 + j * 62, 179 + i * 62, 24, 26]);
-                Sleep(3.5);
+                RandomPress([955 + j * 62, 179 + i * 62, 24, 26], 5);
                 if (!HasBackpackClose() && HasBackpackMenuClose())
                 {
                     IdentifyEquipment();
                     OpenBackpack("equipment", true);
                     RandomPress([955 + j * 62, 179 + i * 62, 24, 26]);
-                    RandomPress([955 + j * 62, 179 + i * 62, 24, 26]);
-                    Sleep();
+                    ClickConfigBtn()
                     shot = captureScreen();
                 }
                 hasWornEquipment = true;
                 break out;
             }
-
         }
     }
     console.log("穿戴完成");
@@ -1350,7 +1348,7 @@ const DropSomeItem = () =>
 
 };
 /**
- * 
+ * 清理背包
  * @param {*} type "total" or “partial"
  * @returns 
  */

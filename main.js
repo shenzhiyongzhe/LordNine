@@ -59,12 +59,13 @@ function Init()
         needRewrite = true;
     }
 
-    if (!config.googleAccount || !config.game.vm || config.game.vm.length < 10)
+    if (!config.googleAccount || !config.game.vm)
     {
         console.log('@配置不存在账号信息，开始读取账号文件');
         const account = ReadAccountFile();
         config.createCharacterTime = new Date().toJSON()
         config.game.vm = account[3];
+        config.game.vm = config.game.vm.replace(/\n/g, '');
         config.googleAccount = account[0];
         config.googlePassword = account[1]
         needRewrite = true;
@@ -316,7 +317,7 @@ const stateFloaty = () =>
         </frame>
     );
     floaty_window.setPosition(0, 682);
-    floaty_window.switch.click(StopScript);
+    floaty_window.switch.click(() => threads.shutDownAll());
 };
 
 const Update = () =>

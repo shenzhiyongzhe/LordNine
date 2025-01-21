@@ -58,7 +58,7 @@ const defaultConfig = {
         boots: null,
     }
 };
-
+const baseUrl = "http://47.76.112.107:8001/"
 let mirrorConfig = null;
 
 let specialConfig = {
@@ -70,8 +70,6 @@ const globalTimePlay = {
     lastTimeClearBackpack_haltMode: 1726208812345
 }
 const configFile = "/sdcard/LordNine/config.json";
-
-
 
 const BackpackPageColorList = [
     ["#fbfbfa", [[0, 4, "#fbfbfa"], [3, 6, "#ffffff"], [0, 7, "#fbfbfa"], [0, 10, "#fcfcfc"]]]
@@ -984,9 +982,33 @@ const HollowPress = (hollowRegion) =>
     press(x1, y1, random(16, 256));
     Sleep();
 };
+const OpenMap = () =>
+{
+    console.log("打开地图");
+    for (let i = 0; i < 10; i++)
+    {
+        if (IsHaltMode())
+        {
+            ExitHaltMode();
+        }
+        if (HasMap())
+        {
+            RandomPress([138, 161, 122, 98]);
+            if (WaitUntilPageBack())
+            {
+                return true;
+            }
+        }
+        Sleep();
+        ClearPage();
+    }
+    console.log("打开地图失败");
+    return false;
+};
 const auto_activeImgList = LoadImgList("icon/auto/auto_active");
 const auto_inactiveImgList = LoadImgList("icon/auto/auto_inactive");
 const auto_questImgList = LoadImgList("icon/auto/quest");
+const enemyIcon = LoadImgList("page/mainUI/enemyIcon")
 const autoRecogRegion = [1127, 423, 61, 45];
 const IsAuto_active = (shot) =>
 {
@@ -1025,15 +1047,52 @@ const IsInQuest = (shot) =>
     return false;
 };
 const ClickAuto = () => RandomPress([1135, 434, 31, 26]);
+
 const PressToAuto = () =>
 {
+    let needClickAuto = false;
     if (IsAuto_inactive())
     {
-        const delayTime = random(3, 30);
+        const delayTime = random(3, 15);
         console.log("延迟" + delayTime + "s点击auto");
         Sleep(delayTime);
         ClickAuto();
-        return true;
+    }
+
+    for (let i = 0; i < 20; i++)
+    {
+        if (FindImgInList(enemyIcon, [460, 42, 65, 73]))
+        {
+            console.log("发现敌人图标，退出。");
+            needClickAuto = false;
+            break;
+        }
+        else
+        {
+            console.log("点击auto，没有敌人，打开地图，随机移动");
+            const destinationIcon = LoadImgList("page/map/destination")
+            if (OpenMap())
+            {
+                for (let i = 0; i < 30; i++)
+                {
+                    RandomPress([527, 269, 240, 228])
+                    if (FindImgInList(destinationIcon, [527, 269, 240, 228]))
+                    {
+                        console.log("随机点击地图成功，退出");
+                        PageBack()
+                        needClickAuto = true;
+                        break;
+                    }
+                    Sleep()
+                }
+                RecycleImgList(destinationIcon)
+            }
+
+        }
+    }
+    if (needClickAuto)
+    {
+        ClickAuto()
     }
     if (IsAuto_active())
     {
@@ -1076,7 +1135,6 @@ const IsMoving = () =>
     return isMoving;
 
 };
-const backpackFullImgList = LoadImgList('backpack/backpackFull')
 const IsBackpackFull = (shot) =>
 {
     shot = shot || captureScreen();
@@ -1085,12 +1143,6 @@ const IsBackpackFull = (shot) =>
         console.log("发现背包已满 ：color");
         return true;
     }
-    // else if (FindImgInList(backpackFullImgList, [1150, 52, 25, 4], shot))
-    // {
-    //     console.log("发现背包已满 img");
-    //     return true;
-
-    // }
     return false;
 };
 
@@ -2074,6 +2126,7 @@ const SwipeRight = (sec) => gesture(sec * 1000, [210, 590], [310, 590]);
 
 
 module.exports = {
+    baseUrl,
     specialConfig, globalTimePlay,
     BuySkillBook,
     CloseBackpack, CloseMenu, ClickSkip, ChangeHaltModeTime, ChangeRecoverPotionPercentToMax, ChangeRecoverPotionPercentToNormal, ClearPage, ChangeGameSetting, ClickAuto, CountDownFloaty,
@@ -2087,7 +2140,7 @@ module.exports = {
     LoadImgList, LaunchGame,
     MatchTemplateList,
     TapBlankToContinue, TapTip,
-    OpenMenu, OpenBackpack, OpenBackpackMenu,
+    OpenMenu, OpenBackpack, OpenBackpackMenu, OpenMap,
     PageBack, PressBlank, PullDownSkill, PressToAuto,
     RandomPress, ReadImg, ReturnHome, RestartGame, RecycleImgList, ReadConfig, RewriteConfig, ReadDealRecord, ReadAccountFile, ReadDailyDiamondRecord, ReadTradeRecord,
     UpdateTradeRecord,

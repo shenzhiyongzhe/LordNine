@@ -1106,6 +1106,8 @@ const LoginFlow = () =>
         {
             ClickConfirmBtn();
             console.log("装置绑定完成");
+            const delayStopTime = random(3, 500)
+            Sleep(delayStopTime)
             StopGame()
             alert("邮箱接码完成", "接码完成")
             StopScript()

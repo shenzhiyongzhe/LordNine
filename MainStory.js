@@ -2,7 +2,7 @@
 const {
     specialConfig,
     BuySkillBook,
-    ClearPage, ClickSkip, CloseMenu, CloseBackpack, ChangeRecoverPotionPercentToMax, ChangeGameSetting,
+    ClearPage, ClickSkip, CloseMenu, CloseBackpack, ChangeRecoverPotionPercentToMax, ChangeGameSetting, ChangeRecoverPotionPercentToNormal,
     DeathCheck,
     ExitHaltMode, EnterMenuItemPage,
     FindBlueBtn, FindNumber, FindRedBtn, FindGoldBtn, FindImgInList, FindImg, FindMultiColors,
@@ -17,11 +17,12 @@ const {
     SwipeSlowly, Sleep, SwipeUp, SwipeDown, SwipeLeft, SwipeRight,
     TapTip,
     WaitUntil, WaitUntilPageBack, WaitUntilMenu,
+    PressToAuto,
 } = require("./utils.js");
 
 const { NextColorList, TalkBubbleColorList, SpeedUpOffColorList, } = require("./Color/MainStoryColorList.js");
 
-const { WearEquipments, StrengthenEquipment, OpenAllBox, DecomposeEquipment, AutoReleaseSkill, AutoPotion, BuyPotion } = require("./Backpack.js");
+const { WearEquipments, StrengthenEquipment, OpenAllBox, DecomposeEquipment, AutoReleaseSkill, AutoPotion, BuyPotion, ExpandBackpackCapacity } = require("./Backpack.js");
 
 const { ComprehensiveImprovement, GuildDonation } = require("./CommonFlow.js");
 
@@ -60,6 +61,7 @@ const talkBubbleImgList = LoadImgList("icon/talkBubble");
 const npcTalk_leaveImgList = LoadImgList("icon/npcTalk_leave");
 const backpackTrashIcon = LoadImgList("backpack/trash");
 const bossFlagIcon = LoadImgList("icon/bossFlagIcon")
+const backpackFullHint = LoadImgList("backpack/backpackFullHint")
 
 const HaveGrowthMissionIcon = (shot) =>
 {
@@ -140,7 +142,7 @@ const TransformMainStory = () =>
     }
 };
 const settingIcon = LoadImgList("icon/beginner/settingIcon")
-const IsBeginnerStage = () => FindImgInList(settingIcon, [1197, 6, 75, 65])
+const HasSettingIcon = () => FindImgInList(settingIcon, [1197, 6, 75, 65])
 
 const ClickMainStory = () => 
 {
@@ -149,23 +151,82 @@ const ClickMainStory = () =>
         return true;
     }
 
-    if (IsBeginnerStage() && !IsInQuest())
+    if (HasSettingIcon() && !IsInQuest())
     {
         console.log("新手阶段，点击主线，等待10秒");
         TapMainStory()
         Sleep(random(5, 15))
+        return true;
     }
-    else if (!HasMenu() && !HaveMainStoryIcon())
+    else if (!HasMenu() && HaveMainStoryIcon())
     {
-        return false;
+        console.log("新手阶段，创建完角色开始阶段。");
+        TapMainStory()
+        Sleep(random(10, 30))
     }
 
     if (IsMoving())
     {
         return true;
     }
+
     if (IsAuto_active() || IsInCity() || IsAuto_inactive())
     {
+        if (isSameMainStoryTime == 0)
+        {
+            console.log("记录当前任务");
+            isSameMainStory = images.clip(captureScreen(), 903, 156, 70, 15);
+            isSameMainStoryTime++;
+        }
+        else
+        {
+            let isLongTimeNoContinue = FindImg(isSameMainStory, [887, 143, 109, 45]);
+            if (isLongTimeNoContinue)
+            {
+                isSameMainStoryTime++;
+                console.log("点击到相同任务，次数加一，当前次数为：" + isSameMainStoryTime);
+                if (isSameMainStoryTime > 5)
+                {
+                    console.log("连续主线的任务相同，可能被卡住，随机移动");
+                    console.log("当前任务模式为：" + storyMode);
+                    const isInSecretLab = FindImgInList(secretLabImgList, [139, 112, 115, 55]);
+                    if (isInSecretLab)
+                    {
+                        console.log("在秘密实验室停止移动，回到主城继续主线");
+                        ReturnHome();
+                        isSameMainStoryTime = 0;
+
+                        return true;
+                    }
+                    if (PressToAuto())
+                    {
+                        isSameMainStoryTime = 0;
+                    }
+                }
+                else
+                {
+                    let isExceptionMainStory = false;
+                    for (let i = 0; i < 10; i++)
+                    {
+                        ClearPage()
+                        TapMainStory()
+                        if (!IsMoving())
+                        {
+                            console.log("点击主线，没有移动");
+                            isExceptionMainStory = true;
+                            break;
+                        }
+                        Sleep()
+                    }
+                    if (isExceptionMainStory)
+                    {
+                        console.log("主线异常", "同一主线任务点击次数过多。");
+                        alert("主线异常", "同一主线任务点击次数过多。")
+                    }
+                }
+
+            }
+        }
         if ((new Date().getTime() - lastTransformationTime) / 60000 < 4)
         {
             TapMainStory();
@@ -178,7 +239,7 @@ const ClickMainStory = () =>
         {
             TapMainStory();
         }
-        Sleep(random(3, 30));
+        Sleep(random(3, 15));
         console.log("点击主线,并等待随机时间");
     }
     else
@@ -540,6 +601,7 @@ const AttackingBossFlow = (number) =>
                 if (lostTitleCount > 3)
                 {
                     console.log("boss 目标丢失，退出boss 流程");
+                    ChangeRecoverPotionPercentToNormal()
                     return true;
                 }
             }
@@ -835,6 +897,8 @@ const AttackingBossFlow = (number) =>
     // RecycleImgList(BossHalfHPImgList);
 };
 
+let haveExpandBackpackCapacity = false;
+
 const MainStoryBranch = () =>
 {
     const shot = captureScreen();
@@ -906,16 +970,21 @@ const MainStoryBranch = () =>
     const hasBackpackClose = FindImgInList(backpackTrashIcon, [978, 651, 50, 51], shot);
     if (hasBackpackClose)
     {
-        if (HasTip())
+        for (let i = 0; i < 10; i++)
         {
-            console.log("背包tip");
-            RandomPress([946, 170, 37, 36]);
+            if (HasTip())
+            {
+                console.log("背包tip");
+                RandomPress([946, 170, 37, 36]);
+            }
+            else
+            {
+                break;
+            }
+            Sleep()
         }
-        else
-        {
-            OpenAllBox();
-            WearEquipments();
-        }
+        OpenAllBox();
+        WearEquipments();
 
     }
     const hasSkillBookPage = FindImgInList(MainStoryBranchImgList.skillBookPage, [1005, 100, 107, 45], shot)
@@ -977,7 +1046,26 @@ const MainStoryBranch = () =>
             }
         }
     }
-
+    const hasBackpackFullHint = FindImgInList(backpackFullHint, [510, 570, 60, 50])
+    if (hasBackpackFullHint)
+    {
+        console.log("发现背包已满提示，直接扩充背包");
+        if (!haveExpandBackpackCapacity)
+        {
+            console.log("没有扩充背包，开始第一次扩充");
+            ExpandBackpackCapacity()
+        }
+        else
+        {
+            console.log("已经扩充。");
+        }
+    }
+    const haveFinishedGrowthMission = HaveFinished([1117, 202, 72, 52], shot)
+    if (haveFinishedGrowthMission)
+    {
+        console.log("发现成长任务完成");
+        RandomPress([908, 197, 267, 34], 6)
+    }
 };
 // -----------------------------     exception    ----------------------------------
 
@@ -1087,7 +1175,6 @@ const MainStoryException = () =>
     IsNotMovingCheck();
 };
 
-
 //01: lv5
 //02: buy skill book
 //03 lv10
@@ -1120,6 +1207,7 @@ const GrowthMissionFlow = () =>
     {
         ClickGrowthMission();
     }
+
     else if (HaveFinished([1112, 118, 85, 243]))
     {
         console.log("完成成长任务");
@@ -1142,8 +1230,7 @@ const GrowthMissionFlow = () =>
     {
         console.log("发现有任务完成，点击完成");
         RandomPress([hadMissionFinished.x, hadMissionFinished.y, 10, 10], 3);
-        RandomPress([777, 435, 50, 53]);
-        Sleep(4);
+        RandomPress([777, 435, 50, 53], 5);
     }
     const hasSkillBookPage = FindImg(GrowthImgList.skillBookMerchantPage, [1031, 3, 202, 60], shot);
     if (hasSkillBookPage)
@@ -1280,7 +1367,7 @@ const GrowthMissionFlow = () =>
             config.game.lv = lv;
             RewriteConfig(config);
         }
-        if (!lv || lv < 35)
+        if (lv > 30 && lv < 35)
         {
             console.log("等级小于34级，切换模式为挂机模式，去地图挂机");
             specialConfig.gameMode = "instance";
@@ -1395,53 +1482,7 @@ const IsNotMovingCheck = () =>
     {
         DailyMissionFlow();
     }
-    if (isSameMainStoryTime == 0)
-    {
-        console.log("记录当前任务");
-        isSameMainStory = images.clip(captureScreen(), 903, 156, 70, 15);
-        isSameMainStoryTime++;
-    }
-    else
-    {
-        TapMainStory();
-        let isLongTimeNoContinue = FindImg(isSameMainStory, [887, 143, 109, 45]);
-        if (isLongTimeNoContinue)
-        {
-            isSameMainStoryTime++;
-            console.log("点击到相同任务，次数加一，当前次数为：" + isSameMainStoryTime);
-            if (isSameMainStoryTime > 2)
-            {
-                isSameMainStoryTime = 0;
-                console.log("连续主线的任务相同，可能被卡住，随机移动");
-                console.log("当前任务模式为：" + storyMode);
-                const isInSecretLab = FindImgInList(secretLabImgList, [139, 112, 115, 55]);
-                if (isInSecretLab)
-                {
-                    console.log("在秘密实验室停止移动，回到主城继续主线");
-                    ReturnHome();
-                    return true;
-                }
-                let randomDirection = random(0, 3);
-                if (randomDirection == 0)
-                {
-                    SwipeUp(3);
-                }
-                else if (randomDirection == 1)
-                {
-                    SwipeRight(3);
-                }
-                else if (randomDirection == 2)
-                {
-                    SwipeDown(3);
-                }
-                else if (randomDirection == 3)
-                {
-                    SwipeLeft(3);
-                }
-            }
 
-        }
-    }
 };
 // storyMode = "growthMission";
 const MainStoryFlow = () =>

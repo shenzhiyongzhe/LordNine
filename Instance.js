@@ -50,76 +50,11 @@ const {
     SwipeDown,
     SwipeLeft,
     SwipeRight,
-    ChangeRecoverPotionPercentToNormal,
+    ChangeRecoverPotionPercentToNormal, OpenMap,
 } = require("./utils");
 const { ComprehensiveImprovement_Instance, DailyQuest, LoginProps } = require("./CommonFlow");
 const { DecomposeEquipment } = require("./Backpack");
 
-const MapIconColorList = [
-    [
-        "#c9ba89",
-        [
-            [16, 2, "#50452f"],
-            [8, 14, "#d0bf8d"],
-            [-2, 15, "#dccb96"],
-            [16, 16, "#d7c692"],
-        ],
-    ],
-    [
-        "#cfbe8d",
-        [
-            [-1, 16, "#dccb96"],
-            [7, 20, "#dac994"],
-            [16, 17, "#d1c18f"],
-            [17, 17, "#d7c692"],
-        ],
-    ],
-    [
-        "#cbba89",
-        [
-            [4, -7, "#dccb96"],
-            [7, -2, "#dccb96"],
-            [-2, 15, "#dccb96"],
-            [18, 17, "#958863"],
-        ],
-    ],
-    [
-        "#cbba89",
-        [
-            [6, -1, "#d7c692"],
-            [3, 6, "#dccb96"],
-            [-1, 15, "#dccb96"],
-            [16, 17, "#d9c894"],
-        ],
-    ],
-    [
-        "#c8b889",
-        [
-            [5, 1, "#dbc996"],
-            [-2, 16, "#dccb96"],
-            [16, 17, "#cebd8b"],
-            [6, 20, "#d3c18f"],
-        ],
-    ],
-    [
-        "#ccbb89",
-        [
-            [6, 0, "#d7c692"],
-            [-1, 16, "#dccb96"],
-            [7, 20, "#d3c18f"],
-            [16, 18, "#d9c894"],
-        ],
-    ],
-    [
-        "#c8b888",
-        [
-            [5, 0, "#dbc996"],
-            [-2, 15, "#dccb96"],
-            [6, 19, "#d3c18f"],
-            [16, 16, "#cebd8b"],
-        ],
-    ],
-];
 
 const FirstLevel = [
     [20, 181, 31, 40],
@@ -223,7 +158,7 @@ const HangUpInstance = () =>
     };
 
     let haveAvailableInstance = false;
-
+    const unsafeImgList = LoadImgList("page/instance/unsafe")
     const shot = captureScreen();
     for (let i = 0; i < instancePos.length; i++)
     {
@@ -232,11 +167,16 @@ const HangUpInstance = () =>
             console.log("该副本已结束");
             continue;
         }
-        if (i != 1 && random(1, 100) > 80)
+        else if (FindImgInList(unsafeImgList, [355, 116 + i * 170, 90, 56], shot))
         {
-            console.log("副本鉴定失败，暂不进入该副本");
+            console.log("该副本不安全，跳过");
             continue;
         }
+        // if (i != 1 && random(1, 100) > 80)
+        // {
+        //     console.log("副本鉴定失败，暂不进入该副本");
+        //     continue;
+        // }
         RandomPress(instancePos[i]);
         let canEnterInstance = CanEnterInstance();
         let requireCombatPower = FindNumber("combatPower", [1171, 494, 81, 39]);
@@ -567,29 +507,7 @@ const DailyMission = () =>
     ClickDailyMission();
 };
 
-const OpenMap = () =>
-{
-    console.log("打开地图");
-    for (let i = 0; i < 10; i++)
-    {
-        if (IsHaltMode())
-        {
-            ExitHaltMode();
-        }
-        if (FindMultiColors(MapIconColorList, [33, 116, 45, 56]) || HasMap())
-        {
-            RandomPress([127, 155, 129, 108]);
-            if (WaitUntilPageBack())
-            {
-                return true;
-            }
-        }
-        Sleep();
-        ClearPage();
-    }
-    console.log("打开地图失败");
-    return false;
-};
+
 
 const EnterMap = (mapName) =>
 {
@@ -929,8 +847,7 @@ const InstanceExceptionCheck = () =>
         if (IsNoExp())
         {
             console.log("@没有经验增加");
-            ExitHaltMode();
-            HangUpWild()
+            PressToAuto()
         }
         if (instance_mode == "dailyMission")
         {
@@ -1126,7 +1043,7 @@ const InstanceBranchManager = () =>
                     console.log(`@${switchMapTime}小时，切换地图`);
                     switchMapTime = parseFloat((Math.random() * 5 + 5).toFixed(2));
                     lastHangUpWildTime = curTime
-                    HangUpSecretLab()
+                    HangUpWild()
                     return true;
                 }
                 else
@@ -1160,7 +1077,7 @@ const InstanceBranchManager = () =>
             console.log(`@${switchMapTime}小时，切换地图`);
             switchMapTime = parseFloat((Math.random() * 5 + 5).toFixed(2));
             lastHangUpWildTime = curTime
-            HangUpSecretLab()
+            HangUpWild()
             return true;
         }
         else
@@ -1169,6 +1086,7 @@ const InstanceBranchManager = () =>
         }
     }
 }
+
 const InstanceFlow = () =>
 {
     InstanceExceptionCheck();

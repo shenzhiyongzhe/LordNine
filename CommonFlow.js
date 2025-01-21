@@ -1761,6 +1761,7 @@ const TradeGoods = () =>
     const sellText = LoadImgList("icon/font/trade/sell");
     const shelfMaxImgList = LoadImgList("icon/font/trade/shelfMax");
     const tradableImgList_100p = LoadImgList("page/trade/tradable_100p")
+    const tradableImgList_30p = LoadImgList("page/trade/tradable_30p")
     let isShelfMax = false;
     let loginCount = 0;
     Sleep();
@@ -1780,7 +1781,8 @@ const TradeGoods = () =>
         for (let i = 0; i < imgList.length; i++)
         {
             CloseSellPopup();
-            if (random(1, 100) > probability)
+            let randomMaterialIndex = random(1, 100)
+            if (randomMaterialIndex < probability)
             {
                 let haveTradable = FindImg(imgList[i], [995, 147, 280, 288])
                 if (haveTradable)
@@ -1817,15 +1819,14 @@ const TradeGoods = () =>
                     }
                 }
             }
-
-
+            CloseSellPopup();
         }
     };
     const LoginEquipment = () =>
     {
         let hasSellText;
         let currentColor = 'blue'
-        for (let i = 0; i < 3; i++)
+        for (let i = 0; i < 6; i++)
         {
             for (let j = 0; j < 4; j++)
             {
@@ -1842,10 +1843,10 @@ const TradeGoods = () =>
                         RandomPress([1016 + j * 66, 175 + i * 66, 38, 36]);
                         currentColor = getItemColor([750, 162, 142, 93])
                     }
-
-                    if (currentColor == "blue" || random(1, 100) < 30)
+                    let randomIndex = random(1, 100)
+                    if (currentColor == "blue" || randomIndex < 30)
                     {
-
+                        RandomPress([1016 + j * 66, 175 + i * 66, 38, 36]);
                         hasSellText = FindImgInList(sellText, [930, 584, 80, 61]);
                         if (hasSellText)
                         {
@@ -1887,7 +1888,8 @@ const TradeGoods = () =>
     //先上架材料
     RandomPress([1192, 121, 55, 27]);
 
-    LoginMaterial(tradableImgList_100p, 20);
+    LoginMaterial(tradableImgList_100p, 80);
+    LoginMaterial(tradableImgList_30p, 30);
     //然后上架武器
     if (!isShelfMax)
     {
@@ -1913,6 +1915,7 @@ const TradeGoods = () =>
     RecycleImgList(shelfMaxImgList);
     RecycleImgList(lockImgList);
     RecycleImgList(tradableImgList_100p)
+    RecycleImgList(tradableImgList_30p)
     return loginCount;
 };
 
@@ -2396,6 +2399,7 @@ const ComprehensiveImprovement_Instance = () =>
         IncreaseWeaponFeatures();
         MakeMaterial();
     }
+
     if (random(1, 100) > 50)
     {
         console.log("@鉴定成功:开箱子");
@@ -2415,7 +2419,7 @@ const ComprehensiveImprovement_Instance = () =>
             StrengthenEquipment()
         }
 
-        const comprehensiveQuest = [ChangeGameSetting, UpgradeHolyRelics, StrengthenHorseEquipment, FusionSuit, WearBestSuit, UpgradeAbilityLevel, AutoPotion]
+        const comprehensiveQuest = [ChangeRecoverPotionPercentToNormal, ChangeGameSetting, UpgradeHolyRelics, StrengthenHorseEquipment, FusionSuit, WearBestSuit, UpgradeAbilityLevel, AutoPotion]
 
         const randomEventIndex = random(0, comprehensiveQuest.length - 1)
         console.log("随机事件索引为：" + randomEventIndex);
@@ -2449,3 +2453,5 @@ module.exports = {
     ChangeAbility, GetEmail, GetAchievement, GetMonsterKnowledgeAward, LoginProps, DailyQuest, needWearEquipment,
     ShopBuy, ComprehensiveImprovement, ComprehensiveImprovement_Instance, StrengthenHorseEquipment, IncreaseWeaponFeatures, GuildDonation,
 };
+
+// ComprehensiveImprovement_Instance()

@@ -1,6 +1,7 @@
 
 
 const {
+    baseUrl,
     globalTimePlay,
     ClickSkip, ChangeHaltModeTime, ClearPage, CountDownFloaty,
     ExitHaltMode,
@@ -77,10 +78,6 @@ const NoPotionFlow = (shot) =>
                 console.log("死亡流程: 确认死亡");
             }
         }
-        if (!IsInCity())
-        {
-            Sleep(random(3, 500));
-        }
 
         if (IsBackpackFull())
         {
@@ -99,24 +96,18 @@ const NoPotionFlow = (shot) =>
         else
         {
             console.log("回家买药水...");
-            if (!IsInCity())
-            {
-                const delayTime = random(1, 500);
-                console.log("角色当前没有药水了 延迟" + delayTime + "s");
-                Sleep(delayTime)
-            }
-
             BuyPotion();
             lastTimeOfBuyingPotion = new Date().getTime();
         }
     }
 };
+
 const NoPotionFlow_HaltMode = (shot) =>
 {
     if (IsNoPotion(shot, [1145, 633, 51, 78]))
     {
         console.log("省电模式：没有药水");
-        Sleep(random(1, 500))
+        Sleep(random(1, 300))
         ExitHaltMode();
         const deathBtn = DeathCheck();
         if (deathBtn)
@@ -490,14 +481,39 @@ const StovePopup = () =>
     {
         console.log("检测到账号被封，关闭脚本");
         const config = ReadConfig()
+        config.game.vm = config.game.vm.replace(/\n/g, '');
+        const searchResponse = http.get(`${baseUrl}devices/search?vm=${config.game.vm}`)
+        const searchResult = JSON.parse(searchResponse.body.string())
+        let banTimes = 1;
+        if (searchResult.result != null)
+        {
+            banTimes += searchResult.result.banTimes;
+        }
+        const params = {
+            vm: config.game.vm,
+            banTimes: banTimes,
+            config: config
+        }
         try
         {
-            http.post(`http://47.76.112.107:8001/devices/${config.game.vm}/off`, {})
+            const postResult = http.post(`${baseUrl}devices`, params)
+            let postResponse = JSON.parse(postResult.body.string())
+            postResponse = postResponse.result
+            if (postResponse.code == 0)
+            {
+                console.log("发生封号数据成功");
+            }
+            else
+            {
+                console.log("发生封号数据失败");
+                console.log(postResponse);
+            }
         }
         catch (error)
         {
             console.log(error);
         }
+
         alert("游戏账户被封禁，", "账号数据已删除")
         StopScript()
     }
