@@ -67,7 +67,7 @@ let specialConfig = {
     lastModeChangeTime: new Date(),
 };
 const globalTimePlay = {
-    lastTimeClearBackpack_haltMode: 1726208812345
+    lastTimeClearBackpack_haltMode: new Date().getTime()
 }
 const configFile = "/sdcard/LordNine/config.json";
 
@@ -1047,30 +1047,29 @@ const IsInQuest = (shot) =>
     return false;
 };
 const ClickAuto = () => RandomPress([1135, 434, 31, 26]);
+const destinationIcon = LoadImgList("page/map/destination")
 
 const PressToAuto = () =>
 {
-    let needClickAuto = false;
     if (IsAuto_inactive())
     {
         const delayTime = random(3, 15);
         console.log("延迟" + delayTime + "s点击auto");
         Sleep(delayTime);
         ClickAuto();
+        Sleep(delayTime)
     }
 
-    for (let i = 0; i < 20; i++)
+    out: for (let i = 0; i < 20; i++)
     {
         if (FindImgInList(enemyIcon, [460, 42, 65, 73]))
         {
             console.log("发现敌人图标，退出。");
-            needClickAuto = false;
             break;
         }
         else
         {
             console.log("点击auto，没有敌人，打开地图，随机移动");
-            const destinationIcon = LoadImgList("page/map/destination")
             if (OpenMap())
             {
                 for (let i = 0; i < 30; i++)
@@ -1080,20 +1079,17 @@ const PressToAuto = () =>
                     {
                         console.log("随机点击地图成功，退出");
                         PageBack()
-                        needClickAuto = true;
-                        break;
+                        WaitUntil(() => !IsMoving())
+                        ClickAuto();
+                        break out;
                     }
                     Sleep()
                 }
-                RecycleImgList(destinationIcon)
             }
-
         }
+        Sleep(10)
     }
-    if (needClickAuto)
-    {
-        ClickAuto()
-    }
+
     if (IsAuto_active())
     {
         return true;

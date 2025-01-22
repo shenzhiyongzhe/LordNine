@@ -144,6 +144,7 @@ const HangUpInstance = () =>
         // [90, 620, 250, 50]
     ];
     const timeOverImgList = LoadImgList("icon/instance/timeOver");
+    const unsafeImgList = LoadImgList("page/instance/unsafe")
 
     let curCombatPower = FindNumber("combatPower", [1154, 600, 111, 43]);
     console.log("当前战力为：" + curCombatPower);
@@ -158,7 +159,6 @@ const HangUpInstance = () =>
     };
 
     let haveAvailableInstance = false;
-    const unsafeImgList = LoadImgList("page/instance/unsafe")
     const shot = captureScreen();
     for (let i = 0; i < instancePos.length; i++)
     {
@@ -221,8 +221,13 @@ const HangUpInstance = () =>
             EnterHaltMode();
         }
     }
+
+    RecycleImgList(timeOverImgList)
+    RecycleImgList(unsafeImgList)
+
     config.game.combatPower = curCombatPower;
     RewriteConfig(config);
+
     return false;
 };
 //接受任务
@@ -254,7 +259,7 @@ const AcceptDailyMission = () =>
     let haveAcceptMax = false;
     let acceptNum = 0;
     const randomAcceptNum = random(3, 10)
-    out: for (let i = 0; i < 10; i++)
+    out: for (let i = 0; i < 4; i++)
     {
         for (let n = 0; n < 2; n++)
         {
@@ -394,14 +399,12 @@ const AcceptDailyMission = () =>
     RecycleImgList(missionAwardImgList);
     RecycleImgList(weeklyMissionGoalImgList);
 
-    if (haveAcceptMax)
-    {
-        config.daily.acceptDailyMission = true;
-        RewriteConfig(config);
-    }
+    config.daily.acceptDailyMission = true;
+    RewriteConfig(config);
+    PageBack();
+
     for (let i = 0; i < 10; i++)
     {
-        PageBack();
         if (HasMenu())
         {
             console.log("接受每日任务流程结束。");
@@ -413,6 +416,7 @@ const AcceptDailyMission = () =>
         }
     }
 };
+
 const ClickDailyMission = () =>
 {
     console.log("fn: 点击每日任务");
@@ -506,7 +510,6 @@ const DailyMission = () =>
 
     ClickDailyMission();
 };
-
 
 
 const EnterMap = (mapName) =>

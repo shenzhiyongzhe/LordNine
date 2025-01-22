@@ -902,12 +902,12 @@ const UpgradeAbilityLevel = () =>
     const PressUpgradeBtn = () => RandomPress([1049, 620, 156, 27]);
 
     const PressPositionList = [
-        [130, 166, 38, 33],
-        [225, 168, 25, 28],
-        [402, 166, 30, 28],
-        [492, 168, 25, 28],
-        [670, 167, 32, 31],
-        [757, 168, 30, 26]
+        [674, 168, 35, 34],
+        [766, 167, 22, 29],
+        [675, 303, 31, 28],
+        [766, 302, 23, 26],
+        [674, 434, 33, 33],
+        [761, 434, 32, 32]
     ];
     for (let i = 0; i < 6; i++)
     {
@@ -935,17 +935,22 @@ const UpgradeAbilityLevel = () =>
             }
         }
     }
+    PageBack()
     for (let i = 0; i < 10; i++)
     {
+        if (HasMenu())
+        {
+            break;
+        }
+        if (FindBlueBtn([533, 589, 213, 71]))
+        {
+            RandomPress([565, 607, 156, 36])
+        }
         if (HasPopupClose([1185, 52, 44, 46]))
         {
             RandomPress([1195, 65, 19, 20]);
         }
-        if (HasPageback())
-        {
-            PageBack();
-            break;
-        }
+        RandomPress([579, 545, 140, 76])
         Sleep();
     }
 };
@@ -961,34 +966,37 @@ const ChangeAbility = (changeList) =>
     const isNotMatchingColorList = [
         ["#f64f4e", [[3, 4, "#f75050"], [3, 11, "#f9564b"], [3, 41, "#fa5454"], [-2, 54, "#f85050"]]]
     ];
+    // 第一个参数是类型，第二个参数是主技能位置，第三个是被动技能位置。
     changeList = changeList || [[0, 0, 0], [0, 1, 1], [3, 1, 2], [3, 0, 3], [2, 1, 4], [2, 0, 5]];
 
-    const typePosArr = [
-        [318, 226, 106, 31],
-        [457, 227, 98, 32],
-        [594, 229, 96, 27],
-        [729, 227, 99, 29],
-        [861, 227, 104, 29],
-        [319, 281, 103, 27],
-        [456, 282, 105, 28],
-        [592, 284, 103, 25]
+    const typePosArr = [//筛选能力弹窗的选项位置。
+        [323, 227, 102, 29],
+        [458, 228, 102, 31],
+        [593, 228, 103, 29],
+        [727, 227, 102, 29],
+
+        [859, 227, 105, 28],
+        [319, 282, 105, 26],
+        [458, 282, 99, 26],
+        [591, 280, 102, 29]
     ];
-    const equipedPosArr = [
-        [130, 166, 38, 33],
-        [225, 168, 25, 28],
-        [402, 166, 30, 28],
-        [492, 168, 25, 28],
-        [670, 167, 32, 31],
-        [757, 168, 30, 26]
+    const equipedPosArr = [ //能力图标装备栏的位置
+        [674, 168, 35, 34],
+        [766, 167, 22, 29],
+        [675, 303, 31, 28],
+        [766, 302, 23, 26],
+        [674, 434, 33, 33],
+        [761, 434, 32, 32]
     ];
     const optionPosArr = [
-        [84, 350, 85, 95],
-        [222, 343, 81, 115],
-        [356, 349, 85, 116],
-        [353, 348, 90, 112],
-        [491, 338, 84, 123],
-        [631, 343, 84, 122],
-        [762, 343, 83, 119],
+        [44, 163, 87, 101],
+        [180, 166, 87, 116],
+        [312, 161, 91, 115],
+        [455, 158, 79, 108],
+
+        [45, 325, 83, 108],
+        [182, 327, 85, 107],
+        [316, 331, 85, 108],
     ];
     const TapClear = () =>
     {
@@ -1039,7 +1047,7 @@ const ChangeAbility = (changeList) =>
         }
     };
     MatchingAbility();
-    let isMatchingWrong = FindMultiColors(isNotMatchingColorList, [138, 132, 594, 100]);
+    let isMatchingWrong = FindMultiColors(isNotMatchingColorList, [703, 142, 67, 336]);
     if (isMatchingWrong)
     {
         console.log("配置错误，重新配置");
@@ -1056,7 +1064,7 @@ const ChangeAbility = (changeList) =>
     PullDownSkill([1060, 650]);
     PullDownSkill([1130, 650]);
     PullDownSkill([1190, 650]);
-    console.log("finish change ability");
+    console.log("完成能力配置");
 };
 const UpgradeHolyRelics = () =>
 {
@@ -1538,9 +1546,14 @@ const GetCurrentDiamond = (sort) =>
 
 const getOriginDate = () =>
 {
-    const arr = new Date().toJSON().split('T');
-    arr[1] = arr[1].slice(0, 8);
-    return arr.join(' ')
+    const date = new Date()
+    const year = date.getFullYear()
+    const month = (date.getMonth() + 1).toString().padStart(2, 0)
+    const day = date.getDate().toString().padStart(2, 0)
+    const hour = date.getHours().toString().padStart(2, 0)
+    const minute = date.getMinutes().toString().padStart(2, 0)
+    const second = date.getSeconds().toString().padStart(2, 0)
+    return `${year}-${month}-${day} ${hour}:${minute}:${second}`
 }
 const GetSettlement = () =>
 {
@@ -1713,7 +1726,7 @@ const GetSettlement = () =>
 
     try
     {
-        console.log("发送数据给后台");
+        console.log("发送交易数据给后台");
         const res = http.post("http://47.76.112.107:8001/devices", postData);
         // const res = http.post("http://10.6.130.129:8001/devices", postData);
         if (res.statusCode == 200)
@@ -2453,5 +2466,3 @@ module.exports = {
     ChangeAbility, GetEmail, GetAchievement, GetMonsterKnowledgeAward, LoginProps, DailyQuest, needWearEquipment,
     ShopBuy, ComprehensiveImprovement, ComprehensiveImprovement_Instance, StrengthenHorseEquipment, IncreaseWeaponFeatures, GuildDonation,
 };
-
-// ComprehensiveImprovement_Instance()

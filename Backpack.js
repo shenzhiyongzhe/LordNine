@@ -535,10 +535,10 @@ const OpenAllBox = () =>
     const hasOpenSuit = OpenSuit();
 
     UseHolyGrail();
-    if (random(1, 100) > 70)
-    {
-        OpenRune()
-    }
+    // if (random(1, 100) > 70)
+    // {
+    //     OpenRune()
+    // }
     Sleep();
     console.log("结束：已打开所有箱子");
 
