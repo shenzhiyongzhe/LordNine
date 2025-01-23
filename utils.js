@@ -1049,9 +1049,9 @@ const IsInQuest = (shot) =>
 const ClickAuto = () => RandomPress([1135, 434, 31, 26]);
 const destinationIcon = LoadImgList("page/map/destination")
 
-const PressToAuto = () =>
+const PressToAuto = (area) =>
 {
-    if (IsAuto_inactive())
+    if (IsAuto_inactive() && area == undefined)
     {
         const delayTime = random(3, 15);
         console.log("延迟" + delayTime + "s点击auto");
@@ -1059,6 +1059,8 @@ const PressToAuto = () =>
         ClickAuto();
         Sleep(delayTime)
     }
+
+    area = area || [[527, 269, 240, 228]]
 
     out: for (let i = 0; i < 20; i++)
     {
@@ -1074,12 +1076,13 @@ const PressToAuto = () =>
             {
                 for (let i = 0; i < 30; i++)
                 {
-                    RandomPress([527, 269, 240, 228])
-                    if (FindImgInList(destinationIcon, [527, 269, 240, 228]))
+                    let field = area[Math.floor(random(0, area.length - 1))]
+                    RandomPress(field)
+                    if (FindImgInList(destinationIcon, [field[0] - 30, field[1] - 30, field[2] + 30, field[3] + 30]))
                     {
                         console.log("随机点击地图成功，退出");
                         PageBack()
-                        WaitUntil(() => !IsMoving())
+                        WaitUntil(() => !IsMoving(), 2000, 40)
                         ClickAuto();
                         break out;
                     }
@@ -1131,12 +1134,17 @@ const IsMoving = () =>
     return isMoving;
 
 };
+const backpackFull_potionSub50 = LoadImgList("page/mainUI/backpackFull_potionSub50")
 const IsBackpackFull = (shot) =>
 {
     shot = shot || captureScreen();
     if (FindMultiColors(BackpackFullColorList, [1144, 35, 39, 27], shot))
     {
         console.log("发现背包已满 ：color");
+        return true;
+    }
+    else if (FindImgInList(backpackFull_potionSub50, [1083, 50, 119, 39], shot))
+    {
         return true;
     }
     return false;

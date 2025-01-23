@@ -256,7 +256,6 @@ const AcceptDailyMission = () =>
     const weeklyMissionIconImgList = LoadImgList("icon/font/dailyMission/weeklyMissionIcon");
     let dailyMissionItemPoints;
 
-    let haveAcceptMax = false;
     let acceptNum = 0;
     const randomAcceptNum = random(3, 10)
     out: for (let i = 0; i < 4; i++)
@@ -266,7 +265,6 @@ const AcceptDailyMission = () =>
             if (FindImgInList(acceptMaxImgList, [1225, 611, 50, 51]))
             {
                 console.log("@今日已经接受了10个任务");
-                haveAcceptMax = true;
                 break out;
             }
 
@@ -292,7 +290,6 @@ const AcceptDailyMission = () =>
                             if (acceptNum >= randomAcceptNum)
                             {
                                 console.log("随机接受的每日任务数量为：" + randomAcceptNum);
-                                haveAcceptMax = true;
                                 break out;
                             }
                             break;
@@ -600,30 +597,49 @@ const HangUpSecretLab = () =>
     RandomPress(SecondLevel[4]);
     RandomPress(ThirdLevel[randomIndex]);
 
-    let secretLabMoveTime = 0;
     const config = ReadConfig();
-
-    if (config.game.combatPower <= 27000)
-    {
-        console.log("战力小于27000，只进入30级区域");
-        secretLabMoveTime = random(10, 40);
-    } else
-    {
-        console.log("战力大于27000，随机整个秘密实验室");
-        secretLabMoveTime = random(5, 120);
-    }
+    const area_30 = [
+        [408, 369, 74, 77],
+        [509, 241, 25, 18],
+        [531, 202, 47, 43],
+        [551, 166, 50, 55],
+        [508, 305, 25, 32],
+        [542, 265, 50, 61],
+        [584, 319, 31, 34],
+        [512, 404, 64, 48]
+    ]
+    const area_50 = [
+        [635, 224, 37, 25],
+        [651, 270, 68, 48],
+        [715, 259, 19, 17],
+        [643, 376, 47, 43],
+        [687, 349, 34, 27],
+        [705, 320, 45, 35],
+        [736, 305, 31, 26],
+        [698, 438, 34, 26],
+        [745, 381, 68, 45],
+        [790, 340, 59, 47],
+        [850, 326, 49, 33],
+        [703, 537, 63, 60]
+    ]
 
     if (FindBlueBtn([936, 646, 251, 67]))
     {
         RandomPress([967, 663, 203, 35]);
         console.log("前往秘密实验室，自动移动中...");
-        if (WaitUntil(() => HasMenu(), 2000, 30))
+        if (WaitUntil(() => HasMenu(), 3000, 40))
         {
             console.log("@到达秘密实验室");
-            console.log("秘密实验室移动时间为 " + secretLabMoveTime);
+            if (config.game.combatPower <= 27000 || (config.game.combatPower > 27000 && random(0, 100) < 50))
+            {
+                console.log("战力小于27000，只进入30级区域");
+                PressToAuto(area_30);
 
-            Sleep(secretLabMoveTime);
-            PressToAuto();
+            } else
+            {
+                console.log("战力大于27000，随机到50级区域的秘密实验室");
+                PressToAuto(area_50)
+            }
         }
     }
 };

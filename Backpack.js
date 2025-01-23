@@ -688,8 +688,7 @@ const BuyCloak = () =>
 
     const cloakMenuItem = LoadImgList("page/trade/menu/cloak");
     const breakCloak = LoadImgList("page/trade/menu/breakCloak");
-    const bonderCloak = LoadImgList("page/trade/goods/bonderCloak");
-
+    const price_10 = LoadImgList("page/trade/price/10")
     let haveOpenedCloakPage = false;
     for (let i = 0; i < 10; i++)
     {
@@ -718,54 +717,40 @@ const BuyCloak = () =>
         for (let j = 0; j < 5; j++)
         {
             SwipeSlowly([630, 540, 5, 5], [630, 240, 5, 5], 3);
-            let haveBonderCloak = FindImgInList(bonderCloak, [373, 167, 200, 486]);
-            if (haveBonderCloak)
+
+            let purchasePrice = FindImgInList(price_10, [390, 185, 107, 465]);
+            if (purchasePrice)
             {
-                console.log("交易所有货:束缚者披风");
-                Sleep()
-                let purchasePrice = FindNumber("purchasePrice", [404, haveBonderCloak.y + 10, 78, 60]);
-                console.log("销售价格为：" + purchasePrice)
-                if (purchasePrice <= 60)
+                console.log("发现价格等于10的披风");
+                RandomPress([400, purchasePrice.y - 30, 500, 50], 3);
+                purchasePrice = FindImgInList(price_10, [871, 195, 68, 289])
+                if (purchasePrice)
                 {
-                    console.log(purchasePrice + " <<< 60");
-                    RandomPress([394, haveBonderCloak.y - 5, 505, 50]);
-                    WaitUntil(() => FindImgInList(bonderCloak, [361, 197, 180, 83]))
-                    if (FindNumber("purchasePrice", [723, 201, 60, 60]))
+                    RandomPress([400, purchasePrice.y - 10, 500, 30], 3)
+                    WaitUntil(() => HasPopupClose([905, 63, 48, 47]))
+                    if (FindBlueBtn([710, 595, 185, 58]))
                     {
-                        RandomPress([387, 221, 555, 52], 2)
-                        if (WaitUntil(() => HasPopupClose([905, 63, 48, 47])))
+                        if (FindNumber("sellPrice", [874, 501, 59, 45]) == 10)
                         {
-                            if (FindBlueBtn([710, 595, 185, 58]))
+                            console.log("点击购买")
+                            RandomPress([733, 609, 139, 31], 2)
+                            if (FindBlueBtn([545, 403, 187, 63]))
                             {
-                                if (FindNumber("sellPrice", [871, 506, 54, 35]) <= 60)
-                                {
-                                    console.log("点击购买")
-                                    RandomPress([733, 609, 139, 31], 2)
-                                    if (FindNumber("purchasePrice", [684, 342, 60, 59]) <= 60)
-                                    {
-                                        if (FindBlueBtn([545, 403, 187, 63]))
-                                        {
-                                            console.log("确定购买")
-                                            RandomPress([568, 421, 144, 28]);
-                                            haveBought = true;
-                                        }
-                                    }
-                                }
+                                console.log("确定购买")
+                                RandomPress([568, 421, 144, 28]);
+                                haveBought = true;
+                                break;
                             }
                         }
                     }
+
                 }
-                else
-                {
-                    console.log(purchasePrice + " >>> 60");
-                }
-                break;
             }
+
         }
     }
     RecycleImgList(cloakMenuItem)
     RecycleImgList(breakCloak)
-    RecycleImgList(bonderCloak)
 
     if (HasPopupClose([905, 63, 48, 47]))
     {
@@ -902,7 +887,7 @@ const WearEquipment = () =>
         }
     };
 
-    const GetTheEquipedInfo = () =>
+    const GetTheEquippedInfo = () =>
     {
         console.log("获取穿戴的装备颜色与强化等级");
         if (!OpenBackpack())
@@ -911,7 +896,7 @@ const WearEquipment = () =>
             return false;
         }
 
-        const equipedPosition = [
+        const equippedPosition = [
             [421, 430, 30, 46],
             [488, 431, 31, 44],
             [555, 432, 32, 45],
@@ -926,14 +911,17 @@ const WearEquipment = () =>
         {
             RandomPress([881, 116, 20, 21]);
         }
-
-        equipedPosition.forEach(pos =>
+        for (let i = 0; i < equippedPosition.length; i++)
         {
-            RandomPress(pos);
+            if (i == 3)
+            {
+                RandomPress([880, 114, 26, 25])
+            }
+            RandomPress(equippedPosition[i]);
             let shot = captureScreen();
             colors.push(getItemColor([623, 170, 120, 61], shot));
             lvList.push(getStrengtheningLv([616, 105, 50, 47], shot));
-        });
+        }
 
         if (colors.length != 6)
         {
@@ -1066,7 +1054,7 @@ const WearEquipment = () =>
 
     if (!hasWornEquipment)
     {
-        GetTheEquipedInfo();
+        GetTheEquippedInfo();
     }
 
     RecycleImgList(magicWandImgList);
@@ -1352,6 +1340,7 @@ const DropSomeItem = () =>
  * @param {*} type "total" or “partial"
  * @returns 
  */
+let firstDecomposeEquipment = false;
 const DecomposeEquipment = (type) =>
 {
     type = type || "partial";
@@ -1457,11 +1446,11 @@ const DecomposeEquipment = (type) =>
         }
         else if (type == "partial")
         {
-            if (config.game.decomposeBlueSuit)
+            if (config.game.decomposeBlueSuit || !firstDecomposeEquipment)
             {
                 SetDecomposeSetting("partial")
                 haveSet = true;
-                config.game.decomposeBlueSuit = true;
+                config.game.decomposeBlueSuit = false;
             }
         }
     }

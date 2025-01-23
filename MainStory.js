@@ -24,7 +24,7 @@ const { NextColorList, TalkBubbleColorList, SpeedUpOffColorList, } = require("./
 
 const { WearEquipments, StrengthenEquipment, OpenAllBox, DecomposeEquipment, AutoReleaseSkill, AutoPotion, BuyPotion, ExpandBackpackCapacity } = require("./Backpack.js");
 
-const { ComprehensiveImprovement, GuildDonation } = require("./CommonFlow.js");
+const { ComprehensiveImprovement, GuildDonation, ChangeAbility } = require("./CommonFlow.js");
 
 
 let storyMode = "mainMission";
@@ -136,9 +136,9 @@ const TransformMainStory = () =>
     RandomPress([1149, 126, 19, 20]);
     if (FindBlueBtn([653, 443, 204, 65]))
     {
-        RandomPress([689, 461, 145, 31]);
+        RandomPress([689, 461, 145, 31], 6);
+        WaitUntilMenu()
         lastTransformationTime = new Date().getTime();
-        Sleep(5);
     }
 };
 const settingIcon = LoadImgList("icon/beginner/settingIcon")
@@ -203,7 +203,7 @@ const ClickMainStory = () =>
                         isSameMainStoryTime = 0;
                     }
                 }
-                else
+                else if (isSameMainStoryTime > 10)
                 {
                     let isExceptionMainStory = false;
                     for (let i = 0; i < 10; i++)
@@ -221,13 +221,30 @@ const ClickMainStory = () =>
                     if (isExceptionMainStory)
                     {
                         console.log("主线异常", "同一主线任务点击次数过多。");
-                        alert("主线异常", "同一主线任务点击次数过多。")
+                        const lv = GetCharacterLv()
+                        if (lv <= 34)
+                        {
+                            console.log("当前等级小于等于34，暂时挂机");
+                            specialConfig.gameMode = "instance"
+                        }
+                        TransformMainStory()
+                        TapMainStory()
+                        for (let i = 0; i < 10; i++)
+                        {
+                            if (!IsMoving() && !IsInQuest())
+                            {
+                                alert("主线异常", "同一主线任务点击次数过多。")
+                                break;
+                            }
+                        }
+
+                        isSameMainStoryTime = 0;
                     }
                 }
 
             }
         }
-        if ((new Date().getTime() - lastTransformationTime) / 60000 < 4)
+        if ((new Date().getTime() - lastTransformationTime) / 60000 < 2)
         {
             TapMainStory();
         }
@@ -239,7 +256,6 @@ const ClickMainStory = () =>
         {
             TapMainStory();
         }
-        Sleep(random(3, 15));
         console.log("点击主线,并等待随机时间");
     }
     else
@@ -247,7 +263,6 @@ const ClickMainStory = () =>
         ClearPage();
         TapMainStory();
         console.log("图片识别有问题，默认点击主线位置");
-        Sleep(3);
     }
 };
 const ClickGrowthMission = () =>
@@ -602,6 +617,12 @@ const AttackingBossFlow = (number) =>
                 {
                     console.log("boss 目标丢失，退出boss 流程");
                     ChangeRecoverPotionPercentToNormal()
+                    const lv = GetCharacterLv()
+                    if (lv <= 34)
+                    {
+                        console.log("*** 等级小于34，暂时挂机,切换主线模式为挂机。***");
+                        specialConfig.gameMode = "instance"
+                    }
                     return true;
                 }
             }
@@ -1000,39 +1021,7 @@ const MainStoryBranch = () =>
         if (hadAbilityPage)
         {
             console.log("主线分支:能力!");
-            RandomPress([79, 342, 89, 122]);
-            RandomPress([79, 342, 89, 122]);
-            RandomPress([132, 165, 34, 35]);
-            //second
-            RandomPress([218, 341, 87, 118]);
-            RandomPress([218, 341, 87, 118]);
-            RandomPress([219, 167, 32, 31]);
-            //third
-            RandomPress([351, 342, 91, 118]);
-            RandomPress([351, 342, 91, 118]);
-            RandomPress([399, 164, 37, 36]);
-            //forth
-            RandomPress([488, 343, 90, 117]);
-            RandomPress([488, 343, 90, 117]);
-            RandomPress([488, 167, 32, 29]);
-            //fifth
-            RandomPress([620, 345, 92, 116]);
-            RandomPress([620, 345, 92, 116]);
-            RandomPress([667, 164, 37, 37]);
-            //sixth
-            RandomPress([757, 339, 89, 115]);
-            RandomPress([757, 339, 89, 115]);
-            RandomPress([757, 168, 30, 27]);
-            Sleep(6);
-            PressBlank();
-            PageBack();
-            PullDownSkill([1060, 650]);
-            Sleep();
-            PullDownSkill([1130, 650]);
-            Sleep();
-            PullDownSkill([1190, 650]);
-            Sleep();
-            console.log("能力搭配结束");
+            ChangeAbility([[0, 0, 0], [0, 1, 1], [1, 0, 2], [1, 1, 3], [2, 1, 4], [2, 0, 5]])
         }
         const hasManufacturePage = FindImgInList(MainStoryBranchImgList.manufacturePage, [1130, 8, 113, 47]);
         if (hasManufacturePage)
@@ -1162,7 +1151,19 @@ const MainStoryException = () =>
         console.log("不小心点击了公会详情，点击离开");
         RandomPress([457, 514, 146, 39]);
     }
-
+    if (HaveFinished([1112, 177, 86, 194]))
+    {
+        console.log("完成任务");
+        RandomPress([907, 197, 218, 34]);
+        Sleep(3);
+        RandomPress([907, 197, 218, 34]);
+        Sleep(3);
+    }
+    if (random(1, 10000) == 2233)
+    {
+        console.log("随机到2233，做一下成长任务");
+        storyMode = "growthMission"
+    }
     if (DeathCheck())
     {
         DeathFlow();
@@ -1304,14 +1305,16 @@ const GrowthMissionFlow = () =>
     if (hasDecomposeEquipmentPage)
     {
         console.log("成长任务14: 分解装备");
-        DecomposeEquipment();
+        ClearPage()
+        OpenAllBox() && OpenAllBox() && OpenAllBox();
+        WearEquipments();
+        if (random(0, 100) > 90)
+        {
+            DecomposeEquipment("total")
+        }
         if (HaveFinished([1126, 210, 57, 33]))
         {
             RandomPress([900, 195, 268, 42]);
-            Sleep(4);
-            OpenAllBox();
-            WearEquipments();
-            StrengthenEquipment();
         }
         storyMode = "mainMission";
     }

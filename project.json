@@ -14,7 +14,7 @@
     },
     "useFeatures": [],
     "icon": "res/logo.ico",
-    "ignoredDirs": ["build", ".git", ".vscode", ".keyStore"],
+    "ignoredDirs": ["build", ".git", ".vscode", ".keyStore", "README.md"],
     "encrypt-code": false,
     "launchConfig": {
         "displaySplash": false,
@@ -41,5 +41,5 @@
     },
     "sourcePath": "/storage/emulated/0/脚本/LordNine/main.js",
     "versionCode": 28,
-    "versionName": "1.22.2"
+    "versionName": "1.23.4"
 }

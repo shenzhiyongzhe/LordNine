@@ -1086,7 +1086,7 @@ const UpgradeHolyRelics = () =>
         [53, 299, 205, 69],
         [48, 407, 226, 68]
     ]
-    for (let j = 0; j < 4; j++)
+    for (let j = 0; j < 3; j++)
     {
         RandomPress(holyPosition[j], 2)
         if (!IsUnlocked())
@@ -2399,7 +2399,7 @@ const ComprehensiveImprovement_Instance = () =>
         }
         DecomposeEquipment();
     }
-    if (random(1, 100) < 10)
+    if (random(1, 100) < 30)
     {
         DailyQuest()
     }
@@ -2423,7 +2423,6 @@ const ComprehensiveImprovement_Instance = () =>
             if (needBuyCloak())
             {
                 BuyCloak()
-                haveOpenedBox = true;
             }
         }
         if (needWearEquipment())
@@ -2438,7 +2437,10 @@ const ComprehensiveImprovement_Instance = () =>
         console.log("随机事件索引为：" + randomEventIndex);
         comprehensiveQuest[randomEventIndex]()
     }
-
+    else
+    {
+        console.log("鉴定开箱子失败。");
+    }
     PutOnSale();
 
     console.log("副本模式下综合提升");
