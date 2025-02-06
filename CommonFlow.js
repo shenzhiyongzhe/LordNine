@@ -1967,8 +1967,8 @@ const PutOnSale = () =>
 
 const GetCommonAward = () =>
 {
-    GetEmail();
     GetActivitiesAward();
+    GetEmail();
     const commonAwardQuest = [GetPassAward, GetAchievement, GetMonsterKnowledgeAward, GetTravelLogAward,]
     for (let i = 0; i < commonAwardQuest.length; i++)
     {

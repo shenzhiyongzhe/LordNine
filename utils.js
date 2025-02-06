@@ -1972,7 +1972,7 @@ const ArrowImgList = {
     "down": LoadImgList("icon/arrow/down"),
     "left": LoadImgList("icon/arrow/left"),
 };
-const HasTip = () => FindMultiColors(TipColorList, [19, 17, 1238, 688]);
+const HasTip = (region) => { region = region || [19, 17, 1238, 688]; return FindMultiColors(TipColorList, region); }
 const TapTip = () =>
 {
     const hasTip = HasTip();

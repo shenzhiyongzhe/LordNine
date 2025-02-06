@@ -160,7 +160,7 @@ const ClickMainStory = () =>
     }
     else if (!HasMenu() && HaveMainStoryIcon())
     {
-        console.log("新手阶段，创建完角色开始阶段。");
+        console.log("新手阶段，在新手村训练阶段。");
         TapMainStory()
         Sleep(random(10, 30))
     }
@@ -993,10 +993,18 @@ const MainStoryBranch = () =>
     {
         for (let i = 0; i < 10; i++)
         {
-            if (HasTip())
+            if (HasTip([751, 445, 76, 55]))
             {
-                console.log("背包tip");
-                RandomPress([946, 170, 37, 36]);
+                console.log("背包tip，点击使用");
+                RandomPress([851, 595, 49, 27], 5);
+                if (FindBlueBtn([1057, 642, 212, 66]))
+                {
+                    RandomPress([1083, 655, 167, 34])
+                }
+            }
+            else if (HasTip([405, 242, 73, 58]))
+            {
+                RandomPress([629, 475, 23, 24])
             }
             else
             {
@@ -1054,6 +1062,7 @@ const MainStoryBranch = () =>
     {
         console.log("发现成长任务完成");
         RandomPress([908, 197, 267, 34], 6)
+
     }
 };
 // -----------------------------     exception    ----------------------------------
@@ -1308,10 +1317,7 @@ const GrowthMissionFlow = () =>
         ClearPage()
         OpenAllBox() && OpenAllBox() && OpenAllBox();
         WearEquipments();
-        if (random(0, 100) > 90)
-        {
-            DecomposeEquipment("total")
-        }
+        DecomposeEquipment()
         if (HaveFinished([1126, 210, 57, 33]))
         {
             RandomPress([900, 195, 268, 42]);

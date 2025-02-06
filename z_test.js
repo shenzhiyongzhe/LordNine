@@ -1,2 +1,3 @@
-const { baseUrl, FindNumber, IsBackpackFull, CountDownFloaty, Sleep, StopGame, StopScript, PressToAuto, SwipeUp, SwipeDown, SwipeLeft, SwipeRight, IsMoving, OpenMap, LoadImgList, RandomPress, FindImgInList, ReadConfig } = require("./utils");
-console.log(IsBackpackFull());
+const { SwipeSlowly, StopScript } = require("./utils.js")
+
+StopScript()

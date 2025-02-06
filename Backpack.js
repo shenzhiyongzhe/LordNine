@@ -1356,6 +1356,13 @@ const DecomposeEquipment = (type) =>
     let hasOpen = OpenBackpack();
     if (hasOpen)
     {
+        const backpackFull_gridMax = LoadImgList("backpack/backpackFull_gridMax")
+        if (FindImgInList(backpackFull_gridMax, [1122, 649, 72, 53]))
+        {
+            console.log("背包格子已经满了，优先扩充背包");
+            ExpandBackpackCapacity()
+        }
+        RecycleImgList(backpackFull_gridMax)
         RandomPress([1043, 665, 23, 26]);
     }
     if (!WaitUntilEnterBackpackMenu())
@@ -1487,20 +1494,30 @@ const DecomposeEquipment = (type) =>
     {
         RewriteConfig(config)
     }
-    if (FindBlueBtn([379, 562, 230, 79]))
+    for (let i = 0; i < 10; i++)
     {
-        RandomPress([415, 582, 137, 36], 3);
-        for (let i = 0; i < 5; i++)
+        if (FindBlueBtn([379, 562, 230, 79]))
         {
-            PressBlank();
-            if (HasBackpackMenuClose())
+            RandomPress([415, 582, 137, 36], 3);
+            for (let i = 0; i < 5; i++)
             {
-                break;
+                PressBlank();
+                if (HasBackpackMenuClose())
+                {
+                    break;
+                }
+                Sleep();
             }
-            Sleep();
+            console.log("分解装备结束");
+            break;
         }
-        console.log("分解装备结束");
+        else
+        {
+            SetDecomposeSetting("partial")
+        }
+        Sleep()
     }
+
     RecycleImgList(selectedMarkImgList);
     CloseBackpack();
     for (let i = 0; i < 10; i++)
@@ -1725,7 +1742,14 @@ const BuyPotion = () =>
         return false;
     }
 };
-
+const IdentifyRandomEquipment = () =>
+{
+    console.log("鉴定随机装备");
+}
+const StrengthenRandomEquipment = () =>
+{
+    console.log("强化随机装备");
+}
 module.exports = {
     BuyCloak,
     IsEmpty, getItemColor,

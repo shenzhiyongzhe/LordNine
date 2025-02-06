@@ -492,7 +492,7 @@ const StovePopup = () =>
         const params = {
             vm: config.game.vm,
             banTimes: banTimes,
-            config: config
+            config: JSON.stringify(config)
         }
         try
         {

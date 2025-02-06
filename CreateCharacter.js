@@ -1212,182 +1212,105 @@ const WaitUntilEnterServerSelectPage = () =>
     }
     RecycleImgList(notice_timeoutImgList);
 };
-const EnterSelectedServer = (serverName) =>
-{
 
-    const bigServer = parseInt(serverName.slice(0, 1));
-    const littleServer = parseInt(serverName.slice(1, 2));
+const FindServer = (serverName) =>
+{
+    const [bigServer, littleServer] = serverName;
     const server_name = `${bigServer + 1}区${littleServer + 1}`;
     console.log("server name : " + server_name);
-    const config = ReadConfig();
-    config.game.serverName = server_name;
-    RewriteConfig(config);
-    let shiftX = littleServer <= 4 ? littleServer : littleServer - 5;
-    let shiftY = littleServer <= 4 ? 0 : 1;
-
-
-    for (let i = 0; i < bigServer; i++)
+    const relativeX = littleServer > 4 ? littleServer - 4 : littleServer;
+    const relativeY = Math.floor((littleServer + 1) / 5)
+    let hasServer = null;
+    for (let i = 0; i < 64; i++)
     {
-        SwipeSlowly([600, 550, 10, 10], [600, 320, 10, 10], 3.3);
-    }
-    let hasServerName = FindImgInList(serverNameImgList[bigServer], [73, 162, 228, 434]);
-    if (!hasServerName)
-    {
-        alert("创建角色失败,", "未找到服务器");
-        return false;
-    }
-
-    if (hasServerName.y > 445)
-    {
-        SwipeSlowly([750, 500, 400, 10], [750, 400, 400, 10], 1);
-    }
-    hasServerName = FindImgInList(serverNameImgList[bigServer], [73, 162, 228, 434]);
-
-    if (!hasServerName)
-    {
-        alert("创建角色失败,", "未找到服务器");
-        return false;
-    }
-
-    const isFull = FindMultiColors(CanNotCreateCharacterColorList, [hasServerName.x + shiftX * 230 - 100, hasServerName.y + shiftY * 110 + 30, 120, 30]);
-    const isFull_img = FindImgInList(canNotCreateCharacterImgList, [hasServerName.x + shiftX * 230 - 100, hasServerName.y + shiftY * 110 + 30, 120, 30]);
-    console.log("isFull : " + isFull);
-    if (isFull || isFull_img)
-    {
-        console.log("服务器已满！", "没有可进入的服务器,开始监听服务器,直到有可进入的服务器为止");
-        const hasAvailableServer = ListenServerFlow();
-        if (hasAvailableServer)
-        {
-            EnterRandomServer();
-        }
-    }
-
-    console.log("选择服务器成功 " + (bigServer + 1) + "区 " + (littleServer + 1));
-    RandomPress([hasServerName.x + shiftX * 230, hasServerName.y + shiftY * 110, 10, 10]);
-    Sleep(5);
-    RandomPress([488, 274, 297, 194]);
-    Sleep(15);
-    for (let i = 0; i < 500; i++)
-    {
-        if (FindRedBtn([535, 494, 212, 69]))
-        {
-            console.log("排队等待中......");
-            Sleep(180);
-        }
-        else if (HasSkip())
-        {
-            ClickSkip();
-            break;
-        }
-        else if (FindBlueBtn([553, 424, 177, 65]))
-        {
-            RandomPress([576, 443, 133, 28]);
-            console.log("server is full");
-            alert("server is full!", "create character failed!");
-            break;
-        }
-        else
-        {
-            if (FindRedBtn([535, 494, 212, 69]))
-            {
-                alert("创建角色失败,", "排队超时");
-                return false;
-            }
-            else if (FindBlueBtn([886, 612, 369, 104]))
-            {
-                console.log("^_^ 排队结束");
-                break;
-
-            }
-        }
-        if (FindImgInList(verificationCodeImgList, [530, 235, 215, 78]))
-        {
-            console.log("发现图形验证码，开始输入验证码");
-            const verificationCode_0 = GetVerificationCode();
-            if (verificationCode_0)
-            {
-                console.log("验证码：", verificationCode_0);
-                RandomPress([511, 426, 295, 11]);
-                setText(verificationCode_0);
-                Sleep();
-                if (FindBlueBtn([531, 500, 222, 73]))
-                {
-                    RandomPress([569, 518, 143, 31]);
-                    Sleep();
-                }
-                break;
-            }
-            else
-            {
-                console.log("验证码识别失败，请手动输入验证码");
-            }
-        }
-        Sleep();
-    }
-
-};
-
-const EnterRandomServer = () =>
-{
-    console.log("开始随机进入一个服务器");
-    let hasServer = false;
-    let isServerFull;
-    const serverAvailableList = [];
-    out: for (let n = 0; n < 8; n++)
-    {
-        if (n != 0)
-        {
-            SwipeSlowly([600, 550, 10, 10], [600, 320, 10, 10], 3.3);
-        }
-        hasServer = FindImgInList(serverNameImgList[n]);
+        hasServer = FindImgInList(serverNameImgList[bigServer], [58, 145, 266, 487]);
         if (hasServer)
         {
             if (hasServer.y > 445)
             {
                 SwipeSlowly([750, 500, 10, 10], [750, 400, 10, 10], 1);
             }
-            for (let i = 0; i < 2; i++)
+
+            const isServerFull = FindMultiColors(CanNotCreateCharacterColorList, [hasServer.x + relativeX * 230 - 100, hasServer.y + relativeY * 110 + 20, 120, 40]);
+            const isServerFull_img = FindImgInList(canNotCreateCharacterImgList, [hasServer.x + relativeX * 230 - 100, hasServer.y + relativeY * 110 + 20, 120, 40]);
+            if (!isServerFull && !isServerFull_img)
             {
-                for (let j = 0; j < 5; j++)
-                {
-                    isServerFull = FindMultiColors(CanNotCreateCharacterColorList, [hasServer.x + j * 230 - 100, hasServer.y + i * 110 + 20, 120, 40]);
-                    isServerFull_img = FindImgInList(canNotCreateCharacterImgList, [hasServer.x + j * 230 - 100, hasServer.y + i * 110 + 20, 120, 40]);
-                    // console.log("region: " + "{" + (hasServer.x + j * 230 - 100) + "," + (hasServer.y + i * 110 + 20) + "," + 120 + "," + 40 + "}");
-                    if (!isServerFull && !isServerFull_img)
-                    {
-                        console.log("可进入: " + (n + 1) + "区" + (5 * i + j + 1) + "号");
-                        serverAvailableList.push([n, i, j]);
-                    }
-                }
+                console.log("可进入: " + server_name);
+                const config = ReadConfig();
+                config.game.serverName = server_name;
+                RewriteConfig(config);
+                return hasServer;
+            }
+            else
+            {
+                console.log("该区已满，无法进入");
+                return false;
+            }
+        }
+        else
+        {
+            if (Math.floor(i / 8) % 2 == 0)
+            {
+                console.log("向下滑动");
+                SwipeSlowly([600, 550, 10, 10], [600, 320, 10, 10], 3.3);
+            }
+            else
+            {
+                console.log("向上滑动");
+                SwipeSlowly([600, 320, 10, 10], [600, 500, 10, 10], 3.3);
             }
         }
     }
-    Sleep();
-    for (let i = 0; i < 8; i++)
+    return false;
+}
+
+const EnterServer = (serverName) =>
+{
+    serverName = serverName.toString()
+    if (serverName === "999")
     {
-        SwipeSlowly([600, 250, 10, 10], [600, 550, 10, 10], 1);
-    }
-    // serverAvailableList.forEach(item => console.log(item));
-    if (serverAvailableList.length == 0)
-    {
-        console.log("服务器已满！", "没有可进入的服务器,开始监听服务器,直到有可进入的服务器为止");
-        const hasAvailableServer = ListenServerFlow();
-        if (hasAvailableServer)
-        {
-            EnterRandomServer();
-        }
+        console.log("开始随机生成一个服务器");
+        serverName = [random(0, 7), random(0, 9)]
     }
     else
     {
-        const randomIndex = random(0, serverAvailableList.length - 1);
-        const serverIndex = serverAvailableList[randomIndex];
+        console.log("进入指定服务器");
+        try
+        {
+            const arr = serverName.split(".")
+            arr.map((item, index) => arr[index] = parseInt(item - 1))
+            serverName = arr
+        } catch (error)
+        {
+            alert(error)
+            StopScript()
+        }
 
-        const randomServerName = `${serverIndex[0]}${serverIndex[1] * 5 + serverIndex[2]}`;
-
-        EnterSelectedServer(randomServerName);
     }
 
-};
+    let haveFoundServer = false;
+
+    for (let i = 0; i < 20; i++)
+    {
+        haveFoundServer = FindServer(serverName)
+        if (haveFoundServer)
+        {
+            console.log("服务器位置：" + JSON.stringify(haveFoundServer));
+            let relativeX = serverName[1] > 4 ? serverName[1] - 4 : serverName[1];
+            let relativeY = Math.floor((serverName[1] + 1) / 5)
+            const clickPosition = [haveFoundServer.x + relativeX * 230, haveFoundServer.y + relativeY * 110, 10, 10]
+            console.log("点击位置：" + clickPosition);
+            RandomPress(clickPosition)
+            break;
+        }
+        else
+        {
+            console.log("重新生成随机服务器");
+            serverName[0] = random(0, 7)
+            serverName[1] = random(0, 9)
+        }
+    }
+}
 
 const SetName = () =>
 {
@@ -1401,31 +1324,7 @@ const SetName = () =>
             hasCreateCharacterBtn = true;
             break;
         }
-        let hasPopup_verificationCode = FindImgInList(verificationCodeImgList, [530, 235, 215, 78]);
-        if (hasPopup_verificationCode)
-        {
-            console.log("发现验证码弹窗");
-            if ((new Date().getTime() - lastTimeGetVerificationCode) / 60000 < 1)
-            {
-                console.log("连续接验证码间隔较短，等待一分钟再接取验证码");
-                Sleep(60);
-            }
-            let code = GetVerificationCode();
-            RandomPress([511, 426, 295, 11]);
-            if (!code)
-            {
-                alert("获取图形验证码失败", "接验证码有问题");
-                return false;
-            }
-            console.log("验证码为:" + code);
-            setText(code);
-            Sleep();
-            if (FindBlueBtn([531, 500, 222, 73]))
-            {
-                RandomPress([569, 518, 143, 31]);
-                Sleep();
-            }
-        }
+
         if (FindMultiColors(WhiteAvatarColorList, [35, 601, 44, 41]))
         {
             PressBlank();
@@ -1436,18 +1335,23 @@ const SetName = () =>
         }
         Sleep();
     }
-    // RecycleServerImgList(verificationCodeImgList);
     const config = ReadConfig();
     let name = null;
     if (hasCreateCharacterBtn == true)
     {
         console.log("点击创建角色");
+        if (random(1, 100) > 50)
+        {
+            console.log("选择男性角色");
+            RandomPress([20, 161, 34, 41])
+        }
         //随机头型和发型
         RandomPress([83, 94, 192, 538]);
         RandomPress([944, 123, 251, 284]);
+        //时装外表
+        RandomPress([938, 559, 261, 36])
 
-        RandomPress([945, 670, 248, 31]); //create btn
-        Sleep();
+        RandomPress([945, 670, 248, 31], 3); //create btn
         if (FindCheckMark([669, 431, 45, 41]))
         {
             RandomPress([509, 338, 263, 23]); //input box
@@ -1532,18 +1436,9 @@ const CreateCharacterFlow = (serverName) =>
         LoginFlow();
     }
     WaitUntilEnterServerSelectPage();
-    if (serverName == "999")
-    {
-        EnterRandomServer();
-    }
-    else
-    {
-        EnterSelectedServer(serverName);
-    }
+    EnterServer(serverName)
     SetName();
-
     FirstEnterGameClickSkip();
-
 };
 
 const temporaryLoginGoogle = () =>
@@ -1551,6 +1446,9 @@ const temporaryLoginGoogle = () =>
     CheckLogin()
     LoginFlow();
 }
+
 module.exports = { CreateCharacterFlow, temporaryLoginGoogle };
 
+
+// EnterServer(serverName)
 
