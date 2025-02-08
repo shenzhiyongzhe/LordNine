@@ -618,7 +618,7 @@ const AttackingBossFlow = (number) =>
                     console.log("boss 目标丢失，退出boss 流程");
                     ChangeRecoverPotionPercentToNormal()
                     const lv = GetCharacterLv()
-                    if (lv <= 34)
+                    if (lv <= 34 && lv > 30)
                     {
                         console.log("*** 等级小于34，暂时挂机,切换主线模式为挂机。***");
                         specialConfig.gameMode = "instance"
@@ -970,7 +970,8 @@ const MainStoryBranch = () =>
         if (HasMenu())
         {
             console.log("开始开新手箱子...");
-            ComprehensiveImprovement()
+            OpenAllBox()
+            WearEquipments()
             AutoReleaseSkill();
             Sleep();
         }
@@ -991,37 +992,30 @@ const MainStoryBranch = () =>
     const hasBackpackClose = FindImgInList(backpackTrashIcon, [978, 651, 50, 51], shot);
     if (hasBackpackClose)
     {
-        for (let i = 0; i < 10; i++)
+        if (HasTip([751, 445, 76, 55]))
         {
-            if (HasTip([751, 445, 76, 55]))
+            console.log("背包tip，点击使用");
+            RandomPress([851, 595, 49, 27], 5);
+            if (FindBlueBtn([1057, 642, 212, 66]))
             {
-                console.log("背包tip，点击使用");
-                RandomPress([851, 595, 49, 27], 5);
-                if (FindBlueBtn([1057, 642, 212, 66]))
-                {
-                    RandomPress([1083, 655, 167, 34])
-                }
+                RandomPress([1083, 655, 167, 34])
             }
-            else if (HasTip([405, 242, 73, 58]))
-            {
-                RandomPress([629, 475, 23, 24])
-            }
-            else
-            {
-                break;
-            }
-            Sleep()
         }
-        OpenAllBox();
-        WearEquipments();
-
+        else if (HasTip([405, 242, 73, 58]))
+        {
+            RandomPress([629, 475, 23, 24])
+        }
+        else
+        {
+            OpenAllBox();
+            WearEquipments();
+        }
     }
     const hasSkillBookPage = FindImgInList(MainStoryBranchImgList.skillBookPage, [1005, 100, 107, 45], shot)
     if (hasSkillBookPage)
     {
         console.log("发现技能书页面，开始穿戴技能")
         AutoReleaseSkill()
-
     }
     if (HasPageback())
     {
@@ -1062,7 +1056,6 @@ const MainStoryBranch = () =>
     {
         console.log("发现成长任务完成");
         RandomPress([908, 197, 267, 34], 6)
-
     }
 };
 // -----------------------------     exception    ----------------------------------

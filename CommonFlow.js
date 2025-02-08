@@ -1931,7 +1931,25 @@ const TradeGoods = () =>
     RecycleImgList(tradableImgList_30p)
     return loginCount;
 };
-
+const BuyEpicSuit = () =>
+{
+    console.log("开始购买紫色装备");
+    const shopList = {
+        "希山頭巾": [],
+        "希山背心": [],
+        '希山皮褲': [],
+        "希山護手": [],
+        "希山長靴": []
+    }
+}
+const ReceiveDiamond = () =>
+{
+    console.log("收取钻石");
+}
+const ReleaseDiamond = () =>
+{
+    console.log("出钻石");
+}
 const PutOnSale = () =>
 {
     console.log("开始进行物品上架");

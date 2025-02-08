@@ -1,3 +1,6 @@
-const { SwipeSlowly, StopScript } = require("./utils.js")
+const { SwipeSlowly, StopScript, LoadImgList, FindImgInList } = require("./utils.js")
 
-StopScript()
+
+const a = LoadImgList("page/trade/goods/XiShanChangXue")
+const b = FindImgInList(a, [296, 294, 106, 102])
+console.log(b);

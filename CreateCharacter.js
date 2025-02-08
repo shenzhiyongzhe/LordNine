@@ -1218,8 +1218,8 @@ const FindServer = (serverName) =>
     const [bigServer, littleServer] = serverName;
     const server_name = `${bigServer + 1}区${littleServer + 1}`;
     console.log("server name : " + server_name);
-    const relativeX = littleServer > 4 ? littleServer - 4 : littleServer;
-    const relativeY = Math.floor((littleServer + 1) / 5)
+    const relativeX = littleServer > 4 ? littleServer - 5 : littleServer;
+    const relativeY = littleServer > 4 ? 1 : 0;
     let hasServer = null;
     for (let i = 0; i < 64; i++)
     {
@@ -1229,6 +1229,7 @@ const FindServer = (serverName) =>
             if (hasServer.y > 445)
             {
                 SwipeSlowly([750, 500, 10, 10], [750, 400, 10, 10], 1);
+                hasServer = FindImgInList(serverNameImgList[bigServer], [58, 145, 266, 487]);
             }
 
             const isServerFull = FindMultiColors(CanNotCreateCharacterColorList, [hasServer.x + relativeX * 230 - 100, hasServer.y + relativeY * 110 + 20, 120, 40]);
@@ -1296,8 +1297,8 @@ const EnterServer = (serverName) =>
         if (haveFoundServer)
         {
             console.log("服务器位置：" + JSON.stringify(haveFoundServer));
-            let relativeX = serverName[1] > 4 ? serverName[1] - 4 : serverName[1];
-            let relativeY = Math.floor((serverName[1] + 1) / 5)
+            let relativeX = serverName[1] > 4 ? serverName[1] - 5 : serverName[1];
+            let relativeY = serverName[1] > 4 ? 1 : 0;
             const clickPosition = [haveFoundServer.x + relativeX * 230, haveFoundServer.y + relativeY * 110, 10, 10]
             console.log("点击位置：" + clickPosition);
             RandomPress(clickPosition)
@@ -1451,4 +1452,6 @@ module.exports = { CreateCharacterFlow, temporaryLoginGoogle };
 
 
 // EnterServer(serverName)
+
+
 
