@@ -58,6 +58,7 @@ const defaultConfig = {
         boots: null,
     }
 };
+
 const baseUrl = "http://47.76.112.107:8001/"
 let mirrorConfig = null;
 
@@ -819,6 +820,7 @@ const MatchTemplateList = (imgList, region, shot) =>
     });
     return filterArr;
 };
+
 const FormatDateTime = (format) =>
 {
     format = format || "_";
@@ -982,6 +984,7 @@ const HollowPress = (hollowRegion) =>
     press(x1, y1, random(16, 256));
     Sleep();
 };
+
 const OpenMap = () =>
 {
     console.log("打开地图");
@@ -1005,6 +1008,7 @@ const OpenMap = () =>
     console.log("打开地图失败");
     return false;
 };
+
 const auto_activeImgList = LoadImgList("icon/auto/auto_active");
 const auto_inactiveImgList = LoadImgList("icon/auto/auto_inactive");
 const auto_questImgList = LoadImgList("icon/auto/quest");
@@ -1062,12 +1066,12 @@ const PressToAuto = (area) =>
 
     area = area || [[527, 269, 240, 228]]
 
-    out: for (let i = 0; i < 20; i++)
+    out: for (let i = 0; i < 10; i++)
     {
         if (FindImgInList(enemyIcon, [460, 42, 65, 73]))
         {
             console.log("发现敌人图标，退出。");
-            break;
+            break out;
         }
         else
         {
@@ -1103,6 +1107,7 @@ let moveObj = {
     clipCount: 0,
     movingClip: null
 };
+
 const IsMoving = () =>
 {
     if (!HasMap())
@@ -1134,7 +1139,9 @@ const IsMoving = () =>
     return isMoving;
 
 };
+
 const backpackFull_potionSub50 = LoadImgList("page/mainUI/backpackFull_potionSub50")
+
 const IsBackpackFull = (shot) =>
 {
     shot = shot || captureScreen();
@@ -1286,6 +1293,7 @@ const BackpackExceptionCheck = () =>
     RecycleImgList(foldImgList);
 
 };
+
 /**
  *
  *
@@ -1333,7 +1341,7 @@ const OpenBackpack = (type, sort) =>
         console.log("点击整理");
         RandomPress([1097, 667, 16, 19]);
     }
-    if (type == undefined)
+    if (type == undefined || "all")
     {
         console.log("打开所有");
     }
@@ -1427,6 +1435,7 @@ const OpenBackpackMenu = (type) =>
     }
     return false;
 };
+
 const Sleep = (time) => { time = time || 1.5; sleep(time * 1000); };
 
 /**
@@ -1447,7 +1456,6 @@ const RandomPress = ([startX, startY, w, h], delay) =>
 
 
 const RecycleImgList = (list) => list.forEach(img => img.recycle());
-
 
 /**
  * 

@@ -25,7 +25,7 @@ GetCaptureScreenPermission();
 
 const CopyApk = () =>
 {
-    const version = '2.8.2'
+    const version = '2.11.1'
     const originPath = `/sdcard/脚本/LordNine/build/LN_v${version}.apk`
     const destinationPath = `/mnt/shared/Pictures/LN_v${version}.apk`
     files.copy(originPath, destinationPath)

@@ -1,5 +1,6 @@
 
 const {
+    baseUrl,
     specialConfig, globalTimePlay,
     ClickSkip, CloseMenu, CloseBackpack, ClearPage,
     EnterMenuItemPage, ExitHaltMode,
@@ -1728,7 +1729,6 @@ const GetSettlement = () =>
     {
         console.log("发送交易数据给后台");
         const res = http.post("http://47.76.112.107:8001/devices", postData);
-        // const res = http.post("http://10.6.130.129:8001/devices", postData);
         if (res.statusCode == 200)
         {
             console.log("发送数据成功");
@@ -1771,8 +1771,8 @@ const TradeGoods = () =>
         RewriteConfig(config);
     }
 
-    const sellText = LoadImgList("icon/font/trade/sell");
-    const shelfMaxImgList = LoadImgList("icon/font/trade/shelfMax");
+    const sellText = LoadImgList("page/trade/sell");
+    const shelfMaxImgList = LoadImgList("page/trade/shelfMax");
     const tradableImgList_100p = LoadImgList("page/trade/tradable_100p")
     const tradableImgList_30p = LoadImgList("page/trade/tradable_30p")
     let isShelfMax = false;
@@ -1931,24 +1931,361 @@ const TradeGoods = () =>
     RecycleImgList(tradableImgList_30p)
     return loginCount;
 };
-const BuyEpicSuit = () =>
+const setSoldPrice = (num) =>
 {
-    console.log("开始购买紫色装备");
-    const shopList = {
-        "希山頭巾": [],
-        "希山背心": [],
-        '希山皮褲': [],
-        "希山護手": [],
-        "希山長靴": []
+    const position = [
+        [594, 510, 39, 25],
+
+        [520, 340, 30, 30],
+        [590, 340, 30, 30],
+        [660, 340, 30, 30],
+
+        [520, 400, 30, 30],
+        [590, 400, 30, 30],
+        [660, 400, 30, 30],
+
+        [520, 450, 30, 30],
+        [590, 450, 30, 30],
+        [660, 450, 30, 30],
+    ]
+    let digitsArray = num.toString().split('').map(Number);
+    console.log("设置的金额为：" + num);
+    RandomPress([670, 511, 20, 23]) //clear
+    for (let i = 0; i < digitsArray.length; i++)
+    {
+        RandomPress(position[digitsArray[i]])
+    }
+
+    if (FindBlueBtn([639, 547, 172, 64]))
+    {
+        RandomPress([665, 564, 121, 28])
     }
 }
+
+const sendOrder = (params) =>
+{
+    try
+    {
+        const res = http.post(`${baseUrl}order/create`, params)
+        console.log("发送订单返回结果: " + res.body.string());
+    } catch (error)
+    {
+        console.log("发送订单数据错误：" + error);
+    }
+}
+
+const BuyEpicEquipment = () =>
+{
+    console.log("开始收货流程，购买紫色装备");
+    const config = ReadConfig()
+    if (config.game.diamond < 200)
+    {
+        console.log("当前钻石不足200，退出");
+        return false;
+    }
+    else if (config.game.diamond > 10000)
+    {
+        console.log("当前钻石已经累计超过10000，暂不操作，退出");
+        return false;
+    }
+    const shopList = {
+        "helmet": [
+            { name: "賽勒畢斯頭盔", englishName: "SaiLeBiSiTouKui", identified: false, }
+        ],
+
+        "tops": [
+            { name: "賽拉特背心", englishName: "SaiLaTeBeiXin", identified: false, }
+        ],
+
+        "underClothes": [
+            { name: "賽拉特皮褲", englishName: "SaiLaTePiKu", identified: false, }
+        ],
+
+        "gloves": [
+            { name: "灰光破曉護手", englishName: "HuiGuangPoXiaoHuShou", identified: false, }
+        ],
+
+        "shoes": [
+            { name: "賽拉特長靴", englishName: "SaiLaTeChangXue", identified: false, }
+        ],
+    }
+    const equipmentArea = Object.keys(shopList)
+    const instancedArr = []
+    let totalItemCount = 0
+
+    for (let item of equipmentArea)
+    {
+        let length = shopList[item].length;
+        totalItemCount += length;
+    }
+
+    if (!EnterMenuItemPage("trade"))
+    {
+        console.log("进入交易所失败");
+        return false;
+    }
+    const purchaseInfo = {}
+
+    let canPurchase = false;
+    const basePath = "page/trade/goods/"
+    let imgList = null;
+
+    for (let i = 0; i < totalItemCount; i++)
+    {
+        let part = equipmentArea[random(0, equipmentArea.length - 1)]
+        let itemIndex = Math.floor(random(0, shopList[part].length - 1))
+
+        let instancedIndex = `${part}-${itemIndex}`
+
+        if (instancedArr.includes(instancedIndex))
+        {
+            console.log("已经生成该装备，重新生成");
+            continue;
+        }
+        else
+        {
+            instancedArr.push(instancedIndex)
+        }
+
+        let { name, englishName, identified } = shopList[part][itemIndex]
+        console.log(`部位：${part}，索引：${itemIndex}，名字：${name}，英文名：${englishName}是否鉴定：${identified}`);
+
+        if (FindGoldBtn([7, 650, 228, 58]))
+        {
+            RandomPress([277, 667, 206, 24])//search input
+            setText(name)
+            let hasKeyboardConfirm = text("确定").findOne(5000)
+            if (hasKeyboardConfirm)
+            {
+                Sleep(random(2, 5))
+                RandomPress([261, 520, 68, 12], random(3, 6))
+            }
+        }
+        imgList = LoadImgList(`${basePath}${part}/${englishName}_${identified ? 1 : 0}`)
+        let hasImg = FindImgInList(imgList, [301, 202, 100, 185])
+        if (hasImg)
+        {
+            let currentPrice = FindNumber("goodsPrice", [400, hasImg.y + 25, 100, 30])
+            console.log("当前紫装价格为：" + currentPrice);
+            if (currentPrice <= 80 && currentPrice > 30)
+            {
+                console.log("可以购买此紫装");
+                RandomPress([425, hasImg.y, 465, 50])
+                canPurchase = true;
+                purchaseInfo.equipmentType = part;
+                purchaseInfo.equipmentName = name;
+                purchaseInfo.englishName = englishName;
+                purchaseInfo.identified = identified;
+                purchaseInfo.purchasePrice = currentPrice;
+                break;
+            }
+            else
+            {
+                console.log("价格过高，随机下一次");
+            }
+        }
+    }
+    let isBoughtSuccess = false;
+    if (canPurchase)
+    {
+        console.log("开始购买流程");
+        if (WaitUntil(() => FindImgInList(imgList, [299, 203, 84, 82])))
+        {
+            let purchasePrice = FindNumber("goodsPrice", [874, 204, 66, 57])
+            if (purchasePrice == purchaseInfo.purchasePrice)
+            {
+                RandomPress([415, 227, 504, 42])
+                if (WaitUntil(() => FindBlueBtn([709, 594, 187, 62])))
+                {
+                    RandomPress([740, 609, 128, 31])
+                    if (WaitUntil(() => FindBlueBtn([544, 403, 195, 65])))
+                    {
+                        RandomPress([577, 422, 131, 27])
+                        console.log("购买成功");
+                        isBoughtSuccess = true;
+                    }
+                }
+            }
+        }
+    }
+    if (isBoughtSuccess)
+    {
+        if (OpenBackpack("all", true))
+        {
+            if (EnterMenuItemPage("trade"))
+            {
+                let haveEquipment = FindImgInList(imgList, [994, 155, 275, 141])
+                if (haveEquipment)
+                {
+                    console.log("发现刚刚购买的紫色装备 " + haveEquipment);
+                    RandomPress([haveEquipment.x, haveEquipment.y, 20, 20])
+                    const sellImg = LoadImgList("page/trade/sell")
+                    if (FindImgInList(sellImg, [927, 587, 83, 52]))
+                    {
+                        RandomPress([919, 601, 109, 23])
+                        console.log("点击贩售");
+                        if (HasPopupClose([961, 189, 43, 51]))
+                        {
+                            const soldPrice = Math.floor(random(400, 500))
+                            purchaseInfo.soldPrice = soldPrice;
+                            RandomPress([852, 263, 105, 17])
+                            setSoldPrice(soldPrice)
+                            if (WaitUntil(() => FindBlueBtn([544, 463, 193, 68])))
+                            {
+                                RandomPress([573, 481, 138, 28])
+                                console.log("点击登录贩售");
+                            }
+                            if (WaitUntil(() => FindBlueBtn([546, 522, 190, 68])))
+                            {
+                                RandomPress([573, 541, 138, 29])
+                                console.log("上架紫色装备成功,发送数据给后台");
+                                console.log("purchaseInfo: " + JSON.stringify(purchaseInfo));
+
+                                const params = {
+                                    id: `${config.game.vm.slice(4, 20)}-${new Date().getTime()}`,
+                                    recipient: config.game.vm,
+                                    serverName: config.game.serverName,
+                                    equipmentType: purchaseInfo.equipmentType,
+                                    equipmentName: purchaseInfo.equipmentName,
+                                    englishName: purchaseInfo.englishName,
+                                    identified: purchaseInfo.identified,
+                                    purchasePrice: purchaseInfo.purchasePrice,
+                                    soldPrice: purchaseInfo.soldPrice,
+                                    state: "已上架"
+                                }
+                                console.log("发送订单的参数为：" + JSON.stringify(params));
+                                sendOrder(params)
+                            }
+                        }
+                    }
+                    RecycleImgList(sellImg)
+                }
+            }
+        }
+    }
+    RecycleImgList(imgList)
+    return purchaseInfo;
+}
+
 const ReceiveDiamond = () =>
 {
     console.log("收取钻石");
+    BuyEpicEquipment()
 }
+
+const getOrderList = () =>
+{
+    try
+    {
+        const config = ReadConfig()
+        const serverName = config.game.serverName;
+        const res = http.post(`${baseUrl}order/findAll`, { serverName, state: "已上架" })
+
+        const body = JSON.parse(res.body.string());
+        if (body.code == 0)
+        {
+            console.log("获取订单信息成功");
+            const list = body.result;
+            if (list)
+            {
+                return list;
+            }
+        }
+        return []
+
+    } catch (error)
+    {
+        console.log(error);
+        return [];
+    }
+
+}
+
+const updateOrderInfo = (params) =>
+{
+    try
+    {
+        console.log("更新订单信息" + JSON.stringify(params));
+        const res = http.post(`${baseUrl}order/create`, params)
+        console.log("发送订单返回结果: " + res.body.string());
+    } catch (error)
+    {
+        console.log("更新订单错误：" + error);
+    }
+}
+
 const ReleaseDiamond = () =>
 {
     console.log("出钻石");
+    const config = ReadConfig()
+    if (config.diamond < 600)
+    {
+        console.log("当前钻石小于900钻，暂不出钻");
+        return false;
+    }
+    if (!EnterMenuItemPage("trade"))
+    {
+        console.log("进入交易所页面失败，退出");
+        return false;
+    }
+    const orderList = getOrderList()
+    const baseImgUrl = "page/trade/goods/"
+    out: for (let i = 0; i < orderList.length; i++)
+    {
+        if (FindGoldBtn([8, 647, 226, 63]))
+        {
+            RandomPress([281, 669, 216, 20])
+            let { equipmentName, englishName, equipmentType, identified, soldPrice } = orderList[i]
+            setText(equipmentName);
+            Sleep(random(2, 5))
+            RandomPress([257, 518, 81, 16], random(2, 5))
+            let imgList = LoadImgList(`${baseImgUrl}/${equipmentType}/${englishName}_${identified ? 1 : 0}`)
+            let haveFoundImg = FindImgInList(imgList, [294, 194, 101, 202])
+            if (haveFoundImg)
+            {
+                console.log("发现需要购买的装备: " + haveFoundImg);
+                RandomPress([420, haveFoundImg.y, 470, 50], random(2, 5))
+                if (WaitUntil(() => FindImgInList(imgList, [300, 200, 82, 193])))
+                {
+                    RandomPress([857, 166, 61, 17])
+                    console.log("发现装备上架详情物品列，点击价格从高到低排序");
+                    for (let j = 0; j < 4; j++)
+                    {
+                        let haveTheItem = FindImgInList(imgList, [298, 196 + j * 99, 90, 99])
+                        if (haveTheItem)
+                        {
+                            let currentPrice = FindNumber("goodsPrice", [715, 197 + j * 100, 74, 71])
+                            if (currentPrice == soldPrice)
+                            {
+                                console.log("发现需要购买的装备和价格，当前物品价格为：" + currentPrice);
+                                RandomPress([390, 212 + j * 99, 553, 68])
+                                if (WaitUntil(() => FindBlueBtn([704, 591, 197, 70])))
+                                {
+                                    console.log("点击购买按钮");
+                                    RandomPress([735, 610, 139, 28])
+                                    if (WaitUntil(() => FindBlueBtn([549, 404, 186, 63])))
+                                    {
+                                        console.log("发现确定购买弹窗");
+                                        let finalConfirmPrice = FindNumber("goodsPrice", [688, 347, 65, 47])
+                                        if (finalConfirmPrice == soldPrice)
+                                        {
+                                            console.log("点击确定购买");
+                                            RandomPress([573, 421, 137, 28])
+                                            const updatedParams = orderList[i]
+                                            updatedParams.sender = config.game.vm
+                                            updatedParams.state = "已完成"
+                                            updateOrderInfo(updatedParams)
+                                            break out;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 const PutOnSale = () =>
 {
@@ -1959,6 +2296,21 @@ const PutOnSale = () =>
         return false;
     }
     GetSettlement();//结算过期上架物品
+
+    const config = ReadConfig()
+    if (config.game.RoR)
+    {
+        if (config.game.RoR == "receive")
+        {
+            console.log("配置为收取钻石的大号，开始执行收钻流程");
+            ReceiveDiamond()
+        }
+        else if (config.game.RoR == "release")
+        {
+            console.log("配置为小号出钻石，开始执行出钻流程");
+            ReleaseDiamond()
+        }
+    }
     if (random(1, 100) > 50)
     {
         LoginProps();
@@ -2325,6 +2677,7 @@ const needBuyCloak = () =>
         return false;
     }
 }
+
 const ComprehensiveImprovement = () =>
 {
     console.log("开始主线阶段的综合提升");
@@ -2389,6 +2742,7 @@ const ComprehensiveImprovement = () =>
 
     return true;
 };
+
 const ComprehensiveImprovement_Instance = () =>
 {
     const config = ReadConfig();
@@ -2486,3 +2840,5 @@ module.exports = {
     ChangeAbility, GetEmail, GetAchievement, GetMonsterKnowledgeAward, LoginProps, DailyQuest, needWearEquipment,
     ShopBuy, ComprehensiveImprovement, ComprehensiveImprovement_Instance, StrengthenHorseEquipment, IncreaseWeaponFeatures, GuildDonation,
 };
+// PutOnSale()
+// ReleaseDiamond()
