@@ -6,7 +6,7 @@ const {
     ClickSkip, ChangeHaltModeTime, ClearPage, CountDownFloaty,
     ExitHaltMode,
     FindImg, FindMultiColors, FindRedBtn, FindImgInList, FindBlueBtn, FindGoldBtn,
-    GetVerificationCode,
+    GetRandom,
     HasPageback, HasMenu, HasPopupClose, HaveMainStoryIcon,
     IsInCity, IsHaltMode, LoadImgList, IsBackpackFull, IsNoPotion,
     LaunchGame,
@@ -31,7 +31,7 @@ const { TipColorList } = require("./Color/MainStoryColorList.js");
 
 let lastTimeOfBuyingPotion = 1726208812345;
 
-let randomTimeToClearBackpack = random(150, 200);
+let randomTimeToClearBackpack = random(840, 1740);
 
 const ExceptionImgList = {
     disconnection: LoadImgList("special/disconnection"),
@@ -83,7 +83,10 @@ const NoPotionFlow = (shot) =>
         {
             console.log("IsBackpackFull：买药水前，背包是满的，优先清理背包");
             globalTimePlay.lastTimeClearBackpack_haltMode = new Date().getTime();
-            LoginProps();
+            if (random(0, 100) > 50)
+            {
+                LoginProps();
+            }
             DecomposeEquipment("partial");
         }
 
@@ -136,7 +139,7 @@ const BackpackFlow_HaltMode = () =>
     {
         console.log("到达随机清理背包时间。");
         globalTimePlay.lastTimeClearBackpack_haltMode = date.getTime();
-        randomTimeToClearBackpack = random(160, 360);
+        randomTimeToClearBackpack = random(840, 1740);
         if (date.getHours() < 7)
         {
             console.log("不在活动时间，不操作清理背包");
@@ -147,7 +150,10 @@ const BackpackFlow_HaltMode = () =>
         {
             ExitHaltMode();
         }
-        LoginProps();
+        if (GetRandom() > 50)
+        {
+            LoginProps();
+        }
         DecomposeEquipment("partial");
     }
 };
@@ -414,39 +420,42 @@ const ResetConfig = () =>
             console.log(`早上${config.resetHour}:${minutes}点，重置每日事项`);
             config.game.today = today
 
-            config.resetHour = random(8, 22)
-
-            haveResetDailyConfig = true;
-            haveResetDailyDiamond = false;
+            config.resetHour = random(8, 20)
 
             config.delayTime = random(3, 1200)
+
             config.game.deathTime = 0;
             config.game.reconnectionTime = 0;
-            config.game.tradingTimes = 0;
-            config.game.dailyDiamond = 0;
 
-            config.daily.dailyInstance = false;
-            config.daily.acceptDailyMission = false;
-            config.daily.hangUpSecretLab = 0;
+            if (GetRandom() > 43)
+            {
+                console.log("鉴定成功：重置交易次数");
+                config.game.tradingTimes = 0;
+            }
+            if (GetRandom() > 62)
+            {
+                console.log("鉴定成功：重置每日副本");
+                config.daily.dailyInstance = false;
+            }
+            if (GetRandom() > 79)
+            {
+                console.log("鉴定成功：重置每日任务");
+                config.daily.acceptDailyMission = false;
+            }
+
+            console.log("鉴定成功：重置每日商城购买");
+            config.daily.dailyShop = false;
 
             config.daily.guildDonation = false;
             config.daily.friendshipDonation = false;
-            config.daily.dailyShop = false;
             config.daily.friendshipShop = false;
+
             config.dailyTradingHours = [
                 `${random(8, 12).toString().padStart(2, 0)}:${random(0, 59).toString().padStart(2, 0)}`,
                 `${random(13, 17).toString().padStart(2, 0)}:${random(0, 59).toString().padStart(2, 0)}`,
                 `${random(18, 22).toString().padStart(2, 0)}:${random(0, 59).toString().padStart(2, 0)}`,
             ];
-            if (date.getDay() == 1)
-            {
-                console.log("每周一，重置周事件")
-                config.dailyTradingHours = [
-                    `${random(8, 12).toString().padStart(2, 0)}:${random(0, 59).toString().padStart(2, 0)}`,
-                    `${random(13, 17).toString().padStart(2, 0)}:${random(0, 59).toString().padStart(2, 0)}`,
-                    `${random(18, 22).toString().padStart(2, 0)}:${random(0, 59).toString().padStart(2, 0)}`,
-                ];
-            }
+
             console.log("reset config")
             RewriteConfig(config);
         }

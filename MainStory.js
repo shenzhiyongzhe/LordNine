@@ -980,7 +980,7 @@ const MainStoryBranch = () =>
     const hasBackpackMenuClose = HasBackpackMenuClose();
     if (hasBackpackMenuClose)
     {
-        console.log("strength equipment branch ==>");
+        console.log("主线任务分支：强化装备 ==>");
         const hasOpenBackpackMenu = OpenBackpackMenu();
         if (!hasOpenBackpackMenu)
         {
@@ -988,6 +988,7 @@ const MainStoryBranch = () =>
             return false;
         }
         StrengthenEquipment();
+        DecomposeEquipment()
     }
     const hasBackpackClose = FindImgInList(backpackTrashIcon, [978, 651, 50, 51], shot);
     if (hasBackpackClose)

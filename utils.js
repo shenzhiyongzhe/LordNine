@@ -853,7 +853,7 @@ const GetVerificationCode = () =>
 
     return result.body.json().pic_str;
 };
-
+const GetRandom = () => random(0, 100);
 const HasPageback = (shot) => { shot = shot || captureScreen(); return FindMultiColors(PagebackColorList, [1216, 9, 41, 43], shot); };
 
 const HasBackpack = () => FindMultiColors(BackpackColorList, [1143, 12, 40, 50]);
@@ -966,6 +966,7 @@ const HasSkip = () =>
     }
     return false;
 };
+
 const HollowPress = (hollowRegion) =>
 {
     const [x, y, w, h] = hollowRegion;
@@ -1014,17 +1015,20 @@ const auto_inactiveImgList = LoadImgList("icon/auto/auto_inactive");
 const auto_questImgList = LoadImgList("icon/auto/quest");
 const enemyIcon = LoadImgList("page/mainUI/enemyIcon")
 const autoRecogRegion = [1127, 423, 61, 45];
+
 const IsAuto_active = (shot) =>
 {
     shot = shot || captureScreen();
     if (FindMultiColors(Auto_activeColorList, autoRecogRegion))
     {
+        console.log("IsAuto_active: true auto colorList");
         return true;
     }
-    else if (FindImgInList(auto_activeImgList, autoRecogRegion))
-    {
-        return true;
-    }
+    // else if (FindImgInList(auto_activeImgList, autoRecogRegion))
+    // {
+    //     console.log("auto img list ");
+    //     return true;
+    // }
     return false;
 };
 
@@ -1033,12 +1037,13 @@ const IsAuto_inactive = (shot) =>
     shot = shot || captureScreen();
     if (FindMultiColors(Auto_inactiveColorList, autoRecogRegion))
     {
+        console.log("IsAuto_inactive: true auto colorList");
         return true;
     }
-    else if (FindImgInList(auto_inactiveImgList, autoRecogRegion))
-    {
-        return true;
-    }
+    // else if (FindImgInList(auto_inactiveImgList, autoRecogRegion))
+    // {
+    //     return true;
+    // }
     return false;
 };
 const IsInQuest = (shot) =>
@@ -1053,55 +1058,53 @@ const IsInQuest = (shot) =>
 const ClickAuto = () => RandomPress([1135, 434, 31, 26]);
 const destinationIcon = LoadImgList("page/map/destination")
 
+const GoToRandomPlace = (area) =>
+{
+    console.log("go to random place");
+    if (OpenMap())
+    {
+        area = area || [[464, 193, 388, 369]]
+        for (let i = 0; i < 10; i++)
+        {
+            let field = area[Math.floor(random(0, area.length - 1))]
+            RandomPress(field)
+            if (FindImgInList(destinationIcon, [field[0] - 30, field[1] - 30, field[2] + 30, field[3] + 30]))
+            {
+                console.log("随机点击地图成功，退出");
+                PageBack()
+                break;
+            }
+            Sleep()
+        }
+    }
+    WaitUntil(() => !IsMoving(), 1000, 150)
+    ClickAuto();
+}
+
 const PressToAuto = (area) =>
 {
-    if (IsAuto_inactive() && area == undefined)
-    {
-        const delayTime = random(3, 15);
-        console.log("延迟" + delayTime + "s点击auto");
-        Sleep(delayTime);
-        ClickAuto();
-        Sleep(delayTime)
-    }
-
-    area = area || [[527, 269, 240, 228]]
-
-    out: for (let i = 0; i < 10; i++)
-    {
-        if (FindImgInList(enemyIcon, [460, 42, 65, 73]))
-        {
-            console.log("发现敌人图标，退出。");
-            break out;
-        }
-        else
-        {
-            console.log("点击auto，没有敌人，打开地图，随机移动");
-            if (OpenMap())
-            {
-                for (let i = 0; i < 30; i++)
-                {
-                    let field = area[Math.floor(random(0, area.length - 1))]
-                    RandomPress(field)
-                    if (FindImgInList(destinationIcon, [field[0] - 30, field[1] - 30, field[2] + 30, field[3] + 30]))
-                    {
-                        console.log("随机点击地图成功，退出");
-                        PageBack()
-                        WaitUntil(() => !IsMoving(), 2000, 40)
-                        ClickAuto();
-                        break out;
-                    }
-                    Sleep()
-                }
-            }
-        }
-        Sleep(10)
-    }
-
+    console.log("Press To Auto");
     if (IsAuto_active())
     {
+        console.log("在auto中...");
         return true;
     }
-    return false;
+    if (area || GetRandom() > 70)
+    {
+        GoToRandomPlace(area)
+        return;
+    }
+    else
+    {
+
+        if (IsAuto_inactive())
+        {
+            ClickAuto()
+            console.log("点击auto位置，退出");
+            return true;
+        }
+    }
+
 };
 let moveObj = {
     clipCount: 0,
@@ -1175,6 +1178,7 @@ const IsHaltMode = (shot) =>
     shot = shot || captureScreen();
     return FindImgInList(haltModeImgList, [680, 112, 65, 48], shot) && !HasMenu(shot) && !HasHaltModeBtn();
 };
+
 const EnterHaltMode = () =>
 {
     for (let i = 0; i < 5; i++)
@@ -1194,6 +1198,7 @@ const EnterHaltMode = () =>
     }
     return false;
 };
+
 const ExitHaltMode = () =>
 {
     console.log("退出节电模式");
@@ -1295,7 +1300,6 @@ const BackpackExceptionCheck = () =>
 };
 
 /**
- *
  *
  * @param {*} type "default all" "equipment" "props" "gold" "auto"
  * @return {*} 
@@ -1500,6 +1504,7 @@ const WaitUntilFindColor = (colorList, region, time) =>
     }
     return false;
 };
+
 const ReturnHome = () =>
 {
     for (let i = 0; i < 100; i++)
@@ -1628,33 +1633,7 @@ const ReadTradeRecord = () => ReadJsonFile(tradeRecord)
 
 const ReadAccountFile = () =>
 {
-    if (files.exists('/sdcard/GoogleProfile.txt'))
-    {
-        const new_content = files.read('/sdcard/GoogleProfile.txt');
-        const arr = new_content.split('---')
-
-        if (arr.length < 2)
-        {
-            alert("账号信息有误，退出脚本")
-            StopScript()
-        }
-        else
-        {
-            arr[2] = "2233"
-
-            if (files.exists('/sdcard/IPdisposition.txt'))
-            {
-                const ip_content = files.read('/sdcard/IPdisposition.txt');
-                const ip_arr = ip_content.split('---')
-                if (ip_arr.length >= 2)
-                {
-                    arr[3] = ip_arr[3]
-                }
-            }
-            return arr;
-        }
-    }
-    else if (files.exists("/sdcard/disposition.txt"))
+    if (files.exists("/sdcard/disposition.txt"))
     {
         const old_content = files.read("/sdcard/disposition.txt");
         const accountArray = old_content.split("---");
@@ -1665,12 +1644,15 @@ const ReadAccountFile = () =>
         else
         {
             alert("账号信息有误，读取文件失败");
+            StopScript()
         }
     }
     else
     {
         alert("读取账号信息失败", "无账号信息");
+        StopScript()
     }
+
 };
 
 const UpdateTradeRecord = (obj) => RewriteJsonFile(tradeRecord, obj)
@@ -1681,8 +1663,10 @@ const RewriteConfig = (config) =>
     files.write(configFile, JSON.stringify(config, null, 2));
 };
 const gamePackageName = "com.smilegate.lordnine.stove.google"
+
 const StopGame = () =>
 {
+    home();
     const appName = app.getAppName(gamePackageName);
     app.openAppSetting(gamePackageName);
     text(appName).waitFor();
@@ -2137,28 +2121,27 @@ const SwipeRight = (sec) => gesture(sec * 1000, [210, 590], [310, 590]);
 
 
 
-module.exports = {
-    baseUrl,
-    specialConfig, globalTimePlay,
-    BuySkillBook,
-    CloseBackpack, CloseMenu, ClickSkip, ChangeHaltModeTime, ChangeRecoverPotionPercentToMax, ChangeRecoverPotionPercentToNormal, ClearPage, ChangeGameSetting, ClickAuto, CountDownFloaty,
-    DeathCheck,
-    EnterMenuItemPage, ExitHaltMode, EnterHaltMode,
-    FindBlueBtn, FindTipPoint, FindImg, FindMultiColors, FindCheckMark, FindRedBtn, FindGoldBtn, FindGreenBtn, FindImgInList, FindNumber, FindFloatNumber, FindWhiteCheckMark,
-    GoToTheNPC, GetVerificationCode, GetCharacterLv, GetDateTime, GetServerName,
-    HasPageback, HasMenu, HasMenuClose, HollowPress, HasSkip, HasBackpackClose, HasBackpackMenuClose, HasPopupClose, HasTip, HaveMainStoryIcon, HasTransformIcon, HaveDailyMissionIcon,
-    HaveFinished, HasMap, HaveToTapBlank,
-    IsMoving, IsBackpackFull, IsInCity, IsHaltMode, IsLocked, IsInQuest, IsAuto_active, IsAuto_inactive, IsNoPotion,
-    LoadImgList, LaunchGame,
-    MatchTemplateList,
-    TapBlankToContinue, TapTip,
-    OpenMenu, OpenBackpack, OpenBackpackMenu, OpenMap,
-    PageBack, PressBlank, PullDownSkill, PressToAuto,
-    RandomPress, ReadImg, ReturnHome, RestartGame, RecycleImgList, ReadConfig, RewriteConfig, ReadDealRecord, ReadAccountFile, ReadDailyDiamondRecord, ReadTradeRecord,
-    UpdateTradeRecord,
-    Sleep, SwipeSlowly, StopScript, SetCountryAndBirth, SwipeUp, SwipeDown, SwipeLeft, SwipeRight, StopGame,
-    WaitUntil, WaitUntilMenu, WaitUntilPageBack, WaitUntilFindColor,
-};
-
-
+// module.exports = {
+//     baseUrl,
+//     specialConfig, globalTimePlay,
+//     BuySkillBook,
+//     CloseBackpack, CloseMenu, ClickSkip, ChangeHaltModeTime, ChangeRecoverPotionPercentToMax, ChangeRecoverPotionPercentToNormal, ClearPage, ChangeGameSetting, ClickAuto, CountDownFloaty,
+//     DeathCheck,
+//     EnterMenuItemPage, ExitHaltMode, EnterHaltMode,
+//     FindBlueBtn, FindTipPoint, FindImg, FindMultiColors, FindCheckMark, FindRedBtn, FindGoldBtn, FindGreenBtn, FindImgInList, FindNumber, FindFloatNumber, FindWhiteCheckMark,
+//     GoToTheNPC, GetVerificationCode, GetCharacterLv, GetDateTime, GetServerName, GetRandom,
+//     HasPageback, HasMenu, HasMenuClose, HollowPress, HasSkip, HasBackpackClose, HasBackpackMenuClose, HasPopupClose, HasTip, HaveMainStoryIcon, HasTransformIcon, HaveDailyMissionIcon,
+//     HaveFinished, HasMap, HaveToTapBlank,
+//     IsMoving, IsBackpackFull, IsInCity, IsHaltMode, IsLocked, IsInQuest, IsAuto_active, IsAuto_inactive, IsNoPotion,
+//     LoadImgList, LaunchGame,
+//     MatchTemplateList,
+//     TapBlankToContinue, TapTip,
+//     OpenMenu, OpenBackpack, OpenBackpackMenu, OpenMap,
+//     PageBack, PressBlank, PullDownSkill, PressToAuto,
+//     RandomPress, ReadImg, ReturnHome, RestartGame, RecycleImgList, ReadConfig, RewriteConfig, ReadDealRecord, ReadAccountFile, ReadDailyDiamondRecord, ReadTradeRecord,
+//     UpdateTradeRecord,
+//     Sleep, SwipeSlowly, StopScript, SetCountryAndBirth, SwipeUp, SwipeDown, SwipeLeft, SwipeRight, StopGame,
+//     WaitUntil, WaitUntilMenu, WaitUntilPageBack, WaitUntilFindColor,
+// };
+PressToAuto()
 // ChangeGameSetting()

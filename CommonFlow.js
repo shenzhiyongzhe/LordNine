@@ -24,6 +24,7 @@ const {
     UpdateTradeRecord,
     ChangeRecoverPotionPercentToNormal,
     ChangeGameSetting,
+    GetRandom,
 } = require("./utils.js");
 
 const { IsEmpty, WearEquipments, StrengthenEquipment, OpenAllBox, UseHolyGrail, DecomposeEquipment, WearBestSuit, CheckSkillAutoRelease, BuyCloak, UnAutoPotion, getItemColor, AutoPotion } = require("./Backpack.js");
@@ -173,6 +174,7 @@ const GetMonsterKnowledgeAward = () =>
     }
     PageBack();
 };
+
 const GetPassAward = () =>
 {
     console.log("开始领取通行证奖励");
@@ -219,6 +221,7 @@ const GetPassAward = () =>
     PageBack();
     return false;
 };
+
 const GetActivitiesAward = () =>
 {
     console.log("开始领取活动奖励");
@@ -237,6 +240,7 @@ const GetActivitiesAward = () =>
     }
     Sleep(3);
     let haveAvailable;
+
     for (let i = 0; i < 10; i++)
     {
         let hasTipPoint = FindTipPoint([286, 113, 35, 403]);
@@ -252,6 +256,7 @@ const GetActivitiesAward = () =>
                     console.log("领取最终奖励")
                     RandomPress([1106, 188, 46, 50])
                     RandomPress([602, 173, 274, 105])
+                    pageShot = captureScreen();
                 }
                 if (haveAvailable)
                 {
@@ -263,6 +268,7 @@ const GetActivitiesAward = () =>
                     {
                         RandomPress([848, 287, 269, 293]);
                     }
+                    pageShot = captureScreen();
                     break;
                 }
             }
@@ -2311,7 +2317,7 @@ const PutOnSale = () =>
             ReleaseDiamond()
         }
     }
-    if (random(1, 100) > 50)
+    if (GetRandom() > 50)
     {
         LoginProps();
     }
@@ -2319,7 +2325,7 @@ const PutOnSale = () =>
     {
         console.log("鉴定失败，不图鉴装备");
     }
-    if (random(1, 100) > 90)
+    if (GetRandom() > 90)
     {
         console.log("鉴定成功，分解装备");
         DecomposeEquipment("partial");
@@ -2752,6 +2758,7 @@ const ComprehensiveImprovement_Instance = () =>
         if (random(1, 100) < 50)
         {
             console.log("鉴定失败，暂不交易");
+            Sleep(30)
             return true;
         }
     }
@@ -2765,13 +2772,13 @@ const ComprehensiveImprovement_Instance = () =>
     if (isBackpackFull)
     {
         console.log("副本提升：背包是满的，需要先清理背包");
-        if (random(1, 100) > 50)
+        if (GetRandom() > 50)
         {
             LoginProps();
         }
         DecomposeEquipment();
     }
-    if (random(1, 100) < 30)
+    if (GetRandom() < 30)
     {
         DailyQuest()
     }
@@ -2785,7 +2792,7 @@ const ComprehensiveImprovement_Instance = () =>
         MakeMaterial();
     }
 
-    if (random(1, 100) > 50)
+    if (GetRandom() > 50)
     {
         console.log("@鉴定成功:开箱子");
         OpenAllBox();
@@ -2795,23 +2802,19 @@ const ComprehensiveImprovement_Instance = () =>
             if (needBuyCloak())
             {
                 BuyCloak()
+                WearEquipments()
+                StrengthenEquipment()
             }
         }
-        if (needWearEquipment())
-        {
-            WearEquipments()
-            StrengthenEquipment()
-        }
-
-        const comprehensiveQuest = [ChangeRecoverPotionPercentToNormal, ChangeGameSetting, UpgradeHolyRelics, StrengthenHorseEquipment, FusionSuit, WearBestSuit, UpgradeAbilityLevel, AutoPotion]
+    }
+    else
+    {
+        console.log("鉴定随机事件。");
+        const comprehensiveQuest = [ChangeRecoverPotionPercentToNormal, ChangeGameSetting, CheckSkillAutoRelease, UpgradeHolyRelics, StrengthenHorseEquipment, FusionSuit, WearBestSuit, UpgradeAbilityLevel, AutoPotion]
 
         const randomEventIndex = random(0, comprehensiveQuest.length - 1)
         console.log("随机事件索引为：" + randomEventIndex);
         comprehensiveQuest[randomEventIndex]()
-    }
-    else
-    {
-        console.log("鉴定开箱子失败。");
     }
     PutOnSale();
 
@@ -2825,20 +2828,12 @@ const ComprehensiveImprovement_Instance = () =>
     AddAttributePoint();
     UnSealEngraving();
 
-    // CheckSkillAutoRelease();
-    // if (config.game.lv > 45)
-    // {
-    //     SwipeSlowly([610, 680, 5, 2], [610, 640, 5, 3], 1);
-    //     SwipeSlowly([670, 680, 5, 2], [670, 640, 5, 3], 1);
-    // }
     console.log("副本：综合提升结束");
 
     return true;
 };
 
 module.exports = {
-    ChangeAbility, GetEmail, GetAchievement, GetMonsterKnowledgeAward, LoginProps, DailyQuest, needWearEquipment,
+    ChangeAbility, GetEmail, GetAchievement, GetMonsterKnowledgeAward, LoginProps, DailyQuest, needWearEquipment, GetCommonAward,
     ShopBuy, ComprehensiveImprovement, ComprehensiveImprovement_Instance, StrengthenHorseEquipment, IncreaseWeaponFeatures, GuildDonation,
 };
-// PutOnSale()
-// ReleaseDiamond()

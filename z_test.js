@@ -1,4 +1,4 @@
-const { SwipeSlowly, StopScript, LoadImgList, FindImgInList, FindNumber, HasPopupClose, RandomPress, FindBlueBtn, baseUrl, ReadConfig } = require("./utils.js")
+const { SwipeSlowly, StopScript, LoadImgList, FindImgInList, FindNumber, HasPopupClose, RandomPress, FindBlueBtn, baseUrl, ReadConfig, PressToAuto, FindMultiColors } = require("./utils.js")
 
 const regions = [
     [394, 229, 97, 62],
@@ -44,6 +44,7 @@ const setSoldPrice = (num) =>
         RandomPress([665, 564, 121, 28])
     }
 }
+
 const config = ReadConfig()
 const purchaseInfo = { "equipmentType": "underClothes", "equipmentName": "賽拉特皮褲", "englishName": "SaiLaTePiKu", "identified": false, "purchasePrice": 72, "soldPrice": 406 }
 
@@ -59,6 +60,7 @@ const params = {
     soldPrice: purchaseInfo.soldPrice,
     state: "已上架"
 }
+
 const sendOrder = (params) =>
 {
     try
@@ -116,5 +118,51 @@ const updateOrderInfo = (params) =>
         console.log("更新订单错误：" + error);
     }
 }
-params.sender = "1234565"
-updateOrderInfo(params)
+const helmet = [
+    "SaiLaTeMaoZi", "HuiGuangPoXiaoMaoZi", "SaiLaTeTouJin", "SaiLeBiSiTouJin"
+]
+const tops = [
+    "SaiLaTeChangPao", "HuiGuangPoXiaoChangPao", "HuiGuangPoXiaoBeiXin", "SaiLeBiSiBeiXin", "HuiGuangPoXiaoKuiJia", "SaiLeBiSiKuiJia", "SaiLaTeKuiJia"
+]
+const underClothes = [
+    "HuiGuangPoXiaoBuKuZi", "SaiLeBiSiBuKuZi", "SaiLaTeBuKuZi", "HuiGuangPoXiaoPiKu", "SaiLeBiSiPiKu"
+]
+const gloves = [
+    "HuiGuangPoXiaoShouTao", "HeiSeJingJiHuShou", "SaiLeBiSiHuShou", "HuiGuangPoXiaoShouJia", "SaiLeBiSiShouJia"
+]
+const shoes = [
+    "HeiSeJingJiDuanXue", "HuiGuangPoXiaoDuanXue", "SaiLeBiSiDuanXue", "SaiLaTeDuanXue"
+]
+const basePath = "page/trade/goods/"
+// const imgList = LoadImgList(`${basePath}shoes/${shoes[0]}_0`)
+
+// const regionList = [
+//     [261, 172, 156, 145],
+// ]
+
+// for (let i = 0; i < regionList.length; i++)
+// {
+//     console.log(FindImgInList(imgList, regionList[i]));
+// }
+const ReadAccountFile = () =>
+{
+    if (files.exists("/sdcard/local_information/machine_information.json"))
+    {
+        const file = files.read("/sdcard/local_information/machine_information.json")
+        const json = JSON.parse(file)
+        console.log(json.id);
+    }
+    else
+    {
+        alert("读取账号信息失败", "无账号信息");
+        StopScript()
+    }
+};
+
+const autoColorLists = [
+    ["#fff1d8", [[1, 4, "#fff3d8"], [2, 7, "#ffeccd"], [7, 3, "#ffefcd"], [31, 4, "#fffae9"]]],
+    ["#ffefd2", [[1, 2, "#fff3d8"], [2, 4, "#fff4d6"], [7, 0, "#ffefcd"], [18, 0, "#ffebc5"]]]
+]
+
+console.log(FindMultiColors(autoColorLists, [1128, 421, 58, 53]));
+const a = ""
