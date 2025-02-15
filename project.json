@@ -1,45 +1,50 @@
 {
-    "abis": ["arm64-v8a"],
-    "assets": [
-        {
-            "form": "/storage/emulated/0/脚本/LordNine",
-            "to": "/project"
-        }
-    ],
-    "buildDir": "build",
-    "build": {
-        "build_id": null,
-        "build_number": 0,
-        "build_time": 0
-    },
-    "useFeatures": [],
-    "icon": "res/logo.ico",
-    "ignoredDirs": ["build", ".git", ".vscode", ".keyStore", "README.md"],
-    "encrypt-code": false,
-    "launchConfig": {
-        "displaySplash": false,
-        "hideAccessibilityServices": false,
-        "hideLauncher": false,
-        "hideLogs": true,
-        "stableMode": false,
-        "volumeUpcontrol": false,
-        "permissions": ["accessibility_services", "draw_overlay"],
-        "serviceDesc": "使脚本自动操作(点击、长按、滑动等)所需，若关闭则只能执行不涉及自动操作的脚本。",
-        "splashIcon": "res/splashIcon.png",
-        "splashText": "Powered by Autoxjs.com"
-    },
-    "libs": ["libopencv_java4.so", "libc++_shared.so", "libjackpal-androidterm5.so", "libjackpal-termexec2.so"],
-    "main": "main.js",
-    "name": "LN",
-    "outputPath": "/storage/emulated/0/脚本/LordNine/build",
-    "packageName": "com.lordnine",
-    "projectDirectory": "/storage/emulated/0/脚本/LordNine",
-    "scripts": {},
-    "signingConfig": {
-        "alias": "lordnine",
-        "keystore": "/storage/emulated/0/脚本/.keyStore/lordnine.keystore"
-    },
-    "sourcePath": "/storage/emulated/0/脚本/LordNine/main.js",
-    "versionCode": 28,
-    "versionName": "2.14.1"
+  "abis": ["arm64-v8a"],
+  "assets": [
+    {
+      "form": "/storage/emulated/0/脚本/LordNine",
+      "to": "/project"
+    }
+  ],
+  "buildDir": "build",
+  "build": {
+    "build_id": null,
+    "build_number": 0,
+    "build_time": 0
+  },
+  "useFeatures": [],
+  "icon": "res/logo.ico",
+  "ignoredDirs": ["build", ".git", ".vscode", ".keyStore", "README.md"],
+  "encrypt-code": false,
+  "launchConfig": {
+    "displaySplash": false,
+    "hideAccessibilityServices": false,
+    "hideLauncher": false,
+    "hideLogs": true,
+    "stableMode": false,
+    "volumeUpcontrol": false,
+    "permissions": ["accessibility_services", "draw_overlay"],
+    "serviceDesc": "使脚本自动操作(点击、长按、滑动等)所需，若关闭则只能执行不涉及自动操作的脚本。",
+    "splashIcon": "res/splashIcon.png",
+    "splashText": "Powered by Autoxjs.com"
+  },
+  "libs": [
+    "libopencv_java4.so",
+    "libc++_shared.so",
+    "libjackpal-androidterm5.so",
+    "libjackpal-termexec2.so"
+  ],
+  "main": "main.js",
+  "name": "LN",
+  "outputPath": "/storage/emulated/0/脚本/LordNine/build",
+  "packageName": "com.lordnine",
+  "projectDirectory": "/storage/emulated/0/脚本/LordNine",
+  "scripts": {},
+  "signingConfig": {
+    "alias": "lordnine",
+    "keystore": "/storage/emulated/0/脚本/.keyStore/lordnine.keystore"
+  },
+  "sourcePath": "/storage/emulated/0/脚本/LordNine/main.js",
+  "versionCode": 28,
+  "versionName": "2.15.2"
 }

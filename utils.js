@@ -11,12 +11,17 @@ const defaultConfig = {
     gameMode: "mainStory",
     delayTime: random(0, 600),
     resetHour: random(4, 12),
-    randomDayOfTheWeek: random(1, 7),
+    randomDayOfTheWeek: [random(1, 7), 0, 0],
     unlockTrade: false,
     accountSuspended: false,
     totalDeathTimes: 0,
     manufacture: [random(1, 15), random(16, 30)],
     dailyTradingHours: [
+        `${random(8, 12).toString().padStart(2, 0)}:${random(0, 59).toString().padStart(2, 0)}`,
+        `${random(13, 17).toString().padStart(2, 0)}:${random(0, 59).toString().padStart(2, 0)}`,
+        `${random(18, 22).toString().padStart(2, 0)}:${random(0, 59).toString().padStart(2, 0)}`,
+    ],
+    randomEventTime: [
         `${random(8, 12).toString().padStart(2, 0)}:${random(0, 59).toString().padStart(2, 0)}`,
         `${random(13, 17).toString().padStart(2, 0)}:${random(0, 59).toString().padStart(2, 0)}`,
         `${random(18, 22).toString().padStart(2, 0)}:${random(0, 59).toString().padStart(2, 0)}`,
@@ -1021,7 +1026,6 @@ const IsAuto_active = (shot) =>
     shot = shot || captureScreen();
     if (FindMultiColors(Auto_activeColorList, autoRecogRegion))
     {
-        console.log("IsAuto_active: true auto colorList");
         return true;
     }
     // else if (FindImgInList(auto_activeImgList, autoRecogRegion))
@@ -1037,7 +1041,6 @@ const IsAuto_inactive = (shot) =>
     shot = shot || captureScreen();
     if (FindMultiColors(Auto_inactiveColorList, autoRecogRegion))
     {
-        console.log("IsAuto_inactive: true auto colorList");
         return true;
     }
     // else if (FindImgInList(auto_inactiveImgList, autoRecogRegion))
@@ -1315,6 +1318,7 @@ const OpenBackpack = (type, sort) =>
         else if (HasBackpack())
         {
             RandomPress([1154, 23, 20, 26]);
+            console.log("点击背包");
         }
         else if (IsHaltMode())
         {
@@ -1332,22 +1336,24 @@ const OpenBackpack = (type, sort) =>
         console.log("打开背包失败");
         return false;
     }
+
     BackpackExceptionCheck();
     if (FindMultiColors(BackpackDetailOnColorList, [1121, 98, 76, 41]))
     {
         console.log("背包整理打开了，点击关闭");
         RandomPress([1138, 113, 46, 14]);
     }
+
     sort = sort || false;
 
     if (sort)
     {
-        console.log("点击整理");
-        RandomPress([1097, 667, 16, 19]);
-    }
-    if (type == undefined || "all")
-    {
-        console.log("打开所有");
+        const config = ReadConfig();
+        if (!config.unlockTrade || GetRandom() > 50)
+        {
+            console.log("点击整理");
+            RandomPress([1097, 667, 16, 19]);
+        }
     }
 
     if (type == "equipment")
@@ -1550,6 +1556,7 @@ const SwipeSlowly = (startRegion, endRegion, sec) =>
     const [x2, y2, w2, h2] = endRegion;
     const endX = Math.round(Math.random() * w2 + x2);
     const endY = Math.round(Math.random() * h2 + y2);
+    sec = sec || 1;
     gesture(sec * 1000, [startX, startY], [endX, endY]);
     Sleep();
 };
@@ -2121,27 +2128,26 @@ const SwipeRight = (sec) => gesture(sec * 1000, [210, 590], [310, 590]);
 
 
 
-// module.exports = {
-//     baseUrl,
-//     specialConfig, globalTimePlay,
-//     BuySkillBook,
-//     CloseBackpack, CloseMenu, ClickSkip, ChangeHaltModeTime, ChangeRecoverPotionPercentToMax, ChangeRecoverPotionPercentToNormal, ClearPage, ChangeGameSetting, ClickAuto, CountDownFloaty,
-//     DeathCheck,
-//     EnterMenuItemPage, ExitHaltMode, EnterHaltMode,
-//     FindBlueBtn, FindTipPoint, FindImg, FindMultiColors, FindCheckMark, FindRedBtn, FindGoldBtn, FindGreenBtn, FindImgInList, FindNumber, FindFloatNumber, FindWhiteCheckMark,
-//     GoToTheNPC, GetVerificationCode, GetCharacterLv, GetDateTime, GetServerName, GetRandom,
-//     HasPageback, HasMenu, HasMenuClose, HollowPress, HasSkip, HasBackpackClose, HasBackpackMenuClose, HasPopupClose, HasTip, HaveMainStoryIcon, HasTransformIcon, HaveDailyMissionIcon,
-//     HaveFinished, HasMap, HaveToTapBlank,
-//     IsMoving, IsBackpackFull, IsInCity, IsHaltMode, IsLocked, IsInQuest, IsAuto_active, IsAuto_inactive, IsNoPotion,
-//     LoadImgList, LaunchGame,
-//     MatchTemplateList,
-//     TapBlankToContinue, TapTip,
-//     OpenMenu, OpenBackpack, OpenBackpackMenu, OpenMap,
-//     PageBack, PressBlank, PullDownSkill, PressToAuto,
-//     RandomPress, ReadImg, ReturnHome, RestartGame, RecycleImgList, ReadConfig, RewriteConfig, ReadDealRecord, ReadAccountFile, ReadDailyDiamondRecord, ReadTradeRecord,
-//     UpdateTradeRecord,
-//     Sleep, SwipeSlowly, StopScript, SetCountryAndBirth, SwipeUp, SwipeDown, SwipeLeft, SwipeRight, StopGame,
-//     WaitUntil, WaitUntilMenu, WaitUntilPageBack, WaitUntilFindColor,
-// };
-PressToAuto()
+module.exports = {
+    baseUrl,
+    specialConfig, globalTimePlay,
+    BuySkillBook,
+    CloseBackpack, CloseMenu, ClickSkip, ChangeHaltModeTime, ChangeRecoverPotionPercentToMax, ChangeRecoverPotionPercentToNormal, ClearPage, ChangeGameSetting, ClickAuto, CountDownFloaty,
+    DeathCheck,
+    EnterMenuItemPage, ExitHaltMode, EnterHaltMode,
+    FindBlueBtn, FindTipPoint, FindImg, FindMultiColors, FindCheckMark, FindRedBtn, FindGoldBtn, FindGreenBtn, FindImgInList, FindNumber, FindFloatNumber, FindWhiteCheckMark,
+    GoToTheNPC, GetVerificationCode, GetCharacterLv, GetDateTime, GetServerName, GetRandom,
+    HasPageback, HasMenu, HasMenuClose, HollowPress, HasSkip, HasBackpackClose, HasBackpackMenuClose, HasPopupClose, HasTip, HaveMainStoryIcon, HasTransformIcon, HaveDailyMissionIcon,
+    HaveFinished, HasMap, HaveToTapBlank,
+    IsMoving, IsBackpackFull, IsInCity, IsHaltMode, IsLocked, IsInQuest, IsAuto_active, IsAuto_inactive, IsNoPotion,
+    LoadImgList, LaunchGame,
+    MatchTemplateList,
+    TapBlankToContinue, TapTip,
+    OpenMenu, OpenBackpack, OpenBackpackMenu, OpenMap,
+    PageBack, PressBlank, PullDownSkill, PressToAuto,
+    RandomPress, ReadImg, ReturnHome, RestartGame, RecycleImgList, ReadConfig, RewriteConfig, ReadDealRecord, ReadAccountFile, ReadDailyDiamondRecord, ReadTradeRecord,
+    UpdateTradeRecord,
+    Sleep, SwipeSlowly, StopScript, SetCountryAndBirth, SwipeUp, SwipeDown, SwipeLeft, SwipeRight, StopGame,
+    WaitUntil, WaitUntilMenu, WaitUntilPageBack, WaitUntilFindColor,
+};
 // ChangeGameSetting()

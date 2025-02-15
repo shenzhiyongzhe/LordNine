@@ -53,7 +53,7 @@ const {
     ChangeRecoverPotionPercentToNormal, OpenMap,
     GetRandom,
 } = require("./utils");
-const { ComprehensiveImprovement_Instance, DailyQuest, LoginProps, GetCommonAward } = require("./CommonFlow");
+const { ComprehensiveImprovement_Instance, DailyQuest, LoginProps, GetCommonAward, FireRandomEvent } = require("./CommonFlow");
 const { DecomposeEquipment } = require("./Backpack");
 
 
@@ -84,7 +84,6 @@ let lastTimeComprehensiveImprovement = 1726208812345;
 
 let clickDailyMissionAwardsTimes = 0;
 
-let tradingHours = null;
 let mapName = null;
 
 const death_haltMode = LoadImgList("special/death_haltmode");
@@ -940,30 +939,23 @@ const InstanceExceptionCheck = () =>
         }
     }
 };
+let dailyTradingHours = null;
 
-const TimeToTrade = () =>
+let randomEventTime = null;
+let randomDayOfTheWeek = null;
+const TimeManager = () =>
 {
-    if (tradingHours == null)
+    if (dailyTradingHours == null || randomEventTime == null || randomDayOfTheWeek == null)
     {
         const config = ReadConfig();
-        if (!config.dailyTradingHours || config.dailyTradingHours.length != 3)
-        {
-            console.log("生成随机交易时间");
-            tradingHours = [
-                `${random(8, 12).toString().padStart(2, 0)}:${random(0, 59).toString().padStart(2, 0)}`,
-                `${random(13, 17).toString().padStart(2, 0)}:${random(0, 59).toString().padStart(2, 0)}`,
-                `${random(18, 22).toString().padStart(2, 0)}:${random(0, 59).toString().padStart(2, 0)}`,
-            ];
-            config.dailyTradingHours = tradingHours;
-            RewriteConfig(config);
-        } else
-        {
-            tradingHours = config.dailyTradingHours;
-        }
+        dailyTradingHours = config.dailyTradingHours;
+        randomEventTime = config.randomEventTime;
+        randomDayOfTheWeek = config.randomDayOfTheWeek;
     }
     const currentTimeString = new Date().toString().slice(16, 21)
     let isTimeToTrade = false;
-    tradingHours.map((time) =>
+    let isTimeToExcuteRandomEvent = false;
+    dailyTradingHours.map((time) =>
     {
         if (currentTimeString == time)
         {
@@ -972,7 +964,27 @@ const TimeToTrade = () =>
             isTimeToTrade = true;
         }
     });
-    return isTimeToTrade;
+    randomEventTime.map((time) =>
+    {
+        if (currentTimeString == time)
+        {
+            if (randomDayOfTheWeek.includes(new Date().getDay()))
+            {
+                console.log("到达随机事件时间");
+                console.log(currentTimeString + " --- " + time);
+                isTimeToExcuteRandomEvent = true;
+            }
+        }
+    });
+    if (isTimeToTrade)
+    {
+        ComprehensiveImprovement_Instance();
+    }
+    if (isTimeToExcuteRandomEvent)
+    {
+        FireRandomEvent();
+        Sleep(60, 120)
+    }
 };
 
 let switchMapTime = parseFloat((Math.random() * 30 + 18).toFixed(2));
@@ -992,7 +1004,7 @@ const TimeChecker = () =>
     oneHourCheck = curTime;
     checkCycle = parseFloat((Math.random() + 1).toFixed(2));
     const config = ReadConfig()
-    tradingHours = config.dailyTradingHours;
+    dailyTradingHours = config.dailyTradingHours;
     if (!config.daily.dailyInstance)
     {
         console.log("今日副本未完成，开始刷副本");
@@ -1054,10 +1066,7 @@ const InstanceFlow = () =>
 {
     InstanceExceptionCheck();
     TimeChecker();
-    if (TimeToTrade())
-    {
-        ComprehensiveImprovement_Instance();
-    }
+    TimeManager()
 };
 
 module.exports = { InstanceFlow };

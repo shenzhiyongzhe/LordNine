@@ -17,6 +17,7 @@ const {
     EnterMenuItemPage,
     RewriteConfig,
     FindWhiteCheckMark,
+    GetRandom,
 
 } = require("./utils.js");
 
@@ -105,18 +106,16 @@ const SingleStrengthen = () =>
         RandomPress([401, 93, 54, 12]);
     }
 };
-/**
- * 
- * @param {string} type "normalBox" 
- */
+const backpackRegion = [925, 155, 250, 450];
 const IsMultipleBox = () => FindBlueBtn([646, 506, 177, 59]);
-const ClickConfigBtn = () => RandomPress([850, 594, 51, 28])
-
+const PressUseBtn = () => RandomPress([850, 594, 51, 28])
+const randomSwipeBackpackUp = () => SwipeSlowly([1000, 400, 10, 10], [1000, 200, 10, 10], 1);
+const randomSwipeBackpackDown = () => SwipeSlowly([1000, 200, 10, 10], [1000, 400, 10, 10], 1);
 
 const OpenSkillBook = () =>
 {
     console.log("fn:打开技能书");
-    const hadOpenBackpack = OpenBackpack("props");
+    const hadOpenBackpack = OpenBackpack("props", true);
     if (!hadOpenBackpack)
     {
         console.log("打开背包失败，退出");
@@ -130,7 +129,7 @@ const OpenSkillBook = () =>
     const haveLearned = LoadImgList("backpack/haveLearned");
     for (let i = 0; i < skillBookImgList.length; i++)
     {
-        hasSkillBook = FindImg(skillBookImgList[i], [931, 160, 260, 445]);
+        hasSkillBook = FindImg(skillBookImgList[i], backpackRegion);
         if (hasSkillBook)
         {
             if (FindImgInList(unableToUse, [hasSkillBook.x - 30, hasSkillBook.y - 20, 40, 40]))
@@ -174,7 +173,7 @@ const OpenSkillBook = () =>
 
 const OpenSuit = () =>
 {
-    console.log("fn: 开始打开时装");
+    console.log("开始打开时装");
     const hasOpenBackpack = OpenBackpack("props");
     if (!hasOpenBackpack)
     {
@@ -195,7 +194,7 @@ const OpenSuit = () =>
 
     for (let i = 0; i < suitImgList.length; i++)
     {
-        let hasOpenedSuit = FindImg(suitImgList[i], [932, 155, 256, 447]);
+        let hasOpenedSuit = FindImg(suitImgList[i], backpackRegion);
         if (hasOpenedSuit)
         {
             console.log("发现时装抽卡")
@@ -205,7 +204,7 @@ const OpenSuit = () =>
                 continue;
             }
             RandomPress([hasOpenedSuit.x, hasOpenedSuit.y, 30, 30]);
-            ClickConfigBtn()
+            PressUseBtn()
             for (let i = 0; i < 60; i++)
             {
                 if (HasSkip())
@@ -260,23 +259,48 @@ const OpenRune = () =>
         return false;
     }
     const runeImgList = LoadImgList("backpack/card/rune")
-    for (let i = 0; i < runeImgList.length; i++)
+
+    let haveRune = FindImgInList(runeImgList, backpackRegion)
+    if (haveRune)
     {
-        let haveRune = FindImg(runeImgList[i], [924, 274, 268, 334])
-        if (haveRune)
+        console.log("发现符文抽卡");
+        RandomPress([haveRune.x, haveRune.y, 30, 30], 4)
+        PressUseBtn()
+        Sleep(2)
+        if (FindBlueBtn([640, 504, 186, 62]))
         {
-            RandomPress([haveRune.x, haveRune.y, 30, 30], 4)
-            ClickConfigBtn()
-            if (FindBlueBtn([640, 504, 186, 62]))
+            RandomPress([672, 522, 128, 29], 3)
+        }
+        ClickSkip()
+        if (WaitUntil(() => FindBlueBtn([510, 629, 260, 80])))
+        {
+            RandomPress([538, 650, 210, 38], 3)
+            RandomPress([538, 650, 210, 38], 3)
+        }
+        if (!FindCheckMark([22, 663, 38, 41]))
+        {
+            RandomPress([67, 674, 105, 16]) //skip anination
+        }
+        for (let i = 0; i < 30; i++)
+        {
+
+            if (FindBlueBtn([648, 632, 231, 77]))
             {
-                RandomPress([672, 522, 128, 29], 3)
+                RandomPress([677, 651, 177, 39]) // again
             }
-            ClickSkip()
-            if (WaitUntil(() => FindBlueBtn([510, 629, 260, 80])))
+            if (FindBlueBtn([510, 629, 260, 80]))
             {
                 RandomPress([538, 650, 210, 38], 3)
-                RandomPress([538, 650, 210, 38], 3)
             }
+            if (FindBlueBtn([407, 635, 231, 71]))
+            {
+                RandomPress([441, 654, 171, 31])
+            }
+            if (HasMenu())
+            {
+                break;
+            }
+            Sleep()
         }
     }
     RecycleImgList(runeImgList)
@@ -293,6 +317,12 @@ const OpenRune = () =>
         else if (FindBlueBtn([511, 636, 262, 67]))
         {
             RandomPress([540, 651, 209, 36])
+            console.log("点击观察结果")
+        }
+        else if (FindBlueBtn([405, 635, 231, 71]))
+        {
+            RandomPress([435, 652, 179, 36])
+            console.log("点击离开")
         }
         Sleep()
     }
@@ -303,11 +333,11 @@ const UseHolyGrail = () =>
     let hasUsedHolyGrail = false;
     OpenBackpack("props");
     const holyGrailImgList = LoadImgList("backpack/props/holyGrail");
-    const hasHolyGrail = FindImgInList(holyGrailImgList, [926, 151, 263, 138]);
+    const hasHolyGrail = FindImgInList(holyGrailImgList, backpackRegion);
     if (hasHolyGrail)
     {
         RandomPress([hasHolyGrail.x, hasHolyGrail.y, 15, 25]);
-        ClickConfigBtn()
+        PressUseBtn()
         for (let i = 0; i < 5; i++)
         {
             if (FindBlueBtn([646, 506, 175, 57]))
@@ -323,6 +353,28 @@ const UseHolyGrail = () =>
     RecycleImgList(holyGrailImgList);
     return hasUsedHolyGrail;
 };
+const OpenHorse = () =>
+{
+    console.log("使用道具坐骑");
+    if (!OpenBackpack("props"))
+    {
+        return false;
+    }
+    const horseImgList = LoadImgList("backpack/props/horse");
+    const haveHorse = FindImgInList(horseImgList, backpackRegion);
+    RecycleImgList(horseImgList);
+    if (haveHorse)
+    {
+        console.log("发现坐骑");
+        RandomPress([haveHorse.x, haveHorse.y, 30, 30]);
+        PressUseBtn()
+        WaitUntil(() => FindBlueBtn([1057, 642, 214, 67]));
+        RandomPress([1078, 657, 172, 35]);
+        return true;
+    }
+    return false;
+}
+
 const OpenActivityBox = () =>
 {
     console.log("fn: 打开道具箱子");
@@ -338,11 +390,11 @@ const OpenActivityBox = () =>
     let shot = captureScreen();
     for (let i = 0; i < 5; i++)
     {
-        hasPropsBox = FindImgInList(PropsImgList, [926, 150, 265, 454], shot);
+        hasPropsBox = FindImgInList(PropsImgList, backpackRegion, shot);
         if (hasPropsBox)
         {
             RandomPress([hasPropsBox.x, hasPropsBox.y, 30, 30]);
-            ClickConfigBtn()
+            PressUseBtn()
             if (IsMultipleBox())
             {
                 RandomPress([666, 520, 138, 30]);
@@ -375,9 +427,10 @@ const OpenActivityBox = () =>
     }
     return hasOpenPropsBox;
 };
+
 const OpenNoOptionBox = () =>
 {
-    console.log("fn: 打开道具箱子");
+    console.log("打开道具箱子");
     if (!OpenBackpack("props"))
     {
         return false;
@@ -387,14 +440,18 @@ const OpenNoOptionBox = () =>
 
     let hasOpenPropsBox = false;
     let hasPropsBox = null;
+    if (GetRandom() > 80)
+    {
+        randomSwipeBackpackUp()
+    }
     let shot = captureScreen();
     for (let i = 0; i < 5; i++)
     {
-        hasPropsBox = FindImgInList(PropsImgList, [926, 150, 265, 454], shot);
+        hasPropsBox = FindImgInList(PropsImgList, backpackRegion, shot);
         if (hasPropsBox)
         {
             RandomPress([hasPropsBox.x, hasPropsBox.y, 30, 30]);
-            ClickConfigBtn()
+            PressUseBtn()
             if (IsMultipleBox())
             {
                 RandomPress([666, 520, 138, 30]);
@@ -429,7 +486,7 @@ const OpenNoOptionBox = () =>
 };
 const OpenOptionalBox = () =>
 {
-    console.log("fn：打开可选择箱子");
+    console.log("打开可选择箱子");
     if (!OpenBackpack("props"))
     {
         console.log("open backpack failed");
@@ -473,6 +530,13 @@ const OpenOptionalBox = () =>
     };
 
     let haveOpened = false;
+    if (GetRandom() > 90)
+    {
+        randomSwipeBackpackDown()
+    } else if (GetRandom() > 90)
+    {
+        randomSwipeBackpackUp()
+    }
     for (let i = 0; i < 5; i++)
     {
         let haveBox = FindImgInList(optionalBoxImgList, backpackRegion);
@@ -482,7 +546,7 @@ const OpenOptionalBox = () =>
             let type = getOptionalType();
             if (type != -1)
             {
-                ClickConfigBtn()
+                PressUseBtn()
                 if (IsMultipleBox())
                 {
                     RandomPress([666, 520, 138, 30]);
@@ -519,6 +583,25 @@ const OpenOptionalBox = () =>
     RecycleImgList(optionalBoxImgList);
     return haveOpened;
 };
+const useNormalProps = (type) =>
+{
+    if (!OpenBackpack("props"))
+    {
+        return false;
+    }
+    type = type || "certificate";
+    console.log("使用普通道具：" + type);
+    const imgList = LoadImgList(`backpack/props/${type}`);
+    const hasProps = FindImgInList(imgList, backpackRegion);
+    RecycleImgList(imgList);
+    if (hasProps)
+    {
+        RandomPress([hasProps.x, hasProps.y, 30, 30]);
+        PressUseBtn()
+        return true;
+    }
+    return false;
+}
 
 const OpenAllBox = () =>
 {
@@ -528,17 +611,30 @@ const OpenAllBox = () =>
         return false;
     }
     Sleep();
-    OpenActivityBox()
     const haveOpenProps = OpenNoOptionBox();
     const haveOpenOptionalBox = OpenOptionalBox();
     const hasOpenSkill = OpenSkillBook();
     const hasOpenSuit = OpenSuit();
-
-    UseHolyGrail();
-    // if (random(1, 100) > 70)
-    // {
-    //     OpenRune()
-    // }
+    if (GetRandom() > 80)
+    {
+        OpenActivityBox()
+    }
+    if (GetRandom() > 80)
+    {
+        UseHolyGrail();
+    }
+    if (GetRandom() > 80)
+    {
+        OpenRune()
+    }
+    if (GetRandom() > 80)
+    {
+        OpenHorse()
+    }
+    if (GetRandom() > 80)
+    {
+        useNormalProps("certificate")
+    }
     Sleep();
     console.log("结束：已打开所有箱子");
 
@@ -1001,7 +1097,7 @@ const WearEquipment = () =>
                             IdentifyEquipment();
                             OpenBackpack("equipment", true);
                             RandomPress([955 + j * 62, 179 + i * 62, 24, 26]);
-                            ClickConfigBtn()
+                            PressUseBtn()
                             Sleep();
                         }
                         hasWornEquipment = true;
@@ -1042,7 +1138,7 @@ const WearEquipment = () =>
                     IdentifyEquipment();
                     OpenBackpack("equipment", true);
                     RandomPress([955 + j * 62, 179 + i * 62, 24, 26]);
-                    ClickConfigBtn()
+                    PressUseBtn()
                     shot = captureScreen();
                 }
                 hasWornEquipment = true;
@@ -1093,7 +1189,7 @@ const WearEquipments = () =>
 
 const AutoReleaseSkill = () =>
 {
-    console.log("fn:开始自动释放技能");
+    console.log("开始自动释放技能");
     let hadOpen = false;
     const skillBookPageImgList = LoadImgList("backpack/skillBookPage");
     for (let i = 0; i < 10; i++)
@@ -1156,6 +1252,7 @@ const AutoReleaseSkill = () =>
         RandomPress([1217, 112, 20, 21]);
     }
 };
+
 const HaveAllSkill = () =>
 {
     let number = 3;
@@ -1206,6 +1303,7 @@ const HaveAllSkill = () =>
         return false;
     }
 };
+
 const CheckSkillAutoRelease = () =>
 {
     console.log("检查技能是否装备与自动是否");

@@ -1,5 +1,5 @@
 
-const { RewriteConfig, Sleep, specialConfig, LaunchGame, ReadConfig, ReadAccountFile, StopScript } = require("./utils.js");
+const { RewriteConfig, Sleep, specialConfig, LaunchGame, ReadConfig, ReadAccountFile, StopScript, GetRandom } = require("./utils.js");
 const { ExceptionFlow } = require("./Exception");
 const { MainStoryFlow } = require("./MainStory.js");
 
@@ -20,45 +20,63 @@ function Init()
 {
     const config = ReadConfig();
 
-    if (config.ui || !config.gameMode)
+    if (config.unlockTrade)
     {
-        FormatConfig()
+        specialConfig.gameMode = "instance";
+        specialConfig.initGameMode = "instance"
+        config.gameMode = "instance"
+    }
+    else
+    {
+        specialConfig.gameMode = "mainStory"
+        specialConfig.initGameMode = "mainStory"
+        config.gameMode = "mainStory"
     }
 
-    let needRewrite = false;
+    gameMode = config.gameMode;
+
 
     if (!config.delayTime)
     {
         config.delayTime = random(1, 1200)
-        needRewrite = true;
     }
-    if (!config.randomDayOfTheWeek)
+    if (!config.randomDayOfTheWeek || typeof config.randomDayOfTheWeek != "object")
     {
-        config.randomDayOfTheWeek = random(1, 7)
-        needRewrite = true;
+        config.randomDayOfTheWeek = [random(1, 7), GetRandom() > 50 ? random(1, 7) : 0, GetRandom() > 50 ? random(1, 7) : 0]
     }
     if (!config.resetHour)
     {
-        config.resetHour = random(4, 12)
+        config.resetHour = random(8, 22)
         console.log("增加新的配置选项：resetHour")
-        needRewrite = true;
     }
     if (!config.totalDeathTimes)
     {
         config.totalDeathTimes = 0;
-        needRewrite = true;
     }
     if (!config.game.tradingTimes)
     {
         config.game.tradingTimes = 0;
-        needRewrite = true;
     }
     if (!config.manufacture)
     {
         config.manufacture = [random(1, 15), random(16, 30)];
-        needRewrite = true;
     }
-
+    if (!config.randomEventTime)
+    {
+        config.randomEventTime = [
+            `${random(8, 12).toString().padStart(2, 0)}:${random(0, 59).toString().padStart(2, 0)}`,
+            `${random(13, 17).toString().padStart(2, 0)}:${random(0, 59).toString().padStart(2, 0)}`,
+            `${random(18, 22).toString().padStart(2, 0)}:${random(0, 59).toString().padStart(2, 0)}`,
+        ];
+    }
+    if (!config.dailyTradingHours)
+    {
+        config.dailyTradingHours = [
+            `${random(8, 12).toString().padStart(2, 0)}:${random(0, 59).toString().padStart(2, 0)}`,
+            `${random(13, 17).toString().padStart(2, 0)}:${random(0, 59).toString().padStart(2, 0)}`,
+            `${random(18, 22).toString().padStart(2, 0)}:${random(0, 59).toString().padStart(2, 0)}`,
+        ];
+    }
     if (!config.googleAccount || !config.game.vm)
     {
         console.log('@配置不存在账号信息，开始读取账号文件');
@@ -71,23 +89,8 @@ function Init()
         needRewrite = true;
     }
 
-    if (needRewrite)
-    {
-        RewriteConfig(config)
-    }
+    RewriteConfig(config)
 
-    if (config.unlockTrade)
-    {
-        specialConfig.gameMode = "instance";
-        specialConfig.initGameMode = "instance"
-    }
-    else
-    {
-        specialConfig.gameMode = "mainStory"
-        specialConfig.initGameMode = "mainStory"
-    }
-
-    gameMode = config.gameMode;
 }
 
 const GetCaptureScreenPermission = () =>
@@ -111,59 +114,6 @@ const GetCaptureScreenPermission = () =>
     });
 };
 
-const FormatConfig = () =>
-{
-    console.log("格式化配置")
-    const config = ReadConfig()
-    const formattedConfig = {
-        game: {},
-        daily: {}
-    }
-    try
-    {
-        formattedConfig.gameMode = config.gameMode;
-        formattedConfig.delayTime = config.delayTime ? config.delayTime : random(0, 600);
-        formattedConfig.resetHour = config.resetHour ? config.resetHour : random(4, 12);
-        formattedConfig.randomDayOfTheWeek = config.randomDayOfTheWeek ? config.randomDayOfTheWeek : random(1, 7);
-        formattedConfig.unlockTrade = config.unlockTrade ? config.unlockTrade : false;
-        formattedConfig.accountSuspended = config.accountSuspended ? config.accountSuspended : false;
-        formattedConfig.totalDeathTimes = config.totalDeathTimes ? config.totalDeathTimes : 0;
-        formattedConfig.manufacture = config.manufacture ? config.manufacture : [random(1, 15), random(16, 30)];
-
-        formattedConfig.game.today = config.game.today;
-        formattedConfig.game.deathTime = config.game.deathTime;
-        formattedConfig.game.reconnectionTime = config.game.reconnectionTime ? config.game.reconnectionTime : 0;
-        formattedConfig.game.serverName = config.game.serverName ? config.game.serverName : "999";
-        formattedConfig.game.name = config.game.name ? config.game.name : '';
-        formattedConfig.game.lv = config.game.lv ? config.game.lv : 0;
-        formattedConfig.game.autoPotion = config.game.autoPotion ? config.game.autoPotion : false;
-        formattedConfig.game.diamond = config.game.diamond ? config.game.diamond : 0;
-        formattedConfig.game.monthlyIncome = config.game.monthlyIncome ? config.game.monthlyIncome : 0;
-        formattedConfig.game.dailyDiamond = config.game.dailyDiamond ? config.game.dailyDiamond : 0;
-        formattedConfig.game.combatPower = config.game.combatPower ? config.game.combatPower : 0;
-        formattedConfig.game.tradingTimes = config.game.tradingTimes ? config.game.tradingTimes : 0;
-        formattedConfig.game.changeGameSetting = config.game.changeGameSetting ? config.game.changeGameSetting : false;
-        formattedConfig.game.engraving_0 = config.game["engraving_0"] ? config.game["engraving_0"] : false;
-        formattedConfig.game.engraving_1 = config.game["engraving_1"] ? config.game["engraving_1"] : false;
-
-        formattedConfig.daily.dailyInstance = false;
-        formattedConfig.daily.acceptDailyMission = false;
-        formattedConfig.daily.hangUpSecretLab = 0;
-
-        formattedConfig.daily.guildDonation = false;
-        formattedConfig.daily.dailyShop = false;
-        formattedConfig.daily.friendshipDonation = false;
-        formattedConfig.daily.friendshipShop = false;
-
-        RewriteConfig(formattedConfig)
-        console.log("配置格式化完成")
-    } catch (error)
-    {
-        console.log("格式化失败")
-        console.log(error)
-    }
-
-}
 
 const uiFloaty = () =>
 {

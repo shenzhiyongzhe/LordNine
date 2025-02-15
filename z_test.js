@@ -1,4 +1,4 @@
-const { SwipeSlowly, StopScript, LoadImgList, FindImgInList, FindNumber, HasPopupClose, RandomPress, FindBlueBtn, baseUrl, ReadConfig, PressToAuto, FindMultiColors } = require("./utils.js")
+const { SwipeSlowly, StopScript, LoadImgList, FindImgInList, FindNumber, HasPopupClose, RandomPress, FindBlueBtn, baseUrl, ReadConfig, PressToAuto, GetRandom } = require("./utils.js")
 
 const regions = [
     [394, 229, 97, 62],
@@ -164,5 +164,6 @@ const autoColorLists = [
     ["#ffefd2", [[1, 2, "#fff3d8"], [2, 4, "#fff4d6"], [7, 0, "#ffefcd"], [18, 0, "#ffebc5"]]]
 ]
 
-console.log(FindMultiColors(autoColorLists, [1128, 421, 58, 53]));
-const a = ""
+const week = [random(1, 7), GetRandom() > 50 ? random(1, 7) : 0, GetRandom() > 50 ? random(1, 7) : 0]
+console.log(week);
+console.log(new Date().getDay());

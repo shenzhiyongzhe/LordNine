@@ -163,12 +163,13 @@ const BackpackFullFlow = (shot) =>
     const isBackpackFull = IsBackpackFull(shot);
     if (isBackpackFull)
     {
-        console.log("背包已满，开始清理背包");
         if (new Date().getHours() < 7)
         {
             console.log("不在活动时间，不操作清理背包");
             return true;
         }
+        console.log("背包已满，开始清理背包");
+
         if ((new Date().getTime() - globalTimePlay.lastTimeClearBackpack_haltMode) / 60000 > 10)
         {
             globalTimePlay.lastTimeClearBackpack_haltMode = new Date().getTime();
@@ -456,6 +457,16 @@ const ResetConfig = () =>
                 `${random(18, 22).toString().padStart(2, 0)}:${random(0, 59).toString().padStart(2, 0)}`,
             ];
 
+            if (date.getDay() == 1)
+            {
+                console.log("周一，重置周配置")
+                config.randomDayOfTheWeek = [random(1, 7), GetRandom() > 50 ? random(1, 7) : 0, GetRandom() > 50 ? random(1, 7) : 0]
+                config.randomEventTime = [
+                    `${random(8, 12).toString().padStart(2, 0)}:${random(0, 59).toString().padStart(2, 0)}`,
+                    `${random(13, 17).toString().padStart(2, 0)}:${random(0, 59).toString().padStart(2, 0)}`,
+                    `${random(18, 22).toString().padStart(2, 0)}:${random(0, 59).toString().padStart(2, 0)}`,
+                ];
+            }
             console.log("reset config")
             RewriteConfig(config);
         }
