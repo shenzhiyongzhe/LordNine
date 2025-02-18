@@ -26,6 +26,8 @@ const defaultConfig = {
         `${random(13, 17).toString().padStart(2, 0)}:${random(0, 59).toString().padStart(2, 0)}`,
         `${random(18, 22).toString().padStart(2, 0)}:${random(0, 59).toString().padStart(2, 0)}`,
     ],
+    autoHuntingTime: `${random(0, 23).toString().padStart(2, 0)}:${random(0, 59).toString().padStart(2, 0)}`,
+
     game: {
         "today": 0,
         "deathTime": 0,
@@ -49,6 +51,7 @@ const defaultConfig = {
         "dailyInstance": false,
         "acceptDailyMission": false,
         "hangUpSecretLab": false,
+        "dailyHunting": false,
 
         "dailyShop": false,
         "friendshipShop": false,
@@ -83,6 +86,7 @@ const BackpackPageColorList = [
 const BackpackDetailOnColorList = [
     ["#3e6759", [[6, -2, "#ffffff"], [8, 0, "#ffffff"], [14, 0, "#3f675a"], [43, 0, "#40685a"]]]
 ];
+
 const popupCloseRegionList = [
     // [989, 54, 59, 52],//
     [795, 94, 40, 45],//购买药水弹窗
@@ -95,6 +99,7 @@ const popupCloseRegionList = [
     [600, 103, 48, 50], //制作装备详细卡片
     [995, 55, 46, 50], //加入公会 弹窗页面
 ];
+
 const tapBlankRegion = [
     [565, 596, 135, 50], //鉴定装备后，点击空白继续
     [570, 630, 150, 50], //获得新能力，点击空白弹窗
@@ -105,7 +110,7 @@ const tapBlankRegion = [
 const ReadImg = (name) => images.read(`./img/${name}.png`);
 const LoadImgList = (url, length) =>
 {
-    length = length || 20;
+    length = length || 30;
     const list = [];
     let img = null;
     for (let i = 0; i < length; i++)
@@ -265,6 +270,10 @@ const ClearPage = () =>
     PageBack(shot);
     TapBlankToContinue(shot);
     TapTip()
+    if (IsHaltMode())
+    {
+        ExitHaltMode()
+    }
     return false;
 };
 const CountDownFloaty = (sec) =>
@@ -1092,21 +1101,18 @@ const PressToAuto = (area) =>
         console.log("在auto中...");
         return true;
     }
-    if (area || GetRandom() > 70)
+    if (area && IsAuto_inactive())
+    {
+        ClickAuto()
+        console.log("点击auto位置，退出");
+        return true;
+    }
+    if (GetRandom() > 70)
     {
         GoToRandomPlace(area)
         return;
     }
-    else
-    {
 
-        if (IsAuto_inactive())
-        {
-            ClickAuto()
-            console.log("点击auto位置，退出");
-            return true;
-        }
-    }
 
 };
 let moveObj = {
@@ -1513,7 +1519,7 @@ const WaitUntilFindColor = (colorList, region, time) =>
 
 const ReturnHome = () =>
 {
-    for (let i = 0; i < 100; i++)
+    for (let i = 0; i < 30; i++)
     {
         if (IsInCity())
         {
@@ -1640,17 +1646,18 @@ const ReadTradeRecord = () => ReadJsonFile(tradeRecord)
 
 const ReadAccountFile = () =>
 {
-    if (files.exists("/sdcard/disposition.txt"))
+    if (files.exists("/sdcard/local_information/machine_information.json"))
     {
-        const old_content = files.read("/sdcard/disposition.txt");
-        const accountArray = old_content.split("---");
-        if (accountArray.length == 4)
+        const file = files.read("/sdcard/local_information/machine_information.json")
+        const accountInfo = JSON.parse(file)
+        const { id, instance, account, password, auxiliary_mailbox } = accountInfo
+        if (id && instance && account && password && auxiliary_mailbox)
         {
-            return accountArray;
+            return accountInfo;
         }
         else
         {
-            alert("账号信息有误，读取文件失败");
+            alert("账号信息有误", "请检查账号文件内容是否正常")
             StopScript()
         }
     }
@@ -1659,9 +1666,7 @@ const ReadAccountFile = () =>
         alert("读取账号信息失败", "无账号信息");
         StopScript()
     }
-
 };
-
 const UpdateTradeRecord = (obj) => RewriteJsonFile(tradeRecord, obj)
 const RewriteConfig = (config) =>
 {
@@ -2126,8 +2131,59 @@ const SwipeDown = (sec) => gesture(sec * 1000, [195, 605], [195, 705]);
 const SwipeLeft = (sec) => gesture(sec * 1000, [180, 590], [80, 590]);
 const SwipeRight = (sec) => gesture(sec * 1000, [210, 590], [310, 590]);
 
+const updateDeviceData = (data) =>
+{
+    try
+    {
+        console.log("更新后台交易数据");
+        const res = http.post("http://47.76.112.107:8001/devices", data);
+        if (res.statusCode == 200)
+        {
+            console.log("发送数据成功");
+            // console.log(res.body.string());
+            return true;
+        }
+        return false;
+    } catch (error)
+    {
+        console.log("发送数据失败：" + error);
+        return false;
 
+    }
+}
 
+const deleteDeviceData = () =>
+{
+    const config = ReadConfig()
+    try
+    {
+        const res = http.get(`${baseUrl}devices/${config.accountInfo.instance}/off`)
+        if (res.code == 0)
+        {
+            console.log("发生封号数据成功");
+        }
+        else
+        {
+            console.log("发生封号数据失败");
+            console.log(res);
+        }
+    } catch (error)
+    {
+        console.log("删除设备数据失败：" + error);
+        return false;
+    }
+}
+const getOriginDate = () =>
+{
+    const date = new Date()
+    const year = date.getFullYear()
+    const month = (date.getMonth() + 1).toString().padStart(2, 0)
+    const day = date.getDate().toString().padStart(2, 0)
+    const hour = date.getHours().toString().padStart(2, 0)
+    const minute = date.getMinutes().toString().padStart(2, 0)
+    const second = date.getSeconds().toString().padStart(2, 0)
+    return `${year}-${month}-${day} ${hour}:${minute}:${second}`
+}
 module.exports = {
     baseUrl,
     specialConfig, globalTimePlay,
@@ -2138,16 +2194,15 @@ module.exports = {
     FindBlueBtn, FindTipPoint, FindImg, FindMultiColors, FindCheckMark, FindRedBtn, FindGoldBtn, FindGreenBtn, FindImgInList, FindNumber, FindFloatNumber, FindWhiteCheckMark,
     GoToTheNPC, GetVerificationCode, GetCharacterLv, GetDateTime, GetServerName, GetRandom,
     HasPageback, HasMenu, HasMenuClose, HollowPress, HasSkip, HasBackpackClose, HasBackpackMenuClose, HasPopupClose, HasTip, HaveMainStoryIcon, HasTransformIcon, HaveDailyMissionIcon,
-    HaveFinished, HasMap, HaveToTapBlank,
+    HaveFinished, HasMap, HaveToTapBlank, HasHaltModeBtn,
     IsMoving, IsBackpackFull, IsInCity, IsHaltMode, IsLocked, IsInQuest, IsAuto_active, IsAuto_inactive, IsNoPotion,
     LoadImgList, LaunchGame,
     MatchTemplateList,
-    TapBlankToContinue, TapTip,
+    TapBlankToContinue, TapTip, getOriginDate,
     OpenMenu, OpenBackpack, OpenBackpackMenu, OpenMap,
     PageBack, PressBlank, PullDownSkill, PressToAuto,
     RandomPress, ReadImg, ReturnHome, RestartGame, RecycleImgList, ReadConfig, RewriteConfig, ReadDealRecord, ReadAccountFile, ReadDailyDiamondRecord, ReadTradeRecord,
-    UpdateTradeRecord,
+    UpdateTradeRecord, updateDeviceData, deleteDeviceData,
     Sleep, SwipeSlowly, StopScript, SetCountryAndBirth, SwipeUp, SwipeDown, SwipeLeft, SwipeRight, StopGame,
     WaitUntil, WaitUntilMenu, WaitUntilPageBack, WaitUntilFindColor,
 };
-// ChangeGameSetting()

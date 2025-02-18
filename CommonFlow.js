@@ -1,11 +1,11 @@
 
 const {
     baseUrl,
-    specialConfig, globalTimePlay,
+    specialConfig,
     ClickSkip, CloseMenu, CloseBackpack, ClearPage,
     EnterMenuItemPage, ExitHaltMode,
     FindBlueBtn, FindTipPoint, FindCheckMark, FindRedBtn, FindGoldBtn, FindGreenBtn, FindNumber, FindImgInList, FindFloatNumber, FindImg,
-    GetDateTime, GoToTheNPC, GetServerName, GetCharacterLv,
+    GetDateTime, GoToTheNPC, GetServerName, GetCharacterLv, getOriginDate,
     HasMenu, HasPageback, HasPopupClose, HasSkip, HasMenuClose, HasTip, HaveToTapBlank,
     IsBackpackFull, IsHaltMode, IsInCity,
     FindMultiColors,
@@ -16,15 +16,13 @@ const {
 
     PressBlank, WaitUntil,
     TapBlankToContinue, PullDownSkill, ReadConfig, RewriteConfig, PageBack,
-
     OpenBackpack, OpenMenu,
-
-    ReadDealRecord, ReadAccountFile, RecycleImgList, ReadDailyDiamondRecord, ReadTradeRecord, ReadImg, RandomPress, ReturnHome,
-
+    ReadDealRecord, RecycleImgList, ReadDailyDiamondRecord, ReadTradeRecord, ReadImg, RandomPress, ReturnHome,
     UpdateTradeRecord,
     ChangeRecoverPotionPercentToNormal,
     ChangeGameSetting,
     GetRandom,
+    updateDeviceData,
 } = require("./utils.js");
 
 const { IsEmpty, WearEquipments, StrengthenEquipment, OpenAllBox, UseHolyGrail, DecomposeEquipment, WearBestSuit, CheckSkillAutoRelease, BuyCloak, UnAutoPotion, getItemColor, AutoPotion } = require("./Backpack.js");
@@ -1437,17 +1435,6 @@ const GetCurrentDiamond = (sort) =>
     return diamond;
 };
 
-const getOriginDate = () =>
-{
-    const date = new Date()
-    const year = date.getFullYear()
-    const month = (date.getMonth() + 1).toString().padStart(2, 0)
-    const day = date.getDate().toString().padStart(2, 0)
-    const hour = date.getHours().toString().padStart(2, 0)
-    const minute = date.getMinutes().toString().padStart(2, 0)
-    const second = date.getSeconds().toString().padStart(2, 0)
-    return `${year}-${month}-${day} ${hour}:${minute}:${second}`
-}
 const GetSettlement = () =>
 {
     console.log("fn: 开始结算");
@@ -1559,17 +1546,15 @@ const GetSettlement = () =>
 
     const config = ReadConfig();
 
-    config.game.vm = config.game.vm.replace(/\n/g, '');
-
-    if (!config.game.serverName || config.game.serverName.toString() == "999")
+    if (config.game.serverName.toString() == "999" || config.game.serverName.toString().includes("null"))
     {
         console.log("server name error")
         config.game.serverName = GetServerName();
     }
 
-    if (!config.game.lv || config.game.lv < 30)
+    if (!config.game.lv || config.game.lv < 30 || GetRandom() > 95)
     {
-        console.log("等级信息错误");
+        console.log("获取最新的等级信息");
         const lv = GetCharacterLv();
         if (lv != null)
         {
@@ -1599,39 +1584,34 @@ const GetSettlement = () =>
         totalDiamond = afterSettleDiamond;
         config.game.diamond = afterSettleDiamond;
     }
+
     config.game.dailyDiamond = config.game.dailyDiamond ? config.game.dailyDiamond : 0;
 
     config.game.monthlyIncome = monthlyIncome;
     config.game.diamond = totalDiamond;
     config.game.dailyDiamond += settlement;
 
-    const postData = {
-        vm: config.game.vm,
+    const data = {
+        id: config.accountInfo.id,
+        vm: config.accountInfo.instance,
         serverName: config.game.serverName,
         lv: config.game.lv,
         combatPower: config.game.combatPower,
         diamond: totalDiamond,
         monthlyIncome: monthlyIncome,
-        dailyDiamond: config.game.dailyDiamond,
+        dailyDiamond: 20,
         historyDealRecord: JSON.stringify(tradeRecord),
         config: JSON.stringify(config)
     };
 
-    try
+    const isUpdateSuccess = updateDeviceData(data)
+    if (isUpdateSuccess)
     {
-        console.log("发送交易数据给后台");
-        const res = http.post("http://47.76.112.107:8001/devices", postData);
-        if (res.statusCode == 200)
-        {
-            console.log("发送数据成功");
-            config.game.tradingTimes++;
-        }
-    } catch (error)
-    {
-        console.log(error);
+        config.game.tradingTimes++;
+        console.log("发送数据成功。交易次数增加一次");
     }
-    RewriteConfig(config);
 
+    RewriteConfig(config);
 };
 
 const TradeGoods = () =>
@@ -1823,6 +1803,7 @@ const TradeGoods = () =>
     RecycleImgList(tradableImgList_30p)
     return loginCount;
 };
+
 const setSoldPrice = (num) =>
 {
     const position = [
@@ -1919,15 +1900,14 @@ const BuyEpicEquipment = () =>
     const purchaseInfo = {}
 
     let canPurchase = false;
-    const basePath = "page/trade/goods/"
     let imgList = null;
 
     for (let i = 0; i < totalItemCount; i++)
     {
-        let part = equipmentArea[random(0, equipmentArea.length - 1)]
-        let itemIndex = Math.floor(random(0, shopList[part].length - 1))
+        let equipmentType = equipmentArea[random(0, equipmentArea.length - 1)]
+        let itemIndex = Math.floor(random(0, shopList[equipmentType].length - 1))
 
-        let instancedIndex = `${part}-${itemIndex}`
+        let instancedIndex = `${equipmentType}-${itemIndex}`
 
         if (instancedArr.includes(instancedIndex))
         {
@@ -1939,8 +1919,8 @@ const BuyEpicEquipment = () =>
             instancedArr.push(instancedIndex)
         }
 
-        let { name, englishName, identified } = shopList[part][itemIndex]
-        console.log(`部位：${part}，索引：${itemIndex}，名字：${name}，英文名：${englishName}是否鉴定：${identified}`);
+        let { name, englishName, identified } = shopList[equipmentType][itemIndex]
+        console.log(`部位：${equipmentType}，索引：${itemIndex}，名字：${name}，英文名：${englishName}是否鉴定：${identified}`);
 
         if (FindGoldBtn([7, 650, 228, 58]))
         {
@@ -1953,7 +1933,7 @@ const BuyEpicEquipment = () =>
                 RandomPress([261, 520, 68, 12], random(3, 6))
             }
         }
-        imgList = LoadImgList(`${basePath}${part}/${englishName}_${identified ? 1 : 0}`)
+        imgList = LoadImgList(`page/trade/goods/${equipmentType}/${englishName}_${identified ? 1 : 0}`)
         let hasImg = FindImgInList(imgList, [301, 202, 100, 185])
         if (hasImg)
         {
@@ -1964,7 +1944,7 @@ const BuyEpicEquipment = () =>
                 console.log("可以购买此紫装");
                 RandomPress([425, hasImg.y, 465, 50])
                 canPurchase = true;
-                purchaseInfo.equipmentType = part;
+                purchaseInfo.equipmentType = equipmentType;
                 purchaseInfo.equipmentName = name;
                 purchaseInfo.englishName = englishName;
                 purchaseInfo.identified = identified;
@@ -1977,7 +1957,6 @@ const BuyEpicEquipment = () =>
             }
         }
     }
-    let isBoughtSuccess = false;
     if (canPurchase)
     {
         console.log("开始购买流程");
@@ -1994,71 +1973,77 @@ const BuyEpicEquipment = () =>
                     {
                         RandomPress([577, 422, 131, 27])
                         console.log("购买成功");
-                        isBoughtSuccess = true;
+                        purchaseInfo.buyingTime = new Date()
                     }
                 }
             }
         }
     }
-    if (isBoughtSuccess)
-    {
-        if (OpenBackpack("all", true))
-        {
-            if (EnterMenuItemPage("trade"))
-            {
-                let haveEquipment = FindImgInList(imgList, [994, 155, 275, 141])
-                if (haveEquipment)
-                {
-                    console.log("发现刚刚购买的紫色装备 " + haveEquipment);
-                    RandomPress([haveEquipment.x, haveEquipment.y, 20, 20])
-                    const sellImg = LoadImgList("page/trade/sell")
-                    if (FindImgInList(sellImg, [927, 587, 83, 52]))
-                    {
-                        RandomPress([919, 601, 109, 23])
-                        console.log("点击贩售");
-                        if (HasPopupClose([961, 189, 43, 51]))
-                        {
-                            const soldPrice = Math.floor(random(400, 500))
-                            purchaseInfo.soldPrice = soldPrice;
-                            RandomPress([852, 263, 105, 17])
-                            setSoldPrice(soldPrice)
-                            if (WaitUntil(() => FindBlueBtn([544, 463, 193, 68])))
-                            {
-                                RandomPress([573, 481, 138, 28])
-                                console.log("点击登录贩售");
-                            }
-                            if (WaitUntil(() => FindBlueBtn([546, 522, 190, 68])))
-                            {
-                                RandomPress([573, 541, 138, 29])
-                                console.log("上架紫色装备成功,发送数据给后台");
-                                console.log("purchaseInfo: " + JSON.stringify(purchaseInfo));
 
-                                const params = {
-                                    id: `${config.game.vm.slice(4, 20)}-${new Date().getTime()}`,
-                                    recipient: config.game.vm,
-                                    serverName: config.game.serverName,
-                                    equipmentType: purchaseInfo.equipmentType,
-                                    equipmentName: purchaseInfo.equipmentName,
-                                    englishName: purchaseInfo.englishName,
-                                    identified: purchaseInfo.identified,
-                                    purchasePrice: purchaseInfo.purchasePrice,
-                                    soldPrice: purchaseInfo.soldPrice,
-                                    state: "已上架"
-                                }
-                                console.log("发送订单的参数为：" + JSON.stringify(params));
-                                sendOrder(params)
-                            }
-                        }
-                    }
-                    RecycleImgList(sellImg)
-                }
-            }
-        }
-    }
     RecycleImgList(imgList)
     return purchaseInfo;
 }
 
+const SellEpicEquipment = (purchaseInfo) =>
+{
+    console.log("上架紫色时装");
+
+    if (OpenBackpack("all", true))
+    {
+        if (EnterMenuItemPage("trade"))
+        {
+            const imgList = LoadImgList(`page/trade/goods/${purchaseInfo.equipmentType}/${purchaseInfo.englishName}_${purchaseInfo.identified ? 1 : 0}`)
+            const sellImg = LoadImgList("page/trade/sell")
+
+            let haveEquipment = FindImgInList(imgList, [994, 155, 275, 141])
+            if (haveEquipment)
+            {
+                console.log("发现刚刚购买的紫色装备 " + haveEquipment);
+                RandomPress([haveEquipment.x, haveEquipment.y, 20, 20])
+                if (FindImgInList(sellImg, [927, 587, 83, 52]))
+                {
+                    RandomPress([919, 601, 109, 23])
+                    console.log("点击贩售");
+                    if (HasPopupClose([961, 189, 43, 51]))
+                    {
+                        const soldPrice = Math.floor(random(450, 500))
+                        purchaseInfo.soldPrice = soldPrice;
+                        RandomPress([852, 263, 105, 17])
+                        setSoldPrice(soldPrice)
+                        if (WaitUntil(() => FindBlueBtn([544, 463, 193, 68])))
+                        {
+                            RandomPress([573, 481, 138, 28])
+                            console.log("点击登录贩售");
+                        }
+                        if (WaitUntil(() => FindBlueBtn([546, 522, 190, 68])))
+                        {
+                            RandomPress([573, 541, 138, 29])
+                            console.log("上架紫色装备成功,发送数据给后台");
+                            console.log("purchaseInfo: " + JSON.stringify(purchaseInfo));
+
+                            const params = {
+                                id: `${config.accountInfo.id}-${new Date().getTime()}`,
+                                recipient: config.accountInfo.id,
+                                serverName: config.game.serverName,
+                                equipmentType: purchaseInfo.equipmentType,
+                                equipmentName: purchaseInfo.equipmentName,
+                                englishName: purchaseInfo.englishName,
+                                identified: purchaseInfo.identified,
+                                purchasePrice: purchaseInfo.purchasePrice,
+                                soldPrice: purchaseInfo.soldPrice,
+                                state: "已上架"
+                            }
+                            console.log("发送订单的参数为：" + JSON.stringify(params));
+                            sendOrder(params)
+                        }
+                    }
+                }
+            }
+            RecycleImgList(imgList)
+            RecycleImgList(sellImg)
+        }
+    }
+}
 const ReceiveDiamond = () =>
 {
     console.log("收取钻石");
@@ -2112,7 +2097,7 @@ const ReleaseDiamond = () =>
     const config = ReadConfig()
     if (config.diamond < 600)
     {
-        console.log("当前钻石小于900钻，暂不出钻");
+        console.log("当前钻石小于600钻，暂不出钻");
         return false;
     }
     if (!EnterMenuItemPage("trade"))
@@ -2133,52 +2118,65 @@ const ReleaseDiamond = () =>
             RandomPress([257, 518, 81, 16], random(2, 5))
             let imgList = LoadImgList(`${baseImgUrl}/${equipmentType}/${englishName}_${identified ? 1 : 0}`)
             let haveFoundImg = FindImgInList(imgList, [294, 194, 101, 202])
-            if (haveFoundImg)
+            if (!haveFoundImg)
             {
-                console.log("发现需要购买的装备: " + haveFoundImg);
-                RandomPress([420, haveFoundImg.y, 470, 50], random(2, 5))
-                if (WaitUntil(() => FindImgInList(imgList, [300, 200, 82, 193])))
+                console.log("未发现需要购买的装备，not find the img");
+                return false;
+            }
+
+            console.log("发现需要购买的装备: " + haveFoundImg);
+            RandomPress([420, haveFoundImg.y, 470, 50], random(2, 5))
+
+            if (!WaitUntil(() => FindImgInList(imgList, [300, 200, 82, 193])))
+            {
+                console.log("未发现上架详情，退出");
+                return false;
+            }
+
+            RandomPress([857, 166, 61, 17])
+            console.log("发现装备上架详情物品列，点击价格从高到低排序");
+            let haveTheItem = false;
+
+            for (let j = 0; j < 4; j++)
+            {
+                haveTheItem = FindImgInList(imgList, [298, 196 + j * 99, 90, 99])
+                if (haveTheItem)
                 {
-                    RandomPress([857, 166, 61, 17])
-                    console.log("发现装备上架详情物品列，点击价格从高到低排序");
-                    for (let j = 0; j < 4; j++)
+                    let currentPrice = FindNumber("goodsPrice", [715, 197 + j * 100, 74, 71])
+                    if (currentPrice == soldPrice)
                     {
-                        let haveTheItem = FindImgInList(imgList, [298, 196 + j * 99, 90, 99])
-                        if (haveTheItem)
+                        console.log("发现需要购买的装备和价格，当前物品价格为：" + currentPrice);
+                        RandomPress([390, 212 + j * 99, 553, 68])
+                        if (!WaitUntil(() => FindBlueBtn([704, 591, 197, 70])))
                         {
-                            let currentPrice = FindNumber("goodsPrice", [715, 197 + j * 100, 74, 71])
-                            if (currentPrice == soldPrice)
+                            console.log("未发现购买按钮，退出");
+                            return false;
+                        }
+                        console.log("点击购买按钮");
+                        RandomPress([735, 610, 139, 28])
+                        if (WaitUntil(() => FindBlueBtn([549, 404, 186, 63])))
+                        {
+                            console.log("发现确定购买弹窗");
+                            let finalConfirmPrice = FindNumber("goodsPrice", [688, 347, 65, 47])
+                            if (finalConfirmPrice == soldPrice)
                             {
-                                console.log("发现需要购买的装备和价格，当前物品价格为：" + currentPrice);
-                                RandomPress([390, 212 + j * 99, 553, 68])
-                                if (WaitUntil(() => FindBlueBtn([704, 591, 197, 70])))
-                                {
-                                    console.log("点击购买按钮");
-                                    RandomPress([735, 610, 139, 28])
-                                    if (WaitUntil(() => FindBlueBtn([549, 404, 186, 63])))
-                                    {
-                                        console.log("发现确定购买弹窗");
-                                        let finalConfirmPrice = FindNumber("goodsPrice", [688, 347, 65, 47])
-                                        if (finalConfirmPrice == soldPrice)
-                                        {
-                                            console.log("点击确定购买");
-                                            RandomPress([573, 421, 137, 28])
-                                            const updatedParams = orderList[i]
-                                            updatedParams.sender = config.game.vm
-                                            updatedParams.state = "已完成"
-                                            updateOrderInfo(updatedParams)
-                                            break out;
-                                        }
-                                    }
-                                }
+                                console.log("点击确定购买");
+                                RandomPress([573, 421, 137, 28])
+                                const updatedParams = orderList[i]
+                                updatedParams.sender = config.accountInfo.id
+                                updatedParams.state = "已完成"
+                                updateOrderInfo(updatedParams)
+                                break out;
                             }
                         }
+
                     }
                 }
             }
         }
     }
 }
+
 const PutOnSale = () =>
 {
     console.log("开始进行物品上架");
@@ -2203,10 +2201,7 @@ const PutOnSale = () =>
             ReleaseDiamond()
         }
     }
-    if (GetRandom() > 50)
-    {
-        LoginProps();
-    }
+
     else
     {
         console.log("鉴定失败，不图鉴装备");
@@ -2215,7 +2210,7 @@ const PutOnSale = () =>
     {
         console.log("鉴定成功，分解装备");
         DecomposeEquipment("partial");
-        globalTimePlay.lastTimeClearBackpack_haltMode = new Date().getTime()
+
     }
     else
     {
@@ -2399,6 +2394,7 @@ const MakeMaterial = () =>
     RecycleImgList(horseArmorImg);
     PageBack();
 };
+
 const UnSealEngraving = () =>
 {
     console.log("fn: 启用刻印");
@@ -2641,10 +2637,10 @@ const ComprehensiveImprovement_Instance = () =>
 
     if (config.game.tradingTimes >= 1)
     {
-        if (random(1, 100) < 50)
+        if (GetRandom() < 50)
         {
             console.log("鉴定失败，暂不交易");
-            Sleep(30)
+            Sleep(61)
             return true;
         }
     }
@@ -2664,24 +2660,18 @@ const ComprehensiveImprovement_Instance = () =>
         }
         DecomposeEquipment();
     }
-    if (GetRandom() < 30)
-    {
-        DailyQuest()
-    }
     const date = new Date();
     const today = date.getDate();
 
     if ((today == config.manufacture[0] || today == config.manufacture[1]) && config.game.tradingTimes == 0)
     {
         console.log("半月制作一次");
-        IncreaseWeaponFeatures();
         MakeMaterial();
     }
 
-    if (GetRandom() > 50)
+    if (GetRandom() > 70)
     {
         console.log("@鉴定成功:开箱子");
-        OpenAllBox();
         if (needBuyCloak())
         {
             WearEquipments()
@@ -2695,12 +2685,7 @@ const ComprehensiveImprovement_Instance = () =>
     }
     else
     {
-        console.log("鉴定随机事件。");
-        const comprehensiveQuest = [ChangeRecoverPotionPercentToNormal, ChangeGameSetting, CheckSkillAutoRelease, UpgradeHolyRelics, StrengthenHorseEquipment, FusionSuit, WearBestSuit, UpgradeAbilityLevel, AutoPotion]
-
-        const randomEventIndex = random(0, comprehensiveQuest.length - 1)
-        console.log("随机事件索引为：" + randomEventIndex);
-        comprehensiveQuest[randomEventIndex]()
+        FireRandomEvent()
     }
     PutOnSale();
 
@@ -2875,56 +2860,96 @@ const randomEvent_shopExchange = () =>
     }
 }
 
-
 const FireRandomEvent = () =>
 {
     console.log("触发随机事件")
-    const randomEventList = [
-        GetActivitiesAward,
-        GetEmail,
-        GetMonsterKnowledgeAward,
-        GetPassAward,
-        GetTravelLogAward,
-        GetAchievement,
-        LoginProps,
-        ShopBuy,
-        IncreaseWeaponFeatures,
-        StrengthenHorseEquipment,
-        UpgradeHolyRelics,
-        GuildDonation,
-        FriendshipDonation,
-        FriendShipShop,
-        ChangeRecoverPotionPercentToNormal,
-        ChangeGameSetting,
-        CheckSkillAutoRelease,
-        FusionSuit,
-        WearBestSuit,
-        UpgradeAbilityLevel,
-        AutoPotion,
-        randomEvent_addPropsToQuickItem,
-        randomEvent_shopExchange,
+    const eventList = [
+        { event: AutoPotion, probability: 2 },
+
+        { event: ChangeRecoverPotionPercentToNormal, probability: 2 },
+        { event: ChangeGameSetting, probability: 2 },
+        { event: CheckSkillAutoRelease, probability: 2 },
+
+        { event: DecomposeEquipment, probability: 10 },
+
+        { event: FriendShipShop, probability: 2 },
+        { event: FriendshipDonation, probability: 2 },
+        { event: FusionSuit, probability: 2 },
+
+        { event: GetAchievement, probability: 2 },
+        { event: GetActivitiesAward, probability: 10 },
+        { event: GetEmail, probability: 10 },
+        { event: GetMonsterKnowledgeAward, probability: 2 },
+        { event: GetPassAward, probability: 2 },
+        { event: GetTravelLogAward, probability: 2 },
+        { event: GuildDonation, probability: 2 },
+
+        { event: IncreaseWeaponFeatures, probability: 2 },
+
+        { event: LoginProps, probability: 2 },
+
+        { event: MakeMaterial, probability: 2 },
+
+        { event: OpenAllBox, probability: 2 },
+
+        { event: randomEvent_addPropsToQuickItem, probability: 2 },
+        { event: randomEvent_shopExchange, probability: 2 },
+
+        { event: ShopBuy, probability: 2 },
+        { event: StrengthenHorseEquipment, probability: 2 },
+
+        { event: WearEquipments, probability: 2 },
+        { event: WearBestSuit, probability: 2 },
+
+        { event: UpgradeHolyRelics, probability: 2 },
+        { event: UpgradeAbilityLevel, probability: 2 },
+        { event: UnSealEngraving, probability: 2 }
     ]
-    for (let i = 0; i < 3; i++)
+
+    const eventNumber = random(0, 8);
+    const eventQueue = []
+
+    const getProbability = () =>
     {
-        if (i == 0 || GetRandom() > 50)
+        let probabilityPool = Array.from({ length: 100 }, (_, index) => index);
+        for (let i = 0; i < eventList.length; i++)
         {
-            let randomEventIndex = GetRandom()
-            if (randomEventIndex < randomEventList.length - 1)
+            let arr = []
+            for (let j = 0; j < eventList[i]["probability"]; j++)
             {
-                console.log("随机事件索引为：" + randomEventIndex);
-                if (IsHaltMode())
+                if (probabilityPool.length == 0)
                 {
-                    ExitHaltMode()
+                    break;
                 }
-                randomEventList[randomEventIndex]()
+                arr.push(probabilityPool[j])
+            }
+            eventList[i]["probabilityArea"] = arr;
+            probabilityPool.splice(0, eventList[i]["probability"])
+        }
+    }
+    const instanceEventQueue = () =>
+    {
+        for (let i = 0; i < eventNumber; i++)
+        {
+            let index = random(0, 99)
+            for (let j = 0; j < eventList.length; j++)
+            {
+                if (eventList[j]["probabilityArea"].includes(index))
+                {
+                    eventQueue.push(eventList[j]["event"])
+                }
             }
         }
     }
+    getProbability()
+    instanceEventQueue()
+    eventQueue.map(fn => fn())
 }
+
+
 
 module.exports = {
     ChangeAbility, GetEmail, GetAchievement, GetMonsterKnowledgeAward, LoginProps, DailyQuest, needWearEquipment, GetCommonAward,
     ShopBuy, ComprehensiveImprovement, ComprehensiveImprovement_Instance, StrengthenHorseEquipment, IncreaseWeaponFeatures, GuildDonation,
     FireRandomEvent,
 };
-

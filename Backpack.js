@@ -1,5 +1,6 @@
 
 const {
+    globalTimePlay,
     BuySkillBook,
     CloseBackpack, ClearPage, ClickSkip, CloseMenu,
     FindImg, FindBlueBtn, FindGoldBtn, FindCheckMark, FindImgInList, FindMultiColors,
@@ -1618,6 +1619,9 @@ const DecomposeEquipment = (type) =>
 
     RecycleImgList(selectedMarkImgList);
     CloseBackpack();
+
+    globalTimePlay.lastTimeClearBackpack_haltMode = new Date().getTime()
+
     for (let i = 0; i < 10; i++)
     {
         if (HasMenu())
@@ -1728,6 +1732,7 @@ const AutoPotion = () =>
     }
     return isSuccess;
 };
+
 const UnAutoPotion = () =>
 {
     console.log("取消自动使用药水");
@@ -1767,6 +1772,7 @@ const UnAutoPotion = () =>
     }
     return isSuccess;
 };
+
 const BuyPotion = () =>
 {
     const hasMenu = HasMenu();
@@ -1837,6 +1843,7 @@ const BuyPotion = () =>
         return false;
     }
 };
+
 const IdentifyRandomEquipment = () =>
 {
     console.log("鉴定随机装备");

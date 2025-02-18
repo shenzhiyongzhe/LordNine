@@ -1,4 +1,5 @@
 const {
+    CountDownFloaty,
     FindMultiColors,
     RandomPress,
     HasMenu,
@@ -52,29 +53,13 @@ const {
     SwipeRight,
     ChangeRecoverPotionPercentToNormal, OpenMap,
     GetRandom,
+    HasHaltModeBtn,
 } = require("./utils");
 const { ComprehensiveImprovement_Instance, DailyQuest, LoginProps, GetCommonAward, FireRandomEvent } = require("./CommonFlow");
 const { DecomposeEquipment } = require("./Backpack");
 
 
-const FirstLevel = [
-    [20, 181, 31, 40],
-    [20, 247, 31, 40],
-    [20, 317, 32, 40],
-    [20, 380, 33, 40],
-];
 
-const SecondLevel = [];
-for (let i = 0; i < 5; i++)
-{
-    SecondLevel.push([100, 220 + i * 51, 130, 30]);
-}
-
-const ThirdLevel = [];
-for (let i = 0; i < 8; i++)
-{
-    ThirdLevel.push([950, 130 + i * 53, 200, 30]);
-}
 
 let instance_mode = "hangUpWild";
 let lastHangUpWildTime = new Date().getTime()
@@ -510,12 +495,34 @@ const DailyMission = () =>
 };
 
 
-const EnterMap = (mapName) =>
+const EnterMap = (mapName, autoTransform) =>
 {
-    console.log("fn：进入地图：" + mapName);
-    console.log("开始掷骰子，质检是否直接传送");
+    const FirstLevel = [
+        [20, 181, 31, 40],
+        [20, 247, 31, 40],
+        [20, 317, 32, 40],
+        [20, 380, 33, 40],
+    ];
+
+    const SecondLevel = [];
+    for (let i = 0; i < 5; i++)
+    {
+        SecondLevel.push([100, 220 + i * 51, 130, 30]);
+    }
+
+    const ThirdLevel = [];
+    for (let i = 0; i < 8; i++)
+    {
+        ThirdLevel.push([950, 130 + i * 53, 200, 30]);
+    }
     const randomIndex = random(1, 100);
-    console.log("投掷结果为：" + randomIndex);
+    if (!mapName)
+    {
+        console.log("随机生成一个地图位置");
+        mapName = [random(0, 2), random(1, 3), random(0, 2)]
+    }
+    console.log("进入地图：" + mapName);
+
     const [firstLevel, secondLevel, thirdLevel] = mapName;
 
     let hasMoved = false;
@@ -524,7 +531,7 @@ const EnterMap = (mapName) =>
     RandomPress(SecondLevel[secondLevel]);
     RandomPress(ThirdLevel[thirdLevel]);
 
-    if (randomIndex > 50)
+    if (randomIndex > 30 || autoTransform)
     {
         console.log("۞快速移动鉴定成功,直接传送");
         if (FindBlueBtn([1066, 647, 162, 67]))
@@ -541,6 +548,11 @@ const EnterMap = (mapName) =>
             }
         } else if (FindBlueBtn([907, 651, 162, 61]))
         {
+            if (autoTransform)
+            {
+                ReturnHome()
+                return true;
+            }
             RandomPress([936, 667, 111, 27]);
             PageBack();
             hasMoved = true;
@@ -577,7 +589,11 @@ const EnterMap = (mapName) =>
 const HangUpSecretLab = () =>
 {
     console.log("fn: 秘密实验室流程");
-
+    if (GetRandom() > 50)
+    {
+        console.log("随机事件鉴定成功");
+        FireRandomEvent()
+    }
     if (!OpenMap())
     {
         return false;
@@ -743,11 +759,13 @@ const randomMoveOperation = () =>
 const HangUpWild = () =>
 {
     console.log("fn: 去野外挂机");
-    if (random(1, 100) < 10)
+    if (GetRandom() > 50)
     {
-        DailyQuest();
+        console.log("随机事件鉴定成功");
+        FireRandomEvent()
     }
     const config = ReadConfig()
+
     if (mapName == null)
     {
         const combatPower = config.game.combatPower;
@@ -755,15 +773,15 @@ const HangUpWild = () =>
         {
             mapName = [0, 3, random(0, 2)];
             console.log("去被污染的盆地挂机");
-        } else if (combatPower >= 18000 && combatPower < 24000)
+        } else if (combatPower >= 18000 && combatPower < 25000)
         {
             mapName = [1, 1, random(0, 2)];
             console.log("去新月湖挂机");
-        } else if (combatPower >= 24000 && combatPower < 28000)
+        } else if (combatPower >= 25000 && combatPower < 29000)
         {
             mapName = [1, 2, random(0, 2)];
             console.log("去暮光之丘挂机");
-        } else if (combatPower >= 28000)
+        } else if (combatPower >= 29000)
         {
             mapName = [2, 1, 0];
             console.log("去鸟兰挂机");
@@ -802,7 +820,6 @@ const HangUpWild = () =>
             console.log("没有修改正常的药水使用百分比。");
             ChangeRecoverPotionPercentToNormal()
         }
-        EnterHaltMode();
         return true;
     } else
     {
@@ -816,30 +833,126 @@ const IsNoExp = () =>
     Sleep(30);
     return FindImg(clip, [90, 610, 140, 15]);
 };
+const AutomaticHunting = () =>
+{
+    console.log("自动狩猎");
+    const config = ReadConfig()
+    const combatPower = config.game.combatPower;
+    if (combatPower < 17500)
+    {
+        console.log("战力不足17500，退出");
+        return false;
+    }
 
+    if (config.daily.dailyHunting)
+    {
+        console.log("今日已经狩猎，退出");
+        return false;
+    }
+    if (GetRandom() > 60)
+    {
+        console.log("切换地图鉴定成功");
+        if (!OpenMap())
+        {
+            return;
+        }
+        EnterMap(null, true)
+    }
+    else
+    {
+        console.log("回城鉴定成功");
+        ReturnHome()
+    }
+
+    if (HasHaltModeBtn())
+    {
+        console.log("点击沙漏图标");
+        RandomPress([44, 479, 22, 23])
+    }
+    if (!WaitUntilPageBack())
+    {
+        return false;
+    }
+    const moonLake = [
+        [52, 140, 167, 29],
+        [48, 194, 176, 30],
+        [44, 244, 175, 31],
+        [46, 300, 175, 30],
+        [47, 349, 175, 32],
+        [46, 405, 172, 29]
+    ]
+    const twilightHill = [
+        [46, 194, 176, 28],
+        [46, 245, 174, 31],
+        [47, 298, 171, 29]
+    ]
+    if (combatPower >= 17500 && combatPower < 18500)
+    {
+        console.log("狩猎地点，新月湖");
+        RandomPress(moonLake[0])
+    }
+    else if (combatPower >= 18500 && combatPower < 19100)
+    {
+        console.log("狩猎地点，新月湖");
+        RandomPress(moonLake[1])
+    }
+    else if (combatPower >= 19100 && combatPower < 20700)
+    {
+        console.log("狩猎地点，新月湖");
+        RandomPress(moonLake[random(0, 3)])
+    }
+    else if (combatPower >= 20700 && combatPower < 24100)
+    {
+        console.log("狩猎地点，新月湖");
+        RandomPress(moonLake[random(0, 5)])
+    }
+    else if (combatPower >= 24100)
+    {
+        console.log("狩猎地点，暮光之丘");
+        RandomPress([33, 86, 186, 30])
+        RandomPress([23, 142, 189, 29])
+
+        if (combatPower >= 24100 && combatPower < 25100)
+        {
+            RandomPress(twilightHill[0])
+        }
+        else if (combatPower >= 24100)
+        {
+            RandomPress(twilightHill[random(0, 2)])
+        }
+    }
+    if (FindBlueBtn([338, 578, 213, 70]))
+    {
+        console.log("点击自动狩猎");
+        RandomPress([371, 596, 148, 31], random(2, 6))
+        if (!FindBlueBtn([640, 437, 206, 76]))
+        {
+            return;
+        }
+        RandomPress([669, 461, 152, 31]) //confirm
+        config.daily.dailyHunting = true;
+        RewriteConfig(config)
+        console.log("更新狩猎配置");
+        const delayTime = random(14400, 36000)
+        console.log("自动狩猎延迟时间为：" + delayTime);
+        threads.start(() => CountDownFloaty(delayTime))
+        Sleep(delayTime);
+        LaunchGame();
+    }
+
+}
 let enterHaltModeSecond = random(300, 900)
 const InstanceExceptionCheck = () =>
 {
     if (IsHaltMode())
     {
-        // if (IsNoExp())
-        // {
-        //     console.log("@没有经验增加");
-        //     PressToAuto()
-        // }
-        if (instance_mode == "dailyMission")
-        {
-            console.log("每日任务，取消省电模式");
-            ExitHaltMode();
-        }
         DeathCheck_HaltMode();
     } else
     {
         const deathBtn = DeathCheck();
-        const config = ReadConfig();
-
         if (deathBtn)
         {
+            const config = ReadConfig();
             RandomPress([deathBtn.x - 50, deathBtn.y, 150, 20], random(10, 30));
             config.totalDeathTimes = config.totalDeathTimes ? config.totalDeathTimes : 0;
             config.totalDeathTimes++;
@@ -849,22 +962,22 @@ const InstanceExceptionCheck = () =>
         if (IsInCity() && !IsMoving())
         {
             console.log("异常检测：在主城, 未移动");
+            if (GetRandom() > 50)
+            {
+                console.log("随机事件鉴定成功");
+                FireRandomEvent()
+            }
             InstanceBranchManager()
         }
+
         if (HasMenu())
         {
             if (instance_mode != "dailyMission")
             {
                 if (!IsAuto_active() && IsAuto_inactive())
                 {
-                    console.log("instance check: 没有自动攻击，点击自动攻击");
                     let pressToAutoRandom = GetRandom()
-                    if (pressToAutoRandom < 15)
-                    {
-                        console.log("点击auto前操作：领取奖励");
-                        GetCommonAward()
-                    }
-                    else if (pressToAutoRandom >= 15 && pressToAutoRandom < 40)
+                    if (pressToAutoRandom >= 15 && pressToAutoRandom < 40)
                     {
                         console.log("点击auto前操作：切换地图");
                         if (GetRandom() > 50)
@@ -876,73 +989,78 @@ const InstanceExceptionCheck = () =>
                             HangUpWild()
                         }
                     }
-                    PressToAuto();
+                    else
+                    {
+                        if (GetRandom() > 50)
+                        {
+                            console.log("随机事件鉴定成功");
+                            FireRandomEvent()
+                        }
+                        PressToAuto();
+                    }
+
                 }
+                const currentTime = new Date().getTime();
+                if ((currentTime - lastTimeEnterHaltMode) / 1000 > enterHaltModeSecond)
+                {
+                    console.log("挂机异常检测：不在省电模式");
+                    console.log(`不在省电模式，${enterHaltModeSecond}，手动进省电模式`);
+                    enterHaltModeSecond = random(300, 600)
+                    EnterHaltMode();
+                    lastTimeEnterHaltMode = currentTime;
+                }
+
             } else
             {
                 if (IsAuto_active())
                 {
                     DailyMission();
+                    Sleep(60)
                 } else if (IsAuto_inactive() && !IsMoving())
                 {
                     DailyMission();
-                    for (let i = 0; i < 6; i++)
-                    {
-                        if (!IsMoving() && !IsInQuest())
-                        {
-                            console.log("随机点屏幕，随机移动");
-                            RandomPress([337, 157, 508, 314]);
-                            instance_mode = "dailyMission";
-                            break;
-                        }
-                        Sleep();
-                    }
+                    Sleep(60)
+                    // for (let i = 0; i < 6; i++)
+                    // {
+                    //     if (!IsMoving() && !IsInQuest())
+                    //     {
+                    //         console.log("随机点屏幕，随机移动");
+                    //         RandomPress([337, 157, 508, 314]);
+                    //         instance_mode = "dailyMission";
+                    //         break;
+                    //     }
+                    //     Sleep();
+                    // }
                 }
-                let haveFinished = HaveFinished([1119, 99, 73, 274]);
-                if (haveFinished)
+
+            }
+            let haveFinished = HaveFinished([1106, 219, 86, 149]);
+            if (haveFinished)
+            {
+                const delayClick = random(3, 60);
+                console.log("完成任务，延迟点击:" + delayClick + "s");
+                Sleep(delayClick);
+                RandomPress([haveFinished.x - 100, haveFinished.y, 100, 20], 2);
+                RandomPress([449, 437, 384, 45]);
+                clickDailyMissionAwardsTimes++;
+                if (clickDailyMissionAwardsTimes > 10)
                 {
-                    const delayClick = random(3, 60);
-                    console.log("完成任务，延迟点击:" + delayClick + "s");
-                    Sleep(delayClick);
-                    RandomPress([haveFinished.x - 100, haveFinished.y, 100, 20], 2);
-                    RandomPress([449, 437, 384, 45]);
-                    clickDailyMissionAwardsTimes++;
-                    if (clickDailyMissionAwardsTimes > 10)
-                    {
-                        console.log("点击完成次数过多！！！");
-                        LoginProps();
-                        DecomposeEquipment();
-                        clickDailyMissionAwardsTimes = 0;
-                    }
+                    console.log("点击完成次数过多！！！");
+                    LoginProps();
+                    DecomposeEquipment();
+                    clickDailyMissionAwardsTimes = 0;
                 }
             }
 
-            if (instance_mode != "dailyMission" && !IsInCity())
-            {
-                if (!IsHaltMode())
-                {
-                    if (!IsAuto_active() && IsAuto_inactive())
-                    {
-                        PressToAuto();
-                    }
-                    const currentTime = new Date().getTime();
-                    if ((currentTime - lastTimeEnterHaltMode) / 1000 > enterHaltModeSecond)
-                    {
-                        console.log("挂机异常检测：不在省电模式");
-                        console.log(`不在省电模式，${enterHaltModeSecond}，手动进省电模式`);
-                        enterHaltModeSecond = random(300, 600)
-                        EnterHaltMode();
-                        lastTimeEnterHaltMode = currentTime;
-                    }
-                }
-            }
         }
     }
 };
-let dailyTradingHours = null;
 
+let dailyTradingHours = null;
 let randomEventTime = null;
 let randomDayOfTheWeek = null;
+let autoHuntingTime = null
+
 const TimeManager = () =>
 {
     if (dailyTradingHours == null || randomEventTime == null || randomDayOfTheWeek == null)
@@ -951,10 +1069,11 @@ const TimeManager = () =>
         dailyTradingHours = config.dailyTradingHours;
         randomEventTime = config.randomEventTime;
         randomDayOfTheWeek = config.randomDayOfTheWeek;
+        autoHuntingTime = config.autoHuntingTime;
     }
     const currentTimeString = new Date().toString().slice(16, 21)
     let isTimeToTrade = false;
-    let isTimeToExcuteRandomEvent = false;
+    let isTimeToExecuteRandomEvent = false;
     dailyTradingHours.map((time) =>
     {
         if (currentTimeString == time)
@@ -972,7 +1091,7 @@ const TimeManager = () =>
             {
                 console.log("到达随机事件时间");
                 console.log(currentTimeString + " --- " + time);
-                isTimeToExcuteRandomEvent = true;
+                isTimeToExecuteRandomEvent = true;
             }
         }
     });
@@ -980,10 +1099,15 @@ const TimeManager = () =>
     {
         ComprehensiveImprovement_Instance();
     }
-    if (isTimeToExcuteRandomEvent)
+    if (isTimeToExecuteRandomEvent)
     {
         FireRandomEvent();
         Sleep(60, 120)
+    }
+    if (currentTimeString == autoHuntingTime)
+    {
+        console.log("到达自动狩猎时间");
+        AutomaticHunting()
     }
 };
 
@@ -1005,13 +1129,16 @@ const TimeChecker = () =>
     checkCycle = parseFloat((Math.random() + 1).toFixed(2));
     const config = ReadConfig()
     dailyTradingHours = config.dailyTradingHours;
+    randomEventTime = config.randomEventTime;
+    randomDayOfTheWeek = config.randomDayOfTheWeek;
+    autoHuntingTime = config.autoHuntingTime;
+
     if (!config.daily.dailyInstance)
     {
         console.log("今日副本未完成，开始刷副本");
         HangUpInstance()
         return true;
     }
-    // InstanceBranchManager()
 }
 
 const InstanceBranchManager = () =>
@@ -1070,6 +1197,7 @@ const InstanceFlow = () =>
 };
 
 module.exports = { InstanceFlow };
+
 
 
 

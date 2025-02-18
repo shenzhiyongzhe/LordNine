@@ -77,18 +77,28 @@ function Init()
             `${random(18, 22).toString().padStart(2, 0)}:${random(0, 59).toString().padStart(2, 0)}`,
         ];
     }
-    if (!config.googleAccount || !config.game.vm)
+    if (!config.autoHuntingTime)
+    {
+        config.autoHuntingTime = `${random(0, 23).toString().padStart(2, 0)}:${random(0, 59).toString().padStart(2, 0)}`
+    }
+    if (!config.daily.dailyHunting)
+    {
+        config.daily.dailyHunting = false;
+    }
+    if (!config.accountInfo || Object.keys(config.accountInfo).length != 5)
     {
         console.log('@配置不存在账号信息，开始读取账号文件');
-        const account = ReadAccountFile();
-        config.createCharacterTime = new Date().toJSON()
-        config.game.vm = account[3];
-        config.game.vm = config.game.vm.replace(/\n/g, '');
-        config.googleAccount = account[0];
-        config.googlePassword = account[1]
-        needRewrite = true;
+        const { id, instance, account, password, auxiliary_mailbox } = ReadAccountFile();
+        const accountInfo = {
+            id,
+            instance,
+            account,
+            password,
+            auxiliary_mailbox
+        }
+        // console.log(`${id} ${instance} ${account} ${password} ${auxiliary_mailbox}`);
+        config.accountInfo = accountInfo;
     }
-
     RewriteConfig(config)
 
 }

@@ -20,6 +20,7 @@ const {
     TapTip,
     SetCountryAndBirth,
     StopScript,
+    deleteDeviceData,
 } = require("./utils.js");
 
 const { WearEquipments, StrengthenEquipment, DecomposeEquipment, BuyPotion } = require("./Backpack.js");
@@ -443,6 +444,10 @@ const ResetConfig = () =>
                 console.log("鉴定成功：重置每日任务");
                 config.daily.acceptDailyMission = false;
             }
+            if (GetRandom() > 40)
+            {
+                config.daily.dailyHunting = false;
+            }
 
             console.log("鉴定成功：重置每日商城购买");
             config.daily.dailyShop = false;
@@ -500,40 +505,7 @@ const StovePopup = () =>
     if (hasLimitAccount)
     {
         console.log("检测到账号被封，关闭脚本");
-        const config = ReadConfig()
-        config.game.vm = config.game.vm.replace(/\n/g, '');
-        const searchResponse = http.get(`${baseUrl}devices/search?vm=${config.game.vm}`)
-        const searchResult = JSON.parse(searchResponse.body.string())
-        let banTimes = 1;
-        if (searchResult.result != null)
-        {
-            banTimes += searchResult.result.banTimes;
-        }
-        const params = {
-            vm: config.game.vm,
-            banTimes: banTimes,
-            config: JSON.stringify(config)
-        }
-        try
-        {
-            const postResult = http.post(`${baseUrl}devices`, params)
-            let postResponse = JSON.parse(postResult.body.string())
-            postResponse = postResponse.result
-            if (postResponse.code == 0)
-            {
-                console.log("发生封号数据成功");
-            }
-            else
-            {
-                console.log("发生封号数据失败");
-                console.log(postResponse);
-            }
-        }
-        catch (error)
-        {
-            console.log(error);
-        }
-
+        deleteDeviceData()
         alert("游戏账户被封禁，", "账号数据已删除")
         StopScript()
     }
@@ -681,7 +653,11 @@ const PressCommonBtn = () =>
         }
         RecycleImgList(blueBtnImgList);
     }
-
+    if (FindBlueBtn([550, 563, 180, 62]))
+    {
+        console.log("自动狩猎确认奖励弹窗");
+        RandomPress([580, 579, 126, 29])
+    }
 };
 const PickMissionFinishAward = () =>
 {

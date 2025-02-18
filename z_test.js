@@ -1,4 +1,4 @@
-const { SwipeSlowly, StopScript, LoadImgList, FindImgInList, FindNumber, HasPopupClose, RandomPress, FindBlueBtn, baseUrl, ReadConfig, PressToAuto, GetRandom } = require("./utils.js")
+const { SwipeSlowly, StopScript, LoadImgList, FindImgInList, FindNumber, HasPopupClose, RandomPress, FindBlueBtn, baseUrl, ReadConfig, PressToAuto, GetRandom, updateDeviceData } = require("./utils.js")
 
 const regions = [
     [394, 229, 97, 62],
@@ -118,6 +118,7 @@ const updateOrderInfo = (params) =>
         console.log("更新订单错误：" + error);
     }
 }
+
 const helmet = [
     "SaiLaTeMaoZi", "HuiGuangPoXiaoMaoZi", "SaiLaTeTouJin", "SaiLeBiSiTouJin"
 ]
@@ -133,6 +134,7 @@ const gloves = [
 const shoes = [
     "HeiSeJingJiDuanXue", "HuiGuangPoXiaoDuanXue", "SaiLeBiSiDuanXue", "SaiLaTeDuanXue"
 ]
+
 const basePath = "page/trade/goods/"
 // const imgList = LoadImgList(`${basePath}shoes/${shoes[0]}_0`)
 
@@ -149,8 +151,17 @@ const ReadAccountFile = () =>
     if (files.exists("/sdcard/local_information/machine_information.json"))
     {
         const file = files.read("/sdcard/local_information/machine_information.json")
-        const json = JSON.parse(file)
-        console.log(json.id);
+        const accountInfo = JSON.parse(file)
+        const { id, instance, account, password, auxiliary_mailbox } = accountInfo
+        if (id && instance && account && password && auxiliary_mailbox)
+        {
+            return accountInfo;
+        }
+        else
+        {
+            alert("账号信息有误", "请检查账号文件内容是否正常")
+            StopScript()
+        }
     }
     else
     {
@@ -164,6 +175,30 @@ const autoColorLists = [
     ["#ffefd2", [[1, 2, "#fff3d8"], [2, 4, "#fff4d6"], [7, 0, "#ffefcd"], [18, 0, "#ffebc5"]]]
 ]
 
-const week = [random(1, 7), GetRandom() > 50 ? random(1, 7) : 0, GetRandom() > 50 ? random(1, 7) : 0]
-console.log(week);
-console.log(new Date().getDay());
+// const week = [random(1, 7), GetRandom() > 50 ? random(1, 7) : 0, GetRandom() > 50 ? random(1, 7) : 0]
+// console.log(week);
+// console.log(new Date().getDay());
+// const date = new Date();
+// const options = {
+//     weekday: 'long',
+//     year: 'numeric',
+//     month: 'long',
+//     day: 'numeric',
+//     hour: "numeric",
+//     timeZone: 'Asia/Shanghai'
+// };
+// console.log(date.toLocaleDateString('zh-CN', options)); // 包含星期、年、月、日，并使用上海时区
+
+let probabilityPool = Array.from({ length: 100 }, (_, index) => index);
+let eventList = Array.from({ length: 30 }, (_, index) => index);
+const getProbability = (length) =>
+{
+    const arr = []
+    for (let i = 0; i < eventList.length; i++)
+    {
+
+    }
+    return arr;
+}
+console.log(getProbability(2));
+console.log(probabilityPool.length);

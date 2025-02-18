@@ -10,7 +10,6 @@ const {
     StopGame,
 } = require("./utils.js");
 
-const { ListenServerFlow } = require("./ListenServer.js");
 
 const { LordNineWordColorList, WhiteAvatarColorList } = require("./Color/ExceptionColorList.js");
 
@@ -335,7 +334,7 @@ const CheckLogin = () =>
     console.log("检测登录流程结束，当前是否登录：" + isLogin);
     return isLogin;
 };
-const accountArray = ReadAccountFile();
+const accountInfo = ReadAccountFile();
 
 const LoginGoogleAccount = () =>
 {
@@ -349,7 +348,7 @@ const LoginGoogleAccount = () =>
         if (hasForgetEmail_zh || hasForgetEmail_kr)
         {
             console.log("发现忘记电子邮件地址。 开始输入邮箱。");
-            setText(accountArray[0]);
+            setText(accountInfo.account);
             Sleep(3);
             ClickNextBtn();
         }
@@ -358,7 +357,7 @@ const LoginGoogleAccount = () =>
         if (hasPasswordInputBox_kr || hasPasswordInputBox_zh)
         {
             console.log("发现密码输入框，开始输入密码");
-            setText(accountArray[1]);
+            setText(accountInfo.password);
             Sleep(3);
             ClickNextBtn();
         }
@@ -383,7 +382,7 @@ const LoginGoogleAccount = () =>
         if (hasInputRecovery)
         {
             console.log("发现辅助邮箱输入框，开始输入辅助邮箱");
-            setText(accountArray[2]);
+            setText(accountInfo.auxiliary_mailbox);
             Sleep(3);
             ClickNextBtn();
         }
@@ -391,7 +390,7 @@ const LoginGoogleAccount = () =>
         if (hasInputRecovery_simple_zh)
         {
             console.log("发现辅助邮箱输入框，开始输入辅助邮箱");
-            setText(accountArray[2]);
+            setText(accountInfo.auxiliary_mailbox);
             Sleep(3);
             ClickNextBtn();
         }
@@ -409,10 +408,7 @@ const LoginGoogleAccount = () =>
         if (hasInputRecovery_zh)
         {
             console.log("发现辅助邮箱输入框，开始输入辅助邮箱");
-            // setText(accountArray[2]);
-            // Sleep(3);
-            // ClickNextBtn();
-            setText(accountArray[0]);
+            setText(accountInfo.account);
             Sleep(3);
             RandomPress([413, 558, 539, 41], 3);
             console.log("邮箱验证码已发送！");
@@ -533,7 +529,7 @@ const LoginGoogleAccount = () =>
         let hasInput_placeholder_recoveryEmail = FindImg(input_placeholder_recoveryEmail, [280, 359, 170, 119]);
         if (hasInput_placeholder_recoveryEmail) 
         {
-            setText(accountArray[0]);
+            setText(accountInfo.account);
             Sleep(3);
             RandomPress([413, 558, 539, 41], 3);
             console.log("邮箱验证码已发送！");
@@ -773,7 +769,7 @@ const InputEmailUrl = () =>
                 if (hasForgetEmail_zh)
                 {
                     console.log("发现忘记电子邮件地址。 开始输入邮箱。");
-                    setText(accountArray[0]);
+                    setText(accountInfo.account);
                     Sleep(3);
                     ClickNextBtn();
                 }
@@ -781,7 +777,7 @@ const InputEmailUrl = () =>
                 if (hasPasswordInputBox_zh)
                 {
                     console.log("发现密码输入框，开始输入密码");
-                    setText(accountArray[1]);
+                    setText(accountInfo.password);
                     Sleep(3);
                     ClickNextBtn();
                 }
@@ -789,7 +785,7 @@ const InputEmailUrl = () =>
                 if (haveShowPassword_en)
                 {
                     console.log("发现密码输入框，开始输入密码");
-                    setText(accountArray[1]);
+                    setText(accountInfo.password);
                     Sleep(3);
                     ClickNextBtn()
                 }
