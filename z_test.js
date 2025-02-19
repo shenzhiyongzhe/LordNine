@@ -106,99 +106,63 @@ const getOrderList = () =>
 // console.log(`${equipmentName}-${englishName}-${equipmentType}-${identified}-${soldPrice}`);
 // console.log(new Date("2025-02-11T03:32:32.000Z"));
 
-const updateOrderInfo = (params) =>
+const shopList = {
+    "helmet": [
+        { name: "賽勒畢斯頭盔", englishName: "SaiLeBiSiTouKui", identified: false, },
+        { name: "賽拉特帽子", englishName: "SaiLaTeMaoZi", identified: false, },
+        { name: "灰光破曉帽子", englishName: "HuiGuangPoXiaoMaoZi", identified: false, },
+        { name: "賽拉特頭巾", englishName: "SaiLaTeTouJin", identified: false, },
+        { name: "賽勒畢斯頭巾", englishName: "SaiLeBiSiTouJin", identified: false, },
+    ],
+
+    "tops": [
+        { name: "賽拉特背心", englishName: "SaiLaTeBeiXin", identified: false, },
+        { name: "賽拉特長袍", englishName: "SaiLaTeChangPao", identified: false, },
+        { name: "灰光破曉長袍", englishName: "HuiGuangPoXiaoChangPao", identified: false, },
+        { name: "灰光破曉背心", englishName: "HuiGuangPoXiaoBeiXin", identified: false, },
+
+        { name: "賽勒畢斯背心", englishName: "SaiLeBiSiBeiXin", identified: false, },
+        { name: "灰光破曉盔甲", englishName: "HuiGuangPoXiaoKuiJia", identified: false, },
+        { name: "賽勒畢斯盔甲", englishName: "SaiLeBiSiKuiJia", identified: false, },
+        { name: "賽拉特盔甲", englishName: "SaiLaTeKuiJia", identified: false, },
+
+    ],
+
+    "underClothes": [
+        { name: "賽拉特皮褲", englishName: "SaiLaTePiKu", identified: false, },
+        { name: "灰光破曉布褲子", englishName: "HuiGuangPoXiaoBuKuZi", identified: false, },
+        { name: "賽勒畢斯布褲子", englishName: "SaiLeBiSiBuKuZi", identified: false, },
+
+        { name: "賽拉特布褲子", englishName: "SaiLaTeBuKuZi", identified: false, },
+        { name: "灰光破曉皮褲", englishName: "HuiGuangPoXiaoPiKu", identified: false, },
+        { name: "賽勒畢斯皮褲", englishName: "SaiLeBiSiPiKu", identified: false, },
+    ],
+
+    "gloves": [
+        { name: "灰光破曉護手", englishName: "HuiGuangPoXiaoHuShou", identified: false, },
+        { name: "灰光破曉手套", englishName: "HuiGuangPoXiaoShouTao", identified: false, },
+        { name: "黑色荊棘護手", englishName: "HeiSeJingJiHuShou", identified: false, },
+
+        { name: "賽勒畢斯護手", englishName: "SaiLeBiSiHuShou", identified: false, },
+        { name: "灰光破曉手甲", englishName: "HuiGuangPoXiaoShouJia", identified: false, },
+        { name: "賽勒畢斯手甲", englishName: "SaiLeBiSiShouJia", identified: false, },
+    ],
+
+    "shoes": [
+        { name: "賽拉特長靴", englishName: "SaiLaTeChangXue", identified: false, },
+        { name: "黑色荊棘短靴", englishName: "HeiSeJingJiDuanXue", identified: false, },
+        { name: "灰光破曉短靴", englishName: "HuiGuangPoXiaoDuanXue", identified: false, },
+
+        { name: "賽勒畢斯短靴", englishName: "SaiLeBiSiDuanXue", identified: false, },
+        { name: "賽拉特短靴", englishName: "SaiLaTeDuanXue", identified: false, },
+    ],
+}
+let imgList = null;
+for (let key in shopList)
 {
-    try
+    for (let item of shopList[key])
     {
-        console.log("更新订单信息" + JSON.stringify(params));
-        const res = http.post(`${baseUrl}order/create`, params)
-        console.log("发送订单返回结果: " + res.body.string());
-    } catch (error)
-    {
-        console.log("更新订单错误：" + error);
+        imgList = LoadImgList(`page/trade/goods/${key}/${item.englishName}_${item.identified ? 1 : 0}`)
+
     }
 }
-
-const helmet = [
-    "SaiLaTeMaoZi", "HuiGuangPoXiaoMaoZi", "SaiLaTeTouJin", "SaiLeBiSiTouJin"
-]
-const tops = [
-    "SaiLaTeChangPao", "HuiGuangPoXiaoChangPao", "HuiGuangPoXiaoBeiXin", "SaiLeBiSiBeiXin", "HuiGuangPoXiaoKuiJia", "SaiLeBiSiKuiJia", "SaiLaTeKuiJia"
-]
-const underClothes = [
-    "HuiGuangPoXiaoBuKuZi", "SaiLeBiSiBuKuZi", "SaiLaTeBuKuZi", "HuiGuangPoXiaoPiKu", "SaiLeBiSiPiKu"
-]
-const gloves = [
-    "HuiGuangPoXiaoShouTao", "HeiSeJingJiHuShou", "SaiLeBiSiHuShou", "HuiGuangPoXiaoShouJia", "SaiLeBiSiShouJia"
-]
-const shoes = [
-    "HeiSeJingJiDuanXue", "HuiGuangPoXiaoDuanXue", "SaiLeBiSiDuanXue", "SaiLaTeDuanXue"
-]
-
-const basePath = "page/trade/goods/"
-// const imgList = LoadImgList(`${basePath}shoes/${shoes[0]}_0`)
-
-// const regionList = [
-//     [261, 172, 156, 145],
-// ]
-
-// for (let i = 0; i < regionList.length; i++)
-// {
-//     console.log(FindImgInList(imgList, regionList[i]));
-// }
-const ReadAccountFile = () =>
-{
-    if (files.exists("/sdcard/local_information/machine_information.json"))
-    {
-        const file = files.read("/sdcard/local_information/machine_information.json")
-        const accountInfo = JSON.parse(file)
-        const { id, instance, account, password, auxiliary_mailbox } = accountInfo
-        if (id && instance && account && password && auxiliary_mailbox)
-        {
-            return accountInfo;
-        }
-        else
-        {
-            alert("账号信息有误", "请检查账号文件内容是否正常")
-            StopScript()
-        }
-    }
-    else
-    {
-        alert("读取账号信息失败", "无账号信息");
-        StopScript()
-    }
-};
-
-const autoColorLists = [
-    ["#fff1d8", [[1, 4, "#fff3d8"], [2, 7, "#ffeccd"], [7, 3, "#ffefcd"], [31, 4, "#fffae9"]]],
-    ["#ffefd2", [[1, 2, "#fff3d8"], [2, 4, "#fff4d6"], [7, 0, "#ffefcd"], [18, 0, "#ffebc5"]]]
-]
-
-// const week = [random(1, 7), GetRandom() > 50 ? random(1, 7) : 0, GetRandom() > 50 ? random(1, 7) : 0]
-// console.log(week);
-// console.log(new Date().getDay());
-// const date = new Date();
-// const options = {
-//     weekday: 'long',
-//     year: 'numeric',
-//     month: 'long',
-//     day: 'numeric',
-//     hour: "numeric",
-//     timeZone: 'Asia/Shanghai'
-// };
-// console.log(date.toLocaleDateString('zh-CN', options)); // 包含星期、年、月、日，并使用上海时区
-
-let probabilityPool = Array.from({ length: 100 }, (_, index) => index);
-let eventList = Array.from({ length: 30 }, (_, index) => index);
-const getProbability = (length) =>
-{
-    const arr = []
-    for (let i = 0; i < eventList.length; i++)
-    {
-
-    }
-    return arr;
-}
-console.log(getProbability(2));
-console.log(probabilityPool.length);

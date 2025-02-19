@@ -6,7 +6,7 @@ const { MainStoryFlow } = require("./MainStory.js");
 const { InstanceFlow } = require("./Instance.js");
 
 const version = `${app.versionName}`
-const versionColorList = ["#FF8F7A", "#FFB6C1", "#FF6F61", "#FFD700", "#9370DB", "#1C2331", "#AE445A", "#EB3678", "#EB3678"]
+const versionColorList = ["#004d40", "#005B8C", "#8a4a9e", "#c54b1f", "#b30000", "#1C2331", "#AE445A", "#EB3678", "#EB3678"]
 const versionColor = versionColorList[parseInt(version.split('.')[2])];
 let mainThread = null;
 let serverName = null;

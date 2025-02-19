@@ -58,7 +58,29 @@ const {
 const { ComprehensiveImprovement_Instance, DailyQuest, LoginProps, GetCommonAward, FireRandomEvent } = require("./CommonFlow");
 const { DecomposeEquipment } = require("./Backpack");
 
+const FirstLevel = [
+    [20, 181, 31, 40],
+    [20, 247, 31, 40],
+    [20, 317, 32, 40],
+    [20, 380, 33, 40],
+];
 
+const SecondLevel = [];
+const ThirdLevel = [];
+
+const initData = () =>
+{
+    for (let i = 0; i < 5; i++)
+    {
+        SecondLevel.push([100, 220 + i * 51, 130, 30]);
+    }
+    for (let i = 0; i < 8; i++)
+    {
+        ThirdLevel.push([950, 130 + i * 53, 200, 30]);
+    }
+}
+
+initData()
 
 
 let instance_mode = "hangUpWild";
@@ -84,6 +106,7 @@ const DeathCheck_HaltMode = (shot) =>
 
 const HangUpInstance = () =>
 {
+    console.log("刷副本");
     if (IsHaltMode())
     {
         ExitHaltMode();
@@ -495,26 +518,10 @@ const DailyMission = () =>
 };
 
 
+
 const EnterMap = (mapName, autoTransform) =>
 {
-    const FirstLevel = [
-        [20, 181, 31, 40],
-        [20, 247, 31, 40],
-        [20, 317, 32, 40],
-        [20, 380, 33, 40],
-    ];
 
-    const SecondLevel = [];
-    for (let i = 0; i < 5; i++)
-    {
-        SecondLevel.push([100, 220 + i * 51, 130, 30]);
-    }
-
-    const ThirdLevel = [];
-    for (let i = 0; i < 8; i++)
-    {
-        ThirdLevel.push([950, 130 + i * 53, 200, 30]);
-    }
     const randomIndex = random(1, 100);
     if (!mapName)
     {
@@ -847,6 +854,7 @@ const AutomaticHunting = () =>
     if (config.daily.dailyHunting)
     {
         console.log("今日已经狩猎，退出");
+        Sleep(61)
         return false;
     }
     if (GetRandom() > 60)

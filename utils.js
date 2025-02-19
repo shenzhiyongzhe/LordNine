@@ -153,6 +153,7 @@ const CloseMenu = (shot) =>
         RandomPress([1213, 25, 23, 24]);
     }
 };
+
 const CloseBackpack = () =>
 {
     const hasBackpackClose = HasBackpackClose();
@@ -446,6 +447,7 @@ const GetServerName = () =>
     return `${serverName}区${serverNumber}`;
 };
 const DeathImgList = LoadImgList("special/death");
+
 const DeathCheck = (shot) =>
 {
     shot = shot || captureScreen();
@@ -658,9 +660,6 @@ const FindFloatNumber = (directory, region, shot) =>
 
     if (recogNumberList.length === 0) return null;
 
-    // console.log("识别所有数字集合:" + JSON.stringify(recogNumberList));
-
-    //数据初步处理：去掉相同x坐标
     const sameXValues = {};
     let sequence = recogNumberList.filter(item => 
     {
@@ -673,7 +672,6 @@ const FindFloatNumber = (directory, region, shot) =>
         {
             return false;
         }
-        // item.points.forEach(point => sequence.push({ number: item.num, x: point.x, threshold: item.threshold }));
     });
 
     //数据初步处理：数字排序
@@ -1024,44 +1022,33 @@ const OpenMap = () =>
     return false;
 };
 
-const auto_activeImgList = LoadImgList("icon/auto/auto_active");
-const auto_inactiveImgList = LoadImgList("icon/auto/auto_inactive");
 const auto_questImgList = LoadImgList("icon/auto/quest");
 const enemyIcon = LoadImgList("page/mainUI/enemyIcon")
-const autoRecogRegion = [1127, 423, 61, 45];
+const autoRecognizeRegion = [1127, 423, 61, 45];
 
 const IsAuto_active = (shot) =>
 {
     shot = shot || captureScreen();
-    if (FindMultiColors(Auto_activeColorList, autoRecogRegion))
+    if (FindMultiColors(Auto_activeColorList, autoRecognizeRegion))
     {
         return true;
     }
-    // else if (FindImgInList(auto_activeImgList, autoRecogRegion))
-    // {
-    //     console.log("auto img list ");
-    //     return true;
-    // }
     return false;
 };
 
 const IsAuto_inactive = (shot) =>
 {
     shot = shot || captureScreen();
-    if (FindMultiColors(Auto_inactiveColorList, autoRecogRegion))
+    if (FindMultiColors(Auto_inactiveColorList, autoRecognizeRegion))
     {
         return true;
     }
-    // else if (FindImgInList(auto_inactiveImgList, autoRecogRegion))
-    // {
-    //     return true;
-    // }
     return false;
 };
 const IsInQuest = (shot) =>
 {
     shot = shot || captureScreen();
-    if (FindMultiColors(QuestColorList, autoRecogRegion) || FindImgInList(auto_questImgList, autoRecogRegion))
+    if (FindMultiColors(QuestColorList, autoRecognizeRegion) || FindImgInList(auto_questImgList, autoRecognizeRegion))
     {
         return true;
     }
@@ -1841,7 +1828,7 @@ const IsLocked = (region, shot) =>
 
 const MenuItemRegionList = {
     "master": [0, 0],
-    "weaponFeatures": [0, 1],
+    "weaponFeature": [0, 1],
     "ability": [0, 2],
     "suit": [0, 3],
     "horse": [0, 4],
@@ -1872,7 +1859,7 @@ const MenuItemRegionList = {
 };
 /**
  * 
- * @param {*} item  "master" "weaponFeatures" "ability" "suit" "horse" "animal" "propsLogin"
+ * @param {*} item  "master" "weaponFeature" "ability" "suit" "horse" "animal" "propsLogin"
     
       "trade" "equipment" "manufacture" "episode" "mission" "achievement" "log"
      
@@ -1885,9 +1872,15 @@ const MenuItemRegionList = {
  */
 const EnterMenuItemPage = (item) =>
 {
+    if (RecognizePage() == item)
+    {
+        console.log("已经在该页面，退出");
+        return true;
+    }
     let hasOpenedMenu = false;
     for (let i = 0; i < 10; i++)
     {
+
         if (HasMenu())
         {
             if (OpenMenu())
@@ -1959,7 +1952,7 @@ const EnterMenuItemPage = (item) =>
 const GetCharacterLv = () =>
 {
     console.log("获取玩家等级，默认为法杖等级");
-    EnterMenuItemPage("weaponFeatures");
+    EnterMenuItemPage("weaponFeature");
     let lv = FindNumber("lv", [208, 166, 50, 52]);
     console.log("玩家等级为：" + lv);
     PageBack();
@@ -2184,6 +2177,68 @@ const getOriginDate = () =>
     const second = date.getSeconds().toString().padStart(2, 0)
     return `${year}-${month}-${day} ${hour}:${minute}:${second}`
 }
+
+const RecognizePage = () =>
+{
+    console.log("识别当前页面");
+    const pageObj = {
+        "master": null,
+        "weaponFeature": null,
+        "ability": null,
+        "suit": null,
+        "horse": null,
+        "animal": null,
+        "propsLogin": null,
+
+        "trade": null,
+        "manufacture": null,
+        "mission": null,
+        "achievement": null,
+
+        "instance": null,
+        "trialOfTower": null,
+        "holyRelics": null,
+        "engraving": null,
+        "monsterKnowledge": null,
+        "friendlinessLevel": null,
+
+        "guild": null,
+
+        "email": null,
+        "shop": null,
+        "activity": null,
+    }
+    const shot = captureScreen()
+    let pageName = null
+    for (let key in pageObj)
+    {
+        pageObj[key] = LoadImgList(`page/${key}/title`)
+        if (key == "activity")
+        {
+            if (FindImgInList(pageObj[key], [561, 45, 160, 79], shot))
+            {
+                pageName = key;
+                break;
+            }
+        }
+        else if (FindImgInList(pageObj[key], [1074, 4, 189, 59], shot))
+        {
+            pageName = key;
+            break;
+        }
+    }
+    for (let key in pageObj)
+    {
+        if (pageObj[key])
+        {
+            RecycleImgList(pageObj[key])
+        }
+    }
+    console.log("当前页面是：" + pageName);
+    return pageName;
+}
+
+
 module.exports = {
     baseUrl,
     specialConfig, globalTimePlay,
@@ -2201,7 +2256,7 @@ module.exports = {
     TapBlankToContinue, TapTip, getOriginDate,
     OpenMenu, OpenBackpack, OpenBackpackMenu, OpenMap,
     PageBack, PressBlank, PullDownSkill, PressToAuto,
-    RandomPress, ReadImg, ReturnHome, RestartGame, RecycleImgList, ReadConfig, RewriteConfig, ReadDealRecord, ReadAccountFile, ReadDailyDiamondRecord, ReadTradeRecord,
+    RandomPress, ReadImg, ReturnHome, RestartGame, RecycleImgList, ReadConfig, RewriteConfig, ReadDealRecord, ReadAccountFile, ReadDailyDiamondRecord, ReadTradeRecord, RecognizePage,
     UpdateTradeRecord, updateDeviceData, deleteDeviceData,
     Sleep, SwipeSlowly, StopScript, SetCountryAndBirth, SwipeUp, SwipeDown, SwipeLeft, SwipeRight, StopGame,
     WaitUntil, WaitUntilMenu, WaitUntilPageBack, WaitUntilFindColor,
