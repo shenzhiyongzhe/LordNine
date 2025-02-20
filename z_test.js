@@ -1,4 +1,4 @@
-const { SwipeSlowly, StopScript, LoadImgList, FindImgInList, FindNumber, HasPopupClose, RandomPress, FindBlueBtn, baseUrl, ReadConfig, PressToAuto, GetRandom, updateDeviceData } = require("./utils.js")
+const { SwipeSlowly, StopScript, LoadImgList, FindImgInList, FindNumber, HasPopupClose, RandomPress, FindBlueBtn, baseUrl, ReadConfig, PressToAuto, GetRandom, updateDeviceData, Sleep } = require("./utils.js")
 
 const regions = [
     [394, 229, 97, 62],
@@ -106,63 +106,101 @@ const getOrderList = () =>
 // console.log(`${equipmentName}-${englishName}-${equipmentType}-${identified}-${soldPrice}`);
 // console.log(new Date("2025-02-11T03:32:32.000Z"));
 
-const shopList = {
-    "helmet": [
-        { name: "賽勒畢斯頭盔", englishName: "SaiLeBiSiTouKui", identified: false, },
-        { name: "賽拉特帽子", englishName: "SaiLaTeMaoZi", identified: false, },
-        { name: "灰光破曉帽子", englishName: "HuiGuangPoXiaoMaoZi", identified: false, },
-        { name: "賽拉特頭巾", englishName: "SaiLaTeTouJin", identified: false, },
-        { name: "賽勒畢斯頭巾", englishName: "SaiLeBiSiTouJin", identified: false, },
-    ],
+// const shopList = {
+//     "helmet": [
+//         { name: "賽勒畢斯頭盔", englishName: "SaiLeBiSiTouKui", identified: false, },
+//         { name: "賽拉特帽子", englishName: "SaiLaTeMaoZi", identified: false, },
+//         { name: "灰光破曉帽子", englishName: "HuiGuangPoXiaoMaoZi", identified: false, },
+//         { name: "賽拉特頭巾", englishName: "SaiLaTeTouJin", identified: false, },
+//         { name: "賽勒畢斯頭巾", englishName: "SaiLeBiSiTouJin", identified: false, },
+//     ],
 
-    "tops": [
-        { name: "賽拉特背心", englishName: "SaiLaTeBeiXin", identified: false, },
-        { name: "賽拉特長袍", englishName: "SaiLaTeChangPao", identified: false, },
-        { name: "灰光破曉長袍", englishName: "HuiGuangPoXiaoChangPao", identified: false, },
-        { name: "灰光破曉背心", englishName: "HuiGuangPoXiaoBeiXin", identified: false, },
+//     "tops": [
+//         { name: "賽拉特背心", englishName: "SaiLaTeBeiXin", identified: false, },
+//         { name: "賽拉特長袍", englishName: "SaiLaTeChangPao", identified: false, },
+//         { name: "灰光破曉長袍", englishName: "HuiGuangPoXiaoChangPao", identified: false, },
+//         { name: "灰光破曉背心", englishName: "HuiGuangPoXiaoBeiXin", identified: false, },
 
-        { name: "賽勒畢斯背心", englishName: "SaiLeBiSiBeiXin", identified: false, },
-        { name: "灰光破曉盔甲", englishName: "HuiGuangPoXiaoKuiJia", identified: false, },
-        { name: "賽勒畢斯盔甲", englishName: "SaiLeBiSiKuiJia", identified: false, },
-        { name: "賽拉特盔甲", englishName: "SaiLaTeKuiJia", identified: false, },
+//         { name: "賽勒畢斯背心", englishName: "SaiLeBiSiBeiXin", identified: false, },
+//         { name: "灰光破曉盔甲", englishName: "HuiGuangPoXiaoKuiJia", identified: false, },
+//         { name: "賽勒畢斯盔甲", englishName: "SaiLeBiSiKuiJia", identified: false, },
+//         { name: "賽拉特盔甲", englishName: "SaiLaTeKuiJia", identified: false, },
 
-    ],
+//     ],
 
-    "underClothes": [
-        { name: "賽拉特皮褲", englishName: "SaiLaTePiKu", identified: false, },
-        { name: "灰光破曉布褲子", englishName: "HuiGuangPoXiaoBuKuZi", identified: false, },
-        { name: "賽勒畢斯布褲子", englishName: "SaiLeBiSiBuKuZi", identified: false, },
+//     "underClothes": [
+//         { name: "賽拉特皮褲", englishName: "SaiLaTePiKu", identified: false, },
+//         { name: "灰光破曉布褲子", englishName: "HuiGuangPoXiaoBuKuZi", identified: false, },
+//         { name: "賽勒畢斯布褲子", englishName: "SaiLeBiSiBuKuZi", identified: false, },
 
-        { name: "賽拉特布褲子", englishName: "SaiLaTeBuKuZi", identified: false, },
-        { name: "灰光破曉皮褲", englishName: "HuiGuangPoXiaoPiKu", identified: false, },
-        { name: "賽勒畢斯皮褲", englishName: "SaiLeBiSiPiKu", identified: false, },
-    ],
+//         { name: "賽拉特布褲子", englishName: "SaiLaTeBuKuZi", identified: false, },
+//         { name: "灰光破曉皮褲", englishName: "HuiGuangPoXiaoPiKu", identified: false, },
+//         { name: "賽勒畢斯皮褲", englishName: "SaiLeBiSiPiKu", identified: false, },
+//     ],
 
-    "gloves": [
-        { name: "灰光破曉護手", englishName: "HuiGuangPoXiaoHuShou", identified: false, },
-        { name: "灰光破曉手套", englishName: "HuiGuangPoXiaoShouTao", identified: false, },
-        { name: "黑色荊棘護手", englishName: "HeiSeJingJiHuShou", identified: false, },
+//     "gloves": [
+//         { name: "灰光破曉護手", englishName: "HuiGuangPoXiaoHuShou", identified: false, },
+//         { name: "灰光破曉手套", englishName: "HuiGuangPoXiaoShouTao", identified: false, },
+//         { name: "黑色荊棘護手", englishName: "HeiSeJingJiHuShou", identified: false, },
 
-        { name: "賽勒畢斯護手", englishName: "SaiLeBiSiHuShou", identified: false, },
-        { name: "灰光破曉手甲", englishName: "HuiGuangPoXiaoShouJia", identified: false, },
-        { name: "賽勒畢斯手甲", englishName: "SaiLeBiSiShouJia", identified: false, },
-    ],
+//         { name: "賽勒畢斯護手", englishName: "SaiLeBiSiHuShou", identified: false, },
+//         { name: "灰光破曉手甲", englishName: "HuiGuangPoXiaoShouJia", identified: false, },
+//         { name: "賽勒畢斯手甲", englishName: "SaiLeBiSiShouJia", identified: false, },
+//     ],
 
-    "shoes": [
-        { name: "賽拉特長靴", englishName: "SaiLaTeChangXue", identified: false, },
-        { name: "黑色荊棘短靴", englishName: "HeiSeJingJiDuanXue", identified: false, },
-        { name: "灰光破曉短靴", englishName: "HuiGuangPoXiaoDuanXue", identified: false, },
+//     "shoes": [
+//         { name: "賽拉特長靴", englishName: "SaiLaTeChangXue", identified: false, },
+//         { name: "黑色荊棘短靴", englishName: "HeiSeJingJiDuanXue", identified: false, },
+//         { name: "灰光破曉短靴", englishName: "HuiGuangPoXiaoDuanXue", identified: false, },
 
-        { name: "賽勒畢斯短靴", englishName: "SaiLeBiSiDuanXue", identified: false, },
-        { name: "賽拉特短靴", englishName: "SaiLaTeDuanXue", identified: false, },
-    ],
-}
-let imgList = null;
-for (let key in shopList)
+//         { name: "賽勒畢斯短靴", englishName: "SaiLeBiSiDuanXue", identified: false, },
+//         { name: "賽拉特短靴", englishName: "SaiLaTeDuanXue", identified: false, },
+//     ],
+// }
+
+// let imgList = null;
+// for (let key in shopList)
+// {
+//     for (let item of shopList[key])
+//     {
+//         imgList = LoadImgList(`page/trade/goods/${key}/${item.englishName}_${item.identified ? 1 : 0}`)
+//         RandomPress([279, 668, 174, 23])
+//         setText(item.name)
+//         Sleep()
+//         RandomPress([260, 518, 107, 17])
+//         if (FindImgInList(imgList, [300, 191, 92, 223]))
+//         {
+//             console.log("发现该物品: " + item.name);
+//             RandomPress([493, 223, 388, 49])
+//             if (FindImgInList(imgList, [300, 191, 92, 223]))
+//             {
+//                 console.log("价格为：" + FindNumber("goodsPrice", [715, 197, 72, 73]));
+//             }
+//         }
+//         RandomPress([279, 668, 174, 23])
+//     }
+// }
+// imgList = LoadImgList(`page/trade/goods/helmet/SaiLaTeMaoZi_0`)
+// if (FindImgInList(imgList, [300, 191, 92, 223]))
+// {
+//     console.log("发现交易所有该物品: ");
+// }
+const generateRandomArray = (max) =>
 {
-    for (let item of shopList[key])
+    let array = Array.from({ length: max }, (_, index) => index)
+    const randomArr = []
+    for (let i = 0; i < max; i++)
     {
-        imgList = LoadImgList(`page/trade/goods/${key}/${item.englishName}_${item.identified ? 1 : 0}`)
-
+        if (array.length == 0)
+        {
+            break;
+        }
+        let index = Math.floor(random(0, array.length - 1))
+        randomArr.push(array[index])
+        array.splice(index, 1)
     }
+    return randomArr;
 }
+
+console.log(generateRandomArray(3));
+

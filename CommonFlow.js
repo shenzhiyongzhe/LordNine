@@ -24,6 +24,7 @@ const {
     GetRandom,
     updateDeviceData,
     RecognizePage,
+    generateRandomArray,
 } = require("./utils.js");
 
 const { IsEmpty, WearEquipments, StrengthenEquipment, OpenAllBox, UseHolyGrail, DecomposeEquipment, WearBestSuit, CheckSkillAutoRelease, BuyCloak, UnAutoPotion, getItemColor, AutoPotion } = require("./Backpack.js");
@@ -987,11 +988,11 @@ const UpgradeHolyRelics = () =>
         [57, 86, 194, 69],
         [49, 192, 198, 68],
         [53, 299, 205, 69],
-        [48, 407, 226, 68]
     ]
-    for (let j = 0; j < 3; j++)
+    const randomArray = generateRandomArray(holyPosition.length)
+    for (let i = 0; i < randomArray.length; i++)
     {
-        RandomPress(holyPosition[j], 2)
+        RandomPress(holyPosition[randomArray[i]], 2)
         if (!IsUnlocked())
         {
             console.log("解锁此圣物栏")
@@ -1001,33 +1002,26 @@ const UpgradeHolyRelics = () =>
                 if (FindBlueBtn([657, 402, 197, 62]))
                 {
                     RandomPress([679, 415, 156, 35], 5);
-                    if (!IsUnlocked())
-                    {
-                        console.log("无法解锁，下一个")
-                        continue;
-                    }
                 }
             }
         }
-        for (let i = 0; i < 7; i++)
+        if (FindBlueBtn([1105, 643, 158, 59]))
         {
-            if (FindBlueBtn([1106, 644, 158, 58]))
-            {
-                RandomPress([1124, 658, 119, 28], 3);
-                if (FindBlueBtn([656, 490, 198, 65]))
-                {
-                    RandomPress([691, 505, 133, 34], 5);
-                    console.log("升级圣物次数：" + i)
-                }
-            }
-            else
-            {
-                console.log("无法升级。下一格")
-                break;
-            }
-            Sleep()
+            console.log("点击全部强化");
+            RandomPress([1125, 655, 122, 34])
+            WaitUntil(() => FindBlueBtn([651, 485, 208, 77]))
+            RandomPress([805, 388, 22, 19])
+            RandomPress([678, 506, 156, 33], 4)
+            break;
         }
+        else if (FindBlueBtn([945, 644, 160, 60]))
+        {
+            console.log("部分强化");
+            RandomPress([969, 657, 117, 31])
+        }
+
     }
+
     PageBack()
     for (let i = 0; i < 10; i++)
     {
@@ -1884,6 +1878,7 @@ const getOrderList = () =>
     }
 
 }
+
 const BuyEpicEquipment = () =>
 {
     console.log("购买紫色装备");
@@ -1951,13 +1946,6 @@ const BuyEpicEquipment = () =>
     }
     const equipmentArea = Object.keys(shopList)
     const instancedArr = []
-    let totalItemCount = 0
-
-    for (let item of equipmentArea)
-    {
-        let length = shopList[item].length;
-        totalItemCount += length;
-    }
 
     if (!EnterMenuItemPage("trade"))
     {
@@ -1969,7 +1957,7 @@ const BuyEpicEquipment = () =>
     let canPurchase = false;
     let imgList = null;
 
-    for (let i = 0; i < totalItemCount; i++)
+    for (let i = 0; i < 10; i++)
     {
         let equipmentType = equipmentArea[random(0, equipmentArea.length - 1)]
         let itemIndex = Math.floor(random(0, shopList[equipmentType].length - 1))
@@ -2000,13 +1988,19 @@ const BuyEpicEquipment = () =>
                 RandomPress([261, 520, 68, 12], random(3, 6))
             }
         }
+
         imgList = LoadImgList(`page/trade/goods/${equipmentType}/${englishName}_${identified ? 1 : 0}`)
         let hasImg = FindImgInList(imgList, [301, 202, 100, 185])
         if (hasImg)
         {
             let currentPrice = FindNumber("goodsPrice", [400, hasImg.y + 25, 100, 30])
             console.log("当前紫装价格为：" + currentPrice);
-            if (currentPrice <= 80 && currentPrice > 30)
+            const maxBudget = config.game.budget;
+            if (!maxBudget)
+            {
+                maxBudget = 100;
+            }
+            if (currentPrice <= maxBudget && currentPrice > 30)
             {
                 console.log("可以购买此紫装");
                 RandomPress([425, hasImg.y, 465, 50])
@@ -2024,6 +2018,7 @@ const BuyEpicEquipment = () =>
             }
         }
     }
+
     if (canPurchase)
     {
         console.log("开始购买流程");
@@ -2040,7 +2035,7 @@ const BuyEpicEquipment = () =>
                     {
                         RandomPress([577, 422, 131, 27])
                         console.log("购买成功");
-                        purchaseInfo.buyingTime = new Date()
+                        // purchaseInfo.buyingTime = new Date()
                     }
                 }
             }
@@ -2060,7 +2055,7 @@ const SellEpicEquipment = (purchaseInfo) =>
     {
         return false;
     }
-
+    const config = ReadConfig()
     const imgList = LoadImgList(`page/trade/goods/${purchaseInfo.equipmentType}/${purchaseInfo.englishName}_${purchaseInfo.identified ? 1 : 0}`)
     const sellImg = LoadImgList("page/trade/sell")
 
@@ -2115,12 +2110,13 @@ const SellEpicEquipment = (purchaseInfo) =>
 const ReceiveDiamond = () =>
 {
     console.log("收取钻石,检查是否有上架失败的紫装");
-    const orderList = getOrderList()
 
     const purchaseInfo = BuyEpicEquipment()
-    SellEpicEquipment(purchaseInfo)
+    if (purchaseInfo.purchasePrice)
+    {
+        SellEpicEquipment(purchaseInfo)
+    }
 }
-
 
 const updateOrderInfo = (params) =>
 {
@@ -2618,145 +2614,8 @@ const needBuyCloak = () =>
     }
 }
 
-const ComprehensiveImprovement = () =>
-{
-    console.log("开始主线阶段的综合提升");
 
-    if ((new Date().getTime() - lastComprehensiveImproveTime) / 60000 < 20)
-    {
-        console.log("暂不操作: 两次提升间隔较短，");
-        return true;
-    }
-
-    const isBackpackFull = IsBackpackFull(captureScreen());
-    if (isBackpackFull)
-    {
-        console.log("提升：背包是满的，需要先清理背包");
-        WearEquipments();
-        StrengthenEquipment();
-        LoginProps();
-        DecomposeEquipment("partial");
-    }
-
-    DailyQuest()
-
-    OpenAllBox() && OpenAllBox() && OpenAllBox()
-
-    if (!isBackpackFull)
-    {
-        console.log("backpack is not full");
-        WearEquipments();
-        StrengthenEquipment();
-        LoginProps();
-        DecomposeEquipment();
-    }
-
-    IncreaseWeaponFeatures();
-    if (random(1, 100) > 50)
-    {
-        UpgradeHolyRelics();
-    }
-    if (random(1, 100) > 50)
-    {
-        StrengthenHorseEquipment();
-    }
-    const config = ReadConfig();
-    if (config.game.lv <= 40 || config.game.lv == null)
-    {
-        if (random(1, 100) > 60)
-        {
-            console.log(`角色等级为${config.game.lv}，改变符文配置`);
-            ChangeAbility();
-        }
-
-    }
-
-    UpgradeAbilityLevel();
-
-    WearBestSuit();
-    CheckSkillAutoRelease();
-    AddAttributePoint();
-    console.log("综合提升结束");
-    IsExchangeUnLock();
-    lastComprehensiveImproveTime = new Date().getTime();
-
-    return true;
-};
-
-const ComprehensiveImprovement_Instance = () =>
-{
-    const config = ReadConfig();
-
-    if (config.game.tradingTimes >= 1)
-    {
-        if (GetRandom() < 50)
-        {
-            console.log("鉴定失败，暂不交易");
-            Sleep(61)
-            return true;
-        }
-    }
-
-    if (IsHaltMode())
-    {
-        ExitHaltMode();
-    }
-
-    const isBackpackFull = IsBackpackFull(captureScreen());
-    if (isBackpackFull)
-    {
-        console.log("副本提升：背包是满的，需要先清理背包");
-        if (GetRandom() > 70)
-        {
-            LoginProps();
-        }
-        DecomposeEquipment();
-    }
-    const date = new Date();
-    const today = date.getDate();
-
-    if ((today == config.manufacture[0] || today == config.manufacture[1]) && config.game.tradingTimes == 0)
-    {
-        console.log("半月制作一次");
-        MakeMaterial();
-    }
-
-    if (GetRandom() > 70)
-    {
-        console.log("@鉴定成功:开箱子");
-        if (needBuyCloak())
-        {
-            WearEquipments()
-            if (needBuyCloak())
-            {
-                BuyCloak()
-                WearEquipments()
-                StrengthenEquipment()
-            }
-        }
-    }
-    else
-    {
-        FireRandomEvent()
-    }
-    PutOnSale();
-
-    console.log("副本模式下综合提升");
-
-    if (config.game.combatPower < 23000 && config.game.tradingTimes == 1)
-    {
-        UpgradeHolyRelics();
-    }
-
-    AddAttributePoint();
-    UnSealEngraving();
-
-    console.log("副本：综合提升结束");
-
-    return true;
-};
-
-const randomEvent_addPropsToQuickItem = () =>
+const addPropsToQuickItem = () =>
 {
     console.log("点击添加物品到快捷栏");
     if (!OpenBackpack("auto"))
@@ -2809,7 +2668,7 @@ const randomEvent_addPropsToQuickItem = () =>
     config.game.setQuickItem = true
     RewriteConfig(config)
 }
-const randomEvent_shopExchange = () =>
+const shopExchange = () =>
 {
     console.log("开始交换活动物品");
     let haveEnterShopPage = false;
@@ -3026,8 +2885,8 @@ const FireRandomEvent = () =>
 
         { event: OpenAllBox, probability: 2 },
 
-        { event: randomEvent_addPropsToQuickItem, probability: 2 },
-        { event: randomEvent_shopExchange, probability: 2 },
+        { event: addPropsToQuickItem, probability: 2 },
+        { event: shopExchange, probability: 2 },
 
         { event: ShopBuy, probability: 2 },
         { event: StrengthenHorseEquipment, probability: 2 },
@@ -3082,10 +2941,151 @@ const FireRandomEvent = () =>
     eventQueue.map(fn => fn())
 }
 
+const ComprehensiveImprovement = () =>
+{
+    console.log("开始主线阶段的综合提升");
 
+    if ((new Date().getTime() - lastComprehensiveImproveTime) / 60000 < 20)
+    {
+        console.log("暂不操作: 两次提升间隔较短，");
+        return true;
+    }
+
+    const isBackpackFull = IsBackpackFull(captureScreen());
+    if (isBackpackFull)
+    {
+        console.log("提升：背包是满的，需要先清理背包");
+        WearEquipments();
+        StrengthenEquipment();
+        LoginProps();
+        DecomposeEquipment("partial");
+    }
+
+    DailyQuest()
+
+    OpenAllBox() && OpenAllBox() && OpenAllBox()
+
+    if (!isBackpackFull)
+    {
+        console.log("backpack is not full");
+        WearEquipments();
+        StrengthenEquipment();
+        LoginProps();
+        DecomposeEquipment();
+    }
+
+    IncreaseWeaponFeatures();
+    if (random(1, 100) > 50)
+    {
+        UpgradeHolyRelics();
+    }
+    if (random(1, 100) > 50)
+    {
+        StrengthenHorseEquipment();
+    }
+    const config = ReadConfig();
+    if (config.game.lv <= 40 || config.game.lv == null)
+    {
+        if (random(1, 100) > 60)
+        {
+            console.log(`角色等级为${config.game.lv}，改变符文配置`);
+            ChangeAbility();
+        }
+
+    }
+
+    UpgradeAbilityLevel();
+
+    WearBestSuit();
+    CheckSkillAutoRelease();
+    AddAttributePoint();
+    console.log("综合提升结束");
+    IsExchangeUnLock();
+    lastComprehensiveImproveTime = new Date().getTime();
+
+    return true;
+};
+
+const ComprehensiveImprovement_Instance = () =>
+{
+    const config = ReadConfig();
+
+    if (config.game.tradingTimes >= 1)
+    {
+        if (GetRandom() < 50)
+        {
+            console.log("鉴定失败，暂不交易");
+            Sleep(61)
+            return true;
+        }
+    }
+
+    if (IsHaltMode())
+    {
+        ExitHaltMode();
+    }
+
+    const isBackpackFull = IsBackpackFull(captureScreen());
+    if (isBackpackFull)
+    {
+        console.log("副本提升：背包是满的，需要先清理背包");
+        if (GetRandom() > 70)
+        {
+            LoginProps();
+        }
+        DecomposeEquipment();
+    }
+    // const date = new Date();
+    // const today = date.getDate();
+
+    // if ((today == config.manufacture[0] || today == config.manufacture[1]) && config.game.tradingTimes == 0)
+    // {
+    //     console.log("半月制作一次");
+    //     MakeMaterial();
+    // }
+
+    if (GetRandom() > 70)
+    {
+        console.log("@鉴定成功:开箱子");
+        if (needBuyCloak())
+        {
+            WearEquipments()
+            if (needBuyCloak())
+            {
+                BuyCloak()
+                WearEquipments()
+                StrengthenEquipment()
+            }
+        }
+    }
+    else
+    {
+        FireRandomEvent()
+    }
+    PutOnSale();
+
+    console.log("副本模式下综合提升");
+
+    if (config.game.combatPower < 24000 && config.game.tradingTimes == 1)
+    {
+        UpgradeHolyRelics();
+    }
+
+    AddAttributePoint();
+    if (GetRandom() > 60)
+    {
+        UnSealEngraving();
+    }
+
+    console.log("副本：综合提升结束");
+
+    return true;
+};
 
 module.exports = {
     ChangeAbility, GetEmail, GetAchievement, GetMonsterKnowledgeAward, LoginProps, DailyQuest, needWearEquipment, GetCommonAward,
     ShopBuy, ComprehensiveImprovement, ComprehensiveImprovement_Instance, StrengthenHorseEquipment, IncreaseWeaponFeatures, GuildDonation,
     FireRandomEvent,
 };
+// const purchaseInfo = { "equipmentType": "gloves", "equipmentName": "賽勒畢斯護手", "englishName": "SaiLeBiSiHuShou", "identified": false, "purchasePrice": 118, "soldPrice": 495 }
+// SellEpicEquipment(purchaseInfo)

@@ -1844,16 +1844,6 @@ const BuyPotion = () =>
     }
 };
 
-const IdentifyRandomEquipment = () =>
-{
-    console.log("鉴定随机装备");
-    if (!EnterMenuItemPage("equipment"))
-    {
-        console.log("进入装备工坊失败");
-        return false;
-    }
-
-}
 
 module.exports = {
     BuyCloak,

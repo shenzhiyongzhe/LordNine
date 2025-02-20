@@ -159,12 +159,6 @@ const uiFloaty = () =>
 
     const uiInterval = setInterval(() =>
     {
-        // defaultAutoStartTime--
-        // if (defaultAutoStartTime <= 0)
-        // {
-        //     toastLog('3分钟未操作，默认开始脚本')
-        //     startBtnEvent()
-        // }
     }, 1000);
 
     floatyWindow.start.click(() =>

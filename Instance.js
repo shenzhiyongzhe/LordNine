@@ -547,7 +547,7 @@ const EnterMap = (mapName, autoTransform) =>
             if (FindBlueBtn([651, 382, 217, 69]))
             {
                 console.log("@等待传送...");
-                RandomPress([681, 401, 150, 28], random(12, 30));
+                RandomPress([681, 401, 150, 28], random(8, 20));
                 if (WaitUntil(HasMenu, 2000, 30))
                 {
                     hasMoved = true;
@@ -595,7 +595,7 @@ const EnterMap = (mapName, autoTransform) =>
 
 const HangUpSecretLab = () =>
 {
-    console.log("fn: 秘密实验室流程");
+    console.log("秘密实验室流程");
     if (GetRandom() > 50)
     {
         console.log("随机事件鉴定成功");
@@ -653,7 +653,8 @@ const HangUpSecretLab = () =>
         console.log("前往秘密实验室，自动移动中...");
         if (WaitUntil(() => HasMenu(), 3000, 40))
         {
-            console.log("@到达秘密实验室");
+            console.log("@到达秘密实验室。");
+            Sleep(random(5, 15))
             if (config.game.combatPower <= 27000 || (config.game.combatPower > 27000 && random(0, 100) < 50))
             {
                 console.log("战力小于27000，只进入30级区域");
@@ -780,17 +781,17 @@ const HangUpWild = () =>
         {
             mapName = [0, 3, random(0, 2)];
             console.log("去被污染的盆地挂机");
-        } else if (combatPower >= 18000 && combatPower < 25000)
+        } else if (combatPower >= 18000 && combatPower < 26000)
         {
             mapName = [1, 1, random(0, 2)];
             console.log("去新月湖挂机");
-        } else if (combatPower >= 25000 && combatPower < 29000)
+        } else if (combatPower >= 26000 && combatPower < 29000)
         {
             mapName = [1, 2, random(0, 2)];
             console.log("去暮光之丘挂机");
         } else if (combatPower >= 29000)
         {
-            mapName = [2, 1, 0];
+            mapName = [2, 1, random(0, 2)];
             console.log("去鸟兰挂机");
         } else
         {

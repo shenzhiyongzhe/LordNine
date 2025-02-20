@@ -33,7 +33,6 @@ const BlackBtnColorList = [
     ["#000000", [[100, 0, "#000000"], [237, 19, "#000000"], [210, 41, "#000000"], [32, 33, "#000000"]]]
 ];
 
-const verificationCodeImgList = LoadImgList("icon/login/verificationCodePopup");
 let checkBox_0 = ReadImg("icon/login/checkBox_0");
 const verificationCoeInput_zh = LoadImgList("icon/beginner/verificationCodeInput_zh");
 const canNotCreateCharacterImgList = LoadImgList("icon/beginner/canNotCreateCharacter");
@@ -64,7 +63,9 @@ const LoadServerImgList = () =>
         serverNameImgList.push(imgList);
     }
 };
+
 LoadServerImgList();
+
 const HasMainUI = () => FindMultiColors(LordNineWordColorList, [313, 333, 728, 354]);
 
 const ClickNextBtn = (findTime) =>
@@ -556,6 +557,7 @@ const LoginGoogleAccount = () =>
         Sleep();
     }
 };
+
 const InputEmailUrl = () =>
 {
     console.log("开始输入邮箱网址");
@@ -1134,11 +1136,12 @@ const LoginFlow = () =>
         Sleep();
     }
 };
+let clickTimes = 0;
+
 const WaitUntilEnterServerSelectPage = () =>
 {
     console.log("等待直到进入服务器选择页面...");
     const notice_timeoutImgList = LoadImgList("icon/beginner/notice_timeout");
-    let lastTimeGetVerificationCode = 1726208812345;
 
     for (let i = 0; i < 90; i++)
     {
@@ -1153,8 +1156,14 @@ const WaitUntilEnterServerSelectPage = () =>
             {
                 console.log("游戏主页面，点击空白");
                 PressBlank();
+                clickTimes++
             }
 
+        }
+        if (clickTimes > 30)
+        {
+            alert("创建角色异常", "点击主页面次数过多，退出")
+            StopScript()
         }
         if (FindBlueBtn([557, 427, 169, 61]))
         {
@@ -1167,31 +1176,6 @@ const WaitUntilEnterServerSelectPage = () =>
             break;
         }
 
-        let hasPopup_verificationCode = FindImgInList(verificationCodeImgList, [530, 235, 215, 78]);
-        if (hasPopup_verificationCode)
-        {
-            console.log("发现验证码弹窗");
-            if ((new Date().getTime() - lastTimeGetVerificationCode) / 60000 < 1)
-            {
-                console.log("连续接验证码间隔较短，等待一分钟再接取验证码");
-                Sleep(60);
-            }
-            let code = GetVerificationCode();
-            RandomPress([511, 426, 295, 11]);
-            if (!code)
-            {
-                alert("获取图形验证码失败", "接验证码有问题");
-                return false;
-            }
-            console.log("验证码为:" + code);
-            setText(code);
-            Sleep();
-            if (FindBlueBtn([531, 500, 222, 73]))
-            {
-                RandomPress([569, 518, 143, 31]);
-                Sleep();
-            }
-        }
         // 验证完毕，有弹窗提示：code-t004
         if (FindImgInList(notice_timeoutImgList, [580, 360, 125, 50]))
         {
@@ -1446,7 +1430,6 @@ const temporaryLoginGoogle = () =>
 module.exports = { CreateCharacterFlow, temporaryLoginGoogle };
 
 
-// EnterServer(serverName)
 
 
 

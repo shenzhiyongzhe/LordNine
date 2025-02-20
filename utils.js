@@ -1088,19 +1088,17 @@ const PressToAuto = (area) =>
         console.log("在auto中...");
         return true;
     }
-    if (area && IsAuto_inactive())
+    if (GetRandom() > 70 || area)
+    {
+        GoToRandomPlace(area)
+        return;
+    }
+    else if (IsAuto_inactive())
     {
         ClickAuto()
         console.log("点击auto位置，退出");
         return true;
     }
-    if (GetRandom() > 70)
-    {
-        GoToRandomPlace(area)
-        return;
-    }
-
-
 };
 let moveObj = {
     clipCount: 0,
@@ -2237,7 +2235,22 @@ const RecognizePage = () =>
     console.log("当前页面是：" + pageName);
     return pageName;
 }
-
+const generateRandomArray = (max) =>
+{
+    let array = Array.from({ length: max }, (_, index) => index)
+    const randomArr = []
+    for (let i = 0; i < max; i++)
+    {
+        if (array.length == 0)
+        {
+            break;
+        }
+        let index = Math.floor(random(0, array.length - 1))
+        randomArr.push(array[index])
+        array.splice(index, 1)
+    }
+    return randomArr;
+}
 
 module.exports = {
     baseUrl,
@@ -2247,7 +2260,7 @@ module.exports = {
     DeathCheck,
     EnterMenuItemPage, ExitHaltMode, EnterHaltMode,
     FindBlueBtn, FindTipPoint, FindImg, FindMultiColors, FindCheckMark, FindRedBtn, FindGoldBtn, FindGreenBtn, FindImgInList, FindNumber, FindFloatNumber, FindWhiteCheckMark,
-    GoToTheNPC, GetVerificationCode, GetCharacterLv, GetDateTime, GetServerName, GetRandom,
+    GoToTheNPC, GetVerificationCode, GetCharacterLv, GetDateTime, GetServerName, GetRandom, generateRandomArray,
     HasPageback, HasMenu, HasMenuClose, HollowPress, HasSkip, HasBackpackClose, HasBackpackMenuClose, HasPopupClose, HasTip, HaveMainStoryIcon, HasTransformIcon, HaveDailyMissionIcon,
     HaveFinished, HasMap, HaveToTapBlank, HasHaltModeBtn,
     IsMoving, IsBackpackFull, IsInCity, IsHaltMode, IsLocked, IsInQuest, IsAuto_active, IsAuto_inactive, IsNoPotion,
