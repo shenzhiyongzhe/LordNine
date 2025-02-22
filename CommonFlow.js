@@ -1,6 +1,5 @@
 
 const {
-    baseUrl,
     specialConfig,
     ClickSkip, CloseMenu, CloseBackpack, ClearPage,
     EnterMenuItemPage, ExitHaltMode,
@@ -25,6 +24,7 @@ const {
     updateDeviceData,
     RecognizePage,
     generateRandomArray,
+    http_post,
 } = require("./utils.js");
 
 const { IsEmpty, WearEquipments, StrengthenEquipment, OpenAllBox, UseHolyGrail, DecomposeEquipment, WearBestSuit, CheckSkillAutoRelease, BuyCloak, UnAutoPotion, getItemColor, AutoPotion } = require("./Backpack.js");
@@ -971,6 +971,7 @@ const ChangeAbility = (changeList) =>
     PullDownSkill([1190, 650]);
     console.log("完成能力配置");
 };
+
 const UpgradeHolyRelics = () =>
 {
     console.log("升级圣物");
@@ -1844,20 +1845,21 @@ const sendOrder = (params) =>
 {
     try
     {
-        const res = http.post(`${baseUrl}order/create`, params)
+        const res = http_post(`order/create`, params)
         console.log("发送订单返回结果: " + res.body.string());
     } catch (error)
     {
         console.log("发送订单数据错误：" + error);
     }
 }
+
 const getOrderList = () =>
 {
     try
     {
         const config = ReadConfig()
         const serverName = config.game.serverName;
-        const res = http.post(`${baseUrl}order/findAll`, { serverName, state: "已上架" })
+        const res = http_post(`order/findAll`, { serverName, state: "已上架" })
 
         const body = JSON.parse(res.body.string());
         if (body.code == 0)
@@ -1879,7 +1881,7 @@ const getOrderList = () =>
 
 }
 
-const BuyEpicEquipment = () =>
+const BuyEpicEquipment = (equipmentType) =>
 {
     console.log("购买紫色装备");
     const config = ReadConfig()
@@ -1893,6 +1895,7 @@ const BuyEpicEquipment = () =>
         console.log("当前钻石已经累计超过10000，暂不操作，退出");
         return false;
     }
+
     const shopList = {
         "helmet": [
             { name: "賽勒畢斯頭盔", englishName: "SaiLeBiSiTouKui", identified: false, },
@@ -1944,7 +1947,12 @@ const BuyEpicEquipment = () =>
             { name: "賽拉特短靴", englishName: "SaiLaTeDuanXue", identified: false, },
         ],
     }
-    const equipmentArea = Object.keys(shopList)
+    if (!equipmentType)
+    {
+        const equipmentTypes = Object.keys(shopList)
+        const randomType = random(0, equipmentTypes.length - 1)
+        equipmentType = equipmentTypes[randomType]
+    }
     const instancedArr = []
 
     if (!EnterMenuItemPage("trade"))
@@ -1959,7 +1967,6 @@ const BuyEpicEquipment = () =>
 
     for (let i = 0; i < 10; i++)
     {
-        let equipmentType = equipmentArea[random(0, equipmentArea.length - 1)]
         let itemIndex = Math.floor(random(0, shopList[equipmentType].length - 1))
 
         let instancedIndex = `${equipmentType}-${itemIndex}`
@@ -1995,10 +2002,10 @@ const BuyEpicEquipment = () =>
         {
             let currentPrice = FindNumber("goodsPrice", [400, hasImg.y + 25, 100, 30])
             console.log("当前紫装价格为：" + currentPrice);
-            const maxBudget = config.game.budget;
+            let maxBudget = config.game.budget;
             if (!maxBudget)
             {
-                maxBudget = 100;
+                maxBudget = 150;
             }
             if (currentPrice <= maxBudget && currentPrice > 30)
             {
@@ -2123,7 +2130,7 @@ const updateOrderInfo = (params) =>
     try
     {
         console.log("更新订单信息" + JSON.stringify(params));
-        const res = http.post(`${baseUrl}order/create`, params)
+        const res = http_post(`order/create`, params)
         console.log("发送订单返回结果: " + res.body.string());
     } catch (error)
     {
@@ -2258,7 +2265,6 @@ const PutOnSale = () =>
     {
         console.log("鉴定成功，分解装备");
         DecomposeEquipment("partial");
-
     }
     else
     {
@@ -2553,67 +2559,286 @@ const UnSealEngraving = () =>
     RecycleImgList(exclude);
     PageBack();
 };
-const needWearEquipment = () =>
-{
-    const config = ReadConfig();
-    if (!config.equipments)
-    {
-        console.log("需要穿装备");
-        return true;
-    }
-    else
-    {
-        const colorList = ["blue", "purple"];
-        for (let key in config.equipments)
-        {
-            if (config.equipments[key] == null)
-            {
-                return true;
-            }
-            if (!colorList.includes(config.equipments[key][0]))
-            {
-                console.log("需要穿装备");
-                return true;
-            }
-        }
-        console.log("@不需要穿装备");
-        return false;
-    }
-};
+
 const needBuyCloak = () =>
 {
+    console.log("判断是否需要购买蓝色披风");
     const config = ReadConfig()
-    if (!config.equipments)
-    {
-        console.log("异常情况，退出");
-        return false;
-    }
-    else if (config.game.diamond < 100)
+    if (config.game.diamond < 100)
     {
         console.log("钻石数量小于100,暂不购买")
         return false;
     }
-    else
+
+    const cloak = config.equipments.cloak;
+    if (cloak)
     {
-        const cloak = config.equipments.cloak;
-        if (cloak)
+        if (cloak == 'blue')
         {
-            if (cloak[0] == 'blue')
+            console.log("已经购买了披风")
+            return false;
+        }
+        else
+        {
+            console.log("可以购买披风")
+            return true;
+        }
+    }
+    console.log("异常，不购买披风")
+    return false;
+}
+const needBuyPurpleEquipment = () =>
+{
+    console.log("判断是否需要购买紫色装备");
+    const config = ReadConfig()
+    if (config.game.diamond < 150)
+    {
+        console.log("钻石数量小于100,暂不购买")
+        return false;
+    }
+
+    const equipments = config.equipments;
+    const needBuyItemArr = []
+    const purpleEquipments = ["helmet", "tops", "underClothes", "gloves", "shoes"]
+    for (let key in equipments)
+    {
+        if (purpleEquipments.includes(key))
+        {
+            if (equipments[key] != "purple")
             {
-                console.log("已经购买了披风")
-                return false;
+                needBuyItemArr.push(key)
+            }
+        }
+
+    }
+    if (needBuyItemArr.length == 0)
+    {
+        console.log("不需要购买紫色装备，退出");
+        return false;
+    }
+    const randomIndex = Math.floor(random(0, needBuyItemArr.length - 1))
+    const randomItem = needBuyItemArr[randomIndex]
+    console.log("随机购买的紫色装备类型是：" + randomItem);
+    return randomItem;
+}
+
+const needBuyOrnament = () =>
+{
+    console.log("判断是否需要购买蓝色饰品");
+    const config = ReadConfig()
+    if (config.game.diamond < 150)
+    {
+        console.log("钻石数量小于100,暂不购买")
+        return false;
+    }
+
+    const equipments = config.equipments;
+    const needBuyItemArr = []
+    for (let key in equipments)
+    {
+        if (equipments[key] != "blue")
+        {
+            console.log(key);
+            needBuyItemArr.push(key)
+        }
+    }
+    if (needBuyItemArr.length == 0)
+    {
+        console.log("不需要购买蓝色饰品，退出");
+        return false;
+    }
+    const randomIndex = Math.floor(random(0, needBuyItemArr.length - 1))
+    const randomItem = needBuyItemArr[randomIndex]
+    console.log("随机购买的蓝色饰品是：" + randomItem);
+    return randomItem;
+
+}
+
+const BuyBlueOrnament = (equipmentType) =>
+{
+    console.log("购买蓝色饰品");
+    const config = ReadConfig()
+    if (config.game.diamond < 200)
+    {
+        console.log("当前钻石不足200，退出");
+        return false;
+    }
+    else if (config.game.diamond > 10000)
+    {
+        console.log("当前钻石已经累计超过10000，暂不操作，退出");
+        return false;
+    }
+    if (!EnterMenuItemPage("trade"))
+    {
+        console.log("进入交易所失败");
+        return false;
+    }
+
+    const shopList = {
+        "necklace": [
+            { name: "墮落信念項鍊", englishName: "DuoLuoXinNianXiangLian", identified: true, },
+            { name: "藍色月光項鍊", englishName: "LanSeYueLiangXiangLian", identified: true, },
+            { name: "深邃虛空項鍊", englishName: "ShenSuiXuKongXiangLian", identified: true, },
+            { name: "束縛者項鍊", englishName: "ShuFuZheXiangLian", identified: true, },
+        ],
+        "earring": [
+            { name: "墮落信念耳環", englishName: "DuoLuoXinNianErHuan", identified: true, },
+            { name: "藍色月光耳環", englishName: "LanSeYueLiangErHuan", identified: true, },
+            { name: "深邃虛空耳環", englishName: "ShenSuiXuKongErHuan", identified: true, },
+            { name: "束縛者耳環", englishName: "ShuFuZheErHuan", identified: true, },
+        ],
+        "bracelet": [
+            { name: "墮落信念手鐲", englishName: "DuoLuoXinNianShouZhuo", identified: true, },
+            { name: "藍色月光手鐲", englishName: "LanSeYueLiangShouZhuo", identified: true, },
+            { name: "深邃虛空手鐲", englishName: "ShenSuiXuKongShouZhuo", identified: true, },
+            { name: "束縛者手鐲", englishName: "ShuFuZheShouZhuo", identified: true, },
+        ],
+
+        "ring": [
+            { name: "墮落信念戒指", englishName: "DuoLuoXinNianJieZhi", identified: true, },
+            { name: "藍色月光戒指", englishName: "LanSeYueLiangJieZhi", identified: true, },
+            { name: "深邃虛空戒指", englishName: "ShenSuiXuKongJieZhi", identified: true, },
+            { name: "束縛者戒指", englishName: "ShuFuZheJieZhi", identified: true, },
+        ],
+
+        "belt": [
+            { name: "墮落信念腰帶", englishName: "DuoLuoXinNianYaoDai", identified: true, },
+            { name: "藍色月光腰帶", englishName: "LanSeYueLiangYaoDai", identified: true, },
+            { name: "深邃虛空腰帶", englishName: "ShenSuiXuKongYaoDai", identified: true, },
+            { name: "束縛者腰帶", englishName: "ShuFuZheYaoDai", identified: true, },
+        ],
+    }
+
+    const instancedArr = []
+
+    const purchaseInfo = {}
+
+    let canPurchase = false;
+    let imgList = null;
+
+    for (let i = 0; i < 10; i++)
+    {
+        let itemIndex = Math.floor(random(0, shopList[equipmentType].length - 1))
+
+        let instancedIndex = `${equipmentType}-${itemIndex}`
+
+        if (instancedArr.includes(instancedIndex))
+        {
+            console.log("已经生成该装备，重新生成");
+            continue;
+        }
+        else
+        {
+            instancedArr.push(instancedIndex)
+        }
+
+        let { name, englishName, identified } = shopList[equipmentType][itemIndex]
+        console.log(`部位：${equipmentType}，索引：${itemIndex}，名字：${name}，英文名：${englishName}是否鉴定：${identified}`);
+
+        if (FindGoldBtn([7, 650, 228, 58]))
+        {
+            RandomPress([277, 667, 206, 24])//search input
+            setText(name)
+            let hasKeyboardConfirm = text("确定").findOne(5000)
+            if (hasKeyboardConfirm)
+            {
+                Sleep(random(2, 5))
+                RandomPress([261, 520, 68, 12], random(3, 6))
+            }
+        }
+
+        imgList = LoadImgList(`page/trade/goods/${equipmentType}/${englishName}_${identified ? 1 : 0}`)
+        let hasImg = FindImgInList(imgList, [290, 187, 112, 123])
+        if (hasImg)
+        {
+            let currentPrice = FindNumber("goodsPrice", [400, hasImg.y + 25, 100, 30])
+            console.log("当前饰品价格为：" + currentPrice);
+            console.log("蓝色饰品限价为：80钻");
+            let maxBudget = 80
+            if (currentPrice <= maxBudget && currentPrice > 10)
+            {
+                console.log("可以购买此饰品");
+                RandomPress([425, hasImg.y, 465, 50])
+                canPurchase = true;
+                purchaseInfo.equipmentType = equipmentType;
+                purchaseInfo.equipmentName = name;
+                purchaseInfo.englishName = englishName;
+                purchaseInfo.identified = identified;
+                purchaseInfo.purchasePrice = currentPrice;
+                break;
             }
             else
             {
-                console.log("可以购买披风")
-                return true;
+                console.log("价格不在区间，随机下一次");
             }
         }
-        console.log("异常，不购买披风")
-        return false;
+        else
+        {
+            console.log("未发现商品");
+        }
+    }
+
+    if (canPurchase)
+    {
+        console.log("开始购买流程");
+        if (WaitUntil(() => FindImgInList(imgList, [299, 203, 84, 82])))
+        {
+            let purchasePrice = FindNumber("goodsPrice", [874, 204, 66, 57])
+            if (purchasePrice == purchaseInfo.purchasePrice)
+            {
+                RandomPress([415, 227, 504, 42])
+                if (WaitUntil(() => FindBlueBtn([709, 594, 187, 62])))
+                {
+                    RandomPress([740, 609, 128, 31])
+                    if (WaitUntil(() => FindBlueBtn([544, 403, 195, 65])))
+                    {
+                        RandomPress([577, 422, 131, 27])
+                        console.log("购买成功");
+                        // purchaseInfo.buyingTime = new Date()
+                    }
+                }
+            }
+        }
+    }
+
+    RecycleImgList(imgList)
+    return purchaseInfo;
+}
+const needBuyEquipment = () =>
+{
+    let needCloak = needBuyCloak()
+    let needOrnament = needBuyOrnament()
+    let needPurpleEquipment = needBuyPurpleEquipment()
+    let isBuySuccess = false;
+    if (needCloak || needOrnament || needPurpleEquipment)
+    {
+        WearEquipments()
+        needCloak = needBuyCloak()
+        needOrnament = needBuyOrnament()
+        needPurpleEquipment = needBuyPurpleEquipment()
+    }
+    if (needCloak)
+    {
+        isBuySuccess = BuyCloak()
+    }
+    else if (needOrnament)
+    {
+        isBuySuccess = BuyBlueOrnament(needOrnament)
+    }
+    else if (needPurpleEquipment)
+    {
+        isBuySuccess = BuyEpicEquipment(needPurpleEquipment)
+    }
+    else
+    {
+        console.log("不需要购买装备");
+    }
+    if (isBuySuccess)
+    {
+        WearEquipments()
+        StrengthenEquipment()
     }
 }
-
 
 const addPropsToQuickItem = () =>
 {
@@ -2853,6 +3078,7 @@ const CheckNotification = () =>
     }
 
 }
+
 const FireRandomEvent = () =>
 {
     console.log("触发随机事件")
@@ -2863,15 +3089,15 @@ const FireRandomEvent = () =>
         { event: ChangeGameSetting, probability: 2 },
         { event: CheckSkillAutoRelease, probability: 2 },
 
-        { event: DecomposeEquipment, probability: 10 },
+        { event: DecomposeEquipment, probability: 12 },
 
         { event: FriendShipShop, probability: 2 },
         { event: FriendshipDonation, probability: 2 },
         { event: FusionSuit, probability: 2 },
 
         { event: GetAchievement, probability: 2 },
-        { event: GetActivitiesAward, probability: 10 },
-        { event: GetEmail, probability: 10 },
+        { event: GetActivitiesAward, probability: 11 },
+        { event: GetEmail, probability: 11 },
         { event: GetMonsterKnowledgeAward, probability: 2 },
         { event: GetPassAward, probability: 2 },
         { event: GetTravelLogAward, probability: 2 },
@@ -2886,7 +3112,7 @@ const FireRandomEvent = () =>
         { event: OpenAllBox, probability: 2 },
 
         { event: addPropsToQuickItem, probability: 2 },
-        { event: shopExchange, probability: 2 },
+        // { event: shopExchange, probability: 2 },
 
         { event: ShopBuy, probability: 2 },
         { event: StrengthenHorseEquipment, probability: 2 },
@@ -2898,7 +3124,8 @@ const FireRandomEvent = () =>
         { event: UpgradeAbilityLevel, probability: 2 },
         { event: UnSealEngraving, probability: 2 },
 
-        { event: CheckNotification, probability: 2 },
+        { event: CheckNotification, probability: 12 },
+        { event: needBuyEquipment, probability: 2 },
     ]
 
     const eventNumber = random(0, 8);
@@ -3035,28 +3262,11 @@ const ComprehensiveImprovement_Instance = () =>
         }
         DecomposeEquipment();
     }
-    // const date = new Date();
-    // const today = date.getDate();
-
-    // if ((today == config.manufacture[0] || today == config.manufacture[1]) && config.game.tradingTimes == 0)
-    // {
-    //     console.log("半月制作一次");
-    //     MakeMaterial();
-    // }
 
     if (GetRandom() > 70)
     {
-        console.log("@鉴定成功:开箱子");
-        if (needBuyCloak())
-        {
-            WearEquipments()
-            if (needBuyCloak())
-            {
-                BuyCloak()
-                WearEquipments()
-                StrengthenEquipment()
-            }
-        }
+        needBuyEquipment()
+        console.log("随机到购买装备");
     }
     else
     {
@@ -3082,10 +3292,10 @@ const ComprehensiveImprovement_Instance = () =>
     return true;
 };
 
+
 module.exports = {
-    ChangeAbility, GetEmail, GetAchievement, GetMonsterKnowledgeAward, LoginProps, DailyQuest, needWearEquipment, GetCommonAward,
+    ChangeAbility, GetEmail, GetAchievement, GetMonsterKnowledgeAward, LoginProps, DailyQuest, GetCommonAward,
     ShopBuy, ComprehensiveImprovement, ComprehensiveImprovement_Instance, StrengthenHorseEquipment, IncreaseWeaponFeatures, GuildDonation,
     FireRandomEvent,
 };
-// const purchaseInfo = { "equipmentType": "gloves", "equipmentName": "賽勒畢斯護手", "englishName": "SaiLeBiSiHuShou", "identified": false, "purchasePrice": 118, "soldPrice": 495 }
-// SellEpicEquipment(purchaseInfo)
+

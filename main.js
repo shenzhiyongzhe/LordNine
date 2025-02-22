@@ -99,6 +99,23 @@ function Init()
         // console.log(`${id} ${instance} ${account} ${password} ${auxiliary_mailbox}`);
         config.accountInfo = accountInfo;
     }
+    if (!config.equipments || !config.equipments.ring)
+    {
+        config.equipments = {
+            helmet: null,
+            guard: null,
+            pants: null,
+            gloves: null,
+            boots: null,
+            cloak: null,
+
+            earring: null,
+            necklace: null,
+            bracelet: null,
+            ring: null,
+            belt: null,
+        }
+    }
     RewriteConfig(config)
 
 }
@@ -112,14 +129,15 @@ const GetCaptureScreenPermission = () =>
     });
     threads.start(function ()
     {
-        let hasOpen = textMatches(/(.*시작하기.*|.*立即开始.*)/).findOne(600000);
+        let hasOpen = textMatches(/(.*시작하기.*|.*立即开始.*)/).findOne(800000);
         if (hasOpen)
         {
             hasOpen.click();
         }
         else
         {
-            throw new Error("获取截图权限失败");
+            console.log("获取截图权限失败");
+            StopScript()
         }
     });
 };

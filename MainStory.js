@@ -1511,5 +1511,3 @@ const MainStoryFlow = () =>
 
 
 module.exports = { MainStoryFlow };
-
-// ClickMainStory()

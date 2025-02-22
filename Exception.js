@@ -25,7 +25,7 @@ const {
 
 const { WearEquipments, StrengthenEquipment, DecomposeEquipment, BuyPotion } = require("./Backpack.js");
 
-const { LoginProps, needWearEquipment } = require("./CommonFlow.js");
+const { LoginProps } = require("./CommonFlow.js");
 
 const { LordNineWordColorList, WhiteAvatarColorList, StartBtnSettingColorList } = require("./Color/ExceptionColorList.js");
 const { TipColorList } = require("./Color/MainStoryColorList.js");

@@ -64,10 +64,22 @@ const defaultConfig = {
         pants: null,
         gloves: null,
         boots: null,
+        cloak: null,
+
+        earring: null,
+        necklace: null,
+        bracelet: null,
+        ring: null,
+        belt: null,
     }
 };
 
+// const baseUrl = "http://8.138.153.122:8001/"
+
 const baseUrl = "http://47.76.112.107:8001/"
+
+const http_post = (url, data) => http.post(`${baseUrl}${url}`, data)
+const http_get = (url, data) => http.post(`${baseUrl}${url}`, data)
 let mirrorConfig = null;
 
 let specialConfig = {
@@ -1339,12 +1351,8 @@ const OpenBackpack = (type, sort) =>
 
     if (sort)
     {
-        const config = ReadConfig();
-        if (!config.unlockTrade || GetRandom() > 50)
-        {
-            console.log("点击整理");
-            RandomPress([1097, 667, 16, 19]);
-        }
+        console.log("点击整理");
+        RandomPress([1097, 667, 16, 19]);
     }
 
     if (type == "equipment")
@@ -2127,7 +2135,7 @@ const updateDeviceData = (data) =>
     try
     {
         console.log("更新后台交易数据");
-        const res = http.post("http://47.76.112.107:8001/devices", data);
+        const res = http_post("devices", data)
         if (res.statusCode == 200)
         {
             console.log("发送数据成功");
@@ -2148,7 +2156,7 @@ const deleteDeviceData = () =>
     const config = ReadConfig()
     try
     {
-        const res = http.get(`${baseUrl}devices/${config.accountInfo.instance}/off`)
+        const res = http_get(`devices/${config.accountInfo.instance}/off`)
         if (res.code == 0)
         {
             console.log("发生封号数据成功");
@@ -2262,7 +2270,7 @@ module.exports = {
     FindBlueBtn, FindTipPoint, FindImg, FindMultiColors, FindCheckMark, FindRedBtn, FindGoldBtn, FindGreenBtn, FindImgInList, FindNumber, FindFloatNumber, FindWhiteCheckMark,
     GoToTheNPC, GetVerificationCode, GetCharacterLv, GetDateTime, GetServerName, GetRandom, generateRandomArray,
     HasPageback, HasMenu, HasMenuClose, HollowPress, HasSkip, HasBackpackClose, HasBackpackMenuClose, HasPopupClose, HasTip, HaveMainStoryIcon, HasTransformIcon, HaveDailyMissionIcon,
-    HaveFinished, HasMap, HaveToTapBlank, HasHaltModeBtn,
+    HaveFinished, HasMap, HaveToTapBlank, HasHaltModeBtn, http_get, http_post,
     IsMoving, IsBackpackFull, IsInCity, IsHaltMode, IsLocked, IsInQuest, IsAuto_active, IsAuto_inactive, IsNoPotion,
     LoadImgList, LaunchGame,
     MatchTemplateList,

@@ -835,12 +835,7 @@ const HangUpWild = () =>
     }
 };
 
-const IsNoExp = () =>
-{
-    let clip = images.clip(captureScreen(), 90, 610, 140, 15);
-    Sleep(30);
-    return FindImg(clip, [90, 610, 140, 15]);
-};
+
 const AutomaticHunting = () =>
 {
     console.log("自动狩猎");
@@ -971,11 +966,7 @@ const InstanceExceptionCheck = () =>
         if (IsInCity() && !IsMoving())
         {
             console.log("异常检测：在主城, 未移动");
-            if (GetRandom() > 50)
-            {
-                console.log("随机事件鉴定成功");
-                FireRandomEvent()
-            }
+            FireRandomEvent()
             InstanceBranchManager()
         }
 
@@ -1000,11 +991,7 @@ const InstanceExceptionCheck = () =>
                     }
                     else
                     {
-                        if (GetRandom() > 50)
-                        {
-                            console.log("随机事件鉴定成功");
-                            FireRandomEvent()
-                        }
+                        FireRandomEvent()
                         PressToAuto();
                     }
 
@@ -1013,12 +1000,18 @@ const InstanceExceptionCheck = () =>
                 if ((currentTime - lastTimeEnterHaltMode) / 1000 > enterHaltModeSecond)
                 {
                     console.log("挂机异常检测：不在省电模式");
-                    console.log(`不在省电模式，${enterHaltModeSecond}，手动进省电模式`);
+                    console.log(`不在省电模式，${enterHaltModeSecond}s，手动进省电模式`);
                     enterHaltModeSecond = random(300, 600)
-                    EnterHaltMode();
-                    lastTimeEnterHaltMode = currentTime;
+                    if (IsInCity())
+                    {
+                        console.log("在主城，不进入节电模式");
+                    }
+                    else
+                    {
+                        EnterHaltMode();
+                        lastTimeEnterHaltMode = currentTime;
+                    }
                 }
-
             } else
             {
                 if (IsAuto_active())
@@ -1029,17 +1022,6 @@ const InstanceExceptionCheck = () =>
                 {
                     DailyMission();
                     Sleep(60)
-                    // for (let i = 0; i < 6; i++)
-                    // {
-                    //     if (!IsMoving() && !IsInQuest())
-                    //     {
-                    //         console.log("随机点屏幕，随机移动");
-                    //         RandomPress([337, 157, 508, 314]);
-                    //         instance_mode = "dailyMission";
-                    //         break;
-                    //     }
-                    //     Sleep();
-                    // }
                 }
 
             }
@@ -1060,7 +1042,6 @@ const InstanceExceptionCheck = () =>
                     clickDailyMissionAwardsTimes = 0;
                 }
             }
-
         }
     }
 };

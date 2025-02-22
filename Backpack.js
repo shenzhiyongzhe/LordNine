@@ -64,7 +64,6 @@ const BackpackItemDetailColorList = {
 };
 
 const emptyGridImgList = LoadImgList("backpack/emptyGrid");
-// const isEquipedImgList = LoadImgList("backpack/isEquiped");
 
 
 const DetailOnColorList = [
@@ -76,8 +75,7 @@ const SingleStrengthenColorList = [
 ];
 
 // ********************  check ----------------------
-const IsEquiped = (region, shot) => { shot = shot || captureScreen(); return FindMultiColors(EquipColorList, region, shot); };
-// const IsEquiped = (region, shot) => { shot = shot || captureScreen(); return FindImgInList(isEquipedImgList, region, shot); };
+const IsEquipped = (region, shot) => { shot = shot || captureScreen(); return FindMultiColors(EquipColorList, region, shot); };
 
 // const IsEmpty = (region, shot) => { shot = shot || captureScreen(); return FindMultiColors(EmptyGridColorList, region, shot); };
 const IsEmpty = (region, shot) => { shot = shot || captureScreen(); return FindImgInList(emptyGridImgList, region, shot); };
@@ -280,7 +278,7 @@ const OpenRune = () =>
         }
         if (!FindCheckMark([22, 663, 38, 41]))
         {
-            RandomPress([67, 674, 105, 16]) //skip anination
+            RandomPress([67, 674, 105, 16]) //skip animation
         }
         for (let i = 0; i < 30; i++)
         {
@@ -766,7 +764,7 @@ const getItemColor = (region, shot) =>
 
 const BuyCloak = () =>
 {
-    console.log("fn:购买披风");
+    console.log("购买披风");
 
     const config = ReadConfig();
     if (config.game.diamond < 100)
@@ -1000,40 +998,51 @@ const WearEquipment = () =>
             [420, 515, 34, 44],
             [486, 514, 33, 47],
             [552, 512, 33, 45],
-        ];
 
-        const colors = [];
-        const lvList = [];
+            [696, 432, 33, 45],
+            [764, 432, 31, 43],
+            [828, 431, 34, 43],
+            [698, 515, 30, 43],
+            [764, 516, 31, 44]
+        ];
+        const equipments = {
+            helmet: null,
+            tops: null,
+            underClothes: null,
+            cloak: null,
+            gloves: null,
+            shoes: null,
+
+            earring: null,
+            necklace: null,
+            bracelet: null,
+            ring: null,
+            belt: null,
+        }
+        const keys = Object.keys(equipments)
         if (HasPopupClose([873, 105, 41, 47]))
         {
             RandomPress([881, 116, 20, 21]);
         }
-        for (let i = 0; i < equippedPosition.length; i++)
+
+        for (let i = 0; i < keys.length; i++)
         {
-            if (i == 3)
+            if (["cloak", "earring", "necklace", "bracelet", "ring", "belt"].includes(keys[i]))
             {
                 RandomPress([880, 114, 26, 25])
             }
             RandomPress(equippedPosition[i]);
             let shot = captureScreen();
-            colors.push(getItemColor([623, 170, 120, 61], shot));
-            lvList.push(getStrengtheningLv([616, 105, 50, 47], shot));
+            equipments[keys[i]] = getItemColor([623, 170, 120, 61], shot)
         }
-
-        if (colors.length != 6)
+        if (HasPopupClose([873, 105, 41, 47]))
         {
-            return false;
+            RandomPress([881, 116, 20, 21]);
         }
-        const config = ReadConfig();
-        const equipments = {};
-        equipments.helmet = [colors[0], lvList[0]];
-        equipments.guard = [colors[1], lvList[1]];
-        equipments.pants = [colors[2], lvList[2]];
-        equipments.cloak = [colors[3], lvList[3]]
-        equipments.gloves = [colors[4], lvList[4]];
-        equipments.boots = [colors[5], lvList[5]];
+        const config = ReadConfig()
         config.equipments = equipments;
-        RewriteConfig(config);
+        RewriteConfig(config)
+
     };
     let hasWornEquipment = false;
     const IdentifyEquipment = () =>
@@ -1064,13 +1073,12 @@ const WearEquipment = () =>
             Sleep();
         }
     };
-    out: for (let i = 0; i < 6; i++)
+    out: for (let i = 0; i < 4; i++)
     {
         for (let j = 0; j < 4; j++)
         {
-            if (IsEquiped([922 + j * 62, 148 + i * 62, 42, 40]))
+            if (IsEquipped([922 + j * 62, 148 + i * 62, 42, 40]))
             {
-                console.log("已穿戴，跳过...");
                 continue;
             }
             if (!HasMenu())
@@ -1149,10 +1157,8 @@ const WearEquipment = () =>
     }
     console.log("穿戴完成");
 
-    if (!hasWornEquipment)
-    {
-        GetTheEquippedInfo();
-    }
+    GetTheEquippedInfo();
+
 
     RecycleImgList(magicWandImgList);
     RecycleImgList(identifyTapScreenImgList);
@@ -1334,6 +1340,7 @@ const CheckSkillAutoRelease = () =>
     }
     console.log("检查完毕");
 };
+
 const StrengthenEquipment = () =>
 {
     console.log("开始强化装备");
@@ -1360,10 +1367,11 @@ const StrengthenEquipment = () =>
     SingleStrengthen();
     // first to strengthen weapon
 
-    //-----------------------------  strengthen armor and ornement---------------------------------
+    //-----------------------------  strengthen armor and ornament---------------------------------
+
     const LoopStrengthen = (type) =>
     {
-        let isEquiped = false;
+        let isEquipped = false;
         let hadStrengthened = false;
         let strengthenBtnRecPos = [387, 566, 213, 70]
         let strengthenBtnClickPos = [422, 581, 154, 36]
@@ -1386,8 +1394,8 @@ const StrengthenEquipment = () =>
             for (let j = 0; j < 4; j++)
             {
                 RandomPress([863 + j * 58, 94 + i * 58, 27, 30]);
-                isEquiped = IsEquiped([284, 207, 33, 34]);
-                if (isEquiped)
+                isEquipped = IsEquipped([284, 207, 33, 34]);
+                if (isEquipped)
                 {
                     for (let k = 0; k < 5; k++)
                     {
@@ -1429,11 +1437,7 @@ const StrengthenEquipment = () =>
     CloseBackpack();
     ClearPage();
 };
-const DropSomeItem = () =>
-{
-    console.log("丢弃一些物品");
 
-};
 /**
  * 清理背包
  * @param {*} type "total" or “partial"
@@ -1854,3 +1858,4 @@ module.exports = {
     UseHolyGrail, WearBestSuit,
     AutoPotion, UnAutoPotion, BuyPotion, ExpandBackpackCapacity
 };
+

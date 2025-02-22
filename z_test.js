@@ -106,101 +106,57 @@ const getOrderList = () =>
 // console.log(`${equipmentName}-${englishName}-${equipmentType}-${identified}-${soldPrice}`);
 // console.log(new Date("2025-02-11T03:32:32.000Z"));
 
-// const shopList = {
-//     "helmet": [
-//         { name: "賽勒畢斯頭盔", englishName: "SaiLeBiSiTouKui", identified: false, },
-//         { name: "賽拉特帽子", englishName: "SaiLaTeMaoZi", identified: false, },
-//         { name: "灰光破曉帽子", englishName: "HuiGuangPoXiaoMaoZi", identified: false, },
-//         { name: "賽拉特頭巾", englishName: "SaiLaTeTouJin", identified: false, },
-//         { name: "賽勒畢斯頭巾", englishName: "SaiLeBiSiTouJin", identified: false, },
-//     ],
+const shopList = {
 
-//     "tops": [
-//         { name: "賽拉特背心", englishName: "SaiLaTeBeiXin", identified: false, },
-//         { name: "賽拉特長袍", englishName: "SaiLaTeChangPao", identified: false, },
-//         { name: "灰光破曉長袍", englishName: "HuiGuangPoXiaoChangPao", identified: false, },
-//         { name: "灰光破曉背心", englishName: "HuiGuangPoXiaoBeiXin", identified: false, },
-
-//         { name: "賽勒畢斯背心", englishName: "SaiLeBiSiBeiXin", identified: false, },
-//         { name: "灰光破曉盔甲", englishName: "HuiGuangPoXiaoKuiJia", identified: false, },
-//         { name: "賽勒畢斯盔甲", englishName: "SaiLeBiSiKuiJia", identified: false, },
-//         { name: "賽拉特盔甲", englishName: "SaiLaTeKuiJia", identified: false, },
-
-//     ],
-
-//     "underClothes": [
-//         { name: "賽拉特皮褲", englishName: "SaiLaTePiKu", identified: false, },
-//         { name: "灰光破曉布褲子", englishName: "HuiGuangPoXiaoBuKuZi", identified: false, },
-//         { name: "賽勒畢斯布褲子", englishName: "SaiLeBiSiBuKuZi", identified: false, },
-
-//         { name: "賽拉特布褲子", englishName: "SaiLaTeBuKuZi", identified: false, },
-//         { name: "灰光破曉皮褲", englishName: "HuiGuangPoXiaoPiKu", identified: false, },
-//         { name: "賽勒畢斯皮褲", englishName: "SaiLeBiSiPiKu", identified: false, },
-//     ],
-
-//     "gloves": [
-//         { name: "灰光破曉護手", englishName: "HuiGuangPoXiaoHuShou", identified: false, },
-//         { name: "灰光破曉手套", englishName: "HuiGuangPoXiaoShouTao", identified: false, },
-//         { name: "黑色荊棘護手", englishName: "HeiSeJingJiHuShou", identified: false, },
-
-//         { name: "賽勒畢斯護手", englishName: "SaiLeBiSiHuShou", identified: false, },
-//         { name: "灰光破曉手甲", englishName: "HuiGuangPoXiaoShouJia", identified: false, },
-//         { name: "賽勒畢斯手甲", englishName: "SaiLeBiSiShouJia", identified: false, },
-//     ],
-
-//     "shoes": [
-//         { name: "賽拉特長靴", englishName: "SaiLaTeChangXue", identified: false, },
-//         { name: "黑色荊棘短靴", englishName: "HeiSeJingJiDuanXue", identified: false, },
-//         { name: "灰光破曉短靴", englishName: "HuiGuangPoXiaoDuanXue", identified: false, },
-
-//         { name: "賽勒畢斯短靴", englishName: "SaiLeBiSiDuanXue", identified: false, },
-//         { name: "賽拉特短靴", englishName: "SaiLaTeDuanXue", identified: false, },
-//     ],
-// }
-
-// let imgList = null;
-// for (let key in shopList)
-// {
-//     for (let item of shopList[key])
-//     {
-//         imgList = LoadImgList(`page/trade/goods/${key}/${item.englishName}_${item.identified ? 1 : 0}`)
-//         RandomPress([279, 668, 174, 23])
-//         setText(item.name)
-//         Sleep()
-//         RandomPress([260, 518, 107, 17])
-//         if (FindImgInList(imgList, [300, 191, 92, 223]))
-//         {
-//             console.log("发现该物品: " + item.name);
-//             RandomPress([493, 223, 388, 49])
-//             if (FindImgInList(imgList, [300, 191, 92, 223]))
-//             {
-//                 console.log("价格为：" + FindNumber("goodsPrice", [715, 197, 72, 73]));
-//             }
-//         }
-//         RandomPress([279, 668, 174, 23])
-//     }
-// }
-// imgList = LoadImgList(`page/trade/goods/helmet/SaiLaTeMaoZi_0`)
-// if (FindImgInList(imgList, [300, 191, 92, 223]))
-// {
-//     console.log("发现交易所有该物品: ");
-// }
-const generateRandomArray = (max) =>
-{
-    let array = Array.from({ length: max }, (_, index) => index)
-    const randomArr = []
-    for (let i = 0; i < max; i++)
-    {
-        if (array.length == 0)
-        {
-            break;
-        }
-        let index = Math.floor(random(0, array.length - 1))
-        randomArr.push(array[index])
-        array.splice(index, 1)
-    }
-    return randomArr;
+    "belt": [
+        { name: "深邃虛空腰帶", englishName: "ShenSuiXuKongYaoDai", identified: true, },
+        { name: "束縛者腰帶", englishName: "ShuFuZheYaoDai", identified: true, },
+    ],
 }
+const test = () =>
+{
+    let imgList = null;
+    for (let key in shopList)
+    {
+        for (let item of shopList[key])
+        {
+            imgList = LoadImgList(`page/trade/goods/${key}/${item.englishName}_${item.identified ? 1 : 0}`)
+            RandomPress([279, 668, 174, 23])
+            console.log("输入：" + item.name);
+            setText(item.name)
+            Sleep()
+            RandomPress([260, 518, 107, 17], 2)
+            if (FindImgInList(imgList, [262, 156, 178, 166]))
+            {
+                RandomPress([493, 223, 388, 49], 2)
+                if (FindImgInList(imgList, [262, 156, 178, 166]))
+                {
+                    console.log("价格为：" + FindNumber("goodsPrice", [715, 197, 72, 73]));
+                }
+                else
+                {
+                    console.log("未发现具体上架物品");
+                }
+            }
+            else
+            {
+                console.log("未发现");
+            }
+            RandomPress([279, 668, 174, 23])
+        }
+    }
+}
+const singleTest = () =>
+{
+    let imgList = LoadImgList(`page/trade/goods/necklace/DuoLuoXinNianXiangLian_1`)
+    if (FindImgInList(imgList, [252, 154, 209, 258]))
+    {
+        console.log("发现交易所有该物品: ");
+    }
+}
+// test()
 
-console.log(generateRandomArray(3));
+singleTest()
+
+
 
