@@ -116,6 +116,14 @@ function Init()
             belt: null,
         }
     }
+    if (config.daily.dailyTrading == undefined)
+    {
+        config.daily.dailyTrading = false;
+    }
+    if (config.daily.dailyTradingTimes == undefined)
+    {
+        config.daily.dailyTradingTimes = random(1, 3)
+    }
     RewriteConfig(config)
 
 }

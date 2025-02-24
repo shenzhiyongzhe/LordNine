@@ -154,7 +154,6 @@ const dailyMissionIconImgList = LoadImgList("icon/dailyMissionIcon");
 const mapPlusIconImgList = LoadImgList("icon/mapPlus");
 const haltModeBtnImgList = LoadImgList("icon/haltModeBtn");
 const lockImgList = LoadImgList("icon/lock");
-
 const CloseMenu = (shot) =>
 {
 
@@ -278,6 +277,7 @@ const ClearPage = () =>
         }
         return true;
     }
+
     ClosePopupWindows(shot);
     CloseMenu(shot);
     PageBack(shot);
@@ -2156,7 +2156,7 @@ const deleteDeviceData = () =>
     const config = ReadConfig()
     try
     {
-        const res = http_get(`devices/${config.accountInfo.instance}/off`)
+        const res = http_post(`devices/${config.accountInfo.instance}/off`, {})
         if (res.code == 0)
         {
             console.log("发生封号数据成功");
@@ -2172,6 +2172,7 @@ const deleteDeviceData = () =>
         return false;
     }
 }
+
 const getOriginDate = () =>
 {
     const date = new Date()

@@ -495,8 +495,7 @@ const DeathFlow = (message) =>
 
 const IsAttackBoss = () =>
 {
-    const shot = captureScreen()
-    if (FindMultiColors(BossTitleColorList, [893, 153, 228, 23], shot) || FindImgInList(bossFlagIcon, [462, 38, 63, 72], shot))
+    if (FindImgInList(bossFlagIcon, [462, 38, 63, 72]))
     {
         return true;
     }

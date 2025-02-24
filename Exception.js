@@ -236,6 +236,7 @@ const DisconnectionFlow = (shot) =>
             {
                 console.log("vpn is time out");
                 alert("time out", "需要更换ip");
+                StopScript()
             }
             threads.start(() => CountDownFloaty(delayTime))
             Sleep(delayTime);
@@ -256,6 +257,7 @@ const DisconnectionFlow = (shot) =>
             {
                 console.log("重连次数超过100次，退出游戏");
                 alert("Disconnection", "重连次数超过10次，退出游戏");
+                StopScript()
             }
 
         }
@@ -433,6 +435,8 @@ const ResetConfig = () =>
             {
                 console.log("鉴定成功：重置交易次数");
                 config.game.tradingTimes = 0;
+                config.daily.dailyTrading = false;
+                config.daily.dailyTradingTimes = random(1, 3);
             }
             if (GetRandom() > 62)
             {

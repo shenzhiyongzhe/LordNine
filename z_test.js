@@ -1,4 +1,4 @@
-const { SwipeSlowly, StopScript, LoadImgList, FindImgInList, FindNumber, HasPopupClose, RandomPress, FindBlueBtn, baseUrl, ReadConfig, PressToAuto, GetRandom, updateDeviceData, Sleep } = require("./utils.js")
+const { SwipeSlowly, StopScript, LoadImgList, FindImgInList, FindNumber, HasPopupClose, RandomPress, FindBlueBtn, baseUrl, ReadConfig, PressToAuto, GetRandom, updateDeviceData, Sleep, FindGoldBtn, FindRedBtn, IsLocked } = require("./utils.js")
 
 const regions = [
     [394, 229, 97, 62],
@@ -156,7 +156,8 @@ const singleTest = () =>
 }
 // test()
 
-singleTest()
-
+// singleTest()
+// console.log(FindNumber("lv", [321, 223, 43, 52]));
+console.log(HasPopupClose([1223, 72, 38, 43]));
 
 

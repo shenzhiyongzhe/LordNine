@@ -25,6 +25,7 @@ const {
     RecognizePage,
     generateRandomArray,
     http_post,
+    WaitUntilMenu,
 } = require("./utils.js");
 
 const { IsEmpty, WearEquipments, StrengthenEquipment, OpenAllBox, UseHolyGrail, DecomposeEquipment, WearBestSuit, CheckSkillAutoRelease, BuyCloak, UnAutoPotion, getItemColor, AutoPotion } = require("./Backpack.js");
@@ -1614,6 +1615,7 @@ const GetSettlement = () =>
     if (isUpdateSuccess)
     {
         config.game.tradingTimes++;
+        config.daily.dailyTrading = true;
         console.log("发送数据成功。交易次数增加一次");
     }
 
@@ -2002,12 +2004,13 @@ const BuyEpicEquipment = (equipmentType) =>
         {
             let currentPrice = FindNumber("goodsPrice", [400, hasImg.y + 25, 100, 30])
             console.log("当前紫装价格为：" + currentPrice);
-            let maxBudget = config.game.budget;
-            if (!maxBudget)
+            let epicEquipmentBudget = config.game.epicEquipmentBudget;
+            if (!epicEquipmentBudget)
             {
-                maxBudget = 150;
+                epicEquipmentBudget = 150;
             }
-            if (currentPrice <= maxBudget && currentPrice > 30)
+            console.log(`紫色装备限价为：${epicEquipmentBudget}钻`);
+            if (currentPrice <= epicEquipmentBudget && currentPrice > 30)
             {
                 console.log("可以购买此紫装");
                 RandomPress([425, hasImg.y, 465, 50])
@@ -2753,9 +2756,13 @@ const BuyBlueOrnament = (equipmentType) =>
         {
             let currentPrice = FindNumber("goodsPrice", [400, hasImg.y + 25, 100, 30])
             console.log("当前饰品价格为：" + currentPrice);
-            console.log("蓝色饰品限价为：80钻");
-            let maxBudget = 80
-            if (currentPrice <= maxBudget && currentPrice > 10)
+            let ornamentBudget = config.game.ornamentBudget;
+            if (!ornamentBudget)
+            {
+                ornamentBudget = 80;
+            }
+            console.log(`蓝色饰品限价为：${ornamentBudget}钻`);
+            if (currentPrice <= ornamentBudget && currentPrice > 10)
             {
                 console.log("可以购买此饰品");
                 RandomPress([425, hasImg.y, 465, 50])
@@ -3078,7 +3085,246 @@ const CheckNotification = () =>
     }
 
 }
+const GoTrialOfTower = () =>
+{
+    console.log("挑战考验之塔");
+    if (!EnterMenuItemPage("trialOfTower"))
+    {
+        console.log("进入考验之塔失败，退出");
+        return false;
+    }
+    if (GetRandom() > 96)
+    {
+        console.log("查看全部奖励并退出");
+        RandomPress([48, 664, 121, 29])
+        const swipeTimes = random(1, 3)
+        for (let i = 0; i < swipeTimes; i++)
+        {
+            SwipeSlowly([580, 280, 10, 10], [580, 520, 10, 10], 2)
+        }
+        RandomPress([922, 133, 32, 31])
+        PageBack()
+        return;
+    }
+    if (FindBlueBtn([950, 639, 327, 71]))
+    {
+        console.log("点击入场");
+        RandomPress([982, 657, 267, 38])
+        console.log("等待进入试炼场");
+        if (!WaitUntilMenu())
+        {
+            return;
+        }
+        console.log("进入试炼场成功");
+    }
+    const leaveImgList = LoadImgList("page/trialOfTower/leave")
+    const nextLevelImgList = LoadImgList("page/trialOfTower/nextLevel")
+    const bossFlagIcon = LoadImgList("icon/bossFlagIcon")
+    let shot = captureScreen()
+    let lastTimeOfUsingSkill = 1726208812345
+    for (let i = 0; i < 450; i++)
+    {
+        shot = captureScreen()
+        if (FindImgInList(nextLevelImgList, [635, 281, 155, 68], shot))
+        {
+            console.log("进入下一层");
+            if (GetRandom() > 10)
+            {
+                RandomPress([659, 301, 113, 29])
+            }
+            else
+            {
+                console.log("随机到离开");
+                if (GetRandom() > 80)
+                {
+                    RandomPress([516, 301, 112, 25])
+                    console.log("点击离开");
+                }
+                else
+                {
+                    console.log("等待自动离开");
+                    Sleep(33)
+                }
+                break;
+            }
+        }
+        else if (FindImgInList(leaveImgList, [512, 284, 107, 62], shot))
+        {
+            console.log("挑战失败");
+            if (GetRandom() > 70)
+            {
+                console.log("重新挑战");
+                RandomPress([659, 301, 113, 29])
+            }
+            else if (GetRandom() > 40)
+            {
+                console.log("点击离开");
+                RandomPress([516, 301, 112, 25])
+            }
+            else
+            {
+                console.log("等待自动离开");
+                Sleep(33)
+            }
+            break;
+        }
+        if (FindImgInList(bossFlagIcon, [457, 38, 77, 75], shot))
+        {
+            console.log("正在攻击长剑守护者，点击雷达查看是否有红色蜗牛");
+            Sleep(5)
+            if ((new Date().getTime() - lastTimeOfUsingSkill) / 3600000 > 40)
+            {
+                console.log("点击无敌技能");
+                RandomPress([1021, 507, 28, 30])
+                lastTimeOfUsingSkill = new Date().getTime()
+            }
+        }
+        Sleep(1)
+    }
+    RecycleImgList(leaveImgList)
+    RecycleImgList(nextLevelImgList)
+    RecycleImgList(bossFlagIcon)
+    console.log("考验之塔结束");
+}
+const ChangeWeaponFeature = () =>
+{
+    console.log("修改武器特性");
+    const resetNumber = random(0, 3)
+    console.log("随机重置特性个数为：" + resetNumber);
+    if (resetNumber == 0)
+    {
+        return;
+    }
+    if (!EnterMenuItemPage("weaponFeature"))
+    {
+        return false;
+    }
 
+
+    const skillPos = [
+        [200, 301, 144, 50],
+        [195, 391, 153, 47],
+        [192, 476, 153, 52],
+        [193, 563, 159, 46]
+    ]
+    const pointsList = [
+        //第一个技能
+        [
+            [
+                [524, 283, 27, 23],
+                [420, 385, 26, 26],
+                [421, 492, 22, 22]
+            ],
+            [
+                [629, 282, 25, 25],
+                [629, 386, 27, 24],
+                [628, 490, 26, 24]
+            ],
+            [
+                [734, 283, 24, 24],
+                [839, 384, 24, 29],
+                [838, 490, 25, 26]
+            ]
+        ],
+        //第二个技能
+        [
+            [
+                [526, 283, 22, 23],
+                [418, 386, 29, 25],
+                [421, 492, 24, 22]
+            ],
+            [
+                [525, 281, 24, 25],
+                [522, 386, 29, 25],
+                [525, 492, 25, 20]
+            ],
+            [
+                [734, 284, 25, 25],
+                [840, 387, 23, 25],
+                [780, 439, 221, 82]
+            ]
+        ],
+        //第三个技能
+        [
+            [
+                [526, 283, 21, 22],
+                [522, 386, 27, 23],
+                [526, 492, 21, 21]
+            ],
+            [
+                [735, 283, 25, 22],
+                [734, 386, 25, 24],
+                [732, 492, 27, 21]
+            ],
+        ],
+        //第四个技能。
+        [
+            [
+                [524, 282, 24, 25],
+                [418, 384, 28, 27],
+                [420, 491, 25, 23]
+            ],
+            [
+                [629, 283, 25, 25],
+                [629, 386, 26, 25],
+                [629, 491, 25, 23]
+            ],
+            [
+                [734, 285, 23, 20],
+                [839, 386, 25, 25],
+                [839, 492, 24, 22],
+            ],
+        ]
+    ]
+
+    const openWeaponSkill = (skill) =>
+    {
+        if (FindBlueBtn([534, 641, 209, 69]))
+        {
+            RandomPress([563, 657, 152, 35])
+        }
+        if (FindBlueBtn([654, 442, 203, 68]))
+        {
+            RandomPress([679, 458, 157, 35])
+        }
+        RandomPress([628, 177, 26, 25])
+        if (FindBlueBtn([994, 635, 208, 70]))
+        {
+            RandomPress([1021, 651, 158, 38], 2)
+        }
+
+        const randomFeature = random(0, 2)
+        console.log("随机的分支为：" + randomFeature);
+        for (let i = 0; i < skill[randomFeature].length; i++)
+        {
+            RandomPress(skill[randomFeature][i])
+            if (FindBlueBtn([994, 635, 208, 70]))
+            {
+                RandomPress([1021, 651, 158, 38], 2)
+            }
+        }
+    }
+
+    for (let i = 0; i < resetNumber; i++)
+    {
+        RandomPress(skillPos[i])
+        openWeaponSkill(pointsList[i])
+    }
+    PageBack()
+    for (let i = 0; i < 10; i++)
+    {
+        if (HasPopupClose([818, 206, 50, 55]))
+        {
+            RandomPress([836, 220, 23, 23])
+        }
+        if (HasMenu())
+        {
+            break;
+        }
+        Sleep()
+    }
+    console.log("修改武器特性结束");
+}
 const FireRandomEvent = () =>
 {
     console.log("触发随机事件")
@@ -3126,6 +3372,7 @@ const FireRandomEvent = () =>
 
         { event: CheckNotification, probability: 12 },
         { event: needBuyEquipment, probability: 2 },
+        { event: ChangeWeaponFeature, probability: 2 },
     ]
 
     const eventNumber = random(0, 8);
@@ -3235,16 +3482,13 @@ const ComprehensiveImprovement = () =>
 
 const ComprehensiveImprovement_Instance = () =>
 {
-    const config = ReadConfig();
+    let config = ReadConfig();
 
-    if (config.game.tradingTimes >= 1)
+    if (config.daily.dailyTrading && config.game.tradingTimes >= config.daily.dailyTradingTimes)
     {
-        if (GetRandom() < 50)
-        {
-            console.log("鉴定失败，暂不交易");
-            Sleep(61)
-            return true;
-        }
+        console.log("今日已达交易次数，暂不交易");
+        Sleep(61)
+        return true;
     }
 
     if (IsHaltMode())
@@ -3291,7 +3535,6 @@ const ComprehensiveImprovement_Instance = () =>
 
     return true;
 };
-
 
 module.exports = {
     ChangeAbility, GetEmail, GetAchievement, GetMonsterKnowledgeAward, LoginProps, DailyQuest, GetCommonAward,

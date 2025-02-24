@@ -526,7 +526,26 @@ const EnterMap = (mapName, autoTransform) =>
     if (!mapName)
     {
         console.log("随机生成一个地图位置");
-        mapName = [random(0, 2), random(1, 3), random(0, 2)]
+        const availableMap = [
+            [0, 1, 0],
+            [0, 1, 1],
+            [0, 2, 0],
+            [0, 2, 1],
+            [0, 3, 0],
+            [0, 3, 1],
+            [0, 3, 2],
+            [1, 1, 0],
+            [1, 1, 1],
+            [1, 1, 2],
+            [1, 2, 0],
+            [1, 2, 1],
+            [1, 2, 2],
+            [2, 1, 0],
+            [2, 1, 1],
+            [2, 1, 2],
+        ]
+
+        mapName = [random(0, availableMap.length - 1)]
     }
     console.log("进入地图：" + mapName);
 
@@ -537,6 +556,13 @@ const EnterMap = (mapName, autoTransform) =>
     RandomPress(FirstLevel[firstLevel]);
     RandomPress(SecondLevel[secondLevel]);
     RandomPress(ThirdLevel[thirdLevel]);
+
+    if (FindBlueBtn([537, 441, 207, 68]))
+    {
+        console.log("未解锁的地图");
+        RandomPress([565, 459, 156, 33])
+        return false;
+    }
 
     if (randomIndex > 30 || autoTransform)
     {
