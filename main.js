@@ -130,6 +130,7 @@ function Init()
 
 const GetCaptureScreenPermission = () =>
 {
+    let isSuccess = false;
     threads.start(function ()
     {
         auto();
@@ -137,10 +138,11 @@ const GetCaptureScreenPermission = () =>
     });
     threads.start(function ()
     {
-        let hasOpen = textMatches(/(.*시작하기.*|.*立即开始.*)/).findOne(800000);
+        let hasOpen = textMatches(/(.*시작하기.*|.*立即开始.*)/).findOne(80000);
         if (hasOpen)
         {
             hasOpen.click();
+            isSuccess = true;
         }
         else
         {
@@ -148,6 +150,7 @@ const GetCaptureScreenPermission = () =>
             StopScript()
         }
     });
+    return isSuccess;
 };
 
 
@@ -194,6 +197,21 @@ const uiFloaty = () =>
         floatyWindow.delayTime.attr("h", 60);
         floatyWindow.start.attr("h", 0);
         floatyWindow.delayTime.setText(`${count}s`);
+        try
+        {
+            const getSuccess = GetCaptureScreenPermission();
+            if (!getSuccess)
+            {
+                GetCaptureScreenPermission()
+            }
+
+        }
+        catch (error)
+        {
+            alert("异常", "获取截图权限失败。")
+            StopScript()
+        }
+
         console.log(`游戏延迟${totalDelayTime}s,等待启动中...`);
         const delayInterval = setInterval(() =>
         {
@@ -208,15 +226,6 @@ const uiFloaty = () =>
                 floatyWindow.close()
             }
         }, 1000);
-        try
-        {
-            GetCaptureScreenPermission();
-
-        }
-        catch (error)
-        {
-            alert("异常", "获取截图权限失败。")
-        }
 
         setTimeout(() =>
         {

@@ -858,7 +858,72 @@ const BuyCloak = () =>
     PageBack()
     return haveBought;
 };
+const GetTheEquippedInfo = () =>
+{
+    console.log("获取穿戴的装备颜色与强化等级");
+    if (!OpenBackpack())
+    {
+        console.log("打开背包失败，退出");
+        return false;
+    }
+    const config = ReadConfig()
+    if (!config.unlockTrade)
+    {
+        console.log("暂未解锁交易所，不检查装备穿戴");
+        return false;
+    }
+    const equippedPosition = [
+        [421, 430, 30, 46],
+        [488, 431, 31, 44],
+        [555, 432, 32, 45],
+        [420, 515, 34, 44],
+        [486, 514, 33, 47],
+        [552, 512, 33, 45],
 
+        [696, 432, 33, 45],
+        [764, 432, 31, 43],
+        [828, 431, 34, 43],
+        [698, 515, 30, 43],
+        [764, 516, 31, 44]
+    ];
+    const equipments = {
+        helmet: null,
+        tops: null,
+        underClothes: null,
+        cloak: null,
+        gloves: null,
+        shoes: null,
+
+        earring: null,
+        necklace: null,
+        bracelet: null,
+        ring: null,
+        belt: null,
+    }
+    const keys = Object.keys(equipments)
+    if (HasPopupClose([873, 105, 41, 47]))
+    {
+        RandomPress([881, 116, 20, 21]);
+    }
+
+    for (let i = 0; i < keys.length; i++)
+    {
+        if (["cloak", "earring", "necklace", "bracelet", "ring", "belt"].includes(keys[i]))
+        {
+            RandomPress([880, 114, 26, 25])
+        }
+        RandomPress(equippedPosition[i]);
+        let shot = captureScreen();
+        equipments[keys[i]] = getItemColor([623, 170, 120, 61], shot)
+    }
+    if (HasPopupClose([873, 105, 41, 47]))
+    {
+        RandomPress([881, 116, 20, 21]);
+    }
+    config.equipments = equipments;
+    RewriteConfig(config)
+
+};
 const WearEquipment = () =>
 {
     console.log("开始穿装备");
@@ -982,68 +1047,7 @@ const WearEquipment = () =>
         }
     };
 
-    const GetTheEquippedInfo = () =>
-    {
-        console.log("获取穿戴的装备颜色与强化等级");
-        if (!OpenBackpack())
-        {
-            console.log("打开背包失败，退出");
-            return false;
-        }
 
-        const equippedPosition = [
-            [421, 430, 30, 46],
-            [488, 431, 31, 44],
-            [555, 432, 32, 45],
-            [420, 515, 34, 44],
-            [486, 514, 33, 47],
-            [552, 512, 33, 45],
-
-            [696, 432, 33, 45],
-            [764, 432, 31, 43],
-            [828, 431, 34, 43],
-            [698, 515, 30, 43],
-            [764, 516, 31, 44]
-        ];
-        const equipments = {
-            helmet: null,
-            tops: null,
-            underClothes: null,
-            cloak: null,
-            gloves: null,
-            shoes: null,
-
-            earring: null,
-            necklace: null,
-            bracelet: null,
-            ring: null,
-            belt: null,
-        }
-        const keys = Object.keys(equipments)
-        if (HasPopupClose([873, 105, 41, 47]))
-        {
-            RandomPress([881, 116, 20, 21]);
-        }
-
-        for (let i = 0; i < keys.length; i++)
-        {
-            if (["cloak", "earring", "necklace", "bracelet", "ring", "belt"].includes(keys[i]))
-            {
-                RandomPress([880, 114, 26, 25])
-            }
-            RandomPress(equippedPosition[i]);
-            let shot = captureScreen();
-            equipments[keys[i]] = getItemColor([623, 170, 120, 61], shot)
-        }
-        if (HasPopupClose([873, 105, 41, 47]))
-        {
-            RandomPress([881, 116, 20, 21]);
-        }
-        const config = ReadConfig()
-        config.equipments = equipments;
-        RewriteConfig(config)
-
-    };
     let hasWornEquipment = false;
     const IdentifyEquipment = () =>
     {
@@ -1157,7 +1161,6 @@ const WearEquipment = () =>
     }
     console.log("穿戴完成");
 
-    GetTheEquippedInfo();
 
 
     RecycleImgList(magicWandImgList);
@@ -1188,6 +1191,7 @@ const WearEquipments = () =>
             haveWorn = true;
         }
     }
+    GetTheEquippedInfo();
     console.log("//连续穿戴装备结束//");
     return haveWorn;
 };
@@ -1468,17 +1472,7 @@ const DecomposeEquipment = (type) =>
         RecycleImgList(backpackFull_gridMax)
         RandomPress([1043, 665, 23, 26]);
     }
-    if (!WaitUntilEnterBackpackMenu())
-    {
-        ClearPage();
-        hasOpen = OpenBackpack();
-        RandomPress([1043, 665, 23, 26]);
-        if (!hasOpen)
-        {
-            console.log("进入分解页面失败，退出");
-            return false;
-        }
-    }
+
     if (IsEmpty([845, 80, 55, 55]))
     {
         console.log("背包是空的，退出");
@@ -1545,6 +1539,7 @@ const DecomposeEquipment = (type) =>
     const config = ReadConfig()
     if (needDecompose)
     {
+        console.log("需要分解");
         if (type == "total")
         {
             if (!config.game.decomposeBlueSuit)
@@ -1563,6 +1558,8 @@ const DecomposeEquipment = (type) =>
                 config.game.decomposeBlueSuit = false;
             }
         }
+        console.log("修改第一次分解配置");
+        firstDecomposeEquipment = true;
     }
 
     const selectedMarkImgList = LoadImgList("backpack/selectedMark");
@@ -1597,29 +1594,40 @@ const DecomposeEquipment = (type) =>
     {
         RewriteConfig(config)
     }
-    for (let i = 0; i < 10; i++)
+
+    if (FindBlueBtn([379, 562, 230, 79]))
     {
-        if (FindBlueBtn([379, 562, 230, 79]))
+        RandomPress([415, 582, 137, 36], 3);
+        for (let i = 0; i < 5; i++)
         {
-            RandomPress([415, 582, 137, 36], 3);
-            for (let i = 0; i < 5; i++)
+            PressBlank();
+            if (HasBackpackMenuClose())
             {
-                PressBlank();
-                if (HasBackpackMenuClose())
-                {
-                    break;
-                }
-                Sleep();
+                break;
             }
-            console.log("分解装备结束");
-            break;
+            Sleep();
         }
-        else
-        {
-            SetDecomposeSetting("partial")
-        }
-        Sleep()
+        console.log("分解装备结束");
     }
+    else
+    {
+        SetDecomposeSetting("partial")
+    }
+    if (FindBlueBtn([379, 562, 230, 79]))
+    {
+        RandomPress([415, 582, 137, 36], 3);
+        for (let i = 0; i < 5; i++)
+        {
+            PressBlank();
+            if (HasBackpackMenuClose())
+            {
+                break;
+            }
+            Sleep();
+        }
+        console.log("分解装备结束");
+    }
+    Sleep()
 
     RecycleImgList(selectedMarkImgList);
     CloseBackpack();

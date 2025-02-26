@@ -877,7 +877,7 @@ const GetVerificationCode = () =>
 
     return result.body.json().pic_str;
 };
-const GetRandom = () => random(0, 100);
+const GetRandom = () => Math.floor(random(0, 100));
 const HasPageback = (shot) => { shot = shot || captureScreen(); return FindMultiColors(PagebackColorList, [1216, 9, 41, 43], shot); };
 
 const HasBackpack = () => FindMultiColors(BackpackColorList, [1143, 12, 40, 50]);
@@ -1103,7 +1103,7 @@ const PressToAuto = (area) =>
     if (GetRandom() > 70 || area)
     {
         GoToRandomPlace(area)
-        return;
+        return true;
     }
     else if (IsAuto_inactive())
     {
@@ -1111,6 +1111,7 @@ const PressToAuto = (area) =>
         console.log("点击auto位置，退出");
         return true;
     }
+    return false;
 };
 let moveObj = {
     clipCount: 0,
@@ -2260,6 +2261,22 @@ const generateRandomArray = (max) =>
     }
     return randomArr;
 }
+const shuffleArray = (array) =>
+{
+    const randomArr = []
+    const length = array.length;
+    for (let i = 0; i < length; i++)
+    {
+        if (array.length == 0)
+        {
+            break;
+        }
+        let index = Math.floor(random(0, array.length - 1))
+        let item = array.splice(index, 1)
+        randomArr.push(item[0])
+    }
+    return randomArr;
+}
 
 module.exports = {
     baseUrl,
@@ -2280,6 +2297,6 @@ module.exports = {
     PageBack, PressBlank, PullDownSkill, PressToAuto,
     RandomPress, ReadImg, ReturnHome, RestartGame, RecycleImgList, ReadConfig, RewriteConfig, ReadDealRecord, ReadAccountFile, ReadDailyDiamondRecord, ReadTradeRecord, RecognizePage,
     UpdateTradeRecord, updateDeviceData, deleteDeviceData,
-    Sleep, SwipeSlowly, StopScript, SetCountryAndBirth, SwipeUp, SwipeDown, SwipeLeft, SwipeRight, StopGame,
+    Sleep, SwipeSlowly, StopScript, SetCountryAndBirth, SwipeUp, SwipeDown, SwipeLeft, SwipeRight, StopGame, shuffleArray,
     WaitUntil, WaitUntilMenu, WaitUntilPageBack, WaitUntilFindColor,
 };

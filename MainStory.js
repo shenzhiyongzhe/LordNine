@@ -18,6 +18,8 @@ const {
     TapTip,
     WaitUntil, WaitUntilPageBack, WaitUntilMenu,
     PressToAuto,
+    GetRandom,
+    StopScript,
 } = require("./utils.js");
 
 const { NextColorList, TalkBubbleColorList, SpeedUpOffColorList, } = require("./Color/MainStoryColorList.js");
@@ -77,7 +79,7 @@ const HaveGrowthMissionIcon = (shot) =>
     return false;
 };
 
-const TapMainStory = () => RandomPress([905, 131, 224, 36], 3);
+const PressMainStoryPos = () => { RandomPress([905, 131, 224, 36], 3); console.log("点击主线位置"); }
 
 const MainStoryBranchImgList = {
     manufacturePage: LoadImgList("icon/beginner/growthMission/manufacturePage"),
@@ -154,14 +156,14 @@ const ClickMainStory = () =>
     if (HasSettingIcon() && !IsInQuest())
     {
         console.log("新手阶段，点击主线，等待10秒");
-        TapMainStory()
+        PressMainStoryPos()
         Sleep(random(5, 15))
         return true;
     }
     else if (!HasMenu() && HaveMainStoryIcon())
     {
         console.log("新手阶段，在新手村训练阶段。");
-        TapMainStory()
+        PressMainStoryPos()
         Sleep(random(10, 30))
     }
 
@@ -195,30 +197,9 @@ const ClickMainStory = () =>
                         console.log("在秘密实验室停止移动，回到主城继续主线");
                         ReturnHome();
                         isSameMainStoryTime = 0;
-
                         return true;
                     }
-                    if (PressToAuto())
-                    {
-                        isSameMainStoryTime = 0;
-                    }
-                }
-                else if (isSameMainStoryTime > 10)
-                {
-                    let isExceptionMainStory = false;
-                    for (let i = 0; i < 10; i++)
-                    {
-                        ClearPage()
-                        TapMainStory()
-                        if (!IsMoving())
-                        {
-                            console.log("点击主线，没有移动");
-                            isExceptionMainStory = true;
-                            break;
-                        }
-                        Sleep()
-                    }
-                    if (isExceptionMainStory)
+                    if (GetRandom() > 50)
                     {
                         console.log("主线异常", "同一主线任务点击次数过多。");
                         const lv = GetCharacterLv()
@@ -228,25 +209,30 @@ const ClickMainStory = () =>
                             specialConfig.gameMode = "instance"
                         }
                         TransformMainStory()
-                        TapMainStory()
+                        PressMainStoryPos()
                         for (let i = 0; i < 10; i++)
                         {
                             if (!IsMoving() && !IsInQuest())
                             {
                                 alert("主线异常", "同一主线任务点击次数过多。")
+                                StopScript()
                                 break;
                             }
+                            Sleep()
                         }
-
+                    }
+                    else
+                    {
+                        PressToAuto()
                         isSameMainStoryTime = 0;
                     }
-                }
 
+                }
             }
         }
         if ((new Date().getTime() - lastTransformationTime) / 60000 < 2)
         {
-            TapMainStory();
+            PressMainStoryPos();
         }
         else if (HasTransformIcon())
         {
@@ -254,21 +240,20 @@ const ClickMainStory = () =>
         }
         else
         {
-            TapMainStory();
+            PressMainStoryPos();
         }
-        console.log("点击主线,并等待随机时间");
     }
     else
     {
         ClearPage();
-        TapMainStory();
+        PressMainStoryPos();
         console.log("图片识别有问题，默认点击主线位置");
     }
 };
 const ClickGrowthMission = () =>
 {
     clickGrowthMissionTimes++;
-    if (clickGrowthMissionTimes > 20)
+    if (clickGrowthMissionTimes > 10)
     {
         console.log("点击成长任务次数过多，切换为主线");
         storyMode = "mainMission";
@@ -986,6 +971,7 @@ const MainStoryBranch = () =>
             console.log("识别错误:", "强化装备未找到相应页面");
             return false;
         }
+        WearEquipments()
         StrengthenEquipment();
         DecomposeEquipment()
     }

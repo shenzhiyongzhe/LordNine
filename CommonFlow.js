@@ -26,6 +26,7 @@ const {
     generateRandomArray,
     http_post,
     WaitUntilMenu,
+    shuffleArray,
 } = require("./utils.js");
 
 const { IsEmpty, WearEquipments, StrengthenEquipment, OpenAllBox, UseHolyGrail, DecomposeEquipment, WearBestSuit, CheckSkillAutoRelease, BuyCloak, UnAutoPotion, getItemColor, AutoPotion } = require("./Backpack.js");
@@ -257,16 +258,14 @@ const GetActivitiesAward = () =>
         if (hasTipPoint)
         {
             RandomPress([hasTipPoint.x - 150, hasTipPoint.y, 150, 20]);
-            let pageShot = captureScreen();
             for (let i = 0; i < 7; i++)
             {
-                haveAvailable = FindTipPoint([425 + i * 116, 265, 45, 260], pageShot);
-                if (FindTipPoint([1137, 159, 45, 50], pageShot))
+                haveAvailable = FindTipPoint([425 + i * 116, 265, 45, 260]);
+                if (FindTipPoint([1137, 159, 45, 50]))
                 {
                     console.log("领取最终奖励")
                     RandomPress([1106, 188, 46, 50])
                     RandomPress([602, 173, 274, 105])
-                    pageShot = captureScreen();
                 }
                 if (haveAvailable)
                 {
@@ -278,7 +277,6 @@ const GetActivitiesAward = () =>
                     {
                         RandomPress([848, 287, 269, 293]);
                     }
-                    pageShot = captureScreen();
                     break;
                 }
             }
@@ -1885,9 +1883,9 @@ const getOrderList = () =>
 
 const BuyEpicEquipment = (equipmentType) =>
 {
-    console.log("购买紫色装备");
+    console.log("购买紫色装备: " + equipmentType);
     const config = ReadConfig()
-    if (config.game.diamond < 200)
+    if (config.game.diamond < 120)
     {
         console.log("当前钻石不足200，退出");
         return false;
@@ -2007,7 +2005,7 @@ const BuyEpicEquipment = (equipmentType) =>
             let epicEquipmentBudget = config.game.epicEquipmentBudget;
             if (!epicEquipmentBudget)
             {
-                epicEquipmentBudget = 150;
+                epicEquipmentBudget = 120;
             }
             console.log(`紫色装备限价为：${epicEquipmentBudget}钻`);
             if (currentPrice <= epicEquipmentBudget && currentPrice > 30)
@@ -2636,14 +2634,19 @@ const needBuyOrnament = () =>
     }
 
     const equipments = config.equipments;
+    const ornamentType = ["necklace", "earring", "bracelet", "ring", "belt"]
     const needBuyItemArr = []
     for (let key in equipments)
     {
-        if (equipments[key] != "blue")
+        if (ornamentType.includes(key))
         {
-            console.log(key);
-            needBuyItemArr.push(key)
+            if (equipments[key] != "blue")
+            {
+                console.log(key);
+                needBuyItemArr.push(key)
+            }
         }
+
     }
     if (needBuyItemArr.length == 0)
     {
@@ -2659,18 +2662,14 @@ const needBuyOrnament = () =>
 
 const BuyBlueOrnament = (equipmentType) =>
 {
-    console.log("购买蓝色饰品");
+    console.log("购买蓝色饰品: " + equipmentType);
     const config = ReadConfig()
     if (config.game.diamond < 200)
     {
         console.log("当前钻石不足200，退出");
         return false;
     }
-    else if (config.game.diamond > 10000)
-    {
-        console.log("当前钻石已经累计超过10000，暂不操作，退出");
-        return false;
-    }
+
     if (!EnterMenuItemPage("trade"))
     {
         console.log("进入交易所失败");
@@ -2813,38 +2812,94 @@ const BuyBlueOrnament = (equipmentType) =>
 }
 const needBuyEquipment = () =>
 {
+    console.log('判断是否需要购买装备');
+    if (IsHaltMode())
+    {
+        ExitHaltMode()
+    }
+    const diamond = GetCurrentDiamond()
+    console.log("当前钻石为：" + diamond);
+    const config = ReadConfig()
+    config.game.diamond = diamond;
+    if (diamond < 150)
+    {
+        return false;
+    }
     let needCloak = needBuyCloak()
     let needOrnament = needBuyOrnament()
     let needPurpleEquipment = needBuyPurpleEquipment()
     let isBuySuccess = false;
     if (needCloak || needOrnament || needPurpleEquipment)
     {
+
         WearEquipments()
         needCloak = needBuyCloak()
         needOrnament = needBuyOrnament()
         needPurpleEquipment = needBuyPurpleEquipment()
     }
-    if (needCloak)
+    const randomIndex = GetRandom()
+
+    if (needCloak && needOrnament && needPurpleEquipment)
+    {
+        if (randomIndex < 33)
+        {
+            isBuySuccess = BuyCloak()
+        }
+        else if (randomIndex >= 33 && randomIndex < 66)
+        {
+            isBuySuccess = BuyBlueOrnament(needOrnament)
+        }
+        else
+        {
+            isBuySuccess = BuyEpicEquipment(needPurpleEquipment)
+        }
+    }
+    else if (needCloak && needPurpleEquipment)
+    {
+        if (randomIndex < 50)
+        {
+            isBuySuccess = BuyCloak()
+        }
+        else
+        {
+            isBuySuccess = BuyEpicEquipment(needPurpleEquipment)
+        }
+    }
+    else if (needCloak && needOrnament)
+    {
+        if (randomIndex < 50)
+        {
+            isBuySuccess = BuyCloak()
+        }
+        else
+        {
+            isBuySuccess = BuyBlueOrnament(needOrnament)
+        }
+    }
+
+    else if (needCloak)
     {
         isBuySuccess = BuyCloak()
-    }
-    else if (needOrnament)
-    {
-        isBuySuccess = BuyBlueOrnament(needOrnament)
     }
     else if (needPurpleEquipment)
     {
         isBuySuccess = BuyEpicEquipment(needPurpleEquipment)
     }
+    else if (needOrnament)
+    {
+        isBuySuccess = BuyBlueOrnament(needOrnament)
+    }
     else
     {
         console.log("不需要购买装备");
+        return false;
     }
     if (isBuySuccess)
     {
         WearEquipments()
         StrengthenEquipment()
     }
+    return false;
 }
 
 const addPropsToQuickItem = () =>
@@ -3200,13 +3255,13 @@ const ChangeWeaponFeature = () =>
         return false;
     }
 
-
     const skillPos = [
         [200, 301, 144, 50],
         [195, 391, 153, 47],
         [192, 476, 153, 52],
         [193, 563, 159, 46]
     ]
+
     const pointsList = [
         //第一个技能
         [
@@ -3281,7 +3336,10 @@ const ChangeWeaponFeature = () =>
     {
         if (FindBlueBtn([534, 641, 209, 69]))
         {
-            RandomPress([563, 657, 152, 35])
+            if (GetRandom() > 15)
+            {
+                RandomPress([563, 657, 152, 35])
+            }
         }
         if (FindBlueBtn([654, 442, 203, 68]))
         {
@@ -3293,7 +3351,7 @@ const ChangeWeaponFeature = () =>
             RandomPress([1021, 651, 158, 38], 2)
         }
 
-        const randomFeature = random(0, 2)
+        const randomFeature = random(0, skill.length)
         console.log("随机的分支为：" + randomFeature);
         for (let i = 0; i < skill[randomFeature].length; i++)
         {
@@ -3325,6 +3383,182 @@ const ChangeWeaponFeature = () =>
     }
     console.log("修改武器特性结束");
 }
+const ChangeAbilityCollection = () =>
+{
+    console.log("修改能力搭配");
+    if (!EnterMenuItemPage("ability"))
+    {
+        return false;
+    }
+
+    const abilityType = {
+        "战斗": [322, 228, 103, 31],
+        "咒文": [594, 226, 101, 30],
+        "防御": [728, 227, 98, 31],
+        "强化": [862, 228, 101, 28],
+        "辅助": [324, 281, 100, 30],
+    }
+    const sixSetPosition = [
+        [[674, 168, 33, 29], [764, 169, 28, 30]],
+        [[672, 301, 38, 32], [763, 301, 27, 31]],
+        [[674, 434, 35, 34], [761, 435, 33, 30]]
+    ]
+    const fourFrontPosition = [
+        [53, 145, 77, 106],
+        [189, 147, 74, 120],
+        [321, 146, 80, 119],
+        [457, 148, 79, 120]
+    ]
+    const fourCheckPosition = [
+        [184, 222, 74, 86],
+        [322, 233, 70, 67],
+        [451, 226, 82, 79]
+    ]
+
+    const randomCollection = shuffleArray(Object.keys(abilityType))
+
+    // const randomCollection = ["战斗", "防御", "咒文"]
+    const lockedImgList = LoadImgList("page/ability/locked")
+    const setAbility = (collectionArray) =>
+    {
+        for (let i = 0; i < collectionArray.length; i++)
+        {
+            if (FindGoldBtn([12, 652, 139, 51]))
+            {
+                RandomPress([33, 662, 101, 29], 2) //select 
+                RandomPress([860, 477, 101, 30])
+                RandomPress(abilityType[collectionArray[i]])
+            }
+            else
+            {
+                break;
+            }
+
+            if (FindBlueBtn([537, 526, 206, 74]))
+            {
+                RandomPress([564, 546, 158, 32], 3)
+            }
+            let unlockNumber = 0;
+
+
+            if (!FindImgInList(lockedImgList, fourCheckPosition[2]))
+            {
+                unlockNumber = 4;
+            }
+            else if (!FindImgInList(lockedImgList, fourCheckPosition[1]))
+            {
+                unlockNumber = 3;
+            }
+            else if (!FindImgInList(lockedImgList, fourCheckPosition[0]))
+            {
+                unlockNumber = 2;;
+            }
+            if (unlockNumber < 2)
+            {
+                console.log("解锁数量不足，退出");
+                break;
+            }
+            console.log("解锁数量为：" + unlockNumber);
+            let randomArray = generateRandomArray(unlockNumber)
+            console.log("随机序列为：" + randomArray);
+            for (let j = 0; j < 2; j++)
+            {
+                RandomPress(fourFrontPosition[randomArray[j]])
+                RandomPress(fourFrontPosition[randomArray[j]])
+                RandomPress(sixSetPosition[i][j])
+                console.log("点击 配置");
+            }
+            for (let n = 0; n < 5; n++)
+            {
+                if (HaveToTapBlank([541, 607, 201, 84]))
+                {
+                    console.log("点击空白");
+                    RandomPress([400, 435, 468, 236], 4)
+                }
+                if (HasPageback())
+                {
+                    break;
+                }
+                Sleep()
+            }
+
+        }
+    }
+
+    const abilityArray = randomCollection.splice(0, 3)
+    console.log("随机能力组合为：" + abilityArray);
+    setAbility(abilityArray)
+    if (GetRandom() > 50)
+    {
+        UpgradeAbilityLevel()
+    }
+    if (GetRandom() > 65)
+    {
+        RandomPress([939, 86, 21, 24])
+        console.log("点击收藏");
+    }
+    let havelockPreset = false;
+
+    if (FindImgInList(lockedImgList, [710, 650, 55, 61]) && FindImgInList(lockedImgList, [760, 648, 53, 58]))
+    {
+        if (GetRandom() > 50)
+        {
+            havelockPreset = [727, 666, 19, 25];
+        }
+        else
+        {
+            havelockPreset = [779, 667, 17, 22]
+        }
+    }
+    else if (FindImgInList(lockedImgList, [710, 650, 55, 61]))
+    {
+        havelockPreset = [727, 666, 19, 25];
+    }
+    else if (FindImgInList(lockedImgList, [760, 648, 53, 58]))
+    {
+        havelockPreset = [779, 667, 17, 22]
+    }
+    if (havelockPreset)
+    {
+        if (GetRandom() > 60)
+        {
+            console.log("添加预设");
+            RandomPress(havelockPreset)
+            if (FindBlueBtn([653, 441, 203, 72]))
+            {
+                RandomPress([681, 461, 152, 31])
+            }
+            const randomCollection_2 = shuffleArray(Object.keys(abilityType))
+
+            const abilityArray_2 = randomCollection_2.splice(0, 3)
+            console.log("随机能力组合为：" + abilityArray_2);
+            setAbility(abilityArray_2)
+        }
+    }
+    PageBack()
+    for (let i = 0; i < 10; i++)
+    {
+        if (HasMenu())
+        {
+            break;
+        }
+        if (HaveToTapBlank([541, 607, 201, 84]))
+        {
+            console.log("点击空白");
+            RandomPress([400, 435, 468, 236], 4)
+        }
+        if (FindBlueBtn([536, 526, 210, 72]))
+        {
+            RandomPress([564, 545, 155, 32])
+        }
+        Sleep()
+    }
+
+    PullDownSkill([1065, 650])
+    PullDownSkill([1130, 650])
+    PullDownSkill([1195, 650])
+}
+
 const FireRandomEvent = () =>
 {
     console.log("触发随机事件")
@@ -3373,6 +3607,8 @@ const FireRandomEvent = () =>
         { event: CheckNotification, probability: 12 },
         { event: needBuyEquipment, probability: 2 },
         { event: ChangeWeaponFeature, probability: 2 },
+        { event: GoTrialOfTower, probability: 2 },
+        { event: ChangeAbilityCollection, probability: 2 },
     ]
 
     const eventNumber = random(0, 8);
@@ -3437,23 +3673,24 @@ const ComprehensiveImprovement = () =>
 
     DailyQuest()
 
-    OpenAllBox() && OpenAllBox() && OpenAllBox()
-
-    if (!isBackpackFull)
+    if (OpenAllBox())
     {
-        console.log("backpack is not full");
+        OpenAllBox()
+        OpenAllBox()
         WearEquipments();
-        StrengthenEquipment();
-        LoginProps();
-        DecomposeEquipment();
     }
 
     IncreaseWeaponFeatures();
-    if (random(1, 100) > 50)
+    if (GetRandom() > 50)
     {
         UpgradeHolyRelics();
     }
-    if (random(1, 100) > 50)
+    if (GetRandom() > 50)
+    {
+        WearBestSuit();
+        CheckSkillAutoRelease();
+    }
+    if (GetRandom() > 70)
     {
         StrengthenHorseEquipment();
     }
@@ -3470,8 +3707,7 @@ const ComprehensiveImprovement = () =>
 
     UpgradeAbilityLevel();
 
-    WearBestSuit();
-    CheckSkillAutoRelease();
+
     AddAttributePoint();
     console.log("综合提升结束");
     IsExchangeUnLock();
@@ -3542,3 +3778,4 @@ module.exports = {
     FireRandomEvent,
 };
 
+// ChangeAbilityCollection()

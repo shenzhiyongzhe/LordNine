@@ -1,4 +1,4 @@
-const { SwipeSlowly, StopScript, LoadImgList, FindImgInList, FindNumber, HasPopupClose, RandomPress, FindBlueBtn, baseUrl, ReadConfig, PressToAuto, GetRandom, updateDeviceData, Sleep, FindGoldBtn, FindRedBtn, IsLocked } = require("./utils.js")
+const { SwipeSlowly, StopScript, LoadImgList, FindImgInList, FindNumber, HasPopupClose, RandomPress, FindBlueBtn, baseUrl, ReadConfig, PressToAuto, GetRandom, updateDeviceData, Sleep, FindGoldBtn, FindRedBtn, IsLocked, HasPageback, HaveToTapBlank } = require("./utils.js")
 
 const regions = [
     [394, 229, 97, 62],
@@ -158,6 +158,25 @@ const singleTest = () =>
 
 // singleTest()
 // console.log(FindNumber("lv", [321, 223, 43, 52]));
-console.log(HasPopupClose([1223, 72, 38, 43]));
 
-
+const shuffleArray = (array) =>
+{
+    const randomArr = []
+    const length = array.length;
+    for (let i = 0; i < length; i++)
+    {
+        if (array.length == 0)
+        {
+            break;
+        }
+        let index = Math.floor(random(0, array.length - 1))
+        console.log(index);
+        let item = array.splice(index, 1)
+        randomArr.push(item[0])
+    }
+    return randomArr;
+}
+const a = [1, 2, 3, 4]
+const a1 = JSON.parse(JSON.stringify(a))
+const b = a.splice(0, 3)
+console.log(a1);
