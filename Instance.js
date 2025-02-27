@@ -545,7 +545,7 @@ const EnterMap = (mapName, autoTransform) =>
             [2, 1, 2],
         ]
 
-        mapName = [random(0, availableMap.length - 1)]
+        mapName = availableMap[random(0, availableMap.length - 1)]
     }
     console.log("进入地图：" + mapName);
 
@@ -1213,6 +1213,7 @@ const InstanceFlow = () =>
 };
 
 module.exports = { InstanceFlow };
+
 
 
 

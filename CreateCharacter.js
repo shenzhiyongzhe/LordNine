@@ -1338,7 +1338,6 @@ const SetName = () =>
             name = GenerateRandomName();
             setText(name);
             Sleep();
-            // RandomPress([1172, 520, 56, 25]); // keyboard confirm btn
             back();
             Sleep();
             RandomPress([686, 452, 77, 17]); //confirm
@@ -1368,7 +1367,7 @@ const SetName = () =>
             }
             else
             {
-                console.log("name ok, create character success");
+                console.log("the name is ok, create character successfully");
                 break;
             }
         }

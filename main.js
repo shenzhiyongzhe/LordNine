@@ -96,7 +96,6 @@ function Init()
             password,
             auxiliary_mailbox
         }
-        // console.log(`${id} ${instance} ${account} ${password} ${auxiliary_mailbox}`);
         config.accountInfo = accountInfo;
     }
     if (!config.equipments || !config.equipments.ring)
@@ -138,7 +137,7 @@ const GetCaptureScreenPermission = () =>
     });
     threads.start(function ()
     {
-        let hasOpen = textMatches(/(.*시작하기.*|.*立即开始.*)/).findOne(80000);
+        let hasOpen = textMatches(/(.*시작하기.*|.*立即开始.*)/).findOne(60000);
         if (hasOpen)
         {
             hasOpen.click();
@@ -163,27 +162,31 @@ const uiFloaty = () =>
             <vertical gravity="center|top" >
                 <text id="delayTime" h='0' gravity="center" color="#ffffff" textSize="40sp" ></text>
                 <button id="start" h="40" w="120" color="#ffffff" bg="#a6e3e9" marginTop="20">开始</button>
-                <text id="more" textSize="20" h="25" gravity="center" marginTop="10">﹀</text>
-                <vertical id="more_container" gravity="center" h="0" marginTop="10">
-                    <radiogroup orientation="horizontal" gravity="center" color="#ffffff">
-                        <radio id="mainStory" text="主线" textSize="10" checked="{{gameMode == 'mainStory' ? true : false}}" />
-                        <radio id="instance" text="挂机" textSize="10" checked="{{gameMode == 'instance' ? true : false}}" />
-                    </radiogroup>
-                    <horizontal gravity="center">
-                        <text id="createCharacter" w="60" textSize="12" color="#ffffff">创建角色</text>
-                        <text textSize="12" textStyle="italic" color={versionColor} >版本：{version}</text>
-                    </horizontal>
-                    <linear orientation="horizontal" gravity="center" >
-                        <text id="loginGoogle" w="60" textSize="12" color="#ffffff" >谷歌登录</text>
-                    </linear>
-                </vertical>
+                <text w="80" textSize="12" textStyle="italic" color={versionColor} marginTop="10">version：{version}</text>
+                <text id="more" textSize="20" h="25" gravity="center" marginTop="5">﹀</text>
+                <linear id="more_container" h="0" w="120" marginTop="10">
+                    <text id="loginGoogle" w="70" textSize="12" color="#ffffff" marginLeft="10" >谷歌登录</text>
+                    <text id="createCharacter" w="70" textSize="12" color="#ffffff" marginLeft="10">创建角色</text>
+                </linear>
             </vertical>
         </card>
     );
 
-    floatyWindow.setSize(400, 270);
+    floatyWindow.setSize(400, 280);
     floatyWindow.setPosition(185, 300);
-
+    try
+    {
+        const getSuccess = GetCaptureScreenPermission();
+        if (!getSuccess)
+        {
+            GetCaptureScreenPermission()
+        }
+    }
+    catch (error)
+    {
+        alert("异常", "获取截图权限失败。")
+        StopScript()
+    }
     const config = ReadConfig()
 
     const uiInterval = setInterval(() =>
@@ -192,25 +195,17 @@ const uiFloaty = () =>
 
     floatyWindow.start.click(() =>
     {
+        if (serverName == null && loginGoogleDelay == 0 && config.game.name == '')
+        {
+            alert("异常检测", "暂未创建角色，退出")
+            StopScript()
+        }
+
         const totalDelayTime = config.delayTime + loginGoogleDelay + createCharacterDelay;
         let count = totalDelayTime
         floatyWindow.delayTime.attr("h", 60);
         floatyWindow.start.attr("h", 0);
         floatyWindow.delayTime.setText(`${count}s`);
-        try
-        {
-            const getSuccess = GetCaptureScreenPermission();
-            if (!getSuccess)
-            {
-                GetCaptureScreenPermission()
-            }
-
-        }
-        catch (error)
-        {
-            alert("异常", "获取截图权限失败。")
-            StopScript()
-        }
 
         console.log(`游戏延迟${totalDelayTime}s,等待启动中...`);
         const delayInterval = setInterval(() =>
@@ -266,31 +261,12 @@ const uiFloaty = () =>
 
     floatyWindow.more.click(() =>
     {
-        floatyWindow.setSize(400, 400);
+        floatyWindow.setSize(400, 350);
         floatyWindow.more_container.attr("h", 80);
         floatyWindow.more.attr("h", 0);
     });
 
     floatyWindow.stop.click(StopScript);
-
-    floatyWindow.mainStory.click(() =>
-    {
-        gameMode = "mainStory";
-        config.gameMode = "mainStory";
-        config.unlockTrade = false;
-        console.log("悬浮窗点击事件：更改模式为主线")
-        RewriteConfig(config);
-    });
-
-    floatyWindow.instance.click(() =>
-    {
-        gameMode = "instance";
-        config.gameMode = "instance";
-        console.log("悬浮窗点击事件：更改模式为挂机")
-        config.unlockTrade = true;
-        RewriteConfig(config);
-
-    });
 };
 
 console.setGlobalLogConfig({

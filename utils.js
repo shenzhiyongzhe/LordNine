@@ -1209,6 +1209,7 @@ const EnterHaltMode = () =>
 const ExitHaltMode = () =>
 {
     console.log("退出节电模式");
+    Sleep(random(3, 30))
     for (let i = 0; i < 3; i++)
     {
         SwipeSlowly([556, 366, 5, 10], [1050, 366, 5, 10], 2);
@@ -1446,7 +1447,7 @@ const OpenBackpackMenu = (type) =>
     return false;
 };
 
-const Sleep = (time) => { time = time || 1.5; sleep(time * 1000); };
+const Sleep = (time) => { time = time || random(); sleep(time * 1000); };
 
 /**
  * 随机点击
@@ -1456,12 +1457,18 @@ const Sleep = (time) => { time = time || 1.5; sleep(time * 1000); };
  */
 const RandomPress = ([startX, startY, w, h], delay) =>
 {
-    const time = random(20, 100);
-    delay = delay || 1.5;
+    const time = random(20, 150);
+    const beforeDelay = random(0, 1000)
+    sleep(beforeDelay)
+    if (delay)
+    {
+        delay = delay + random(1, 1000)
+    }
+    delay = delay || random(1500, 3000);
     const x = Math.round(Math.random() * w + startX);
     const y = Math.round(Math.random() * h + startY);
     press(x, y, time);
-    Sleep(delay);
+    sleep(delay);
 };
 
 

@@ -205,7 +205,7 @@ const IsTimeout = () =>
         console.log("点击刷新");
         Sleep(5);
     }
-    let hasTimeOut = text("timeout").findOne(3000);
+    let hasTimeOut = text("timeout").findOne(6000);
     if (hasTimeOut)
     {
         return true;
@@ -436,8 +436,9 @@ const ResetConfig = () =>
                 console.log("鉴定成功：重置交易次数");
                 config.game.tradingTimes = 0;
                 config.daily.dailyTrading = false;
-                config.daily.dailyTradingTimes = random(1, 3);
+                config.daily.dailyTradingTimes = random(0, 2);
             }
+
             if (GetRandom() > 62)
             {
                 console.log("鉴定成功：重置每日副本");
@@ -461,9 +462,9 @@ const ResetConfig = () =>
             config.daily.friendshipShop = false;
 
             config.dailyTradingHours = [
-                `${random(8, 12).toString().padStart(2, 0)}:${random(0, 59).toString().padStart(2, 0)}`,
-                `${random(13, 17).toString().padStart(2, 0)}:${random(0, 59).toString().padStart(2, 0)}`,
-                `${random(18, 22).toString().padStart(2, 0)}:${random(0, 59).toString().padStart(2, 0)}`,
+                `${random(8, 23).toString().padStart(2, 0)}:${random(0, 59).toString().padStart(2, 0)}`,
+                `${random(8, 23).toString().padStart(2, 0)}:${random(0, 59).toString().padStart(2, 0)}`,
+                `${random(8, 23).toString().padStart(2, 0)}:${random(0, 59).toString().padStart(2, 0)}`,
             ];
 
             if (date.getDay() == 1)
@@ -471,9 +472,9 @@ const ResetConfig = () =>
                 console.log("周一，重置周配置")
                 config.randomDayOfTheWeek = [random(1, 7), GetRandom() > 50 ? random(1, 7) : 0, GetRandom() > 50 ? random(1, 7) : 0]
                 config.randomEventTime = [
-                    `${random(8, 12).toString().padStart(2, 0)}:${random(0, 59).toString().padStart(2, 0)}`,
-                    `${random(13, 17).toString().padStart(2, 0)}:${random(0, 59).toString().padStart(2, 0)}`,
-                    `${random(18, 22).toString().padStart(2, 0)}:${random(0, 59).toString().padStart(2, 0)}`,
+                    `${random(8, 23).toString().padStart(2, 0)}:${random(0, 59).toString().padStart(2, 0)}`,
+                    `${random(8, 23).toString().padStart(2, 0)}:${random(0, 59).toString().padStart(2, 0)}`,
+                    `${random(8, 23).toString().padStart(2, 0)}:${random(0, 59).toString().padStart(2, 0)}`,
                 ];
             }
             console.log("reset config")
@@ -596,6 +597,14 @@ const PressCommonBtn = () =>
             console.log("右下角蓝色按钮,制作");
             RandomPress([1030, 659, 95, 34]);
         }
+        const createCharacterImgList = LoadImgList("icon/beginner/createCharacter")
+        if (FindImgInList(createCharacterImgList, [983, 651, 163, 66]))
+        {
+            console.log("发现创建角色按钮，异常，退出脚本");
+            alert("异常检测", "未创建角色，退出")
+            StopScript()
+        }
+        RecycleImgList(createCharacterImgList)
     }
     if (FindBlueBtn([657, 443, 192, 65], shot))
     {
@@ -663,6 +672,7 @@ const PressCommonBtn = () =>
         RandomPress([580, 579, 126, 29])
     }
 };
+
 const PickMissionFinishAward = () =>
 {
     if (FindImgInList(ExceptionImgList.missionFinishPickAward, [556, 159, 159, 69]))
@@ -671,6 +681,7 @@ const PickMissionFinishAward = () =>
         RandomPress([449, 437, 384, 45]);
     }
 };
+
 const MakeSureInGame = (shot) =>
 {
     if (!HasMenu())

@@ -176,7 +176,4 @@ const shuffleArray = (array) =>
     }
     return randomArr;
 }
-const a = [1, 2, 3, 4]
-const a1 = JSON.parse(JSON.stringify(a))
-const b = a.splice(0, 3)
-console.log(a1);
+// console.log(HasPopupClose([905, 64, 46, 50]));

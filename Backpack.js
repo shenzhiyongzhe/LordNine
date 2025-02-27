@@ -1511,6 +1511,7 @@ const DecomposeEquipment = (type) =>
                 {
                     console.log("取消蓝色装备");
                     RandomPress([667, 230, 42, 13]);
+                    firstDecomposeEquipment = true;
                 }
                 if (FindCheckMark([774, 214, 39, 47]))
                 {
@@ -1558,8 +1559,6 @@ const DecomposeEquipment = (type) =>
                 config.game.decomposeBlueSuit = false;
             }
         }
-        console.log("修改第一次分解配置");
-        firstDecomposeEquipment = true;
     }
 
     const selectedMarkImgList = LoadImgList("backpack/selectedMark");
@@ -1608,10 +1607,6 @@ const DecomposeEquipment = (type) =>
             Sleep();
         }
         console.log("分解装备结束");
-    }
-    else
-    {
-        SetDecomposeSetting("partial")
     }
     if (FindBlueBtn([379, 562, 230, 79]))
     {
