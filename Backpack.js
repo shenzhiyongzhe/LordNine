@@ -12,7 +12,7 @@ const {
     OpenBackpack, OpenBackpackMenu, OpenMenu,
     PageBack, PressBlank, PullDownSkill,
     RecycleImgList, RandomPress, ReadImg, ReturnHome,
-    SwipeSlowly, Sleep,
+    humanSwipe, Sleep,
     ReadConfig,
     FindNumber,
     EnterMenuItemPage,
@@ -108,8 +108,8 @@ const SingleStrengthen = () =>
 const backpackRegion = [925, 155, 250, 450];
 const IsMultipleBox = () => FindBlueBtn([646, 506, 177, 59]);
 const PressUseBtn = () => RandomPress([850, 594, 51, 28])
-const randomSwipeBackpackUp = () => SwipeSlowly([1000, 400, 10, 10], [1000, 200, 10, 10], 1);
-const randomSwipeBackpackDown = () => SwipeSlowly([1000, 200, 10, 10], [1000, 400, 10, 10], 1);
+const randomSwipeBackpackUp = () => humanSwipe([949, 451, 217, 116], [958, 199, 210, 111]);
+const randomSwipeBackpackDown = () => humanSwipe([958, 199, 210, 111], [949, 451, 217, 116]);
 
 const OpenSkillBook = () =>
 {
@@ -216,7 +216,6 @@ const OpenSuit = () =>
                 }
                 if (FindImgInList(swipeToConfirmImgList, [504, 598, 254, 66]))
                 {
-                    // SwipeSlowly([483, 640, 42, 10], [770, 640, 30, 10], 1);
                     swipe(520, 650, 770, 650, 500);
                     Sleep(5);
                     if (!IsJumpAnimation())
@@ -785,10 +784,9 @@ const BuyCloak = () =>
     const breakCloak = LoadImgList("page/trade/menu/breakCloak");
     const price_10 = LoadImgList("page/trade/price/10")
     let haveOpenedCloakPage = false;
-    for (let i = 0; i < 10; i++)
+    for (let i = 0; i < 5; i++)
     {
-        SwipeSlowly([130, 600, 5, 5], [130, 300, 5, 5], 1);
-
+        humanSwipe([15, 550, 203, 75], [25, 146, 193, 89]);
         let hasCloakMenu = FindImgInList(cloakMenuItem, [2, 106, 80, 556]);
         if (hasCloakMenu)
         {
@@ -811,7 +809,7 @@ const BuyCloak = () =>
     {
         for (let j = 0; j < 5; j++)
         {
-            SwipeSlowly([630, 540, 5, 5], [630, 240, 5, 5], 3);
+            humanSwipe([630, 540, 5, 5], [630, 240, 5, 5]);
 
             let purchasePrice = FindImgInList(price_10, [390, 185, 107, 465]);
             if (purchasePrice)
@@ -1861,4 +1859,3 @@ module.exports = {
     UseHolyGrail, WearBestSuit,
     AutoPotion, UnAutoPotion, BuyPotion, ExpandBackpackCapacity
 };
-

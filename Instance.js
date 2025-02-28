@@ -36,7 +36,6 @@ const {
     RewriteConfig,
 
     MatchTemplateList,
-    SwipeSlowly,
     ClearPage,
     ChangeGameSetting,
     OpenBackpack,
@@ -54,6 +53,7 @@ const {
     ChangeRecoverPotionPercentToNormal, OpenMap,
     GetRandom,
     HasHaltModeBtn,
+    humanSwipe,
 } = require("./utils");
 const { ComprehensiveImprovement_Instance, DailyQuest, LoginProps, GetCommonAward, FireRandomEvent } = require("./CommonFlow");
 const { DecomposeEquipment } = require("./Backpack");
@@ -239,6 +239,7 @@ const HangUpInstance = () =>
 
     return false;
 };
+
 //接受任务
 const AcceptDailyMission = () =>
 {
@@ -267,7 +268,7 @@ const AcceptDailyMission = () =>
 
     let acceptNum = 0;
     const randomAcceptNum = random(3, 10)
-    out: for (let i = 0; i < 4; i++)
+    out: for (let i = 0; i < 3; i++)
     {
         for (let n = 0; n < 2; n++)
         {
@@ -311,7 +312,7 @@ const AcceptDailyMission = () =>
                     RandomPress([454, 435, 375, 48]);
                 }
             }
-            SwipeSlowly([450, 500, 10, 10], [450, 300, 10, 10], 2);
+            humanSwipe([450, 500, 10, 10], [450, 300, 10, 10]);
         }
         RandomPress([62, 664, 105, 21]);
         WaitUntil(() => HasPopupClose([819, 207, 53, 50]));
@@ -390,7 +391,7 @@ const AcceptDailyMission = () =>
                     }
                 }
             }
-            SwipeSlowly([450, 500, 10, 10], [450, 300, 10, 10], 2);
+            humanSwipe([450, 500, 10, 10], [450, 300, 10, 10]);
         }
     }
 
@@ -1118,7 +1119,7 @@ const TimeManager = () =>
     if (isTimeToExecuteRandomEvent)
     {
         FireRandomEvent();
-        Sleep(60, 120)
+        Sleep(61)
     }
     if (currentTimeString == autoHuntingTime)
     {

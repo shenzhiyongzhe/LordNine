@@ -11,7 +11,7 @@ const {
     LoadImgList,
 
     WaitUntilPageBack,
-    SwipeSlowly, Sleep,
+    humanSwipe, Sleep,
 
     PressBlank, WaitUntil,
     TapBlankToContinue, PullDownSkill, ReadConfig, RewriteConfig, PageBack,
@@ -435,53 +435,6 @@ const LoginProps = (type) =>
     type = type || "partial";
     const CanPressLoginBtn = () => FindGreenBtn([1089, 508, 171, 47]);
 
-    const SetLoginSetting = () =>
-    {
-        if (FindGoldBtn([62, 656, 134, 44]))
-        {
-            console.log("只登录白色装备和绿色装备");
-            RandomPress([82, 665, 100, 23]);
-            WaitUntil(() => HasPopupClose([1044, 160, 43, 43]));
-
-            if (!FindCheckMark([401, 269, 35, 38]))
-            {
-                RandomPress([451, 279, 62, 16]);
-            }
-            if (!FindCheckMark([564, 271, 38, 38]))
-            {
-                RandomPress([610, 279, 71, 19]);
-            }
-            if (FindBlueBtn([657, 491, 198, 65]))
-            {
-                RandomPress([681, 503, 154, 37]);
-                console.log("确定搜索记录设置");
-            }
-            for (let i = 0; i < 10; i++)
-            {
-                if (HasPopupClose([1045, 157, 39, 43]))
-                {
-                    if (!FindCheckMark([401, 269, 35, 38]))
-                    {
-                        RandomPress([451, 279, 62, 16]);
-                    }
-                    if (!FindCheckMark([564, 271, 38, 38]))
-                    {
-                        RandomPress([610, 279, 71, 19]);
-                    }
-                    if (FindBlueBtn([657, 491, 198, 65]))
-                    {
-                        RandomPress([681, 503, 154, 37]);
-                    }
-                }
-                if (HasPageback())
-                {
-                    break;
-                }
-                Sleep();
-            }
-        }
-
-    };
 
     for (let i = 0; i < 2; i++)
     {
@@ -516,7 +469,7 @@ const LoginProps = (type) =>
         console.log("可记录道具数量：" + hasItemToLogin);
     }
 
-    out: for (let i = 0; i < 15; i++)
+    out: for (let i = 0; i < 10; i++)
     {
         hasTipPoint = FindTipPoint([511, 122, 421, 494]);
         if (hasTipPoint)
@@ -537,7 +490,7 @@ const LoginProps = (type) =>
             {
                 break out;
             }
-            SwipeSlowly([243, 549, 423, 35], [255, 157, 374, 29], 3);
+            humanSwipe([83, 453, 934, 184], [62, 29, 1146, 196], [1000, 1300]);
         }
     }
     PageBack();
@@ -723,8 +676,7 @@ const IncreaseWeaponFeatures = () =>
     }
     if (skillNumber >= 5)
     {
-        SwipeSlowly([280, 580, 40, 10], [280, 310, 40, 10], 1);
-        SwipeSlowly([280, 580, 40, 10], [280, 310, 40, 10], 1);
+        humanSwipe([116, 499, 235, 100], [112, 77, 380, 176], [300, 800]);
         for (let i = 0; i < skillNumber - 4; i++)
         {
             RandomPress([197, 300 + i * 82, 146, 40]);
@@ -1153,7 +1105,7 @@ const JoinGuild = () =>
             hasStrBtn = FindStraightAwayBtn();
             if (!hasStrBtn)
             {
-                SwipeSlowly([492, 516, 76, 27], [496, 210, 70, 25], 4);
+                humanSwipe([83, 479, 1139, 146], [78, 35, 1112, 262], [500, 1000]);
             }
             else
             {
@@ -1493,7 +1445,7 @@ const GetSettlement = () =>
                             shot = captureScreen();
                         }
                     }
-                    SwipeSlowly([450, 600, 10, 10], [450, 300, 10, 10], 1);
+                    humanSwipe([59, 463, 1187, 158], [50, 35, 1166, 255], [500, 1000]);
                 }
             }
             PageBack();
@@ -2215,17 +2167,15 @@ const MakeMaterial = () =>
     };
     const materialImg = LoadImgList("page/manufacture/material");
     const manufacture_material = LoadImgList("page/manufacture/manufacture_material");
-    const greenBlackOle = LoadImgList("page/manufacture/greenBlackOle");
 
     const horseImg = LoadImgList("page/manufacture/horse");
     const horseStrengtheningMaterial = LoadImgList("page/manufacture/horseStrengtheningMaterial");
     const horseArmorImg = LoadImgList("page/manufacture/horseArmor");
 
-    let ole = null;
     let horseArmor = null;
-    for (let i = 0; i < 4; i++)
+    for (let i = 0; i < 2; i++)
     {
-        SwipeSlowly([140, 600, 5, 5], [140, 300, 5, 5], 1);
+        humanSwipe([21, 563, 206, 69], [21, 158, 198, 72]);
         let haveMaterial = FindImgInList(materialImg, [6, 343, 68, 312]);
         if (haveMaterial)
         {
@@ -2236,21 +2186,20 @@ const MakeMaterial = () =>
         if (haveManufacture_material)
         {
             console.log("点击制作材料");
-            RandomPress([haveManufacture_material.x, haveManufacture_material.y, 150, 10]);
-        }
-        ole = FindImgInList(greenBlackOle, [240, 204, 76, 73]);
-        if (ole)
-        {
-            console.log("发现奥雷");
+            RandomPress([haveManufacture_material.x, haveManufacture_material.y, 150, 10], 3);
             break;
         }
-        Sleep(2);
     }
-    if (ole)
+
+    if (FindBlueBtn([1011, 644, 268, 64]))
     {
         PressToManufacture([323, 217, 132, 49]);
         PressToManufacture([326, 377, 118, 49]);
         PressToManufacture([321, 459, 136, 42]);
+    }
+    else
+    {
+        console.log("未发现制作材料");
     }
     for (let i = 0; i < 4; i++)
     {
@@ -2272,7 +2221,7 @@ const MakeMaterial = () =>
             console.log("find horse armor");
             break;
         }
-        SwipeSlowly([140, 600, 5, 5], [140, 300, 5, 5], 1);
+        humanSwipe([140, 600, 5, 5], [140, 300, 5, 5]);
         Sleep(2);
     }
     if (horseArmor)
@@ -2281,7 +2230,6 @@ const MakeMaterial = () =>
     }
     RecycleImgList(materialImg);
     RecycleImgList(manufacture_material);
-    RecycleImgList(greenBlackOle);
     RecycleImgList(horseImg);
     RecycleImgList(horseStrengtheningMaterial);
     RecycleImgList(horseArmorImg);
@@ -2839,7 +2787,7 @@ const shopExchange = () =>
         {
             if (GetRandom() > 60)
             {
-                SwipeSlowly([1100, 330, 20, 50], [440, 330, 20, 50], 1)
+                humanSwipe([1100, 330, 20, 50], [440, 330, 20, 50])
             }
             RandomPress([305, 142, 811, 504]) //第一页区域
             if (WaitUntil(() => FindRedBtn([379, 535, 255, 73]), 1000, 10))
@@ -3027,7 +2975,7 @@ const GoTrialOfTower = () =>
         const swipeTimes = random(1, 3)
         for (let i = 0; i < swipeTimes; i++)
         {
-            SwipeSlowly([580, 280, 10, 10], [580, 520, 10, 10], 2)
+            humanSwipe([580, 280, 10, 10], [580, 520, 10, 10])
         }
         RandomPress([922, 133, 32, 31])
         PageBack()
@@ -3431,10 +3379,15 @@ const ChangeAbilityCollection = () =>
             console.log("点击空白");
             RandomPress([400, 435, 468, 236], 4)
         }
+        if (HaveToTapBlank([565, 639, 151, 55]))
+        {
+            RandomPress([427, 485, 471, 198])
+        }
         if (FindBlueBtn([536, 526, 210, 72]))
         {
             RandomPress([564, 545, 155, 32])
         }
+        RandomPress([1224, 17, 39, 38])
         Sleep()
     }
 

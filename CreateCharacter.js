@@ -1,13 +1,14 @@
 const {
     ClickSkip,
     FindMultiColors, FindBlueBtn, FindCheckMark, PressBlank, FindRedBtn, FindImgInList, FindImg,
-    HasSkip, HasPopupClose, LoadImgList, GetVerificationCode,
+    HasSkip, HasPopupClose, LoadImgList,
     ReadConfig, RewriteConfig, ReadImg, RandomPress, RestartGame, ReadAccountFile,
     WaitUntil, WaitUntilFindColor,
-    Sleep, SwipeSlowly, SetCountryAndBirth,
+    Sleep, SetCountryAndBirth,
     RecycleImgList,
     StopScript,
     StopGame,
+    humanSwipe,
 } = require("./utils.js");
 
 
@@ -1200,14 +1201,14 @@ const FindServer = (serverName) =>
     const relativeX = littleServer > 4 ? littleServer - 5 : littleServer;
     const relativeY = littleServer > 4 ? 1 : 0;
     let hasServer = null;
-    for (let i = 0; i < 64; i++)
+    for (let i = 0; i < 24; i++)
     {
         hasServer = FindImgInList(serverNameImgList[bigServer], [58, 145, 266, 487]);
         if (hasServer)
         {
             if (hasServer.y > 445)
             {
-                SwipeSlowly([750, 500, 10, 10], [750, 400, 10, 10], 1);
+                humanSwipe([138, 446, 969, 78], [103, 292, 1082, 77], [2000, 2300])
                 hasServer = FindImgInList(serverNameImgList[bigServer], [58, 145, 266, 487]);
             }
 
@@ -1232,12 +1233,12 @@ const FindServer = (serverName) =>
             if (Math.floor(i / 8) % 2 == 0)
             {
                 console.log("向下滑动");
-                SwipeSlowly([600, 550, 10, 10], [600, 320, 10, 10], 3.3);
+                humanSwipe([102, 439, 1100, 128], [91, 215, 1103, 86], [3300, 3500])
             }
             else
             {
                 console.log("向上滑动");
-                SwipeSlowly([600, 320, 10, 10], [600, 500, 10, 10], 3.3);
+                humanSwipe([129, 221, 1028, 64], [136, 523, 1055, 74])
             }
         }
     }
@@ -1427,6 +1428,8 @@ const temporaryLoginGoogle = () =>
 }
 
 module.exports = { CreateCharacterFlow, temporaryLoginGoogle };
+
+
 
 
 

@@ -12,7 +12,7 @@ const {
     LaunchGame,
     PressBlank, PageBack, RewriteConfig, RecycleImgList,
     ReadConfig, RestartGame, ReadImg, RandomPress,
-    Sleep, SwipeSlowly,
+    Sleep,
     WaitUntil, WaitUntilMenu, WaitUntilPageBack,
     ReturnHome,
     ChangeGameSetting,
@@ -313,6 +313,7 @@ const MainUIFlow = (shot) =>
 {
     if (HaveLordNineWord(shot))
     {
+        console.log("发现权力之望logo");
         if (FindMultiColors(WhiteAvatarColorList, [32, 600, 52, 49], shot))
         {
             const whiteCheckMark = [["#ffffff", [[5, 4, "#ffffff"], [10, 0, "#ffffff"]]]]
@@ -320,17 +321,15 @@ const MainUIFlow = (shot) =>
             {
                 RandomPress([83, 669, 90, 17])
             }
-            Sleep(random(1, 10));
-            RandomPress([416, 173, 438, 358])
-            Sleep(5);
+            Sleep(random(5, 10))
+            RandomPress([416, 173, 438, 358], random(5, 10))
             console.log("点击开始游戏 有区服的主页面");
         }
         else
         {
             console.log("点击开始 主页面");
-            Sleep(random(1, 10));
-            RandomPress([416, 173, 438, 358])
-            Sleep(5);
+            Sleep(random(5, 10))
+            RandomPress([416, 173, 438, 358], random(5, 10))
         }
         clickMainUITimes++;
         if (clickMainUITimes >= 30)
@@ -713,7 +712,6 @@ const MakeSureInGame = (shot) =>
 const ExceptionFlow = () =>
 {
     const shot = captureScreen();
-
     if (IsHaltMode())
     {
         NoPotionFlow_HaltMode(shot);

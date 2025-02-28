@@ -1,5 +1,5 @@
 
-const { RewriteConfig, Sleep, specialConfig, LaunchGame, ReadConfig, ReadAccountFile, StopScript, GetRandom } = require("./utils.js");
+const { RewriteConfig, specialConfig, LaunchGame, ReadConfig, ReadAccountFile, StopScript, GetRandom } = require("./utils.js");
 const { ExceptionFlow } = require("./Exception");
 const { MainStoryFlow } = require("./MainStory.js");
 
@@ -126,32 +126,50 @@ function Init()
     RewriteConfig(config)
 
 }
-
-const GetCaptureScreenPermission = () =>
+const applyForCaptureScreenPermission = () =>
 {
+    console.log("申请截图权限");
     let isSuccess = false;
     threads.start(function ()
     {
         auto();
         images.requestScreenCapture(true);
     });
+
     threads.start(function ()
     {
         let hasOpen = textMatches(/(.*시작하기.*|.*立即开始.*)/).findOne(60000);
         if (hasOpen)
         {
             hasOpen.click();
+            console.log("获取截图截图权限成功");
             isSuccess = true;
         }
-        else
+        console.log("获取截图权限失败");
+    });
+}
+
+
+const GetCaptureScreenPermission = () =>
+{
+    threads.start(() =>    
+    {
+        requestScreenCapture(true);
+
+    });
+    device.setMusicVolume(0);
+    threads.start(() =>
+    {
+        let hasOpen = textMatches(/(.*시작하기.*|.*立即开始.*)/).findOne(2000);
+        if (hasOpen)
         {
-            console.log("获取截图权限失败");
-            StopScript()
+            hasOpen.click();
+            sleep(500);
+            const img = captureScreen();
+            toast(img.getWidth() + " x " + img.getHeight());
         }
     });
-    return isSuccess;
 };
-
 
 const uiFloaty = () =>
 {
@@ -162,11 +180,11 @@ const uiFloaty = () =>
             <vertical gravity="center|top" >
                 <text id="delayTime" h='0' gravity="center" color="#ffffff" textSize="40sp" ></text>
                 <button id="start" h="40" w="120" color="#ffffff" bg="#a6e3e9" marginTop="20">开始</button>
-                <text w="80" textSize="12" textStyle="italic" color={versionColor} marginTop="10">version：{version}</text>
+                <text textSize="14" textStyle="italic" w="120" color={versionColor} marginTop="10">version：{version}</text>
                 <text id="more" textSize="20" h="25" gravity="center" marginTop="5">﹀</text>
-                <linear id="more_container" h="0" w="120" marginTop="10">
-                    <text id="loginGoogle" w="70" textSize="12" color="#ffffff" marginLeft="10" >谷歌登录</text>
-                    <text id="createCharacter" w="70" textSize="12" color="#ffffff" marginLeft="10">创建角色</text>
+                <linear id="more_container" h="0" w="120" marginTop="5">
+                    <text id="loginGoogle" w="70" textSize="10" color="#ffffff"  >谷歌登录</text>
+                    <text id="createCharacter" w="70" textSize="10" color="#ffffff" marginLeft="5">创建角色</text>
                 </linear>
             </vertical>
         </card>
@@ -174,19 +192,8 @@ const uiFloaty = () =>
 
     floatyWindow.setSize(400, 280);
     floatyWindow.setPosition(185, 300);
-    try
-    {
-        const getSuccess = GetCaptureScreenPermission();
-        if (!getSuccess)
-        {
-            GetCaptureScreenPermission()
-        }
-    }
-    catch (error)
-    {
-        alert("异常", "获取截图权限失败。")
-        StopScript()
-    }
+    GetCaptureScreenPermission()
+
     const config = ReadConfig()
 
     const uiInterval = setInterval(() =>
@@ -276,6 +283,7 @@ console.setGlobalLogConfig({
 
 const stateFloaty = () =>
 {
+    console.log("脚本logo");
     const floaty_window = floaty.window(
         <frame gravity="center" id="switch" w="18" h="18" >
             <text color="#ffffff">🎯</text>
@@ -290,7 +298,6 @@ const Update = () =>
     while (true)
     {
         ExceptionFlow();
-
         if (specialConfig.gameMode == "mainStory")
         {
             MainStoryFlow();

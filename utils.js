@@ -165,6 +165,97 @@ const CloseMenu = (shot) =>
     }
 };
 
+/**
+ * 生成对数正态分布的随机数
+ * @param {number} mu      - 对数均值（控制分布中心）
+ * @param {number} sigma   - 对数标准差（控制分布宽度）
+ * @returns {number}       - 符合对数正态分布的随机数
+ */
+const logNormal = (mu, sigma) =>
+{
+    // mu = mu || Math.log(800);
+    // sigma = sigma || 0.5
+    // // 生成正态分布随机数，再取指数
+    // let z = Math.sqrt(-2 * Math.log(Math.random())) * Math.cos(2 * Math.PI * Math.random());
+    // const number = Math.floor(Math.exp(mu + sigma * z));
+    // console.log("lnumber");
+    return 1000
+}
+const Sleep = (time) => 
+{
+    if (!time)
+    {
+        time = logNormal()
+    }
+    else
+    {
+        time = time * 1000 + logNormal()
+    }
+    sleep(time)
+};
+
+const humanSwipe = (startRegion, endRegion, durationLimit) => 
+{
+    let steps = 50; // 滑动过程分解为50个步骤
+    let points = [];
+    durationLimit = durationLimit || [500, 1000]
+
+    const duration = Math.floor(random(durationLimit[0], durationLimit[1]))
+    const [x1, y1, w1, h1] = startRegion;
+    const startX = Math.round(Math.random() * w1 + x1);
+    const startY = Math.round(Math.random() * h1 + y1);
+    const [x2, y2, w2, h2] = endRegion;
+    const endX = Math.round(Math.random() * w2 + x2);
+    const endY = Math.round(Math.random() * h2 + y2);
+
+    // 生成贝塞尔曲线控制点，添加路径扰动
+    let controlX = (startX + endX) / 2 + random(-20, 20);
+    let controlY = (startY + endY) / 2 + random(-20, 20);
+
+    // 生成变速滑动轨迹（加速-减速）
+    for (let i = 0; i <= steps; i++)
+    {
+        let t = i / steps;
+        // 贝塞尔曲线公式（二次）
+        let x = (1 - t) * (1 - t) * startX + 2 * t * (1 - t) * controlX + t * t * endX;
+        let y = (1 - t) * (1 - t) * startY + 2 * t * (1 - t) * controlY + t * t * endY;
+        // 添加随机扰动（模拟手指抖动）
+        x += random(-3, 3);
+        y += random(-3, 3);
+        points.push([x, y]);
+    }
+
+    // 执行滑动
+    gesture(duration, points);
+
+    Sleep()
+}
+/**
+ * 随机点击
+ *
+ * @param {*} [startX, startY, w, h]
+ * @param {*} delay 单位秒
+ */
+const RandomPress = ([startX, startY, w, h], delay) =>
+{
+    const beforeDelay = logNormal()
+    sleep(beforeDelay)
+
+    const x1 = Math.round(Math.random() * w + startX);
+    const y1 = Math.round(Math.random() * h + startY);
+    const x2 = x1 + random(-4, 4);
+    const y2 = y1 + random(-4, 4)
+
+    const time = random(20, 200);
+    swipe(x1, y1, x2, y2, time);
+    if (delay)
+    {
+        delay = delay + logNormal(Math.log(800))
+    }
+    delay = delay || logNormal();
+    sleep(delay);
+
+};
 const CloseBackpack = () =>
 {
     const hasBackpackClose = HasBackpackClose();
@@ -265,6 +356,7 @@ const ChangeRecoverPotionPercentToNormal = () =>
     }
     return false;
 };
+
 const ClearPage = () =>
 {
     let shot = captureScreen();
@@ -359,6 +451,21 @@ const OpenSetting = () =>
 const ChangeGameSetting = () =>
 {
     console.log("开始修改游戏画面设置");
+    const config = ReadConfig()
+    if (config.game.changeGameSetting)
+    {
+        console.log("已经修改游戏画面设置");
+        if (GetRandom() > 80)
+        {
+            console.log("鉴定成功，再次修改画面设置");
+        }
+        else
+        {
+            console.log("不修改画面设置");
+            return true;
+        }
+    }
+
     let isChangeSuccess = false;
 
     if (!OpenSetting())
@@ -370,11 +477,22 @@ const ChangeGameSetting = () =>
 
     RandomPress([1132, 225, 97, 23]) //自动战斗范围无限制
     RandomPress([958, 529, 116, 26]) //移动时维持自动战斗
+
     RandomPress([187, 78, 75, 24]) //游戏设置页
     RandomPress([1128, 226, 112, 24]) //取消接收
-    RandomPress([641, 378, 101, 25]) //省电模式关闭
-    SwipeSlowly([640, 600, 10, 10], [640, 300, 10, 10], 1);
-    SwipeSlowly([640, 600, 10, 10], [640, 300, 10, 10], 1);
+
+    if (GetRandom() > 50)
+    {
+        console.log("关闭节电模式");
+        RandomPress([641, 378, 101, 25]) //省电模式关闭
+    }
+    else
+    {
+        console.log("10分钟关闭");
+        RandomPress([958, 376, 120, 26])
+    }
+    humanSwipe([351, 530, 591, 100], [294, 137, 856, 109], [2000, 3000])
+
     //关闭角色资讯
     for (let i = 0; i < 5; i++)
     {
@@ -395,9 +513,9 @@ const ChangeGameSetting = () =>
         let imgList = LoadImgList(`page/gameSetting/${i}`)
         gameSettingFont.push(imgList)
     }
-    out: for (let i = 0; i < 6; i++)
+    out: for (let i = 0; i < 4; i++)
     {
-        SwipeSlowly([640, 600, 10, 10], [640, 300, 10, 10], 1.5);
+        humanSwipe([351, 530, 591, 100], [294, 137, 856, 109], [2000, 3000])
         for (let j = 0; j < gameSettingFont.length; j++)
         {
             let haveFont = FindImgInList(gameSettingFont[j], [244, 109, 204, 544])
@@ -409,7 +527,6 @@ const ChangeGameSetting = () =>
                 {
                     console.log("到达底部")
                     isChangeSuccess = true;
-                    const config = ReadConfig()
                     config.game.changeGameSetting = true;
                     RewriteConfig(config)
                     break out;
@@ -859,24 +976,6 @@ const FormatDateTime = (format) =>
 
 const GetDateTime = (format) => FormatDateTime(format);
 
-const GetVerificationCode = () =>
-{
-    const url = "https://upload.chaojiying.net/Upload/Processing.php";
-    const clip = images.clip(images.captureScreen(), 470, 297, 278, 86);
-    const img = images.toBase64(clip);
-    const data =
-    {
-        user: "btx159632",
-        pass: "Snhc2024",
-        softid: "6909c4f85873ab3fd2011a6c72e4ed5b",
-        codetype: "1902",
-        // userfile: img
-        file_base64: img
-    };
-    const result = http.post(url, data);
-
-    return result.body.json().pic_str;
-};
 const GetRandom = () => Math.floor(random(0, 100));
 const HasPageback = (shot) => { shot = shot || captureScreen(); return FindMultiColors(PagebackColorList, [1216, 9, 41, 43], shot); };
 
@@ -1212,7 +1311,7 @@ const ExitHaltMode = () =>
     Sleep(random(3, 30))
     for (let i = 0; i < 3; i++)
     {
-        SwipeSlowly([556, 366, 5, 10], [1050, 366, 5, 10], 2);
+        humanSwipe([486, 185, 326, 385], [984, 49, 258, 644], [300, 800])
         Sleep(6);
         if (HasMenu())
         {
@@ -1266,9 +1365,10 @@ const PageBack = (shot) =>
     const hasPageBack = HasPageback(shot);
     if (hasPageBack)
     {
-        console.log("返回");
+        console.log("点击返回");
         RandomPress([1226, 19, 18, 23]);
     }
+    return false;
 };
 
 const BackpackExceptionCheck = () =>
@@ -1447,29 +1547,8 @@ const OpenBackpackMenu = (type) =>
     return false;
 };
 
-const Sleep = (time) => { time = time || random(); sleep(time * 1000); };
 
-/**
- * 随机点击
- *
- * @param {*} [startX, startY, w, h]
- * @param {*} delay 单位秒
- */
-const RandomPress = ([startX, startY, w, h], delay) =>
-{
-    const time = random(20, 150);
-    const beforeDelay = random(0, 1000)
-    sleep(beforeDelay)
-    if (delay)
-    {
-        delay = delay + random(1, 1000)
-    }
-    delay = delay || random(1500, 3000);
-    const x = Math.round(Math.random() * w + startX);
-    const y = Math.round(Math.random() * h + startY);
-    press(x, y, time);
-    sleep(delay);
-};
+
 
 
 const RecycleImgList = (list) => list.forEach(img => img.recycle());
@@ -1555,18 +1634,7 @@ const ReturnHome = () =>
     }
     return false;
 };
-const SwipeSlowly = (startRegion, endRegion, sec) =>
-{
-    const [x1, y1, w1, h1] = startRegion;
-    const startX = Math.round(Math.random() * w1 + x1);
-    const startY = Math.round(Math.random() * h1 + y1);
-    const [x2, y2, w2, h2] = endRegion;
-    const endX = Math.round(Math.random() * w2 + x2);
-    const endY = Math.round(Math.random() * h2 + y2);
-    sec = sec || 1;
-    gesture(sec * 1000, [startX, startY], [endX, endY]);
-    Sleep();
-};
+
 const ReadConfig = () =>
 {
     if (!mirrorConfig)
@@ -1694,7 +1762,7 @@ const StopGame = () =>
     }
     home();
 }
-const LaunchGame = () => app.launch(gamePackageName);
+const LaunchGame = () => { console.log("启动游戏"); app.launch(gamePackageName); }
 
 const RestartGame = (time) =>
 {
@@ -1733,7 +1801,7 @@ const ChangeHaltModeTime = () =>
  * @param {*} pos [x, y]
  */
 
-const PullDownSkill = (pos) => { gesture(500, pos, [pos[0] + random(0, 5), pos[1] + 30 + random(0, 5)]); Sleep(); };
+const PullDownSkill = (pos) => humanSwipe([pos[0] - 20, pos[1], 40, 15], [pos[0] - 20, pos[1] + 20, 40, 15], [100, 300])
 
 /** 
 * @param {*} type "grocery" "skill" "equipment" "friend" "exchange" "mount" "stockroom"
@@ -2053,7 +2121,7 @@ const TapArrow = () =>
     return hadFindArrow;
 };
 
-const StopScript = () => java.lang.System.exit(0);
+const StopScript = () => { console.log("退出脚本"); java.lang.System.exit(0); }
 // const StopScript = () => engines.stopAllAndToast()
 
 const SetCountryAndBirth = () =>
@@ -2293,9 +2361,9 @@ module.exports = {
     DeathCheck,
     EnterMenuItemPage, ExitHaltMode, EnterHaltMode,
     FindBlueBtn, FindTipPoint, FindImg, FindMultiColors, FindCheckMark, FindRedBtn, FindGoldBtn, FindGreenBtn, FindImgInList, FindNumber, FindFloatNumber, FindWhiteCheckMark,
-    GoToTheNPC, GetVerificationCode, GetCharacterLv, GetDateTime, GetServerName, GetRandom, generateRandomArray,
+    GoToTheNPC, GetCharacterLv, GetDateTime, GetServerName, GetRandom, generateRandomArray,
     HasPageback, HasMenu, HasMenuClose, HollowPress, HasSkip, HasBackpackClose, HasBackpackMenuClose, HasPopupClose, HasTip, HaveMainStoryIcon, HasTransformIcon, HaveDailyMissionIcon,
-    HaveFinished, HasMap, HaveToTapBlank, HasHaltModeBtn, http_get, http_post,
+    HaveFinished, HasMap, HaveToTapBlank, HasHaltModeBtn, http_get, http_post, humanSwipe,
     IsMoving, IsBackpackFull, IsInCity, IsHaltMode, IsLocked, IsInQuest, IsAuto_active, IsAuto_inactive, IsNoPotion,
     LoadImgList, LaunchGame,
     MatchTemplateList,
@@ -2304,6 +2372,7 @@ module.exports = {
     PageBack, PressBlank, PullDownSkill, PressToAuto,
     RandomPress, ReadImg, ReturnHome, RestartGame, RecycleImgList, ReadConfig, RewriteConfig, ReadDealRecord, ReadAccountFile, ReadDailyDiamondRecord, ReadTradeRecord, RecognizePage,
     UpdateTradeRecord, updateDeviceData, deleteDeviceData,
-    Sleep, SwipeSlowly, StopScript, SetCountryAndBirth, SwipeUp, SwipeDown, SwipeLeft, SwipeRight, StopGame, shuffleArray,
+    Sleep, StopScript, SetCountryAndBirth, SwipeUp, SwipeDown, SwipeLeft, SwipeRight, StopGame, shuffleArray,
     WaitUntil, WaitUntilMenu, WaitUntilPageBack, WaitUntilFindColor,
 };
+

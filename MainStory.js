@@ -14,7 +14,7 @@ const {
     OpenBackpack, OpenBackpackMenu, OpenMenu,
     PullDownSkill, PageBack, PressBlank,
     ReadConfig, RewriteConfig, RecycleImgList, ReturnHome, ReadImg, RandomPress,
-    SwipeSlowly, Sleep, SwipeUp, SwipeDown, SwipeLeft, SwipeRight,
+    Sleep, SwipeUp, SwipeDown, SwipeLeft, SwipeRight,
     TapTip,
     WaitUntil, WaitUntilPageBack, WaitUntilMenu,
     PressToAuto,
