@@ -4,36 +4,39 @@ const { ExceptionFlow } = require("./Exception");
 const { MainStoryFlow } = require("./MainStory.js");
 
 const { InstanceFlow } = require("./Instance.js");
+const { dhyanaFlow } = require("./dhyana.js");
 
 const version = `${app.versionName}`
 const versionColorList = ["#004d40", "#005B8C", "#8a4a9e", "#c54b1f", "#b30000", "#1C2331", "#AE445A", "#EB3678", "#EB3678"]
 const versionColor = versionColorList[parseInt(version.split('.')[2])];
-let mainThread = null;
 let serverName = null;
 
 let loginGoogleDelay = 0;
 let createCharacterDelay = 0;
-
-let gameMode = null;
-
+let isDhyana = false;
 function Init()
 {
     const config = ReadConfig();
-
-    if (config.unlockTrade)
+    if (config.dhyana)
     {
-        specialConfig.gameMode = "instance";
-        specialConfig.initGameMode = "instance"
-        config.gameMode = "instance"
+        console.log("当前配置为禅模式")
+        specialConfig.gameMode = "dhyana"
+        specialConfig.initGameMode = "dhyana"
+        isDhyana = true;
     }
     else
     {
-        specialConfig.gameMode = "mainStory"
-        specialConfig.initGameMode = "mainStory"
-        config.gameMode = "mainStory"
+        if (config.unlockTrade)
+        {
+            specialConfig.gameMode = "instance";
+            specialConfig.initGameMode = "instance"
+        }
+        else
+        {
+            specialConfig.gameMode = "mainStory"
+            specialConfig.initGameMode = "mainStory"
+        }
     }
-
-    gameMode = config.gameMode;
 
 
     if (!config.delayTime)
@@ -180,29 +183,32 @@ const uiFloaty = () =>
             <vertical gravity="center|top" >
                 <text id="delayTime" h='0' gravity="center" color="#ffffff" textSize="40sp" ></text>
                 <button id="start" h="40" w="120" color="#ffffff" bg="#a6e3e9" marginTop="20">开始</button>
-                <text textSize="14" textStyle="italic" w="120" color={versionColor} marginTop="10">version：{version}</text>
+                <text textSize="14" textStyle="italic" w="120" color={versionColor} marginTop="10" marginLeft="17">version：{version}</text>
                 <text id="more" textSize="20" h="25" gravity="center" marginTop="5">﹀</text>
                 <linear id="more_container" h="0" w="120" marginTop="5">
                     <text id="loginGoogle" w="70" textSize="10" color="#ffffff"  >谷歌登录</text>
-                    <text id="createCharacter" w="70" textSize="10" color="#ffffff" marginLeft="5">创建角色</text>
+                    <text id="createCharacter" w="70" textSize="10" color="#ffffff" >创建角色</text>
                 </linear>
+                <checkbox id="gameMode_dhyana" w="100" text="模式：禅" textSize="12" checked="{{isDhyana}}" />
             </vertical>
         </card>
     );
-
     floatyWindow.setSize(400, 280);
     floatyWindow.setPosition(185, 300);
     GetCaptureScreenPermission()
 
     const config = ReadConfig()
-
+    // if (config.dhyana)
+    // {
+    //     floatyWindow.gameMode_dhyana.enabled = true;
+    // }
     const uiInterval = setInterval(() =>
     {
     }, 1000);
 
     floatyWindow.start.click(() =>
     {
-        if (serverName == null && loginGoogleDelay == 0 && config.game.name == '')
+        if (serverName == null && loginGoogleDelay == 0 && (config.game.lv == 0 || config.game.combatPower < 1000))
         {
             alert("异常检测", "暂未创建角色，退出")
             StopScript()
@@ -234,7 +240,7 @@ const uiFloaty = () =>
             console.log("版本号为：" + version);
             console.log("《《《 游戏开始 》》》");
             console.log("游戏模式为：" + specialConfig.gameMode);
-            mainThread = threads.start(MainFlow);
+            threads.start(MainFlow);
             clearInterval(uiInterval);
         }, (totalDelayTime + 1) * 1000);
     });
@@ -268,11 +274,36 @@ const uiFloaty = () =>
 
     floatyWindow.more.click(() =>
     {
-        floatyWindow.setSize(400, 350);
-        floatyWindow.more_container.attr("h", 80);
+        floatyWindow.setSize(400, 450);
+        floatyWindow.more_container.attr("h", 30);
         floatyWindow.more.attr("h", 0);
     });
 
+    floatyWindow.gameMode_dhyana.on("check", (checked) =>
+    {
+        if (checked)
+        {
+            console.log("打开禅模式");
+            config.dhyana = true;
+            specialConfig.gameMode = "dhyana"
+            specialConfig.initGameMode = "dhyana"
+        } else
+        {
+            console.log("关闭禅模式");
+            config.dhyana = false;
+            if (config.unlockTrade)
+            {
+                specialConfig.gameMode = "instance";
+                specialConfig.initGameMode = "instance"
+            }
+            else
+            {
+                specialConfig.gameMode = "mainStory"
+                specialConfig.initGameMode = "mainStory"
+            }
+        }
+        RewriteConfig(config)
+    })
     floatyWindow.stop.click(StopScript);
 };
 
@@ -297,14 +328,21 @@ const Update = () =>
 {
     while (true)
     {
-        ExceptionFlow();
-        if (specialConfig.gameMode == "mainStory")
+        if (specialConfig.gameMode == "dhyana")
         {
-            MainStoryFlow();
+            dhyanaFlow()
         }
-        else if (specialConfig.gameMode == "instance")
+        else
         {
-            InstanceFlow();
+            ExceptionFlow();
+            if (specialConfig.gameMode == "mainStory")
+            {
+                MainStoryFlow();
+            }
+            else if (specialConfig.gameMode == "instance")
+            {
+                InstanceFlow();
+            }
         }
         if (specialConfig.gameMode != specialConfig.initGameMode)
         {

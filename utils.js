@@ -8,12 +8,10 @@ const { PagebackColorList, MenuColorList, MenuCloseColorList, BlueBtnColorList, 
 const { TipColorList, } = require("./Color/MainStoryColorList.js");
 
 const defaultConfig = {
-    gameMode: "mainStory",
     delayTime: random(0, 600),
     resetHour: random(4, 12),
     randomDayOfTheWeek: [random(1, 7), 0, 0],
     unlockTrade: false,
-    accountSuspended: false,
     totalDeathTimes: 0,
     manufacture: [random(1, 15), random(16, 30)],
     dailyTradingHours: [
@@ -2375,4 +2373,3 @@ module.exports = {
     Sleep, StopScript, SetCountryAndBirth, SwipeUp, SwipeDown, SwipeLeft, SwipeRight, StopGame, shuffleArray,
     WaitUntil, WaitUntilMenu, WaitUntilPageBack, WaitUntilFindColor,
 };
-

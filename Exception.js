@@ -321,14 +321,14 @@ const MainUIFlow = (shot) =>
             {
                 RandomPress([83, 669, 90, 17])
             }
-            Sleep(random(5, 10))
+            Sleep(random(1, 10))
             RandomPress([416, 173, 438, 358], random(5, 10))
             console.log("点击开始游戏 有区服的主页面");
         }
         else
         {
             console.log("点击开始 主页面");
-            Sleep(random(5, 10))
+            Sleep(random(1, 10))
             RandomPress([416, 173, 438, 358], random(5, 10))
         }
         clickMainUITimes++;
@@ -685,6 +685,7 @@ const MakeSureInGame = (shot) =>
 {
     if (!HasMenu())
     {
+        shot = shot || captureScreen();
         MainUIFlow(shot);
         PressCommonBtn();
         PressSomeTip(shot);
@@ -728,7 +729,7 @@ const ExceptionFlow = () =>
     ResetConfig();
 };
 
-module.exports = { ExceptionFlow };
+module.exports = { ExceptionFlow, MakeSureInGame };
 
 
 

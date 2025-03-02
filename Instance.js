@@ -1213,7 +1213,7 @@ const InstanceFlow = () =>
     TimeManager()
 };
 
-module.exports = { InstanceFlow };
+module.exports = { InstanceFlow, HangUpSecretLab, HangUpWild };
 
 
 
