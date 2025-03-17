@@ -7,7 +7,6 @@ const GetCaptureScreenPermission = () =>
         requestScreenCapture(true);
 
     });
-    device.setMusicVolume(0);
     threads.start(() =>
     {
         let hasOpen = textMatches(/(.*시작하기.*|.*立即开始.*)/).findOne(2000);

@@ -155,15 +155,10 @@ const applyForCaptureScreenPermission = () =>
 
 const GetCaptureScreenPermission = () =>
 {
-    threads.start(() =>    
-    {
-        requestScreenCapture(true);
 
-    });
-    device.setMusicVolume(0);
     threads.start(() =>
     {
-        let hasOpen = textMatches(/(.*시작하기.*|.*立即开始.*)/).findOne(2000);
+        let hasOpen = textMatches(/(.*시작하기.*|.*立即开始.*)/).findOne(80000);
         if (hasOpen)
         {
             hasOpen.click();
@@ -172,6 +167,14 @@ const GetCaptureScreenPermission = () =>
             toast(img.getWidth() + " x " + img.getHeight());
         }
     });
+
+    const isSuccess = requestScreenCapture(true);
+    if (!isSuccess)
+    {
+        console.log("截图权限申请失败,重新申请");
+        StopScript();
+    }
+
 };
 
 const uiFloaty = () =>
@@ -208,9 +211,10 @@ const uiFloaty = () =>
 
     floatyWindow.start.click(() =>
     {
-        if (serverName == null && loginGoogleDelay == 0 && (config.game.lv == 0 || config.game.combatPower < 1000))
+        if (serverName == null && loginGoogleDelay == 0 && (config.game.lv == 0 && config.game.combatPower == 1000 && config.totalDeathTimes == 0))
         {
             alert("异常检测", "暂未创建角色，退出")
+            console.log("暂未创建角色，退出")
             StopScript()
         }
 

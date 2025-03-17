@@ -35,9 +35,9 @@
     "libjackpal-termexec2.so"
   ],
   "main": "main.js",
-  "name": "LN",
+  "name": "LABCN",
   "outputPath": "/storage/emulated/0/脚本/LordNine/build",
-  "packageName": "com.lordnine",
+  "packageName": "com.laxn.v1",
   "projectDirectory": "/storage/emulated/0/脚本/LordNine",
   "scripts": {},
   "signingConfig": {
@@ -46,5 +46,5 @@
   },
   "sourcePath": "/storage/emulated/0/脚本/LordNine/main.js",
   "versionCode": 28,
-  "versionName": "3.2.1"
+  "versionName": "3.9.1"
 }

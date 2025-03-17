@@ -1725,12 +1725,14 @@ const ReadAccountFile = () =>
         else
         {
             alert("账号信息有误", "请检查账号文件内容是否正常")
+            console.log("账号信息有误，请检查账号文件内容是否正常")
             StopScript()
         }
     }
     else
     {
         alert("读取账号信息失败", "无账号信息");
+        console.log("读取账号信息失败，无账号信息");
         StopScript()
     }
 };

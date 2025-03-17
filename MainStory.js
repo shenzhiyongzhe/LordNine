@@ -215,6 +215,7 @@ const ClickMainStory = () =>
                             if (!IsMoving() && !IsInQuest())
                             {
                                 alert("主线异常", "同一主线任务点击次数过多。")
+                                console.log("主线异常", "同一主线任务点击次数过多。");
                                 StopScript()
                                 break;
                             }
@@ -414,7 +415,6 @@ const DeathFlow = (message) =>
 
     const config = ReadConfig();
     config.game.deathTime++;
-    config.totalDeathTimes = config.totalDeathTimes ? config.totalDeathTimes : 0;
     config.totalDeathTimes++;
     if (message != null)
     {

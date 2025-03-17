@@ -234,7 +234,7 @@ const DisconnectionFlow = (shot) =>
             let isTimeout = IsTimeout();
             if (isTimeout)
             {
-                console.log("vpn is time out");
+                console.log("需要更换ip，vpn is time out");
                 alert("time out", "需要更换ip");
                 StopScript()
             }
@@ -305,6 +305,7 @@ const DisconnectionFlow = (shot) =>
             Sleep(serverMaintenanceDelayTime)
             RandomPress([674, 443, 127, 29])
             alert("服务器维护中", "检测到游戏服务器维护中")
+            console.log("服务器维护中，退出游戏");
             StopScript()
         }
     }

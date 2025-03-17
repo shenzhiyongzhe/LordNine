@@ -1108,6 +1108,7 @@ const LoginFlow = () =>
             const delayStopTime = random(3, 500)
             Sleep(delayStopTime)
             alert("邮箱接码完成", "接码完成")
+            console.log("邮箱接码完成")
             StopScript()
             break;
         }
@@ -1164,6 +1165,7 @@ const WaitUntilEnterServerSelectPage = () =>
         if (clickTimes > 30)
         {
             alert("创建角色异常", "点击主页面次数过多，退出")
+            console.log("点击主页面次数过多，退出")
             StopScript()
         }
         if (FindBlueBtn([557, 427, 169, 61]))
@@ -1264,6 +1266,7 @@ const EnterServer = (serverName) =>
         } catch (error)
         {
             alert(error)
+            console.log(error)
             StopScript()
         }
 
