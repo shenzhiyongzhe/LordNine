@@ -171,13 +171,12 @@ const CloseMenu = (shot) =>
  */
 const logNormal = (mu, sigma) =>
 {
-    // mu = mu || Math.log(800);
-    // sigma = sigma || 0.5
-    // // 生成正态分布随机数，再取指数
-    // let z = Math.sqrt(-2 * Math.log(Math.random())) * Math.cos(2 * Math.PI * Math.random());
-    // const number = Math.floor(Math.exp(mu + sigma * z));
-    // console.log("lnumber");
-    return 1000
+    mu = mu || Math.log(800);
+    sigma = sigma || 0.5
+    // 生成正态分布随机数，再取指数
+    let z = Math.sqrt(-2 * Math.log(Math.random())) * Math.cos(2 * Math.PI * Math.random());
+    const number = Math.floor(Math.exp(mu + sigma * z));
+    return number
 }
 const Sleep = (time) => 
 {

@@ -37,6 +37,8 @@ const BlackBtnColorList = [
 let checkBox_0 = ReadImg("icon/login/checkBox_0");
 const verificationCoeInput_zh = LoadImgList("icon/beginner/verificationCodeInput_zh");
 const canNotCreateCharacterImgList = LoadImgList("icon/beginner/canNotCreateCharacter");
+const input_placeholder_recoveryEmail = ReadImg("icon/login/input_placeholder_recoveryEmail");
+
 const serverNameImgList = [];
 const GenerateRandomName = () =>
 {
@@ -58,7 +60,7 @@ const GenerateRandomName = () =>
 const LoadServerImgList = () =>
 {
     let imgList = null;
-    for (let i = 0; i < 8; i++)
+    for (let i = 0; i < 9; i++)
     {
         imgList = LoadImgList(`icon/beginner/serverNameList/${i}`);
         serverNameImgList.push(imgList);
@@ -100,12 +102,19 @@ const ClickConfirmBtn = (findTime) =>
         hasConfirm_zh.click();
         return true;
     }
+    const hasConfirm_kr = text("확인").findOne(findTime);
+    if (hasConfirm_kr)
+    {
+        console.log("点击确认-kr");
+        hasConfirm_kr.click();
+        return true;
+    }
 
 };
 const PressServerBar = () => { console.log("点击服务器框，进入选区页面"); RandomPress([547, 590, 173, 32]); };
 const CheckLogin = () =>
 {
-    console.log("开始执行：检测是否已经登录账号");
+    console.log("check login：检测是否已经登录账号");
 
     let isLogin = false;
 
@@ -331,17 +340,24 @@ const CheckLogin = () =>
             }
             break;
         }
+        let hasInput_placeholder_recoveryEmail = FindImg(input_placeholder_recoveryEmail, [280, 359, 170, 119]);
+        if (hasInput_placeholder_recoveryEmail) 
+        {
+            console.log("发现辅助游戏邮箱输入框，进入登录环节");
+            isLogin = false;
+            break;
+        }
         Sleep();
     }
     console.log("检测登录流程结束，当前是否登录：" + isLogin);
     return isLogin;
 };
-const accountInfo = ReadAccountFile();
+const config = ReadConfig();
+const accountInfo = config.accountInfo;
 
 const LoginGoogleAccount = () =>
 {
-    console.log("开始登录 Google 账号");
-    let input_placeholder_recoveryEmail = ReadImg("icon/login/input_placeholder_recoveryEmail");
+    console.log("LoginGoogleAccount:开始登录 Google 账号");
 
     for (let i = 0; i < 400; i++)
     {
@@ -413,7 +429,7 @@ const LoginGoogleAccount = () =>
             setText(accountInfo.account);
             Sleep(3);
             RandomPress([413, 558, 539, 41], 3);
-            console.log("邮箱验证码已发送！");
+            console.log("cn:邮箱验证码已发送！");
             if (textMatches(/.*已發送驗證碼至電子信箱.*/).findOne(20))
             {
                 console.log("发现已发送验证码弹窗，点击确认");
@@ -531,9 +547,12 @@ const LoginGoogleAccount = () =>
         let hasInput_placeholder_recoveryEmail = FindImg(input_placeholder_recoveryEmail, [280, 359, 170, 119]);
         if (hasInput_placeholder_recoveryEmail) 
         {
+            console.log(`发现辅助游戏邮箱输入框，开始输入邮箱,email:${accountInfo.account}`);
+            RandomPress([329, 390, 619, 41])
             setText(accountInfo.account);
-            Sleep(3);
-            RandomPress([413, 558, 539, 41], 3);
+            Sleep(random(1, 3));
+            RandomPress([338, 71, 615, 63]) // 关闭键盘
+            RandomPress([413, 558, 539, 41], 3); //点击下一步
             console.log("邮箱验证码已发送！");
             if (textMatches(/.*已發送驗證碼至電子信箱.*/).findOne(20))
             {
@@ -737,6 +756,7 @@ const InputEmailUrl = () =>
             click(hasUseIdentificationContinue.bounds().centerX(), hasUseIdentificationContinue.bounds().centerY());
         }
 
+
         Sleep();
         console.log("loop: " + i);
     }
@@ -745,7 +765,12 @@ const InputEmailUrl = () =>
         RandomPress([345, 100, 56, 14]);
         console.log("set text: url: https://mail.google.com");
         setText("https://accounts.google.com/v3/signin/identifier?continue=https%3A%2F%2Fmail.google.com%2Fmail%2F&ifkv=Ab5oB3qf7n2kJ0DkeNfW4CCNqYU37pmOSMWBPtyZzVGDdJnrZfPwECRIX01Jayqe0Yc5cR29ifDZGA&rip=1&sacu=1&service=mail&flowName=GlifWebSignIn&flowEntry=ServiceLogin&dsh=S18480657%3A1724727896300825&ddm=0");
-        Sleep();
+        Sleep(random(6, 10));
+        if (textMatches(/.*인증 메일 안내.*/).findOne(20))
+        {
+            console.log("发现STOVE邮箱验证，退出输入邮箱地址");
+            return true;
+        }
         if (textMatches(/(.*mail.google.com.*)/).findOne(3000))
         {
             Sleep();
@@ -761,6 +786,11 @@ const InputEmailUrl = () =>
                     console.log("发现邮箱关联账户，点击关联");
                     Sleep(3);
                     RandomPress([252, 1084, 218, 41]);
+                }
+                if (textMatches(/.*인증 메일 안내.*/).findOne(20))
+                {
+                    console.log("发现STOVE邮箱验证，退出输入邮箱地址");
+                    return true;
                 }
                 let hasUseIdentificationContinue = textMatches(/.*的身份继续.*/).findOne(20);
                 if (hasUseIdentificationContinue)
@@ -968,7 +998,7 @@ const GetEmailVerificationCode = () =>
                     has_refreshBtn_zh.click()
                     Sleep(3)
                 }
-                let hasEmail = textMatches(/.*驗證信說明.*/).find()
+                let hasEmail = textMatches(/.*驗證信說明.*|.*인증 메일 안내.*/).find()
                 if (hasEmail.empty())
                 {
                     console.log("没找到╭(╯^╰)╮")
@@ -986,7 +1016,7 @@ const GetEmailVerificationCode = () =>
         {
             console.log("获取验证码")
             Sleep()
-            let verificationCodeStr = textMatches(/.*請在輸入欄中輸入以下認證碼.*/).find()
+            let verificationCodeStr = textMatches(/.*請在輸入欄中輸入以下認證碼.*|.*인증번호.*/).find()
             if (verificationCodeStr)
             {
                 const codeList = []
@@ -1033,7 +1063,7 @@ const GetEmailVerificationCode = () =>
         return regex.test(str);
     }
 
-    for (let i = 0; i < 5; i++)
+    for (let i = 0; i < 3; i++)
     {
         code = GetLastestCode();
         if (code != null && code.length == 6 && isSixDigits(code))
@@ -1056,8 +1086,7 @@ const LoginFlow = () =>
         return false;
     }
     recents();
-    Sleep(3);
-
+    Sleep(random(2, 4));
     click(30, 600);
     Sleep();
     for (let i = 0; i < 30; i++)
@@ -1070,6 +1099,7 @@ const LoginFlow = () =>
             setText(code);
             Sleep();
             ClickNextBtn();
+            ClickConfirmBtn()
         }
         let hadVerificationSuccess = text("이메일 인증이 완료되었습니다.").findOne(20);
         if (hadVerificationSuccess)
@@ -1100,7 +1130,6 @@ const LoginFlow = () =>
         {
             RandomPress([333, 557, 624, 48])
         }
-        // ClickNextBtn()
         if (textMatches(/.*已完成裝置.*/).findOne(20))
         {
             ClickConfirmBtn();
@@ -1249,29 +1278,6 @@ const FindServer = (serverName) =>
 
 const EnterServer = (serverName) =>
 {
-    serverName = serverName.toString()
-    if (serverName === "999")
-    {
-        console.log("开始随机生成一个服务器");
-        serverName = [random(0, 7), random(0, 9)]
-    }
-    else
-    {
-        console.log("进入指定服务器");
-        try
-        {
-            const arr = serverName.split(".")
-            arr.map((item, index) => arr[index] = parseInt(item - 1))
-            serverName = arr
-        } catch (error)
-        {
-            alert(error)
-            console.log(error)
-            StopScript()
-        }
-
-    }
-
     let haveFoundServer = false;
 
     for (let i = 0; i < 20; i++)
@@ -1290,7 +1296,14 @@ const EnterServer = (serverName) =>
         else
         {
             console.log("重新生成随机服务器");
-            serverName[0] = random(0, 7)
+            if (serverName[0] == 8)
+            {
+                serverName[0] = 8;
+            }
+            else
+            {
+                serverName[0] = random(0, 7)
+            }
             serverName[1] = random(0, 9)
         }
     }

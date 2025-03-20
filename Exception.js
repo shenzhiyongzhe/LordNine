@@ -310,6 +310,7 @@ const DisconnectionFlow = (shot) =>
         }
     }
 };
+
 const MainUIFlow = (shot) =>
 {
     if (HaveLordNineWord(shot))

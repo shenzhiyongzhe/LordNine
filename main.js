@@ -14,6 +14,8 @@ let serverName = null;
 let loginGoogleDelay = 0;
 let createCharacterDelay = 0;
 let isDhyana = false;
+let isGlobalServer = false;
+
 function Init()
 {
     const config = ReadConfig();
@@ -129,29 +131,6 @@ function Init()
     RewriteConfig(config)
 
 }
-const applyForCaptureScreenPermission = () =>
-{
-    console.log("申请截图权限");
-    let isSuccess = false;
-    threads.start(function ()
-    {
-        auto();
-        images.requestScreenCapture(true);
-    });
-
-    threads.start(function ()
-    {
-        let hasOpen = textMatches(/(.*시작하기.*|.*立即开始.*)/).findOne(60000);
-        if (hasOpen)
-        {
-            hasOpen.click();
-            console.log("获取截图截图权限成功");
-            isSuccess = true;
-        }
-        console.log("获取截图权限失败");
-    });
-}
-
 
 const GetCaptureScreenPermission = () =>
 {
@@ -164,7 +143,7 @@ const GetCaptureScreenPermission = () =>
             hasOpen.click();
             sleep(500);
             const img = captureScreen();
-            toast(img.getWidth() + " x " + img.getHeight());
+            toastLog("分辨率：" + img.getWidth() + " x " + img.getHeight());
         }
     });
 
@@ -182,41 +161,36 @@ const uiFloaty = () =>
     Init()
     const floatyWindow = floaty.window(
         <card gravity="center|top" alpha="1" cardBackgroundColor="#71c9ce" cardCornerRadius="10">
-            <text id="stop" color="#ffffff" w="30" h="30" bg="#71c9ce" marginLeft="85">✕</text>
+            <text id="stop" color="#ffffff" w="30" h="30" bg="#71c9ce" marginLeft="100">✕</text>
             <vertical gravity="center|top" >
                 <text id="delayTime" h='0' gravity="center" color="#ffffff" textSize="40sp" ></text>
                 <button id="start" h="40" w="120" color="#ffffff" bg="#a6e3e9" marginTop="20">开始</button>
                 <text textSize="14" textStyle="italic" w="120" color={versionColor} marginTop="10" marginLeft="17">version：{version}</text>
                 <text id="more" textSize="20" h="25" gravity="center" marginTop="5">﹀</text>
                 <linear id="more_container" h="0" w="120" marginTop="5">
-                    <text id="loginGoogle" w="70" textSize="10" color="#ffffff"  >谷歌登录</text>
-                    <text id="createCharacter" w="70" textSize="10" color="#ffffff" >创建角色</text>
+                    <text id="loginGoogle" w="70" textSize="12" color="#ffffff"  >谷歌登录</text>
+                    <text id="createCharacter" w="70" textSize="12" color="#ffffff" >创建角色</text>
                 </linear>
-                <checkbox id="gameMode_dhyana" w="100" text="模式：禅" textSize="12" checked="{{isDhyana}}" />
+                <horizontal gravity="center">
+                    <checkbox id="gameMode_dhyana" w="100" text="模式：禅" textSize="12" checked="{{isDhyana}}" />
+                    <checkbox id="globalServer" w="100" text="国际服" textSize="12" />
+                </horizontal>
+
             </vertical>
         </card>
     );
-    floatyWindow.setSize(400, 280);
-    floatyWindow.setPosition(185, 300);
+    floatyWindow.setSize(450, 300);
+    floatyWindow.setPosition(162, 300);
     GetCaptureScreenPermission()
 
     const config = ReadConfig()
-    // if (config.dhyana)
-    // {
-    //     floatyWindow.gameMode_dhyana.enabled = true;
-    // }
+
     const uiInterval = setInterval(() =>
     {
     }, 1000);
 
     floatyWindow.start.click(() =>
     {
-        if (serverName == null && loginGoogleDelay == 0 && (config.game.lv == 0 && config.game.combatPower == 1000 && config.totalDeathTimes == 0))
-        {
-            alert("异常检测", "暂未创建角色，退出")
-            console.log("暂未创建角色，退出")
-            StopScript()
-        }
 
         const totalDelayTime = config.delayTime + loginGoogleDelay + createCharacterDelay;
         let count = totalDelayTime
@@ -260,8 +234,36 @@ const uiFloaty = () =>
         });
         dialogs.input("请输入区服编号", "999", (name) =>
         {
-            console.log("serverName:" + name);
-            serverName = name;
+            serverName = name.toString()
+            if (serverName === "999")
+            {
+                console.log("开始随机生成一个服务器");
+                if (isGlobalServer)
+                {
+                    console.log("国际服随机生成");
+                    serverName = [8, random(0, 9)]
+                }
+                else
+                {
+                    console.log("韩服随机生成");
+                    serverName = [random(0, 7), random(0, 9)]
+                }
+            }
+            else
+            {
+                try
+                {
+                    const arr = serverName.split(".")
+                    arr.map((item, index) => arr[index] = parseInt(item - 1))
+                    serverName = arr
+                } catch (error)
+                {
+                    alert(error)
+                    console.log(error)
+                    StopScript()
+                }
+            }
+            console.log("serverName:" + serverName);
         });
     });
 
@@ -278,7 +280,7 @@ const uiFloaty = () =>
 
     floatyWindow.more.click(() =>
     {
-        floatyWindow.setSize(400, 450);
+        floatyWindow.setSize(450, 450);
         floatyWindow.more_container.attr("h", 30);
         floatyWindow.more.attr("h", 0);
     });
@@ -307,6 +309,20 @@ const uiFloaty = () =>
             }
         }
         RewriteConfig(config)
+    })
+
+    floatyWindow.globalServer.on("check", (checked) =>
+    {
+        if (checked)
+        {
+            console.log("勾选国际服");
+            isGlobalServer = true;
+        }
+        else
+        {
+            console.log("取消勾选国际服");
+            isGlobalServer = false;
+        }
     })
     floatyWindow.stop.click(StopScript);
 };

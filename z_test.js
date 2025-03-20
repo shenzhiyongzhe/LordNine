@@ -16,7 +16,39 @@ const { StopScript, LoadImgList, FindImgInList, FindNumber, HasPopupClose, Rando
 
 // }
 // console.log(`总延迟：${number},平均延迟：${number / 1000}ms, 最大延迟：${max}ms, 最小延迟：${min}ms`);
+const getCode = () =>
+{
+    console.log("获取验证码")
+    Sleep()
+    let verificationCodeStr = textMatches(/.*請在輸入欄中輸入以下認證碼.*|.*인증번호.*/).find()
+    if (verificationCodeStr)
+    {
+        const codeList = []
+        verificationCodeStr.map(item =>
+        {
+            if (item.text)
+            {
+                let str = item.text()
+                let match = str.match(/\b\d{6}\b/)
+                if (match)
+                {
+                    codeList.push(match[0])
+                }
+            }
+        })
+        console.log("codelist: " + JSON.stringify(codeList))
+        if (codeList.length >= 1)
+        {
+            code = codeList[codeList.length - 1]
+            return code;
+        }
+        return null
+    }
+    else
+    {
+        console.log('╭(╯^╰)╮ 未发现新邮件')
+        return null;
+    }
+}
 
-
-console.log(FindBlueBtn([930, 640, 264, 71]));
-
+console.log(getCode())
