@@ -1422,6 +1422,21 @@ const FirstEnterGameClickSkip = () =>
         Sleep();
     }
 };
+const phoneNumberVerification = () =>
+{
+    console.log("开始手机号验证");
+    for (let i = 0; i < 20; i++)
+    {
+        if (FindBlueBtn([649, 428, 179, 61]))
+        {
+            console.log("发现手机号验证页面");
+            RandomPress([671, 445, 133, 27]);
+            console.log("点击同意")
+            break;
+        }
+        Sleep();
+    }
+}
 const CreateCharacterFlow = (serverName) =>
 {
     console.log("动态导入创建角色模板...");

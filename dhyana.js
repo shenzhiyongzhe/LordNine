@@ -1,9 +1,35 @@
+const { ComprehensiveImprovement_Instance } = require("./CommonFlow");
 const { MakeSureInGame } = require("./Exception")
 const { HangUpSecretLab, HangUpWild } = require("./Instance")
 const { IsHaltMode, IsInCity, GetRandom, IsAuto_active, IsAuto_inactive, ClickAuto, Sleep, EnterHaltMode } = require("./utils")
 
 
+let dailyTradingHours = null;
 
+const TimeManager = () =>
+{
+    if (dailyTradingHours == null)
+    {
+        const config = ReadConfig();
+        dailyTradingHours = config.dailyTradingHours;
+    }
+    const currentTimeString = new Date().toString().slice(16, 21)
+    let isTimeToTrade = false;
+    dailyTradingHours.map((time) =>
+    {
+        if (currentTimeString == time)
+        {
+            console.log(currentTimeString + " --- " + time);
+            console.log("到达随机交易时间");
+            isTimeToTrade = true;
+        }
+    });
+    if (isTimeToTrade)
+    {
+        ComprehensiveImprovement_Instance();
+    }
+
+};
 const dhyanaFlow = () =>
 {
     if (!IsHaltMode())
@@ -36,6 +62,7 @@ const dhyanaFlow = () =>
             }
         }
     }
+    TimeManager()
 }
 
 

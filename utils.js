@@ -72,9 +72,9 @@ const defaultConfig = {
     }
 };
 
-// const baseUrl = "http://8.138.153.122:8001/"
+const baseUrl = "http://8.138.153.122:8001/"
 
-const baseUrl = "http://47.76.112.107:8001/"
+// const baseUrl = "http://47.76.112.107:8001/"
 
 const http_post = (url, data) => http.post(`${baseUrl}${url}`, data)
 const http_get = (url, data) => http.post(`${baseUrl}${url}`, data)
