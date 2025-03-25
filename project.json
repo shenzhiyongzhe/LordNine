@@ -13,7 +13,7 @@
     "build_time": 0
   },
   "useFeatures": [],
-  "icon": "res/logo.ico",
+  "icon": "res/logo.png",
   "ignoredDirs": ["build", ".git", ".vscode", ".keyStore", "README.md"],
   "encrypt-code": false,
   "launchConfig": {
@@ -46,5 +46,5 @@
   },
   "sourcePath": "/storage/emulated/0/脚本/LordNine/main.js",
   "versionCode": 28,
-  "versionName": "3.23.1"
+  "versionName": "3.25.2"
 }

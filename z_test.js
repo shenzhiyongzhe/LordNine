@@ -1,4 +1,4 @@
-const { StopScript, LoadImgList, FindImgInList, FindNumber, HasPopupClose, RandomPress, FindBlueBtn, baseUrl, ReadConfig, PressToAuto, GetRandom, updateDeviceData, Sleep, FindGoldBtn, FindRedBtn, IsLocked, HasPageback, HaveToTapBlank, FindGreenBtn } = require("./utils.js")
+const { StopScript, LoadImgList, FindImgInList, FindNumber, HasPopupClose, RandomPress, FindBlueBtn, baseUrl, ReadConfig, PressToAuto, GetRandom, updateDeviceData, Sleep, FindGoldBtn, FindRedBtn, IsLocked, HasPageback, HaveToTapBlank, FindGreenBtn, humanSwipe } = require("./utils.js")
 
 
 // for (let i = 0; i < 1000; i++)
@@ -51,4 +51,4 @@ const getCode = () =>
     }
 }
 
-console.log(getCode())
+humanSwipe([449, 524, 405, 32], [439, 171, 445, 35], [500, 700])

@@ -38,7 +38,7 @@ let checkBox_0 = ReadImg("icon/login/checkBox_0");
 const verificationCoeInput_zh = LoadImgList("icon/beginner/verificationCodeInput_zh");
 const canNotCreateCharacterImgList = LoadImgList("icon/beginner/canNotCreateCharacter");
 const input_placeholder_recoveryEmail = ReadImg("icon/login/input_placeholder_recoveryEmail");
-
+const haveSendVEmailImg = ReadImg("icon/login/haveSendVEmail")
 const serverNameImgList = [];
 const GenerateRandomName = () =>
 {
@@ -573,7 +573,13 @@ const LoginGoogleAccount = () =>
                 break;
             }
         }
-
+        let hasloginto = FindImg(haveSendVEmailImg, [316, 225, 684, 144]);
+        if (hasloginto)
+        {
+            console.log("识图发现已经发送了邮箱验证码，点击确认");
+            RandomPress([408, 384, 459, 56])
+            break;
+        }
         Sleep();
     }
 };

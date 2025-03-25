@@ -1491,45 +1491,55 @@ const DecomposeEquipment = (type) =>
         {
             console.log("修改自动登录设置");
             RandomPress([1099, 616, 30, 26]); //设置图标
-            WaitUntil(() => HasPopupClose([865, 125, 35, 34]));
+            WaitUntil(() => HasPopupClose([863, 51, 53, 51]));
             Sleep();
+            humanSwipe([439, 171, 445, 35], [449, 524, 405, 32], [500, 700])
+            humanSwipe([439, 171, 445, 35], [449, 524, 405, 32], [500, 700])
             if (type == "total")
             {
                 console.log("全部分解");
-                if (!FindCheckMark([651, 234, 64, 38]))
+                if (!FindCheckMark([635, 155, 55, 41]))
                 {
                     console.log("分解蓝色装备");
-                    RandomPress([667, 230, 42, 13]);
+                    RandomPress([652, 168, 53, 13]);
+                }
+                if (!FindCheckMark([769, 148, 52, 54]))
+                {
+                    console.log("分解红色装备")
+                    RandomPress([790, 169, 52, 11])
                 }
             }
             else if (type == "partial")
             {
                 console.log("部分分解");
-                if (FindCheckMark([651, 234, 64, 38]))
+                if (FindCheckMark([635, 155, 55, 41]))
                 {
                     console.log("取消蓝色装备");
-                    RandomPress([667, 230, 42, 13]);
+                    RandomPress([652, 168, 53, 13]);
                     firstDecomposeEquipment = true;
                 }
-                if (FindCheckMark([774, 214, 39, 47]))
+                if (FindCheckMark([769, 148, 52, 54]))
                 {
-                    RandomPress([787, 231, 48, 15]);
+                    RandomPress([790, 169, 52, 11])
                 }
             }
-            if (FindCheckMark([404, 396, 44, 46]))
+            humanSwipe([449, 524, 405, 32], [439, 171, 445, 35], [500, 700])
+            humanSwipe([449, 524, 405, 32], [439, 171, 445, 35], [500, 700])
+
+            if (FindCheckMark([359, 505, 56, 49]))
             {
-                console.log("不取消可记录装备");
-                RandomPress([442, 409, 67, 18]);
+                console.log("选项：所有记录道具除外 取消勾选");
+                RandomPress([385, 520, 101, 16]);
             }
-            if (FindCheckMark([529, 396, 38, 44]))
+            if (FindCheckMark([497, 506, 55, 47]))
             {
                 console.log("不取消可强化装备");
-                RandomPress([569, 408, 76, 19]);
+                RandomPress([527, 519, 97, 21]);
             }
-            if (FindGoldBtn([553, 544, 177, 50]))
+            if (FindGoldBtn([520, 571, 203, 64]))
             {
                 console.log("自动登录设置完毕");
-                RandomPress([575, 556, 134, 25]);
+                RandomPress([549, 589, 146, 27]);
             }
 
         }

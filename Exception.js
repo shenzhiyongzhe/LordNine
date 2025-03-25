@@ -43,7 +43,13 @@ const ExceptionImgList = {
     loading: LoadImgList("special/loading"),
     confirmToGo: LoadImgList("special/confirmToGo"),
     quickMoving: LoadImgList("icon/font/quickMoving"),
-    crucifixIcon: LoadImgList("icon/crucifixIcon")
+    crucifixIcon: LoadImgList("icon/crucifixIcon"),
+    PreventAutomaticLogin: LoadImgList("icon/PreventAutomaticLogin"),
+    RecognitionFailure: LoadImgList("icon/RecognitionFailure"),
+    DropDownOption: LoadImgList("icon/DropDownOption"),
+    VerificationSuccessful: LoadImgList("icon/VerificationSuccessful"),
+    HongKong: LoadImgList("icon/HongKong+852"),
+    agree: LoadImgList("icon/agree"),
 };
 const HasTip = (region, shot) =>
 {
@@ -711,6 +717,197 @@ const MakeSureInGame = (shot) =>
     StovePopup();
     ClearPage();
 };
+const HumanMachineVerification = (shot) =>
+{
+    if (FindImgInList(ExceptionImgList.PreventAutomaticLogin, [504, 180, 254, 102], shot))
+    {
+        console.log("发现防止自动登录，点击验证");
+        shot = captureScreen();
+        let temp = images.clip(shot, 469, 296, 284, 98)
+        let image_Base64 = images.toBase64(temp)
+        temp.recycle()
+        let resoult = CJY_OCR(image_Base64)
+        if (resoult != null)
+        {
+            RandomPress([518, 407, 248, 23]);
+            sleep(random(1000, 2000))
+            setText(resoult.pic_str)
+            sleep(random(1000, 2000))
+            RandomPress([567, 514, 139, 39]);
+            shot = captureScreen();
+            if (FindImgInList(ExceptionImgList.RecognitionFailure, [510, 395, 258, 55], shot))
+            {
+                console.log("发现未验证通过，执行反分");
+                CJY_ReportError(resoult.pic_id)
+            }
+        }
+    }
+
+    if (FindImgInList(ExceptionImgList.agree, [647, 408, 203, 103]) || FindImgInList(ExceptionImgList.DropDownOption, [756, 252, 92, 65]))
+    {
+        for (let i = 0; i < 200; i++)
+        {
+            if (FindImgInList(ExceptionImgList.agree, [647, 408, 203, 103]))
+            {
+                console.log("点击同意");
+                RandomPress([677, 442, 120, 31]);
+            }
+            let HongKong_resoult = FindImgInList(ExceptionImgList.HongKong, [466, 310, 362, 223])
+            if (HongKong_resoult)
+            {
+                console.log(HongKong_resoult);
+                console.log("点击选择HongKong地区");
+                console.log(HongKong_resoult.x + "点击选择HongKong地区" + HongKong_resoult.y);
+                RandomPress([HongKong_resoult.x, HongKong_resoult.y, 153, 13]);
+            }
+
+            if (FindImgInList(ExceptionImgList.DropDownOption, [756, 252, 92, 65]))
+            {
+                if (FindImgInList(ExceptionImgList.HongKong, [547, 257, 198, 53]))
+                {
+                    let filePath = "/sdcard/local_information/Phonecall.json";
+                    if (!files.exists(filePath))
+                    {
+                        alert("文件不存在", "手机号文件不存在");
+                        StopScript()
+                    }
+                    let fileContent = files.read(filePath);
+                    let jsonObject = JSON.parse(fileContent);
+                    let phone = jsonObject.phone;
+                    let url = jsonObject.url;
+                    console.log("点击电话号码输入框并输入");
+                    RandomPress([496, 312, 179, 17]);
+                    sleep(random(1000, 2000))
+                    setText(phone)//电话
+                    sleep(random(1000, 2000))
+                    RandomPress([338, 39, 611, 112]);//输入法上方区域
+                    sleep(random(1000, 2000))
+                    RandomPress([724, 312, 90, 21]);//接收验证码按钮
+                    let code = GetVerificationCode(url)
+                    if (code != null)
+                    {
+                        console.log("点击验证码输入框并输入");
+                        RandomPress([500, 347, 178, 20]);
+                        sleep(random(1000, 2000))
+                        setText(code)//验证码
+                        sleep(random(1000, 2000))
+                        RandomPress([338, 39, 611, 112]);//输入法上方区域
+                        sleep(random(1000, 2000))
+                        RandomPress([673, 467, 117, 29]);//点击验证
+                    } else
+                    {
+                        console.log("获取验证码失败,重新获取");
+                    }
+                } else
+                {
+                    console.log("点击选择电话号码地区");
+                    RandomPress([800, 277, 17, 16]);
+                }
+            }
+
+            if (FindImgInList(ExceptionImgList.VerificationSuccessful, [492, 307, 310, 103]))
+            {
+                console.log("电话号码验证成功");
+                RandomPress([585, 440, 117, 33]);
+                break;
+            }
+            Sleep();
+        }
+    }
+}
+
+
+function GetVerificationCode(url)
+{
+    for (let i = 0; i < 120; i++)
+    {
+        let r = http.get(url);
+        if (r.statusCode == 200)
+        {
+            let resoult = r.body.string()
+            if (resoult != "0|0")
+            {
+                let code = resoult.match(/\b\d{6}\b/)[0];
+                console.log("提取验证码为：", code);
+                return code;
+            } else
+            {
+                console.log("等待验证码...")
+            }
+        } else
+        {
+            console.log("获取验证码失败")
+            alert("获取验证码失败，请检查网络或链接")
+            return null
+        }
+        Sleep()
+    }
+    return null
+}
+
+
+function CJY_OCR(Base64)
+{
+    let url = "https://upload.chaojiying.net/Upload/Processing.php"
+    let params = {
+        "user": CJY_USER,
+        "pass2": pass2,
+        "softid": CJY_SOFTID,
+        "codetype": CJY_CODETYPE,
+        "file_base64": Base64
+    }
+
+    var result = http.postJson(url, params);
+    if (result.statusCode == 200)
+    {
+        var r = result.body.json()
+        log(r)
+        if (r.err_no == 0)
+        {
+            let resoult = r.pic_str
+            log("识别结果:" + resoult)
+            return r
+        } else
+        {
+            log("超级鹰错误代码:" + r.err_no + "错误描述:" + r.err_str)
+            return null
+        }
+    } else
+    {
+        log("超级鹰访问失败")
+    }
+}
+
+function CJY_ReportError(ErrorId)
+{
+    let url = "https://upload.chaojiying.net/Upload/ReportError.php"
+    let params = {
+        "user": CJY_USER,
+        "pass2": pass2,
+        "id": ErrorId,
+        "softid": CJY_SOFTID,
+    }
+
+    var result = http.postJson(url, params);
+    if (result.statusCode == 200)
+    {
+        var r = result.body.json()
+        log(r)
+        if (r.err_no == 0)
+        {
+            let resoult = r.pic_str
+            log("识别结果:" + resoult)
+            return r
+        } else
+        {
+            log("超级鹰反分错误代码:" + r.err_no + "错误描述:" + r.err_str)
+            return null
+        }
+    } else
+    {
+        log("超级鹰反分访问失败")
+    }
+}
 
 const ExceptionFlow = () =>
 {
@@ -726,7 +923,7 @@ const ExceptionFlow = () =>
         NoPotionFlow(shot);
         MakeSureInGame(shot);
     }
-
+    HumanMachineVerification(shot)
     DisconnectionFlow(shot);
     ResetConfig();
 };
