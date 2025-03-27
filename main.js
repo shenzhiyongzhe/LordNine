@@ -16,82 +16,66 @@ let createCharacterDelay = 0;
 let isDhyana = false;
 let isGlobalServer = false;
 
-function Init()
-{
+function Init() {
     const config = ReadConfig();
-    if (config.dhyana)
-    {
+    if (config.dhyana) {
         console.log("当前配置为禅模式")
         specialConfig.gameMode = "dhyana"
         specialConfig.initGameMode = "dhyana"
         isDhyana = true;
     }
-    else
-    {
-        if (config.unlockTrade)
-        {
+    else {
+        if (config.unlockTrade) {
             specialConfig.gameMode = "instance";
             specialConfig.initGameMode = "instance"
         }
-        else
-        {
+        else {
             specialConfig.gameMode = "mainStory"
             specialConfig.initGameMode = "mainStory"
         }
     }
 
 
-    if (!config.delayTime)
-    {
+    if (!config.delayTime) {
         config.delayTime = random(1, 1200)
     }
-    if (!config.randomDayOfTheWeek || typeof config.randomDayOfTheWeek != "object")
-    {
+    if (!config.randomDayOfTheWeek || typeof config.randomDayOfTheWeek != "object") {
         config.randomDayOfTheWeek = [random(1, 7), GetRandom() > 50 ? random(1, 7) : 0, GetRandom() > 50 ? random(1, 7) : 0]
     }
-    if (!config.resetHour)
-    {
+    if (!config.resetHour) {
         config.resetHour = random(8, 22)
         console.log("增加新的配置选项：resetHour")
     }
-    if (!config.totalDeathTimes)
-    {
+    if (!config.totalDeathTimes) {
         config.totalDeathTimes = 0;
     }
-    if (!config.game.tradingTimes)
-    {
+    if (!config.game.tradingTimes) {
         config.game.tradingTimes = 0;
     }
-    if (!config.manufacture)
-    {
+    if (!config.manufacture) {
         config.manufacture = [random(1, 15), random(16, 30)];
     }
-    if (!config.randomEventTime)
-    {
+    if (!config.randomEventTime) {
         config.randomEventTime = [
             `${random(8, 12).toString().padStart(2, 0)}:${random(0, 59).toString().padStart(2, 0)}`,
             `${random(13, 17).toString().padStart(2, 0)}:${random(0, 59).toString().padStart(2, 0)}`,
             `${random(18, 22).toString().padStart(2, 0)}:${random(0, 59).toString().padStart(2, 0)}`,
         ];
     }
-    if (!config.dailyTradingHours)
-    {
+    if (!config.dailyTradingHours) {
         config.dailyTradingHours = [
             `${random(8, 12).toString().padStart(2, 0)}:${random(0, 59).toString().padStart(2, 0)}`,
             `${random(13, 17).toString().padStart(2, 0)}:${random(0, 59).toString().padStart(2, 0)}`,
             `${random(18, 22).toString().padStart(2, 0)}:${random(0, 59).toString().padStart(2, 0)}`,
         ];
     }
-    if (!config.autoHuntingTime)
-    {
+    if (!config.autoHuntingTime) {
         config.autoHuntingTime = `${random(0, 23).toString().padStart(2, 0)}:${random(0, 59).toString().padStart(2, 0)}`
     }
-    if (!config.daily.dailyHunting)
-    {
+    if (!config.daily.dailyHunting) {
         config.daily.dailyHunting = false;
     }
-    if (!config.accountInfo || Object.keys(config.accountInfo).length != 5)
-    {
+    if (!config.accountInfo || Object.keys(config.accountInfo).length != 5) {
         console.log('@配置不存在账号信息，开始读取账号文件');
         const { id, instance, account, password, auxiliary_mailbox } = ReadAccountFile();
         const accountInfo = {
@@ -103,8 +87,7 @@ function Init()
         }
         config.accountInfo = accountInfo;
     }
-    if (!config.equipments || !config.equipments.ring)
-    {
+    if (!config.equipments || !config.equipments.ring) {
         config.equipments = {
             helmet: null,
             guard: null,
@@ -120,26 +103,21 @@ function Init()
             belt: null,
         }
     }
-    if (config.daily.dailyTrading == undefined)
-    {
+    if (config.daily.dailyTrading == undefined) {
         config.daily.dailyTrading = false;
     }
-    if (config.daily.dailyTradingTimes == undefined)
-    {
+    if (config.daily.dailyTradingTimes == undefined) {
         config.daily.dailyTradingTimes = random(1, 3)
     }
     RewriteConfig(config)
 
 }
 
-const GetCaptureScreenPermission = () =>
-{
+const GetCaptureScreenPermission = () => {
 
-    threads.start(() =>
-    {
+    threads.start(() => {
         let hasOpen = textMatches(/(.*시작하기.*|.*立即开始.*)/).findOne(80000);
-        if (hasOpen)
-        {
+        if (hasOpen) {
             hasOpen.click();
             sleep(500);
             const img = captureScreen();
@@ -148,16 +126,14 @@ const GetCaptureScreenPermission = () =>
     });
 
     const isSuccess = requestScreenCapture(true);
-    if (!isSuccess)
-    {
+    if (!isSuccess) {
         console.log("截图权限申请失败,重新申请");
         StopScript();
     }
 
 };
 
-const uiFloaty = () =>
-{
+const uiFloaty = () => {
     Init()
     const floatyWindow = floaty.window(
         <card gravity="center|top" alpha="1" cardBackgroundColor="#71c9ce" cardCornerRadius="10">
@@ -185,12 +161,10 @@ const uiFloaty = () =>
 
     const config = ReadConfig()
 
-    const uiInterval = setInterval(() =>
-    {
+    const uiInterval = setInterval(() => {
     }, 1000);
 
-    floatyWindow.start.click(() =>
-    {
+    floatyWindow.start.click(() => {
 
         const totalDelayTime = config.delayTime + loginGoogleDelay + createCharacterDelay;
         let count = totalDelayTime
@@ -199,22 +173,18 @@ const uiFloaty = () =>
         floatyWindow.delayTime.setText(`${count}s`);
 
         console.log(`游戏延迟${totalDelayTime}s,等待启动中...`);
-        const delayInterval = setInterval(() =>
-        {
-            ui.run(() =>
-            {
+        const delayInterval = setInterval(() => {
+            ui.run(() => {
                 floatyWindow.delayTime.setText(`${count}s`);
             });
             count--;
-            if (count <= 0)
-            {
+            if (count <= 0) {
                 clearInterval(delayInterval);
                 floatyWindow.close()
             }
         }, 1000);
 
-        setTimeout(() =>
-        {
+        setTimeout(() => {
             console.log("版本号为：" + version);
             console.log("《《《 游戏开始 》》》");
             console.log("游戏模式为：" + specialConfig.gameMode);
@@ -223,41 +193,32 @@ const uiFloaty = () =>
         }, (totalDelayTime + 1) * 1000);
     });
 
-    floatyWindow.createCharacter.click(() =>
-    {
-        dialogs.input("请输入延迟时间（单位 秒）", "15000", (time) =>
-        {
+    floatyWindow.createCharacter.click(() => {
+        dialogs.input("请输入延迟时间（单位 秒）", "15000", (time) => {
             console.log("登录谷歌延迟时间为:" + time);
             createCharacterDelay = parseInt(time);
             createCharacterDelay = random(0, createCharacterDelay) + 1;
             toastLog(`延迟时间为${createCharacterDelay + config.delayTime}s`)
         });
-        dialogs.input("请输入区服编号", "999", (name) =>
-        {
+        dialogs.input("请输入区服编号", "999", (name) => {
             serverName = name.toString()
-            if (serverName === "999")
-            {
+            if (serverName === "999") {
                 console.log("开始随机生成一个服务器");
-                if (isGlobalServer)
-                {
+                if (isGlobalServer) {
                     console.log("国际服随机生成");
                     serverName = [8, random(0, 9)]
                 }
-                else
-                {
+                else {
                     console.log("韩服随机生成");
                     serverName = [random(0, 7), random(0, 9)]
                 }
             }
-            else
-            {
-                try
-                {
+            else {
+                try {
                     const arr = serverName.split(".")
                     arr.map((item, index) => arr[index] = parseInt(item - 1))
                     serverName = arr
-                } catch (error)
-                {
+                } catch (error) {
                     alert(error)
                     console.log(error)
                     StopScript()
@@ -267,10 +228,8 @@ const uiFloaty = () =>
         });
     });
 
-    floatyWindow.loginGoogle.click(() =>
-    {
-        dialogs.input("请输入延迟时间（单位 秒）", "3", (time) =>
-        {
+    floatyWindow.loginGoogle.click(() => {
+        dialogs.input("请输入延迟时间（单位 秒）", "3", (time) => {
             console.log("登录谷歌延迟时间为:" + time);
             loginGoogleDelay = parseInt(time);
             loginGoogleDelay = random(0, loginGoogleDelay) + 1
@@ -278,32 +237,26 @@ const uiFloaty = () =>
         });
     });
 
-    floatyWindow.more.click(() =>
-    {
+    floatyWindow.more.click(() => {
         floatyWindow.setSize(450, 450);
         floatyWindow.more_container.attr("h", 30);
         floatyWindow.more.attr("h", 0);
     });
 
-    floatyWindow.gameMode_dhyana.on("check", (checked) =>
-    {
-        if (checked)
-        {
+    floatyWindow.gameMode_dhyana.on("check", (checked) => {
+        if (checked) {
             console.log("打开禅模式");
             config.dhyana = true;
             specialConfig.gameMode = "dhyana"
             specialConfig.initGameMode = "dhyana"
-        } else
-        {
+        } else {
             console.log("关闭禅模式");
             config.dhyana = false;
-            if (config.unlockTrade)
-            {
+            if (config.unlockTrade) {
                 specialConfig.gameMode = "instance";
                 specialConfig.initGameMode = "instance"
             }
-            else
-            {
+            else {
                 specialConfig.gameMode = "mainStory"
                 specialConfig.initGameMode = "mainStory"
             }
@@ -311,15 +264,12 @@ const uiFloaty = () =>
         RewriteConfig(config)
     })
 
-    floatyWindow.globalServer.on("check", (checked) =>
-    {
-        if (checked)
-        {
+    floatyWindow.globalServer.on("check", (checked) => {
+        if (checked) {
             console.log("勾选国际服");
             isGlobalServer = true;
         }
-        else
-        {
+        else {
             console.log("取消勾选国际服");
             isGlobalServer = false;
         }
@@ -332,8 +282,7 @@ console.setGlobalLogConfig({
     "filePattern": "%d{dd日}%m%n"
 });
 
-const stateFloaty = () =>
-{
+const stateFloaty = () => {
     console.log("脚本logo");
     const floaty_window = floaty.window(
         <frame gravity="center" id="switch" w="18" h="18" >
@@ -344,39 +293,29 @@ const stateFloaty = () =>
     floaty_window.switch.click(() => threads.shutDownAll());
 };
 
-const Update = () =>
-{
-    while (true)
-    {
-        if (specialConfig.gameMode == "dhyana")
-        {
+const Update = () => {
+    while (true) {
+        if (specialConfig.gameMode == "dhyana") {
             dhyanaFlow()
         }
-        else
-        {
+        else {
             ExceptionFlow();
-            if (specialConfig.gameMode == "mainStory")
-            {
+            if (specialConfig.gameMode == "mainStory") {
                 MainStoryFlow();
             }
-            else if (specialConfig.gameMode == "instance")
-            {
+            else if (specialConfig.gameMode == "instance") {
                 InstanceFlow();
             }
         }
-        if (specialConfig.gameMode != specialConfig.initGameMode)
-        {
-            if (Math.abs(specialConfig.lastModeChangeTime.getTime() - new Date().getTime()) / (3600 * 1000) >= 4)
-            {
+        if (specialConfig.gameMode != specialConfig.initGameMode) {
+            if (Math.abs(specialConfig.lastModeChangeTime.getTime() - new Date().getTime()) / (3600 * 1000) >= 4) {
                 console.log("--- game mode changed ----");
                 console.log("game mode changed over 5 hours");
                 const config = ReadConfig()
-                if (config.unlockTrade)
-                {
+                if (config.unlockTrade) {
                     specialConfig.gameMode = "instance"
                 }
-                else
-                {
+                else {
                     specialConfig.gameMode = "mainStory";
                 }
                 specialConfig.lastModeChangeTime = new Date()
@@ -386,19 +325,16 @@ const Update = () =>
     }
 };
 
-const MainFlow = () =>
-{
+const MainFlow = () => {
     stateFloaty();
     LaunchGame();
-    if (serverName != null)
-    {
+    if (serverName != null) {
         console.log("开始导入创建角色模块");
         const { CreateCharacterFlow } = require("./CreateCharacter.js");
         CreateCharacterFlow(serverName);
         console.log("&&& 创建角色流程结束 &&&")
     }
-    if (loginGoogleDelay != 0)
-    {
+    if (loginGoogleDelay != 0) {
         console.log("仅谷歌登录")
         const { temporaryLoginGoogle } = require("./CreateCharacter.js");
         temporaryLoginGoogle()

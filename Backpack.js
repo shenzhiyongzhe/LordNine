@@ -75,7 +75,7 @@ const SingleStrengthenColorList = [
 ];
 
 // ********************  check ----------------------
-const IsEquipped = (region, shot) => { shot = shot || captureScreen(); return FindMultiColors(EquipColorList, region, shot); };
+const IsEquipped = (region, shot) => { shot = shot || captureScreen(); return FindMultiColors(EquipColorList, region, shot, 7); };
 
 // const IsEmpty = (region, shot) => { shot = shot || captureScreen(); return FindMultiColors(EmptyGridColorList, region, shot); };
 const IsEmpty = (region, shot) => { shot = shot || captureScreen(); return FindImgInList(emptyGridImgList, region, shot); };
@@ -922,6 +922,7 @@ const GetTheEquippedInfo = () =>
     RewriteConfig(config)
 
 };
+
 const WearEquipment = () =>
 {
     console.log("开始穿装备");
@@ -1484,6 +1485,7 @@ const DecomposeEquipment = (type) =>
         RandomPress([962, 575, 102, 16]);
         console.log("关闭详细资讯");
     }
+    //修改自动登录设置
     //修改自动登录设置
     const SetDecomposeSetting = (type) =>
     {

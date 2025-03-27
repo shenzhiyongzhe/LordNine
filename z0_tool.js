@@ -24,19 +24,19 @@ GetCaptureScreenPermission();
 
 const CopyApk = () =>
 {
-    const version = '3.25.2'
+    const version = '3.27.2'
     const originPath = `/sdcard/脚本/LordNine/build/NST_v${version}.apk`
     const destinationPath = `/mnt/shared/Pictures/NST_v${version}.apk`
     files.copy(originPath, destinationPath)
     console.log("复制成功");
 }
 
-CopyApk();
+// CopyApk();
 
 // engines.stopAllAndToast();
 // java.lang.System.exit(0);
 //com.smilegate.lordnine.stove.google
-
+// java.lang.System.exit(0)
 // adb -s 10.245.81.17:5555  pull /sdcard/脚本/LordNine/build/lordnine_v1.0.0.apk C:/nginx/Rom/LordNine.apk
 // adb -s 10.1.99.24:5555  pull /sdcard/脚本/LordNine/build/lordnine_v12.23.1.apk C:/nginx/Rom/LordNine.apk
 

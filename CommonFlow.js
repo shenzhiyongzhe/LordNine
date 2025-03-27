@@ -1615,7 +1615,7 @@ const TradeGoods = () =>
     Sleep();
     //网格的横纵间隔均为66像素 格子大小为57x57
 
-    const CloseSellPopup = () => 
+    const CloseSellPopup = () =>
     {
         if (HasPopupClose([956, 186, 50, 57]))
         {
@@ -1719,7 +1719,7 @@ const TradeGoods = () =>
                             }
                         }
                     }
-                    else 
+                    else
                     {
                         console.log("鉴定失败：下一个");
                         CloseSellPopup();
@@ -3211,6 +3211,7 @@ const ChangeWeaponFeature = () =>
     }
     console.log("修改武器特性结束");
 }
+
 const ChangeAbilityCollection = () =>
 {
     console.log("修改能力搭配");
@@ -3614,6 +3615,3 @@ module.exports = {
     ShopBuy, ComprehensiveImprovement, ComprehensiveImprovement_Instance, StrengthenHorseEquipment, IncreaseWeaponFeatures, GuildDonation,
     FireRandomEvent,
 };
-
-// console.log(needBuyEquipment());
-// GoTrialOfTower()

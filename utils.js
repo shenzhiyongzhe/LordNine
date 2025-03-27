@@ -178,7 +178,7 @@ const logNormal = (mu, sigma) =>
     const number = Math.floor(Math.exp(mu + sigma * z));
     return number
 }
-const Sleep = (time) => 
+const Sleep = (time) =>
 {
     if (!time)
     {
@@ -191,7 +191,7 @@ const Sleep = (time) =>
     sleep(time)
 };
 
-const humanSwipe = (startRegion, endRegion, durationLimit) => 
+const humanSwipe = (startRegion, endRegion, durationLimit) =>
 {
     let steps = 50; // 滑动过程分解为50个步骤
     let points = [];
@@ -240,11 +240,7 @@ const RandomPress = ([startX, startY, w, h], delay) =>
 
     const x1 = Math.round(Math.random() * w + startX);
     const y1 = Math.round(Math.random() * h + startY);
-    const x2 = x1 + random(-4, 4);
-    const y2 = y1 + random(-4, 4)
-
-    const time = random(20, 200);
-    swipe(x1, y1, x2, y2, time);
+    click(x1, y1);
     if (delay)
     {
         delay = delay + logNormal(Math.log(800))
@@ -589,7 +585,7 @@ const DeathCheck = (shot) =>
                 return deathBtn;
             }
             deathBtn = FindImg(DeathImgList[i], [527, 584, 217, 85], shot);
-            if (deathBtn) 
+            if (deathBtn)
             {
                 console.log("角色死亡! 失去能力点");
                 return deathBtn;
@@ -693,7 +689,7 @@ const FindNumber = (directory, region, shot) =>
 
     //数据初步处理：去掉相同x坐标
     const sameXValues = {};
-    let sequence = recogNumberList.filter(item => 
+    let sequence = recogNumberList.filter(item =>
     {
         if (!sameXValues[item.point.x])
         {
@@ -787,7 +783,7 @@ const FindFloatNumber = (directory, region, shot) =>
     if (recogNumberList.length === 0) return null;
 
     const sameXValues = {};
-    let sequence = recogNumberList.filter(item => 
+    let sequence = recogNumberList.filter(item =>
     {
         if (!sameXValues[item.point.x])
         {
@@ -1356,7 +1352,7 @@ const OpenMenu = () =>
     return false;
 };
 
-const PageBack = (shot) => 
+const PageBack = (shot) =>
 {
     shot = shot || captureScreen();
     const hasPageBack = HasPageback(shot);
