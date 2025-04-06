@@ -27,6 +27,7 @@ const {
     http_post,
     WaitUntilMenu,
     shuffleArray,
+    FindTotalSellPrice,
 } = require("./utils.js");
 
 const { IsEmpty, WearEquipments, StrengthenEquipment, OpenAllBox, UseHolyGrail, DecomposeEquipment, WearBestSuit, CheckSkillAutoRelease, BuyCloak, UnAutoPotion, getItemColor, AutoPotion } = require("./Backpack.js");
@@ -1626,46 +1627,61 @@ const TradeGoods = () =>
     const LoginMaterial = (imgList, probability) =>
     {
         let hasSellText;
+        let randomMaterialIndex
         for (let i = 0; i < imgList.length; i++)
         {
             CloseSellPopup();
-            let randomMaterialIndex = random(1, 100)
-            if (randomMaterialIndex < probability)
+            randomMaterialIndex = random(1, 100)
+            if (randomMaterialIndex > probability)
             {
-                let haveTradable = FindImg(imgList[i], [995, 147, 280, 288])
-                if (haveTradable)
+                console.log(`材料鉴定概率失败，下一个,当前点数${randomMaterialIndex}, 最大点数：${probability}`)
+                continue;
+            }
+
+            let haveTradable = FindImg(imgList[i], [995, 147, 280, 288])
+            if (haveTradable)
+            {
+                RandomPress([haveTradable.x, haveTradable.y, 30, 30]);
+                hasSellText = FindImgInList(sellText, [930, 584, 80, 61]);
+                if (hasSellText)
                 {
-                    RandomPress([haveTradable.x, haveTradable.y, 30, 30]);
-                    hasSellText = FindImgInList(sellText, [930, 584, 80, 61]);
-                    if (hasSellText)
+                    RandomPress([915, 599, 115, 28]); //贩售按钮
+                    WaitUntil(() => FindBlueBtn([549, 467, 182, 57]));
+                    let sellPrice = FindNumber("sellPrice", [916, 254, 50, 35])
+                    if (sellPrice <= 10)
                     {
-                        RandomPress([915, 599, 115, 28]); //贩售按钮
-                        WaitUntil(() => FindBlueBtn([549, 467, 182, 57]));
+                        CloseSellPopup();
+                        continue;
+                    }
+                    let totalSellPrice = FindTotalSellPrice()
+                    if (Math.abs(sellPrice - totalSellPrice) > 10)
+                    {
+                        console.log("销售价格与最低价相差大于10，手动设置价格")
+                        RandomPress([871, 265, 85, 13])
+                        setSoldPrice(totalSellPrice)
 
-                        if (FindNumber("sellPrice", [916, 254, 50, 35]) <= 10)
+                    }
+                    RandomPress([577, 481, 126, 29]);
+                    if (WaitUntil(() => FindBlueBtn([547, 525, 186, 62])))
+                    {
+                        RandomPress([573, 542, 132, 27]);
+                        if (FindImgInList(shelfMaxImgList, [536, 96, 188, 55]))
                         {
-                            CloseSellPopup();
-                            continue;
+                            console.log("上架数量已满");
+                            isShelfMax = true;
+                            return false;
                         }
-
-                        RandomPress([577, 481, 126, 29]);
-                        if (WaitUntil(() => FindBlueBtn([547, 525, 186, 62])))
+                        else
                         {
-                            RandomPress([573, 542, 132, 27]);
-                            if (FindImgInList(shelfMaxImgList, [536, 96, 188, 55]))
-                            {
-                                console.log("上架数量已满");
-                                isShelfMax = true;
-                                return false;
-                            }
-                            else
-                            {
-                                console.log("上架物品成功");
-                                loginCount++;
-                            }
+                            console.log("上架物品成功");
+                            loginCount++;
                         }
                     }
                 }
+            }
+            else
+            {
+                console.log("未发现材料")
             }
             CloseSellPopup();
         }
@@ -1736,8 +1752,8 @@ const TradeGoods = () =>
     //先上架材料
     RandomPress([1192, 121, 55, 27]);
 
-    LoginMaterial(tradableImgList_100p, 80);
-    LoginMaterial(tradableImgList_30p, 30);
+    LoginMaterial(tradableImgList_100p, 85);
+    LoginMaterial(tradableImgList_30p, 40);
     //然后上架武器
     if (!isShelfMax)
     {

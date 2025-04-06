@@ -617,10 +617,10 @@ const FindMultiColors = (colorArr, region, shot, threshold) =>
     }
     return hasColor;
 };
-const FindImg = (img, region, shot) =>
+const FindImg = (img, region, shot, threshold) =>
 {
     shot = shot || captureScreen();
-    return images.findImage(shot, img, { region });
+    return images.findImage(shot, img, { region, threshold });
 };
 const FindBlueBtn = (region, shot) => { shot = shot || captureScreen(); return FindMultiColors(BlueBtnColorList, region, shot); };
 
@@ -634,13 +634,13 @@ const FindGoldBtn = (region, shot) => { shot = shot || captureScreen(); return F
 const FindGreenBtn = (region, shot) => { shot = shot || captureScreen(); return FindMultiColors(GreenBtnColorList, region, shot); };
 const FindCheckMark = (region) => FindMultiColors(CheckMarkColorList, region);
 const FindWhiteCheckMark = (region, shot) => { shot = shot || captureScreen(); return FindMultiColors(whiteCheckMark, region, shot) }
-const FindImgInList = (imgList, region, shot) =>
+const FindImgInList = (imgList, region, shot, threshold) =>
 {
     shot = shot || captureScreen();
     let hasImg = false;
     for (let i = 0; i < imgList.length; i++)
     {
-        hasImg = FindImg(imgList[i], region, shot);
+        hasImg = FindImg(imgList[i], region, shot, threshold);
         if (hasImg)
         {
             return hasImg;
@@ -648,9 +648,10 @@ const FindImgInList = (imgList, region, shot) =>
     }
     return false;
 };
-const FindNumber = (directory, region, shot) =>
+const FindNumber = (directory, region, shot, threshold) =>
 {
     shot = shot || captureScreen();
+    threshold = threshold || 0.92;
     const numberImgList = [];
     for (let i = 0; i < 11; i++)
     {
@@ -669,7 +670,7 @@ const FindNumber = (directory, region, shot) =>
         let n = numberImgList[i].length;
         for (let j = 0; j < n; j++)
         {
-            let num = images.matchTemplate(shot, numberImgList[i][j], { region: region, threshold: 0.92 });
+            let num = images.matchTemplate(shot, numberImgList[i][j], { region, threshold });
             if (num.points.length > 0)
             {
                 // recogNumberList.push({ num: i, points: num.points, threshold: num.matches[0].similarity });
@@ -2347,7 +2348,31 @@ const shuffleArray = (array) =>
     }
     return randomArr;
 }
+const FindTotalSellPrice = () =>
+{
+    const dotImgList = LoadImgList("number/dot")
 
+    const dot = FindImgInList(dotImgList, [909, 380, 53, 15], captureScreen(), 0.92)
+    let number, region;
+    if (dot)
+    {
+        console.log("有小数点: " + dot)
+        region = [dot.x - 35, dot.y - 12, 37, 15]
+    }
+    else
+    {
+        console.log("没有小数点")
+        region = [882, 371, 90, 26]
+    }
+    number = FindNumber("totalSellPrice", region, captureScreen(), 0.96)
+    console.log("number: " + number)
+    if (!number)
+    {
+        console.log("再次识别")
+        number = FindNumber("totalSellPrice", [882, 371, 90, 26], captureScreen(), 0.96)
+    }
+    return number;
+}
 module.exports = {
     baseUrl,
     specialConfig, globalTimePlay,
@@ -2356,6 +2381,7 @@ module.exports = {
     DeathCheck,
     EnterMenuItemPage, ExitHaltMode, EnterHaltMode,
     FindBlueBtn, FindTipPoint, FindImg, FindMultiColors, FindCheckMark, FindRedBtn, FindGoldBtn, FindGreenBtn, FindImgInList, FindNumber, FindFloatNumber, FindWhiteCheckMark,
+    FindTotalSellPrice,
     GoToTheNPC, GetCharacterLv, GetDateTime, GetServerName, GetRandom, generateRandomArray,
     HasPageback, HasMenu, HasMenuClose, HollowPress, HasSkip, HasBackpackClose, HasBackpackMenuClose, HasPopupClose, HasTip, HaveMainStoryIcon, HasTransformIcon, HaveDailyMissionIcon,
     HaveFinished, HasMap, HaveToTapBlank, HasHaltModeBtn, http_get, http_post, humanSwipe,

@@ -54,17 +54,17 @@ const ExceptionImgList = {
     crucifixIcon: LoadImgList("icon/crucifixIcon"),
     PreventAutomaticLogin: LoadImgList("icon/PreventAutomaticLogin"),
     RecognitionFailure: LoadImgList("icon/RecognitionFailure"),
-    DropDownOption : LoadImgList("icon/DropDownOption"),
-    VerificationSuccessful : LoadImgList("icon/VerificationSuccessful"),
-    LanguageChange : LoadImgList("icon/LanguageChange"),
-    Menu : LoadImgList("icon/Menu"),
-    GameSettings : LoadImgList("icon/GameSettings"),
-    BattleSettingsPage : LoadImgList("icon/BattleSettingsPage"),
-    TraditionalChinese : LoadImgList("icon/TraditionalChinese"),
-    IsKorean : LoadImgList("icon/IsKorean"),
-    Korean : LoadImgList("icon/Korean"),
-   HongKong : LoadImgList("icon/HongKong+852"),
-   agree: LoadImgList("icon/agree"),
+    DropDownOption: LoadImgList("icon/DropDownOption"),
+    VerificationSuccessful: LoadImgList("icon/VerificationSuccessful"),
+    LanguageChange: LoadImgList("icon/LanguageChange"),
+    Menu: LoadImgList("icon/Menu"),
+    GameSettings: LoadImgList("icon/GameSettings"),
+    BattleSettingsPage: LoadImgList("icon/BattleSettingsPage"),
+    TraditionalChinese: LoadImgList("icon/TraditionalChinese"),
+    IsKorean: LoadImgList("icon/IsKorean"),
+    Korean: LoadImgList("icon/Korean"),
+    HongKong: LoadImgList("icon/HongKong+852"),
+    agree: LoadImgList("icon/agree"),
 
 };
 
@@ -210,46 +210,46 @@ let clickMainUITimes = 0;
 
 
 const LanguageDetection = (shot) => {
-    if (FindImgInList(ExceptionImgList.Korean, [79,664,107,43], shot)) {
+    if (FindImgInList(ExceptionImgList.Korean, [79, 664, 107, 43], shot)) {
         console.log("发现语言为韩语，修改为中文");
         LanguageRevision()
     }
 };
 
-const LanguageRevision = (shot) =>{
+const LanguageRevision = (shot) => {
     for (let i = 0; i < 200; i++) {
-        shot =  captureScreen();
+        shot = captureScreen();
 
-        if (FindImgInList(ExceptionImgList.LanguageChange, [524,179,242,114], shot)) {
+        if (FindImgInList(ExceptionImgList.LanguageChange, [524, 179, 242, 114], shot)) {
             console.log("点击确认变更语言");
-            RandomPress([682,457,151,35]);
-            sleep(random(10000,20000))
+            RandomPress([682, 457, 151, 35]);
+            sleep(random(10000, 20000))
             break
         }
 
-        if (FindImgInList(ExceptionImgList.Menu, [1182,5,84,64], shot)) {
+        if (FindImgInList(ExceptionImgList.Menu, [1182, 5, 84, 64], shot)) {
             console.log("点击菜单");
-            RandomPress([1212,23,26,27]);
+            RandomPress([1212, 23, 26, 27]);
         }
-        if (FindImgInList(ExceptionImgList.GameSettings, [1111,524,102,98], shot)) {
+        if (FindImgInList(ExceptionImgList.GameSettings, [1111, 524, 102, 98], shot)) {
             console.log("点击设置");
-            RandomPress([1149,551,30,25]);
+            RandomPress([1149, 551, 30, 25]);
         }
 
-        if (FindImgInList(ExceptionImgList.BattleSettingsPage, [2,93,128,104], shot)) {
+        if (FindImgInList(ExceptionImgList.BattleSettingsPage, [2, 93, 128, 104], shot)) {
             console.log("战斗设置页，点击账户设置页");
-            RandomPress([633,73,76,30]);
+            RandomPress([633, 73, 76, 30]);
         }
 
-        if (FindImgInList(ExceptionImgList.TraditionalChinese, [906,318,223,176], shot)) {
+        if (FindImgInList(ExceptionImgList.TraditionalChinese, [906, 318, 223, 176], shot)) {
             console.log("点击繁体中文并退出");
-            RandomPress([930,411,150,32]);
-            sleep(random(1000,2000))
-            RandomPress([1214,19,35,21]);
-        }else{
-            if (FindImgInList(ExceptionImgList.IsKorean, [696,361,229,88], shot)) {
+            RandomPress([930, 411, 150, 32]);
+            sleep(random(1000, 2000))
+            RandomPress([1214, 19, 35, 21]);
+        } else {
+            if (FindImgInList(ExceptionImgList.IsKorean, [696, 361, 229, 88], shot)) {
                 console.log("当前为韩语，点击切换");
-                RandomPress([735,388,147,27]);
+                RandomPress([735, 388, 147, 27]);
             }
         }
         Sleep()
@@ -257,30 +257,28 @@ const LanguageRevision = (shot) =>{
 }
 
 const HumanMachineVerification = (shot) => {
-    if (FindImgInList(ExceptionImgList.PreventAutomaticLogin, [504,180,254,102], shot))
-    {
+    if (FindImgInList(ExceptionImgList.PreventAutomaticLogin, [504, 180, 254, 102], shot)) {
         console.log("发现防止自动登录，点击验证");
-        shot =  captureScreen();
-        let temp =  images.clip(shot,469,296,284,98)
+        shot = captureScreen();
+        let temp = images.clip(shot, 469, 296, 284, 98)
         let image_Base64 = images.toBase64(temp)
         temp.recycle()
-        let resoult =  CJY_OCR(image_Base64) 
-        if (resoult!=null) {
-            RandomPress([518,407,248,23]);
-            sleep(random(1000,2000))
+        let resoult = CJY_OCR(image_Base64)
+        if (resoult != null) {
+            RandomPress([518, 407, 248, 23]);
+            sleep(random(1000, 2000))
             setText(resoult.pic_str)
-            sleep(random(1000,2000))
-            RandomPress([567,514,139,39]);
-            shot =  captureScreen();
-            if (FindImgInList(ExceptionImgList.RecognitionFailure, [510,395,258,55], shot))
-            {
+            sleep(random(1000, 2000))
+            RandomPress([567, 514, 139, 39]);
+            shot = captureScreen();
+            if (FindImgInList(ExceptionImgList.RecognitionFailure, [510, 395, 258, 55], shot)) {
                 console.log("发现未验证通过，执行反分");
                 CJY_ReportError(resoult.pic_id)
             }
         }
     }
 
-    if (FindImgInList(ExceptionImgList.agree, [647, 408, 203, 103])||FindImgInList(ExceptionImgList.DropDownOption, [756, 252, 92, 65])) {
+    if (FindImgInList(ExceptionImgList.agree, [647, 408, 203, 103]) || FindImgInList(ExceptionImgList.DropDownOption, [756, 252, 92, 65])) {
         for (let i = 0; i < 200; i++) {
             if (FindImgInList(ExceptionImgList.agree, [647, 408, 203, 103])) {
                 console.log("点击同意");
@@ -290,7 +288,7 @@ const HumanMachineVerification = (shot) => {
             if (HongKong_resoult) {
                 console.log(HongKong_resoult);
                 console.log("点击选择HongKong地区");
-                console.log(HongKong_resoult.x+"点击选择HongKong地区"+ HongKong_resoult.y);
+                console.log(HongKong_resoult.x + "点击选择HongKong地区" + HongKong_resoult.y);
                 RandomPress([HongKong_resoult.x, HongKong_resoult.y, 153, 13]);
             }
 
@@ -316,14 +314,14 @@ const HumanMachineVerification = (shot) => {
                     let code = GetVerificationCode(url)
                     if (code != null) {
                         console.log("点击验证码输入框并输入");
-                        RandomPress([500,347,178,20]);
+                        RandomPress([500, 347, 178, 20]);
                         sleep(random(1000, 2000))
                         setText(code)//验证码
                         sleep(random(1000, 2000))
                         RandomPress([338, 39, 611, 112]);//输入法上方区域
                         sleep(random(1000, 2000))
-                        RandomPress([673,467,117,29]);//点击验证
-                    }else{
+                        RandomPress([673, 467, 117, 29]);//点击验证
+                    } else {
                         console.log("获取验证码失败,重新获取");
                     }
                 } else {
@@ -332,9 +330,9 @@ const HumanMachineVerification = (shot) => {
                 }
             }
 
-            if (FindImgInList(ExceptionImgList.VerificationSuccessful, [492,307,310,103])) {
+            if (FindImgInList(ExceptionImgList.VerificationSuccessful, [492, 307, 310, 103])) {
                 console.log("电话号码验证成功");
-                RandomPress([585,440,117,33]);
+                RandomPress([585, 440, 117, 33]);
                 break;
             }
             Sleep();
@@ -348,14 +346,14 @@ function GetVerificationCode(url) {
         let r = http.get(url);
         if (r.statusCode == 200) {
             let resoult = r.body.string()
-            if (resoult!="0|0") {
+            if (resoult != "0|0") {
                 let code = resoult.match(/\b\d{6}\b/)[0];
                 console.log("提取验证码为：", code);
                 return code;
-            }else{
+            } else {
                 console.log("等待验证码...")
             }
-        }else{
+        } else {
             console.log("获取验证码失败")
             alert("获取验证码失败，请检查网络或链接")
             return null
@@ -366,26 +364,26 @@ function GetVerificationCode(url) {
 }
 
 
-function CJY_OCR(Base64) { 
+function CJY_OCR(Base64) {
     let url = "https://upload.chaojiying.net/Upload/Processing.php"
     let params = {
-        "user":CJY_USER,
-        "pass2":pass2,
-        "softid":CJY_SOFTID,
-        "codetype":CJY_CODETYPE,
-        "file_base64":Base64
+        "user": CJY_USER,
+        "pass2": pass2,
+        "softid": CJY_SOFTID,
+        "codetype": CJY_CODETYPE,
+        "file_base64": Base64
     }
 
     var result = http.postJson(url, params);
     if (result.statusCode == 200) {
         var r = result.body.json()
         log(r)
-        if (r.err_no==0) {
-            let resoult =  r.pic_str
-            log("识别结果:"+resoult)
+        if (r.err_no == 0) {
+            let resoult = r.pic_str
+            log("识别结果:" + resoult)
             return r
-        }else{
-            log("超级鹰错误代码:"+r.err_no+"错误描述:"+r.err_str)
+        } else {
+            log("超级鹰错误代码:" + r.err_no + "错误描述:" + r.err_str)
             return null
         }
     } else {
@@ -396,22 +394,22 @@ function CJY_OCR(Base64) {
 function CJY_ReportError(ErrorId) {
     let url = "https://upload.chaojiying.net/Upload/ReportError.php"
     let params = {
-        "user":CJY_USER,
-        "pass2":pass2,
-        "id":ErrorId,
-        "softid":CJY_SOFTID,
+        "user": CJY_USER,
+        "pass2": pass2,
+        "id": ErrorId,
+        "softid": CJY_SOFTID,
     }
 
     var result = http.postJson(url, params);
     if (result.statusCode == 200) {
         var r = result.body.json()
         log(r)
-        if (r.err_no==0) {
-            let resoult =  r.pic_str
-            log("识别结果:"+resoult)
+        if (r.err_no == 0) {
+            let resoult = r.pic_str
+            log("识别结果:" + resoult)
             return r
-        }else{
-            log("超级鹰反分错误代码:"+r.err_no+"错误描述:"+r.err_str)
+        } else {
+            log("超级鹰反分错误代码:" + r.err_no + "错误描述:" + r.err_str)
             return null
         }
     } else {
@@ -518,7 +516,7 @@ const MainUIFlow = (shot) => {
             RandomPress([416, 173, 438, 358], random(5, 10))
         }
         clickMainUITimes++;
-        if (clickMainUITimes >= 30) {
+        if (clickMainUITimes >= 15) {
             console.log('点击主屏幕次数过多，弹窗提醒');
             alert("异常检测", "点击主屏幕次数过多")
         }
@@ -847,7 +845,7 @@ const ExceptionFlow = () => {
     ResetConfig();
 };
 
-module.exports = { ExceptionFlow, MakeSureInGame };
+module.exports = { ExceptionFlow, MakeSureInGame, HumanMachineVerification };
 
 
 

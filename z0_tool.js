@@ -24,14 +24,14 @@ GetCaptureScreenPermission();
 
 const CopyApk = () =>
 {
-    const version = '3.27.2'
+    const version = '4.6.1'
     const originPath = `/sdcard/脚本/LordNine/build/NST_v${version}.apk`
     const destinationPath = `/mnt/shared/Pictures/NST_v${version}.apk`
     files.copy(originPath, destinationPath)
     console.log("复制成功");
 }
 
-// CopyApk();
+CopyApk();
 
 // engines.stopAllAndToast();
 // java.lang.System.exit(0);

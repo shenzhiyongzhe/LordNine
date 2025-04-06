@@ -14,7 +14,7 @@
   },
   "useFeatures": [],
   "icon": "res/logo.png",
-  "ignoredDirs": ["build", ".git", ".vscode", ".keyStore", "README.md"],
+  "ignoredDirs": ["build", ".vscode"],
   "encrypt-code": false,
   "launchConfig": {
     "displaySplash": false,
@@ -42,9 +42,9 @@
   "scripts": {},
   "signingConfig": {
     "alias": "lordnine",
-    "keystore": "/storage/emulated/0/脚本/.keyStore/lordnine.keystore"
+    "keystore": "/storage/emulated/0/脚本/LordNine/.keyStore/lordnine.keystore"
   },
   "sourcePath": "/storage/emulated/0/脚本/LordNine/main.js",
   "versionCode": 28,
-  "versionName": "3.27.2"
+  "versionName": "4.6.1"
 }
