@@ -871,32 +871,34 @@ const GetTheEquippedInfo = () =>
         return false;
     }
     const equippedPosition = [
-        [421, 430, 30, 46],
-        [488, 431, 31, 44],
-        [555, 432, 32, 45],
-        [420, 515, 34, 44],
-        [486, 514, 33, 47],
-        [552, 512, 33, 45],
+        [493, 421, 29, 39],
+        [545, 426, 33, 36],
+        [601, 423, 29, 35],
+        [655, 422, 29, 39],
+        [709, 423, 29, 38],
+        [763, 424, 27, 36],
 
-        [696, 432, 33, 45],
-        [764, 432, 31, 43],
-        [828, 431, 34, 43],
-        [698, 515, 30, 43],
-        [764, 516, 31, 44]
+        [493, 421, 29, 39],
+        [545, 426, 33, 36],
+        [601, 423, 29, 35],
+        [655, 422, 29, 39],
+        [709, 423, 29, 38],
+        [763, 424, 27, 36],
     ];
     const equipments = {
         helmet: null,
         tops: null,
         underClothes: null,
-        cloak: null,
         gloves: null,
         shoes: null,
+        cloak: null,
 
         earring: null,
         necklace: null,
         bracelet: null,
         ring: null,
         belt: null,
+        badeg: null,
     }
     const keys = Object.keys(equipments)
     if (HasPopupClose([873, 105, 41, 47]))
@@ -904,12 +906,20 @@ const GetTheEquippedInfo = () =>
         RandomPress([881, 116, 20, 21]);
     }
 
-    for (let i = 0; i < keys.length; i++)
+    for (let i = 0; i < 6; i++)
     {
-        if (["cloak", "earring", "necklace", "bracelet", "ring", "belt"].includes(keys[i]))
-        {
-            RandomPress([880, 114, 26, 25])
-        }
+
+        RandomPress([880, 114, 26, 25])
+        RandomPress(equippedPosition[i]);
+        let shot = captureScreen();
+        equipments[keys[i]] = getItemColor([623, 170, 120, 61], shot)
+    }
+    RandomPress([828, 433, 20, 19], 1)
+
+    for (let i = 6; i < 12; i++)
+    {
+
+        RandomPress([880, 114, 26, 25])
         RandomPress(equippedPosition[i]);
         let shot = captureScreen();
         equipments[keys[i]] = getItemColor([623, 170, 120, 61], shot)
@@ -919,6 +929,7 @@ const GetTheEquippedInfo = () =>
         RandomPress([881, 116, 20, 21]);
     }
     config.equipments = equipments;
+    console.log(`equipments color: ${JSON.stringify(equipments)}`)
     RewriteConfig(config)
 
 };
@@ -1229,19 +1240,34 @@ const AutoReleaseSkill = () =>
     }
     //
     RandomPress([944, 309, 37, 34]);
+    Sleep(1)
     RandomPress([407, 650, 36, 32]);
+    Sleep(1)
+    console.log("滑动");
     PullDownSkill([420, 650]);
-    RandomPress([407, 650, 36, 32]);
+    console.log("滑动完成");
+    Sleep()
+    // RandomPress([407, 650, 36, 32]);
     //
     RandomPress([1011, 312, 30, 31]);
+    Sleep(1)
     RandomPress([470, 652, 33, 36]);
+    Sleep(1)
+    console.log("滑动");
     PullDownSkill([480, 650]);
-    RandomPress([470, 652, 33, 36]);
+    console.log("滑动完成");
+    Sleep()
+    // RandomPress([470, 652, 33, 36]);
     //
     RandomPress([1072, 305, 35, 35]);
+    Sleep(1)
     RandomPress([529, 653, 40, 32]);
+    Sleep(1)
+    console.log("滑动");
     PullDownSkill([540, 650]);
-    RandomPress([532, 653, 33, 35]);
+    console.log("滑动完成");
+    Sleep()
+    // RandomPress([532, 653, 33, 35]);
     //
     const config = ReadConfig();
     if (config.game.lv >= 45)

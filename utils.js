@@ -1797,7 +1797,7 @@ const ChangeHaltModeTime = () =>
  * @param {*} pos [x, y]
  */
 
-const PullDownSkill = (pos) => humanSwipe([pos[0] - 20, pos[1], 40, 15], [pos[0] - 20, pos[1] + 20, 40, 15], [100, 300])
+const PullDownSkill = (pos) => humanSwipe([pos[0] - 20, pos[1], 40, 15], [pos[0] - 20, pos[1] + 50, 40, 15], [500, 800])
 
 /** 
 * @param {*} type "grocery" "skill" "equipment" "friend" "exchange" "mount" "stockroom"
@@ -2354,6 +2354,7 @@ const FindTotalSellPrice = () =>
 
     const dot = FindImgInList(dotImgList, [909, 380, 53, 15], captureScreen(), 0.92)
     let number, region;
+
     if (dot)
     {
         console.log("有小数点: " + dot)
@@ -2364,13 +2365,14 @@ const FindTotalSellPrice = () =>
         console.log("没有小数点")
         region = [882, 371, 90, 26]
     }
-    number = FindNumber("totalSellPrice", region, captureScreen(), 0.96)
+    number = FindNumber("totalSellPrice", region, captureScreen(), 0.9)
     console.log("number: " + number)
     if (!number)
     {
         console.log("再次识别")
         number = FindNumber("totalSellPrice", [882, 371, 90, 26], captureScreen(), 0.96)
     }
+
     return number;
 }
 module.exports = {

@@ -816,6 +816,7 @@ const UpgradeAbilityLevel = () =>
         Sleep();
     }
 };
+
 const ChangeAbility = (changeList) =>
 {
     console.log("改变能力配置，默认配置为战斗，防御，咒术");
@@ -1659,7 +1660,6 @@ const TradeGoods = () =>
                         console.log("销售价格与最低价相差大于10，手动设置价格")
                         RandomPress([871, 265, 85, 13])
                         setSoldPrice(totalSellPrice)
-
                     }
                     RandomPress([577, 481, 126, 29]);
                     if (WaitUntil(() => FindBlueBtn([547, 525, 186, 62])))
@@ -1752,8 +1752,8 @@ const TradeGoods = () =>
     //先上架材料
     RandomPress([1192, 121, 55, 27]);
 
-    LoginMaterial(tradableImgList_100p, 85);
-    LoginMaterial(tradableImgList_30p, 40);
+    LoginMaterial(tradableImgList_100p, 90);
+    LoginMaterial(tradableImgList_30p, 70);
     //然后上架武器
     if (!isShelfMax)
     {
@@ -3627,7 +3627,7 @@ const ComprehensiveImprovement_Instance = () =>
 };
 
 module.exports = {
-    ChangeAbility, GetEmail, GetAchievement, GetMonsterKnowledgeAward, LoginProps, DailyQuest, GetCommonAward,
+    ChangeAbilityCollection, ChangeAbility, GetEmail, GetAchievement, GetMonsterKnowledgeAward, LoginProps, DailyQuest, GetCommonAward,
     ShopBuy, ComprehensiveImprovement, ComprehensiveImprovement_Instance, StrengthenHorseEquipment, IncreaseWeaponFeatures, GuildDonation,
-    FireRandomEvent,
+    FireRandomEvent, PutOnSale,
 };
